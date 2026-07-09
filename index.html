@@ -4675,8 +4675,6 @@ if(!window.CSS){window.CSS={};}
 if(!CSS.escape){CSS.escape=function(s){return String(s).replace(/["\\]/g,'\\$&');};}
 </script>
 
-
-
 <style>
 /* SIMURG OS V6: Coaching card colored outer borders + contained premium surfaces */
 #coaching .coachingGrid > .card{
@@ -12382,3 +12380,306 @@ m Shell V4: Logger information architecture fix -->
 })();
 </script>
 
+<!-- SIMURG OS Premium Shell V12 Final: native contained screens + stable iPhone nav -->
+<style id="simurgPremiumShellV12FinalStyle">
+@media(max-width:860px){
+  :root{
+    --simurgNativeNavH:64px;
+    --simurgNativeBottom:calc(var(--simurgNativeNavH) + 26px + env(safe-area-inset-bottom,0px));
+    --simurgNativeTop:calc(12px + env(safe-area-inset-top,0px));
+  }
+
+  html,
+  body{
+    width:100%!important;
+    height:100%!important;
+    min-height:100%!important;
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+    scroll-behavior:auto!important;
+    background:#020407!important;
+  }
+
+  body,
+  body.simurg-lock-scroll,
+  body.simurgAlertLocked{
+    position:fixed!important;
+    inset:0!important;
+    width:100%!important;
+    padding:0!important;
+    overflow:hidden!important;
+    touch-action:auto!important;
+  }
+
+  .app{
+    display:block!important;
+    width:100%!important;
+    height:100vh!important;
+    height:100svh!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    background:radial-gradient(circle at 50% -18%,rgba(56,189,248,.11),transparent 34%),linear-gradient(180deg,#05070b,#020407 64%,#020407)!important;
+  }
+
+  .app > aside,
+  .simurgMobileBottomNav,
+  .simurgMobileSheet,
+  .simurgMobileShade{
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+
+  main{
+    position:relative!important;
+    width:100%!important;
+    max-width:520px!important;
+    height:100vh!important;
+    height:100svh!important;
+    min-height:0!important;
+    margin:0 auto!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+
+  main > .section{
+    position:absolute!important;
+    inset:0!important;
+    display:none!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    animation:none!important;
+    transform:none!important;
+    opacity:1!important;
+  }
+
+  main > .section.active{
+    display:block!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    overscroll-behavior-y:contain!important;
+    scroll-behavior:auto!important;
+    padding:var(--simurgNativeTop) 12px var(--simurgNativeBottom)!important;
+  }
+
+  main > .section.active::-webkit-scrollbar,
+  .dayProgram::-webkit-scrollbar,
+  .weekStrip::-webkit-scrollbar,
+  .v4Tabs::-webkit-scrollbar{
+    display:none!important;
+  }
+
+  .topbar,
+  .gymAddCard,
+  #simurgV8Nav,
+  #simurgV8Sheet{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+
+  #simurgV8Nav{
+    display:grid!important;
+    grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    position:fixed!important;
+    left:8px!important;
+    right:8px!important;
+    bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;
+    height:var(--simurgNativeNavH)!important;
+    z-index:2147483000!important;
+    padding:6px!important;
+    gap:3px!important;
+    border-radius:24px!important;
+    border:1px solid rgba(255,255,255,.10)!important;
+    background:#05070b!important;
+    box-shadow:0 -8px 28px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.05)!important;
+    contain:layout paint style!important;
+    transition:none!important;
+    animation:none!important;
+    will-change:auto!important;
+  }
+
+  #simurgV8Nav button,
+  #simurgV8Nav button *,
+  #simurgV8Nav button.active{
+    transition:none!important;
+    animation:none!important;
+    transform:none!important;
+    -webkit-transform:none!important;
+    will-change:auto!important;
+    backface-visibility:hidden!important;
+    -webkit-backface-visibility:hidden!important;
+  }
+
+  #simurgV8Nav button{
+    min-width:0!important;
+    min-height:0!important;
+    border:0!important;
+    border-radius:18px!important;
+    background:transparent!important;
+    color:#8f9aaa!important;
+    box-shadow:none!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:2px!important;
+    padding:3px 1px!important;
+    font-size:9.2px!important;
+    line-height:1.05!important;
+    font-weight:850!important;
+    letter-spacing:0!important;
+    -webkit-tap-highlight-color:transparent!important;
+  }
+
+  #simurgV8Nav button i{
+    font-size:15px!important;
+    line-height:1!important;
+    color:inherit!important;
+  }
+
+  #simurgV8Nav button.active,
+  #simurgV8Nav.ps-key-home button[data-key="home"],
+  #simurgV8Nav.ps-key-recovery button[data-key="recovery"],
+  #simurgV8Nav.ps-key-gym button[data-key="gym"],
+  #simurgV8Nav.ps-key-logger button[data-key="logger"],
+  #simurgV8Nav.ps-key-polar button[data-key="polar"],
+  #simurgV8Nav.ps-key-menu button[data-key="menu"]{
+    background:#f3f7fb!important;
+    color:#05070b!important;
+    border-color:#f3f7fb!important;
+    box-shadow:none!important;
+    font-weight:1000!important;
+  }
+
+  #simurgV8Sheet{
+    bottom:calc(var(--simurgNativeNavH) + 18px + env(safe-area-inset-bottom,0px))!important;
+    background:#0b111a!important;
+    box-shadow:0 22px 54px rgba(0,0,0,.58)!important;
+    transition:opacity .14s ease, transform .14s ease!important;
+  }
+
+  #simurgV8Shade{
+    transition:opacity .14s ease!important;
+  }
+}
+</style>
+<script id="simurgPremiumShellV12FinalScript">
+(function(){
+  var BUILD='SIMURG OS Premium Shell V12';
+  var MOBILE_WIDTH=860;
+
+  function ready(fn){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();}
+  function isMobile(){return window.innerWidth<=MOBILE_WIDTH;}
+  function keyFromId(id){
+    if(id==='workout') return 'logger';
+    if(id==='gym') return 'gym';
+    if(id==='recovery') return 'recovery';
+    if(id==='polar') return 'polar';
+    if(id==='home') return 'home';
+    return 'menu';
+  }
+  function idFromKey(key){return key==='logger'?'workout':key==='menu'?null:key;}
+  function activeSection(){return document.querySelector('main > .section.active') || document.querySelector('.section.active');}
+  function setNativeKey(id,key){
+    key=key || keyFromId(id);
+    window.__simurgCurrentMobileKey=key;
+    window.__simurgStableNavKey=key;
+    if(id) document.body.setAttribute('data-simurg-active-screen',id);
+    document.documentElement.setAttribute('data-simurg-active-key',key);
+
+    var nav=document.getElementById('simurgV8Nav');
+    if(nav){
+      ['home','recovery','gym','logger','polar','menu'].forEach(function(k){nav.classList.toggle('ps-key-'+k,k===key);});
+      nav.querySelectorAll('button[data-key]').forEach(function(button){button.classList.toggle('active',button.dataset.key===key);});
+    }
+  }
+  function resetActiveScreen(id){
+    if(!isMobile()) return;
+    var section=id?document.getElementById(id):activeSection();
+    if(!section) return;
+    requestAnimationFrame(function(){
+      section.scrollTop=0;
+      document.documentElement.scrollTop=0;
+      document.body.scrollTop=0;
+    });
+  }
+  function bindNav(){
+    var nav=document.getElementById('simurgV8Nav');
+    if(!nav) return;
+    nav.querySelectorAll('button[data-key]').forEach(function(button){
+      if(button.__simurgV12FinalBound) return;
+      button.__simurgV12FinalBound=true;
+      button.addEventListener('pointerdown',function(){setNativeKey(idFromKey(button.dataset.key),button.dataset.key);},{capture:true,passive:true});
+      button.addEventListener('click',function(){setNativeKey(idFromKey(button.dataset.key),button.dataset.key);},true);
+    });
+  }
+  function installNavigationPatch(){
+    if(window.__simurgV12NativeFinalPatched) return;
+    window.__simurgV12NativeFinalPatched=true;
+
+    var previousShow=window.show;
+    if(typeof previousShow==='function'){
+      window.show=function(id,btn){
+        var result=previousShow.apply(this,arguments);
+        var key=keyFromId(id);
+        setNativeKey(id,key);
+        resetActiveScreen(id);
+        return result;
+      };
+    }
+
+    var previousGo=window.simurgV8Go;
+    window.simurgV8Go=function(id,key){
+      var stableKey=key || keyFromId(id);
+      setNativeKey(id,stableKey);
+      var result;
+      if(typeof previousGo==='function') result=previousGo.apply(this,arguments);
+      else if(typeof window.show==='function') result=window.show(id,null);
+      setNativeKey(id,stableKey);
+      resetActiveScreen(id);
+      return result;
+    };
+
+    var previousOpen=window.simurgV8OpenMenu;
+    window.simurgV8OpenMenu=function(){
+      setNativeKey(null,'menu');
+      return typeof previousOpen==='function'?previousOpen.apply(this,arguments):undefined;
+    };
+
+    var previousClose=window.simurgV8CloseMenu;
+    window.simurgV8CloseMenu=function(){
+      var result=typeof previousClose==='function'?previousClose.apply(this,arguments):undefined;
+      var section=activeSection();
+      setNativeKey(section?section.id:'home',window.__simurgStableNavKey || keyFromId(section?section.id:'home'));
+      return result;
+    };
+  }
+  function refreshShell(){
+    if(!isMobile()) return;
+    bindNav();
+    var section=activeSection();
+    setNativeKey(section?section.id:'home',window.__simurgStableNavKey || keyFromId(section?section.id:'home'));
+    document.documentElement.scrollTop=0;
+    document.body.scrollTop=0;
+    try{
+      var b=document.querySelector('.versionBadgeCard b'); if(b) b.textContent=BUILD;
+      var s=document.querySelector('.versionBadgeCard span'); if(s) s.textContent='Contained app screens · Body scroll locked · Stable native bottom nav';
+    }catch(e){}
+  }
+
+  ready(function(){
+    installNavigationPatch();
+    refreshShell();
+    setTimeout(refreshShell,400);
+    setTimeout(refreshShell,1200);
+  });
+  window.addEventListener('resize',function(){setTimeout(refreshShell,80);});
+  window.addEventListener('pageshow',refreshShell);
+})();
+</script>
