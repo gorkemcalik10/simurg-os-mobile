@@ -4681,6 +4681,8 @@ if(!window.CSS){window.CSS={};}
 if(!CSS.escape){CSS.escape=function(s){return String(s).replace(/["\\]/g,'\\$&');};}
 </script>
 
+
+
 <style>
 /* SIMURG OS V6: Coaching card colored outer borders + contained premium surfaces */
 #coaching .coachingGrid > .card{
@@ -13619,5 +13621,1542 @@ m Shell V4: Logger information architecture fix -->
   });
   window.addEventListener('resize',function(){setTimeout(apply,80);});
   window.simurgDisableLoggerTrendTooltip=apply;
+})();
+</script>
+
+<!-- SIMURG OS Polar Bridge v1: Apple Health Shortcut Sync preparation -->
+<style id="simurgPolarBridgeV1Style">
+@media(max-width:860px){
+	  .polarBridgeCard,
+	  .polarBridgeHero,
+	  .polarBridgeEmpty,
+	  .polarBridgeAdvice,
+	  .polarBridgeSignalCard,
+	  .polarBridgeCoachCard{
+	    background:linear-gradient(180deg,rgba(9,18,31,.98),rgba(3,7,14,.99))!important;
+	    border:1px solid rgba(128,169,232,.16)!important;
+	    border-radius:22px!important;
+	    box-shadow:0 12px 30px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.035)!important;
+  }
+
+  .polarBridgeCard{
+    padding:16px!important;
+    margin-bottom:12px!important;
+  }
+
+  .polarBridgeCard h2,
+  .polarBridgeHero h1{
+    color:#f7fbff!important;
+    letter-spacing:-.2px!important;
+  }
+
+	  .polarBridgeCard .sub,
+	  .polarBridgeHero p,
+	  .polarBridgeEmpty p,
+	  .polarBridgeAdvice{
+	    color:#aebbd0!important;
+	    line-height:1.48!important;
+	  }
+
+	  .polarBridgeSubtitle{
+	    margin-top:-2px!important;
+	    color:#dbe6f5!important;
+	    font-size:13px!important;
+	    font-weight:850!important;
+	    line-height:1.38!important;
+	  }
+
+	  .polarBridgeExplanation{
+	    margin-top:10px!important;
+	    color:#9facbf!important;
+	    font-size:12.5px!important;
+	    line-height:1.5!important;
+	  }
+
+	  .polarBridgeCode{
+	    max-width:100%!important;
+	    margin:12px 0 0!important;
+	    padding:10px 11px!important;
+	    overflow:auto!important;
+	    border-radius:14px!important;
+	    border:1px solid rgba(128,169,232,.13)!important;
+	    background:rgba(2,7,14,.72)!important;
+	    color:#cfe0ff!important;
+	    font-size:10.5px!important;
+	    line-height:1.42!important;
+	    white-space:pre-wrap!important;
+	    overflow-wrap:anywhere!important;
+	  }
+
+	  .polarBridgeTestBox{
+	    width:100%!important;
+	    min-height:104px!important;
+	    margin-top:10px!important;
+	    padding:12px!important;
+	    border-radius:16px!important;
+	    border:1px solid rgba(128,169,232,.18)!important;
+	    background:rgba(2,7,14,.66)!important;
+	    color:#edf6ff!important;
+	    font-size:11.5px!important;
+	    line-height:1.45!important;
+	    resize:vertical!important;
+	    box-sizing:border-box!important;
+	  }
+
+	  .polarBridgeActions{
+	    margin-top:10px!important;
+	  }
+
+	  .polarBridgeTestStatus{
+	    min-height:16px!important;
+	    margin-top:8px!important;
+	    color:#91b7ff!important;
+	    font-size:12px!important;
+	    line-height:1.4!important;
+	  }
+
+	  .polarBridgeFlow{
+	    display:grid!important;
+	    grid-template-columns:1fr!important;
+    gap:8px!important;
+    margin:13px 0!important;
+  }
+
+  .polarBridgeStep{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    padding:10px 12px!important;
+    border-radius:16px!important;
+    background:rgba(255,255,255,.035)!important;
+    border:1px solid rgba(128,169,232,.12)!important;
+    color:#dbe6f5!important;
+    font-weight:850!important;
+  }
+
+  .polarBridgeStep span{
+    color:#91b7ff!important;
+    font-size:11px!important;
+    letter-spacing:.08em!important;
+    text-transform:uppercase!important;
+    white-space:nowrap!important;
+  }
+
+  .polarBridgeStatus{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    margin-top:10px!important;
+  }
+
+	  .polarBridgeStatusBox,
+	  .polarBridgeMetric{
+	    min-width:0!important;
+	    padding:12px!important;
+	    border-radius:16px!important;
+    background:rgba(255,255,255,.035)!important;
+    border:1px solid rgba(128,169,232,.12)!important;
+  }
+
+  .polarBridgeStatusBox small,
+  .polarBridgeMetric small{
+    display:block!important;
+    color:#7f8da1!important;
+    font-size:9.5px!important;
+    font-weight:950!important;
+    letter-spacing:.12em!important;
+    text-transform:uppercase!important;
+    margin-bottom:6px!important;
+  }
+
+  .polarBridgeStatusBox b,
+  .polarBridgeMetric b{
+    display:block!important;
+    color:#f7fbff!important;
+    font-size:16px!important;
+    line-height:1.15!important;
+	    overflow-wrap:break-word!important;
+	  }
+
+	  .polarBridgeMetric.wide,
+	  .polarBridgeStages,
+	  .polarBridgeWorkout,
+	  .polarBridgeNotes{
+	    grid-column:1/-1!important;
+	  }
+
+	  .polarBridgeSignalCard{
+	    padding:16px!important;
+	    margin-bottom:12px!important;
+	  }
+
+	  .polarBridgeSignalCard.ready{
+	    border-color:rgba(74,222,128,.25)!important;
+	    background:radial-gradient(circle at 12% 0%,rgba(74,222,128,.14),transparent 36%),linear-gradient(180deg,rgba(9,18,31,.98),rgba(3,7,14,.99))!important;
+	  }
+
+	  .polarBridgeSignalCard.controlled{
+	    border-color:rgba(240,184,75,.30)!important;
+	    background:radial-gradient(circle at 12% 0%,rgba(240,184,75,.14),transparent 36%),linear-gradient(180deg,rgba(9,18,31,.98),rgba(3,7,14,.99))!important;
+	  }
+
+	  .polarBridgeSignalCard.waiting{
+	    border-color:rgba(145,183,255,.18)!important;
+	  }
+
+	  .polarBridgeSignalTitle{
+	    display:flex!important;
+	    align-items:flex-start!important;
+	    justify-content:space-between!important;
+	    gap:10px!important;
+	    margin-bottom:9px!important;
+	  }
+
+	  .polarBridgeSignalTitle small{
+	    display:block!important;
+	    color:#91b7ff!important;
+	    font-size:9.5px!important;
+	    font-weight:1000!important;
+	    letter-spacing:.14em!important;
+	    text-transform:uppercase!important;
+	    margin-bottom:5px!important;
+	  }
+
+	  .polarBridgeSignalTitle b{
+	    display:block!important;
+	    color:#f7fbff!important;
+	    font-size:18px!important;
+	    line-height:1.15!important;
+	  }
+
+	  .polarBridgeSignalCard p,
+	  .polarBridgeCoachCard p{
+	    margin:0!important;
+	    color:#b6c5d9!important;
+	    font-size:12.7px!important;
+	    line-height:1.48!important;
+	  }
+
+	  .polarBridgeStageList{
+	    display:grid!important;
+	    gap:7px!important;
+	    margin-top:4px!important;
+	  }
+
+	  .polarBridgeStage{
+	    display:grid!important;
+	    grid-template-columns:68px minmax(0,1fr) 52px!important;
+	    gap:8px!important;
+	    align-items:center!important;
+	  }
+
+	  .polarBridgeStage span{
+	    color:#9fb0c6!important;
+	    font-size:11px!important;
+	    font-weight:850!important;
+	  }
+
+	  .polarBridgeStage em{
+	    height:7px!important;
+	    border-radius:999px!important;
+	    background:linear-gradient(90deg,#5f8ff7,var(--polarCyan,#18e6df))!important;
+	  }
+
+	  .polarBridgeStage b{
+	    text-align:right!important;
+	    color:#f7fbff!important;
+	    font-size:12px!important;
+	  }
+
+	  .polarBridgeWorkout,
+	  .polarBridgeNotes{
+	    padding:12px!important;
+	    border-radius:16px!important;
+	    background:rgba(255,255,255,.035)!important;
+	    border:1px solid rgba(128,169,232,.12)!important;
+	    color:#c9d6e8!important;
+	    font-size:12.5px!important;
+	    line-height:1.45!important;
+	  }
+
+	  .polarBridgeWorkout b,
+	  .polarBridgeNotes b{
+	    display:block!important;
+	    color:#f7fbff!important;
+	    margin-bottom:5px!important;
+	  }
+
+	  .polarBridgeCoachCard{
+	    margin:0 0 12px!important;
+	    padding:15px!important;
+	  }
+
+	  .polarBridgeCoachCard h2{
+	    margin:0 0 10px!important;
+	    color:#f7fbff!important;
+	    font-size:15px!important;
+	  }
+
+	  .polarBridgeCoachGrid{
+	    display:grid!important;
+	    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+	    gap:8px!important;
+	    margin:10px 0!important;
+	  }
+
+	  .polarBridgeCoachLine{
+	    min-width:0!important;
+	    padding:10px!important;
+	    border-radius:14px!important;
+	    background:rgba(255,255,255,.035)!important;
+	    border:1px solid rgba(128,169,232,.12)!important;
+	  }
+
+	  .polarBridgeCoachLine small{
+	    display:block!important;
+	    color:#7f8da1!important;
+	    font-size:9.5px!important;
+	    font-weight:950!important;
+	    letter-spacing:.12em!important;
+	    text-transform:uppercase!important;
+	    margin-bottom:5px!important;
+	  }
+
+	  .polarBridgeCoachLine b{
+	    display:block!important;
+	    color:#f7fbff!important;
+	    font-size:13px!important;
+	    line-height:1.2!important;
+	    overflow-wrap:break-word!important;
+	  }
+
+  .polarBridgeHero{
+    padding:18px!important;
+    margin-bottom:12px!important;
+    background:radial-gradient(circle at 14% 0%,rgba(95,143,247,.14),transparent 34%),linear-gradient(180deg,rgba(9,18,31,.98),rgba(3,7,14,.99))!important;
+  }
+
+  .polarBridgeHeroTop{
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:space-between!important;
+    gap:12px!important;
+    margin-bottom:12px!important;
+  }
+
+  .polarBridgeKicker{
+    color:#91b7ff!important;
+    font-size:10px!important;
+    font-weight:1000!important;
+    letter-spacing:.16em!important;
+    text-transform:uppercase!important;
+    margin-bottom:7px!important;
+  }
+
+  .polarBridgeSignal{
+    flex:0 0 auto!important;
+    border-radius:999px!important;
+    padding:8px 10px!important;
+    border:1px solid rgba(145,183,255,.20)!important;
+    background:rgba(95,143,247,.12)!important;
+    color:#b8d0ff!important;
+    font-size:11px!important;
+    font-weight:1000!important;
+    white-space:nowrap!important;
+  }
+
+  .polarBridgeSignal.ready{
+    border-color:rgba(74,222,128,.24)!important;
+    background:rgba(74,222,128,.10)!important;
+    color:#a9f5bf!important;
+  }
+
+  .polarBridgeSignal.controlled{
+    border-color:rgba(240,184,75,.28)!important;
+    background:rgba(240,184,75,.10)!important;
+    color:#f5d18a!important;
+  }
+
+  .polarBridgeMetricGrid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:9px!important;
+    margin-top:12px!important;
+  }
+
+  .polarBridgeEmpty{
+    padding:18px!important;
+    margin-bottom:12px!important;
+    text-align:left!important;
+  }
+
+  .polarBridgeEmpty b{
+    display:block!important;
+    color:#f7fbff!important;
+    margin-bottom:7px!important;
+    font-size:16px!important;
+  }
+
+	  .polarBridgeAdvice{
+	    padding:14px!important;
+	    margin-top:12px!important;
+	    border-color:rgba(240,184,75,.22)!important;
+	    background:linear-gradient(180deg,rgba(41,31,14,.72),rgba(5,10,18,.88))!important;
+	  }
+
+	  .polarDashboardV1{
+	    display:grid!important;
+	    gap:12px!important;
+	    max-width:480px!important;
+	    margin:0 auto!important;
+	    padding-bottom:14px!important;
+	  }
+
+	  .polarRecoveryV1,
+	  .polarStageCardV1,
+	  .polarActivityCardV1,
+	  .polarCoachSentenceV1{
+	    border:1px solid rgba(128,169,232,.16)!important;
+	    border-radius:24px!important;
+	    background:radial-gradient(circle at 18% 0%,rgba(95,143,247,.12),transparent 34%),linear-gradient(180deg,rgba(7,17,30,.98),rgba(2,7,14,.995))!important;
+	    box-shadow:0 18px 48px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.04)!important;
+	    overflow:hidden!important;
+	  }
+
+	  .polarRecoveryV1{
+	    padding:17px!important;
+	  }
+
+	  .polarRecoveryHeadV1,
+	  .polarActivityHeadV1,
+	  .polarStageHeadV1{
+	    display:flex!important;
+	    justify-content:space-between!important;
+	    align-items:flex-start!important;
+	    gap:12px!important;
+	    margin-bottom:12px!important;
+	  }
+
+	  .polarRecoveryHeadV1 h1{
+	    margin:0 0 7px!important;
+	    color:#f8fbff!important;
+	    font-size:23px!important;
+	    line-height:1.05!important;
+	    letter-spacing:-.55px!important;
+	  }
+
+	  .polarRecoveryMetaV1,
+	  .polarStageHeadV1 span{
+	    display:block!important;
+	    color:#91a3bb!important;
+	    font-size:11px!important;
+	    line-height:1.35!important;
+	  }
+
+	  .polarStatusPillV1{
+	    flex:0 0 auto!important;
+	    padding:7px 10px!important;
+	    border-radius:999px!important;
+	    font-size:10px!important;
+	    font-weight:1000!important;
+	    letter-spacing:.08em!important;
+	    color:#cfe0ff!important;
+	    border:1px solid rgba(145,183,255,.20)!important;
+	    background:rgba(95,143,247,.12)!important;
+	  }
+
+	  .polarStatusPillV1.ready,
+	  .polarChipV1.good{
+	    color:#86efac!important;
+	    border-color:rgba(34,197,94,.28)!important;
+	    background:rgba(34,197,94,.12)!important;
+	  }
+
+	  .polarStatusPillV1.controlled,
+	  .polarChipV1.caution{
+	    color:#facc15!important;
+	    border-color:rgba(250,204,21,.28)!important;
+	    background:rgba(250,204,21,.10)!important;
+	  }
+
+	  .polarStatusPillV1.waiting,
+	  .polarChipV1.missing{
+	    color:#cbd5e1!important;
+	    border-color:rgba(148,163,184,.20)!important;
+	    background:rgba(148,163,184,.10)!important;
+	  }
+
+	  .polarRecoveryBodyV1{
+	    display:grid!important;
+	    grid-template-columns:132px minmax(0,1fr)!important;
+	    gap:15px!important;
+	    align-items:center!important;
+	  }
+
+	  .polarRecoveryRingV1{
+	    width:128px!important;
+	    height:128px!important;
+	    border-radius:50%!important;
+	    display:grid!important;
+	    place-items:center!important;
+	    position:relative!important;
+	    background:conic-gradient(var(--polarRing,#22c55e) var(--polarScore,0%),rgba(148,163,184,.14) 0)!important;
+	    box-shadow:0 0 26px rgba(34,197,94,.16)!important;
+	  }
+
+	  .polarRecoveryRingV1:before{
+	    content:""!important;
+	    position:absolute!important;
+	    inset:10px!important;
+	    border-radius:50%!important;
+	    background:linear-gradient(180deg,rgba(8,18,31,.98),rgba(2,7,14,1))!important;
+	    box-shadow:inset 0 1px 0 rgba(255,255,255,.05)!important;
+	  }
+
+	  .polarRingInnerV1{
+	    position:relative!important;
+	    display:grid!important;
+	    place-items:center!important;
+	    text-align:center!important;
+	  }
+
+	  .polarRingInnerV1 b{
+	    color:#f8fbff!important;
+	    font-size:36px!important;
+	    line-height:.9!important;
+	    letter-spacing:-1px!important;
+	  }
+
+	  .polarRingInnerV1 small{
+	    color:#9fb0c6!important;
+	    font-size:9px!important;
+	    font-weight:950!important;
+	    letter-spacing:.14em!important;
+	    text-transform:uppercase!important;
+	    margin-top:5px!important;
+	  }
+
+	  .polarRecoveryMeaningV1 b{
+	    display:block!important;
+	    color:#f8fbff!important;
+	    font-size:15px!important;
+	    line-height:1.2!important;
+	    margin-bottom:7px!important;
+	  }
+
+	  .polarRecoveryMeaningV1 p{
+	    margin:0!important;
+	    color:#b8c7da!important;
+	    font-size:12.5px!important;
+	    line-height:1.44!important;
+	  }
+
+	  .polarMetricGridV1{
+	    display:grid!important;
+	    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+	    gap:9px!important;
+	  }
+
+	  .polarMetricMiniV1{
+	    min-width:0!important;
+	    padding:12px!important;
+	    border-radius:18px!important;
+	    border:1px solid rgba(128,169,232,.13)!important;
+	    background:linear-gradient(180deg,rgba(10,22,38,.86),rgba(3,9,18,.96))!important;
+	  }
+
+	  .polarMetricMiniV1 small{
+	    display:block!important;
+	    color:#8fa1ba!important;
+	    font-size:9.5px!important;
+	    font-weight:950!important;
+	    letter-spacing:.10em!important;
+	    text-transform:uppercase!important;
+	    margin-bottom:7px!important;
+	    white-space:nowrap!important;
+	    overflow:hidden!important;
+	    text-overflow:ellipsis!important;
+	  }
+
+	  .polarMetricValueV1{
+	    display:flex!important;
+	    align-items:flex-end!important;
+	    gap:4px!important;
+	    color:#f8fbff!important;
+	    min-width:0!important;
+	  }
+
+	  .polarMetricValueV1 b{
+	    font-size:22px!important;
+	    line-height:.95!important;
+	    letter-spacing:-.45px!important;
+	    overflow-wrap:anywhere!important;
+	  }
+
+	  .polarMetricValueV1 em{
+	    color:#91a3bb!important;
+	    font-style:normal!important;
+	    font-size:10px!important;
+	    font-weight:850!important;
+	    padding-bottom:2px!important;
+	  }
+
+	  .polarChipV1{
+	    display:inline-flex!important;
+	    max-width:100%!important;
+	    margin-top:8px!important;
+	    padding:4px 7px!important;
+	    border-radius:999px!important;
+	    color:#bfdbfe!important;
+	    border:1px solid rgba(96,165,250,.22)!important;
+	    background:rgba(96,165,250,.10)!important;
+	    font-size:9.5px!important;
+	    font-weight:950!important;
+	    line-height:1!important;
+	  }
+
+	  .polarMetricBarV1,
+	  .polarCoachBarTrackV1{
+	    height:5px!important;
+	    margin-top:9px!important;
+	    border-radius:999px!important;
+	    background:rgba(148,163,184,.16)!important;
+	    overflow:hidden!important;
+	  }
+
+	  .polarMetricBarV1 span,
+	  .polarCoachBarTrackV1 span{
+	    display:block!important;
+	    height:100%!important;
+	    width:var(--polarBar,0%)!important;
+	    border-radius:999px!important;
+	    background:linear-gradient(90deg,#22c55e,#7CFF6B)!important;
+	  }
+
+	  .polarMetricMiniV1.caution .polarMetricBarV1 span,
+	  .polarCoachLineV1.caution .polarCoachBarTrackV1 span{
+	    background:linear-gradient(90deg,#f59e0b,#facc15)!important;
+	  }
+
+	  .polarMetricMiniV1.missing .polarMetricBarV1 span,
+	  .polarCoachLineV1.missing .polarCoachBarTrackV1 span{
+	    background:linear-gradient(90deg,#64748b,#94a3b8)!important;
+	  }
+
+	  .polarStageCardV1,
+	  .polarActivityCardV1,
+	  .polarCoachSentenceV1{
+	    padding:14px!important;
+	  }
+
+	  .polarStageHeadV1 b,
+	  .polarActivityHeadV1 b{
+	    color:#f8fbff!important;
+	    font-size:14px!important;
+	    line-height:1.2!important;
+	  }
+
+	  .polarStageStackV1{
+	    display:flex!important;
+	    height:14px!important;
+	    border-radius:999px!important;
+	    overflow:hidden!important;
+	    background:rgba(148,163,184,.15)!important;
+	    margin:9px 0 11px!important;
+	  }
+
+	  .polarStageSegV1{
+	    min-width:3px!important;
+	    height:100%!important;
+	  }
+
+	  .polarStageLegendV1{
+	    display:grid!important;
+	    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+	    gap:7px!important;
+	  }
+
+	  .polarStageLegendV1 div{
+	    display:flex!important;
+	    align-items:center!important;
+	    justify-content:space-between!important;
+	    gap:8px!important;
+	    min-width:0!important;
+	    color:#cbd5e1!important;
+	    font-size:11px!important;
+	  }
+
+	  .polarStageLegendV1 i{
+	    width:8px!important;
+	    height:8px!important;
+	    border-radius:3px!important;
+	    flex:0 0 auto!important;
+	  }
+
+	  .polarStageLegendV1 span{
+	    min-width:0!important;
+	    overflow:hidden!important;
+	    text-overflow:ellipsis!important;
+	    white-space:nowrap!important;
+	  }
+
+	  .polarStageLegendV1 b{
+	    color:#f8fbff!important;
+	    font-size:11px!important;
+	    white-space:nowrap!important;
+	  }
+
+	  .polarActivityLevelV1{
+	    display:inline-flex!important;
+	    align-items:center!important;
+	    gap:7px!important;
+	    padding:7px 9px!important;
+	    border-radius:999px!important;
+	    color:#bfdbfe!important;
+	    border:1px solid rgba(96,165,250,.22)!important;
+	    background:rgba(96,165,250,.10)!important;
+	    font-size:11px!important;
+	    font-weight:1000!important;
+	  }
+
+	  .polarActivityLevelV1.caution{
+	    color:#facc15!important;
+	    border-color:rgba(250,204,21,.28)!important;
+	    background:rgba(250,204,21,.10)!important;
+	  }
+
+	  .polarWorkoutV1{
+	    display:grid!important;
+	    grid-template-columns:minmax(0,1fr) auto!important;
+	    gap:10px!important;
+	    align-items:center!important;
+	    padding:12px!important;
+	    border-radius:18px!important;
+	    border:1px solid rgba(128,169,232,.12)!important;
+	    background:rgba(255,255,255,.035)!important;
+	  }
+
+	  .polarWorkoutV1 b{
+	    display:block!important;
+	    color:#f8fbff!important;
+	    font-size:13px!important;
+	    line-height:1.2!important;
+	  }
+
+	  .polarWorkoutV1 span{
+	    color:#94a3b8!important;
+	    font-size:11px!important;
+	  }
+
+	  .polarWorkoutStatsV1{
+	    grid-column:1/-1!important;
+	    display:grid!important;
+	    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+	    gap:8px!important;
+	    margin-top:4px!important;
+	  }
+
+	  .polarWorkoutStatsV1 div{
+	    min-width:0!important;
+	    color:#f8fbff!important;
+	    font-size:12px!important;
+	    font-weight:900!important;
+	  }
+
+	  .polarWorkoutStatsV1 small{
+	    display:block!important;
+	    color:#8fa1ba!important;
+	    font-size:9px!important;
+	    font-weight:850!important;
+	    margin-top:2px!important;
+	  }
+
+	  .polarCoachSentenceV1{
+	    color:#dbeafe!important;
+	    font-size:13px!important;
+	    line-height:1.45!important;
+	  }
+
+	  .polarCoachSentenceV1 b{
+	    display:block!important;
+	    color:#f8fbff!important;
+	    margin-bottom:5px!important;
+	  }
+
+	  .polarBridgeCoachCard{
+	    background:radial-gradient(circle at 14% 0%,rgba(34,197,94,.10),transparent 35%),linear-gradient(180deg,rgba(7,17,30,.98),rgba(2,7,14,.995))!important;
+	  }
+
+	  .polarBridgeCoachHeadV1{
+	    display:flex!important;
+	    align-items:flex-start!important;
+	    justify-content:space-between!important;
+	    gap:10px!important;
+	    margin-bottom:10px!important;
+	  }
+
+	  .polarBridgeCoachHeadV1 h2{
+	    margin:0!important;
+	  }
+
+	  .polarCoachLineV1{
+	    min-width:0!important;
+	    padding:10px!important;
+	    border-radius:16px!important;
+	    border:1px solid rgba(128,169,232,.12)!important;
+	    background:rgba(255,255,255,.035)!important;
+	  }
+
+	  .polarCoachLineV1 small{
+	    display:block!important;
+	    color:#8fa1ba!important;
+	    font-size:9.5px!important;
+	    font-weight:950!important;
+	    letter-spacing:.10em!important;
+	    text-transform:uppercase!important;
+	    margin-bottom:5px!important;
+	  }
+
+	  .polarCoachLineV1 b{
+	    display:block!important;
+	    color:#f8fbff!important;
+	    font-size:13px!important;
+	    line-height:1.2!important;
+	  }
+
+	  .polarAlertCardV1{
+	    align-items:flex-start!important;
+	    gap:10px!important;
+	    border-color:rgba(34,197,94,.24)!important;
+	    background:radial-gradient(circle at 0% 0%,rgba(34,197,94,.10),transparent 38%),linear-gradient(180deg,rgba(8,20,33,.98),rgba(3,9,18,.99))!important;
+	  }
+
+	  .polarAlertCardV1.controlled{
+	    border-color:rgba(250,204,21,.28)!important;
+	    background:radial-gradient(circle at 0% 0%,rgba(250,204,21,.10),transparent 38%),linear-gradient(180deg,rgba(8,20,33,.98),rgba(3,9,18,.99))!important;
+	  }
+
+	  .polarAlertBodyV1{
+	    min-width:0!important;
+	    width:100%!important;
+	  }
+
+	  .polarAlertTopV1{
+	    display:flex!important;
+	    justify-content:space-between!important;
+	    align-items:center!important;
+	    gap:8px!important;
+	    margin-bottom:6px!important;
+	  }
+
+	  .polarAlertTopV1 b{
+	    color:#f8fbff!important;
+	    font-size:13px!important;
+	  }
+
+	  .polarAlertKeyV1,
+	  .polarAlertNoteV1{
+	    display:block!important;
+	    color:#cbd5e1!important;
+	    font-size:12px!important;
+	    line-height:1.4!important;
+	    overflow-wrap:anywhere!important;
+	  }
+
+	  .polarAlertNoteV1{
+	    margin-top:7px!important;
+	    color:#facc15!important;
+	  }
+	}
+	</style>
+<script id="simurgPolarBridgeV1Script">
+(function(){
+  var BRIDGE_SOURCE='apple_health_shortcut';
+
+  function ready(fn){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function store(){
+    var root;
+    try{root=DATA;}catch(e){root=window.simurgData||{};}
+    if(!root || typeof root!=='object') root={};
+    window.simurgData=root;
+    if(!root.polarBridge || typeof root.polarBridge!=='object' || Array.isArray(root.polarBridge)){
+      root.polarBridge={source:BRIDGE_SOURCE,lastSync:'',daily:{}};
+    }
+    root.polarBridge.source=BRIDGE_SOURCE;
+    if(!root.polarBridge.daily || typeof root.polarBridge.daily!=='object' || Array.isArray(root.polarBridge.daily)) root.polarBridge.daily={};
+    return root;
+  }
+  function bridge(){return store().polarBridge;}
+  function persist(){
+    var root=store();
+    try{localStorage.setItem('atlas_summary_reports',JSON.stringify(root));}catch(e){}
+  }
+  function pick(obj,names){
+    for(var i=0;i<names.length;i++){
+      var key=names[i];
+      if(obj && obj[key]!=null && obj[key]!=='') return obj[key];
+    }
+    return undefined;
+  }
+  function unwrap(payload){
+    if(typeof payload==='string'){
+      try{payload=JSON.parse(payload);}catch(e){payload={raw:payload};}
+    }
+    payload=payload||{};
+    if(payload.payload && typeof payload.payload==='object') payload=payload.payload;
+    if(payload.data && typeof payload.data==='object') payload=payload.data;
+    if(payload.health && typeof payload.health==='object') payload=Object.assign({},payload,payload.health);
+    if(payload.summary && typeof payload.summary==='object') payload=Object.assign({},payload,payload.summary);
+    return payload;
+  }
+  function num(v){
+    if(v==null || v==='') return null;
+    if(typeof v==='number' && Number.isFinite(v)) return v;
+    var cleaned=String(v).replace(',','.').replace(/[^\d.-]/g,'');
+    if(!cleaned) return null;
+    var n=Number(cleaned);
+    return Number.isFinite(n)?n:null;
+  }
+  function round(v,digits){
+    if(v==null) return null;
+    var p=Math.pow(10,digits||0);
+    return Math.round(v*p)/p;
+  }
+  function dateOnly(v){
+    if(v instanceof Date && !isNaN(v)) return v.toISOString().slice(0,10);
+    if(typeof v==='number' && Number.isFinite(v)) return new Date(v).toISOString().slice(0,10);
+    var s=String(v||'').trim();
+    var m=s.match(/\d{4}-\d{2}-\d{2}/);
+    if(m) return m[0];
+    var d=s?new Date(s):new Date();
+    if(isNaN(d)) d=new Date();
+    return d.toISOString().slice(0,10);
+  }
+  function durationMinutes(payload){
+    var minutes=num(pick(payload,['sleepDurationMinutes','sleepMinutes','asleepMinutes','sleep_min','sleepMinutesAsleep']));
+    if(minutes!=null) return Math.round(minutes);
+    var seconds=num(pick(payload,['sleepDurationSeconds','sleepSeconds','asleepSeconds']));
+    if(seconds!=null) return Math.round(seconds/60);
+    var hours=num(pick(payload,['sleepDurationHours','sleepHours','asleepHours']));
+    if(hours!=null) return Math.round(hours*60);
+    var raw=pick(payload,['sleepDuration','sleep','sleepTime','asleep']);
+    if(typeof raw==='number') return Math.round(raw);
+    var text=String(raw||'').trim().toLowerCase();
+    if(!text) return null;
+    var hm=text.match(/(\d+(?:[.,]\d+)?)\s*[:hsa]\s*(\d+)?/);
+    if(hm){
+      var h=num(hm[1])||0;
+      var m=num(hm[2])||0;
+      return Math.round(h*60+m);
+    }
+    var mins=num(text);
+    return mins==null?null:Math.round(mins);
+  }
+  function fmtDateTime(iso){
+    if(!iso) return '-';
+    var d=new Date(iso);
+    if(isNaN(d)) return iso;
+    return d.toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }
+  function fmtSleep(min){
+    if(min==null) return '-';
+    var h=Math.floor(min/60), m=Math.round(min%60);
+    return h+'s '+String(m).padStart(2,'0')+'dk';
+  }
+	  function metric(v,suffix){
+	    if(v==null) return '-';
+	    return String(v)+(suffix||'');
+	  }
+	  function text(v,fallback){
+	    if(v==null || v==='') return fallback||'';
+	    return String(v);
+	  }
+	  function sleepStages(payload){
+	    var raw=payload&&payload.sleepStages&&typeof payload.sleepStages==='object'?payload.sleepStages:null;
+	    if(!raw) return null;
+	    var stages={
+	      deepMinutes:(function(){var n=num(pick(raw,['deepMinutes','deep','deepSleepMinutes']));return n==null?null:Math.round(n);})(),
+	      remMinutes:(function(){var n=num(pick(raw,['remMinutes','rem','remSleepMinutes']));return n==null?null:Math.round(n);})(),
+	      lightMinutes:(function(){var n=num(pick(raw,['lightMinutes','light','lightSleepMinutes']));return n==null?null:Math.round(n);})(),
+	      awakeMinutes:(function(){var n=num(pick(raw,['awakeMinutes','awake','awakeDuringSleepMinutes']));return n==null?null:Math.round(n);})()
+	    };
+	    return Object.keys(stages).some(function(k){return stages[k]!=null;})?stages:null;
+	  }
+	  function workoutList(payload){
+	    var source=Array.isArray(payload.workouts)?payload.workouts:(payload.workout?[payload.workout]:[]);
+	    return source.filter(function(w){return w&&typeof w==='object';}).map(function(w){
+	      return {
+	        type:text(pick(w,['type','activityType','name']),'Workout'),
+	        duration:text(pick(w,['duration','durationText','time']),''),
+	        activeEnergy:round(num(pick(w,['activeEnergy','activeEnergyKcal','activeCalories','activeCal'])),1),
+	        avgHr:round(num(pick(w,['avgHr','avgHR','averageHr','averageHeartRate'])),1),
+	        maxHr:round(num(pick(w,['maxHr','maxHR','maximumHr','maxHeartRate'])),1),
+	        rpe:round(num(pick(w,['rpe','RPE'])),1)
+	      };
+	    });
+	  }
+	  function normalize(payload){
+	    var p=unwrap(payload);
+	    var date=dateOnly(pick(p,['date','day','localDate','startDate','endDate','sampleDate']));
+	    var sleepMin=durationMinutes(p);
+	    var activeEnergy=round(num(pick(p,['activeEnergy','activeEnergyKcal','activeCalories','activeCal','activeEnergyBurned'])),1);
+	    var totalEnergy=round(num(pick(p,['totalEnergy','totalEnergyKcal','totalCalories','totalCal','energyBurned'])),1);
+	    var sourceText=text(pick(p,['dataSource','source','sourceName','origin']),'Polar Flow via Apple Health');
+	    return {
+	      date:date,
+	      source:text(pick(p,['source']),BRIDGE_SOURCE),
+	      receivedAt:new Date().toISOString(),
+	      sleepDurationMinutes:sleepMin,
+	      sleepDurationText:text(pick(p,['sleepDurationText','sleepText']),fmtSleep(sleepMin)),
+	      sleepScore:round(num(pick(p,['sleepScore','sleep_score'])),1),
+	      nightlyRecharge:round(num(pick(p,['nightlyRecharge','nightly_recharge','recharge'])),1),
+	      sleepCharge:round(num(pick(p,['sleepCharge','sleep_charge'])),1),
+	      ansCharge:round(num(pick(p,['ansCharge','ans_charge'])),1),
+	      hrvMs:round(num(pick(p,['hrvMs','hrv','HRV','heartRateVariability','heartRateVariabilityMs'])),1),
+	      restingHr:round(num(pick(p,['restingHr','restingHR','rhr','RHR','restingHeartRate'])),1),
+	      sleepHr:round(num(pick(p,['sleepHr','sleepHR','sleepHeartRate','sleepingHeartRate','sleepAvgHr','sleepAverageHeartRate'])),1),
+	      respiratoryRate:round(num(pick(p,['respiratoryRate','respirationRate','respRate','breathingRate'])),1),
+	      steps:(function(){var n=num(pick(p,['steps','stepCount','StepCount'])); return n==null?null:Math.round(n);})(),
+	      activeEnergyKcal:activeEnergy,
+	      activeEnergy:activeEnergy,
+	      totalEnergyKcal:totalEnergy,
+	      totalEnergy:totalEnergy,
+	      activityLoad:text(pick(p,['activityLoad','trainingLoad','load']),''),
+	      cardioLoad:round(num(pick(p,['cardioLoad','cardio_load','trainingImpulse'])),1),
+	      dataSource:sourceText,
+	      device:text(pick(p,['device','deviceName','wearable','watch']),''),
+	      shortcutName:text(pick(p,['shortcutName','shortcut']),'iOS Shortcut'),
+	      sleepStages:sleepStages(p),
+	      workouts:workoutList(p),
+	      readinessNotes:Array.isArray(p.readinessNotes)?p.readinessNotes.map(function(x){return String(x);}).filter(Boolean):[]
+	    };
+	  }
+  function latestEntry(){
+    var daily=bridge().daily||{};
+    var dates=Object.keys(daily).filter(Boolean).sort();
+    if(!dates.length) return null;
+    return daily[dates[dates.length-1]];
+  }
+	  function signal(entry){
+	    if(!entry) return {label:'WAITING',cls:'waiting',note:'Shortcut verisi bekleniyor.'};
+	    if(entry.sleepDurationMinutes==null || entry.hrvMs==null || entry.restingHr==null) return {label:'WAITING',cls:'waiting',note:'Uyku, HRV ve dinlenik nabız çekirdek sinyali bekleniyor.'};
+	    var warnings=advice(entry);
+	    if(warnings.length) return {label:'CONTROLLED',cls:'controlled',note:warnings.join(' ')};
+	    return {label:'READY',cls:'ready',note:'Sleep, HRV ve RHR bugünkü planı destekliyor.'};
+	  }
+		  function advice(entry){
+		    var arr=[];
+		    if(entry && entry.sleepDurationMinutes!=null && entry.sleepDurationMinutes<360) arr.push('Uyku düşük.');
+		    if(entry && entry.nightlyRecharge!=null && entry.nightlyRecharge<60) arr.push('Nightly Recharge düşük.');
+		    if(entry && entry.hrvMs!=null && entry.hrvMs<45) arr.push('HRV düşük.');
+		    if(entry && entry.restingHr!=null && entry.restingHr>60) arr.push('Dinlenik nabız yüksek.');
+		    if(activityLoadHigh(entry)) arr.push('Aktivite yükü yüksek.');
+		    return arr;
+	  }
+	  function activityLoadHigh(entry){
+	    if(!entry) return false;
+	    var load=String(entry.activityLoad||'').toLowerCase();
+	    return /high|very|heavy|severe|yüksek/.test(load) || (entry.cardioLoad!=null && entry.cardioLoad>=80);
+	  }
+	  function activityLoadModerate(entry){
+	    if(!entry) return false;
+	    var load=String(entry.activityLoad||'').toLowerCase();
+	    return /moderate|medium|high|very|heavy|severe|orta|yüksek/.test(load) || (entry.cardioLoad!=null && entry.cardioLoad>=55);
+	  }
+	  function sleepStatus(entry){
+	    if(!entry || entry.sleepDurationMinutes==null) return 'Waiting';
+	    if(entry.sleepDurationMinutes>=420) return 'Good';
+	    if(entry.sleepDurationMinutes>=360) return 'Acceptable';
+	    return 'Low';
+	  }
+	  function hrvStatus(entry){
+	    if(!entry || entry.hrvMs==null) return 'Waiting';
+	    return entry.hrvMs>=45?'Normal':'Low';
+	  }
+	  function rhrStatus(entry){
+	    if(!entry || entry.restingHr==null) return 'Waiting';
+	    return entry.restingHr<=60?'Controlled':'High';
+	  }
+		  function activityStatus(entry){
+		    if(!entry || (!entry.activityLoad && entry.cardioLoad==null)) return 'Waiting';
+		    if(activityLoadHigh(entry)) return 'High';
+		    if(activityLoadModerate(entry)) return 'Moderate';
+		    return 'Normal';
+		  }
+		  function clamp(n,min,max){
+		    n=Number(n);
+		    if(!Number.isFinite(n)) return min;
+		    return Math.max(min,Math.min(max,n));
+		  }
+		  function recoveryScore(entry){
+		    if(!entry) return null;
+		    if(entry.nightlyRecharge!=null) return clamp(Math.round(entry.nightlyRecharge),0,100);
+		    if(entry.sleepDurationMinutes==null || entry.hrvMs==null || entry.restingHr==null) return null;
+		    var sleep=entry.sleepDurationMinutes>=420?34:(entry.sleepDurationMinutes>=360?25:12);
+		    var hrv=entry.hrvMs>=45?33:15;
+		    var rhr=entry.restingHr<=60?33:15;
+		    return clamp(sleep+hrv+rhr,0,100);
+		  }
+		  function signalMeaning(entry){
+		    var sig=signal(entry);
+		    if(sig.cls==='ready') return 'Sleep and HRV support today’s plan. Start normally and keep form quality high.';
+		    if(sig.cls==='controlled') return 'Keep today’s plan, but avoid aggressive progression. Start press/row movements controlled.';
+		    return 'No Polar Bridge data yet. Run the Shortcut to fill this dashboard.';
+		  }
+		  function ringColor(cls){
+		    if(cls==='ready') return '#67e650';
+		    if(cls==='controlled') return '#facc15';
+		    return '#64748b';
+		  }
+		  function statusTone(label){
+		    var s=String(label||'').toLowerCase();
+		    if(/missing|waiting/.test(s)) return 'missing';
+		    if(/moderate|high|low|reduced/.test(s)) return 'caution';
+		    if(/good|normal|controlled/.test(s)) return 'good';
+		    return 'normal';
+		  }
+		  function healthFor(type,value,entry){
+		    if(value==null || value==='') return {label:'Missing',tone:'missing',progress:0};
+		    var n=num(value);
+		    if(type==='nightly' || type==='sleepScore') return n>=75?{label:'Good',tone:'good',progress:n}:n>=60?{label:'Normal',tone:'normal',progress:n}:{label:'Controlled',tone:'caution',progress:n};
+		    if(type==='hrv') return n>=55?{label:'Good',tone:'good',progress:clamp(n/80*100,6,100)}:n>=45?{label:'Normal',tone:'normal',progress:clamp(n/80*100,6,100)}:{label:'Controlled',tone:'caution',progress:clamp(n/80*100,6,100)};
+		    if(type==='rhr') return n<=55?{label:'Good',tone:'good',progress:clamp((75-n)/30*100,8,100)}:n<=60?{label:'Controlled',tone:'normal',progress:clamp((75-n)/30*100,8,100)}:{label:'Controlled',tone:'caution',progress:clamp((75-n)/30*100,8,100)};
+		    if(type==='sleepHr') return n<=55?{label:'Normal',tone:'normal',progress:clamp((75-n)/30*100,8,100)}:{label:'Controlled',tone:n>65?'caution':'normal',progress:clamp((75-n)/30*100,8,100)};
+		    if(type==='resp') return n>=12 && n<=16?{label:'Normal',tone:'normal',progress:72}:{label:'Controlled',tone:'caution',progress:54};
+		    if(type==='steps') return n>=8000?{label:'Good',tone:'good',progress:clamp(n/10000*100,6,100)}:n>=5000?{label:'Normal',tone:'normal',progress:clamp(n/10000*100,6,100)}:{label:'Controlled',tone:'caution',progress:clamp(n/10000*100,6,100)};
+		    if(type==='energy') return n>=300?{label:'Normal',tone:'normal',progress:clamp(n/600*100,6,100)}:{label:'Controlled',tone:'caution',progress:clamp(n/600*100,6,100)};
+		    return {label:'Normal',tone:'normal',progress:65};
+		  }
+		  function metricMini(label,value,unit,type,entry){
+		    var h=healthFor(type,value,entry);
+		    var display=value==null || value===''?'-':(type==='steps'?Number(value).toLocaleString('tr-TR'):value);
+		    return '<div class="polarMetricMiniV1 '+esc(h.tone)+'" style="--polarBar:'+clamp(Math.round(h.progress),0,100)+'%">'
+		      +'<small>'+esc(label)+'</small>'
+		      +'<div class="polarMetricValueV1"><b>'+esc(display)+'</b>'+(unit?'<em>'+esc(unit)+'</em>':'')+'</div>'
+		      +'<span class="polarChipV1 '+esc(h.tone)+'">'+esc(h.label)+'</span>'
+		      +'<div class="polarMetricBarV1"><span></span></div>'
+		      +'</div>';
+		  }
+		  function loadLevel(entry){
+		    if(!entry || (!entry.activityLoad && entry.cardioLoad==null && !(entry.workouts&&entry.workouts.length))) return null;
+		    if(activityLoadHigh(entry)) return {label:'High',tone:'caution'};
+		    if(activityLoadModerate(entry)) return {label:'Moderate',tone:'caution'};
+		    return {label:'Low',tone:'normal'};
+		  }
+		  function latestWorkout(entry){
+		    return entry&&Array.isArray(entry.workouts)&&entry.workouts.length?entry.workouts[0]:null;
+		  }
+	  function flowHtml(){
+	    return '<div class="polarBridgeFlow">'
+	      +'<div class="polarBridgeStep"><b>Polar Flow</b><span>source</span></div>'
+	      +'<div class="polarBridgeStep"><b>Apple Health</b><span>hub</span></div>'
+	      +'<div class="polarBridgeStep"><b>iOS Shortcuts</b><span>bridge</span></div>'
+	      +'<div class="polarBridgeStep"><b>Simurg Cloud</b><span>sync</span></div>'
+	      +'</div>';
+	  }
+		  function samplePayload(){
+		    return {
+		      date:'2026-07-09',
+		      source:'polar_flow_apple_health_shortcut',
+		      device:'Polar Loop Gen 2',
+		      sleepMinutes:432,
+		      sleepDurationText:'7h 12m',
+		      sleepScore:88,
+		      nightlyRecharge:76,
+		      sleepCharge:82,
+		      ansCharge:71,
+		      hrvMs:62,
+		      restingHr:48,
+		      sleepHr:52,
+		      respiratoryRate:14.2,
+		      steps:8200,
+		      activeEnergy:420,
+		      totalEnergy:2460,
+		      activityLoad:'moderate',
+		      cardioLoad:55,
+		      workouts:[
+		        {
+		          type:'Badminton',
+		          duration:'32:39',
+		          activeEnergy:143,
+		          avgHr:112,
+		          maxHr:125,
+		          rpe:5
+		        }
+		      ],
+		      sleepStages:{
+		        deepMinutes:95,
+		        remMinutes:86,
+		        lightMinutes:238,
+		        awakeMinutes:13
+		      },
+		      readinessNotes:[
+		        'Sleep duration is good.',
+		        'HRV is within normal range.',
+		        'Resting HR is controlled.',
+		        'Moderate extra activity load detected.'
+		      ]
+		    };
+		  }
+	  function samplePayloadText(){return JSON.stringify(samplePayload(),null,2);}
+	  function renderDataCenterBridge(){
+	    var data=document.getElementById('data');
+	    if(!data) return;
+	    var card=document.getElementById('polarBridgeDataCard');
+	    if(!card){
+	      card=document.createElement('div');
+	      card.id='polarBridgeDataCard';
+	      card.className='card polarBridgeCard';
+	    }
+	    var polarImport=data.querySelector('.polarImportHelper');
+	    var universal=data.querySelector('.universalImportCard');
+	    if(polarImport && polarImport.parentNode) polarImport.parentNode.insertBefore(card,polarImport.nextSibling);
+	    else if(universal && universal.parentNode) universal.parentNode.insertBefore(card,universal);
+	    else data.insertBefore(card,data.children[1]||null);
+	    var b=bridge(), entry=latestEntry(), sig=signal(entry);
+	    var statusText=entry?'Last sync: '+fmtDateTime(b.lastSync):'Waiting for Shortcut';
+	    card.innerHTML='<h2>Polar Bridge</h2>'
+	      +'<div class="sub polarBridgeSubtitle">Polar Flow → Apple Health → iOS Shortcuts → Simurg Cloud</div>'
+	      +'<div class="polarBridgeExplanation">No Polar API, no token, no manual file import. iOS Shortcuts sends Apple Health summary data to Simurg. This test payload is only for checking the Simurg Polar system. The real workflow will be iOS Shortcuts sending Apple Health data automatically.</div>'
+	      +flowHtml()
+	      +'<div class="polarBridgeStatus">'
+	      +'<div class="polarBridgeStatusBox"><small>Status</small><b>'+esc(statusText)+'</b></div>'
+	      +'<div class="polarBridgeStatusBox"><small>Signal</small><b>'+esc(sig.label)+'</b></div>'
+	      +'<div class="polarBridgeStatusBox"><small>Receiver</small><b>simurgReceivePolarBridge(payload)</b></div>'
+	      +'<div class="polarBridgeStatusBox"><small>Stored In</small><b>simurgData.polarBridge.daily</b></div>'
+	      +'</div>'
+	      +'<pre class="polarBridgeCode"><code>'+esc(samplePayloadText())+'</code></pre>'
+	      +'<textarea id="polarBridgeTestPayload" class="jsonBox polarBridgeTestBox" aria-label="Polar Bridge test payload">'+esc(samplePayloadText())+'</textarea>'
+	      +'<div class="actions polarBridgeActions"><button class="btn" onclick="simurgSavePolarBridgeTestPayload()">Test Payload Kaydet</button><button class="btn sec" onclick="simurgOpenPolarBridgeTab()">Polar Sekmesini Aç</button></div>'
+	      +'<div id="polarBridgeTestStatus" class="polarBridgeTestStatus" aria-live="polite"></div>';
+	  }
+	  function ensurePolarSection(){
+	    var section=document.getElementById('polar');
+	    if(!section){
+	      var main=document.querySelector('main');
+      if(!main) return null;
+      section=document.createElement('section');
+      section.id='polar';
+      section.className='section simurgPolarShell simurgPolarBridgeShell';
+      main.appendChild(section);
+    }
+	    section.classList.add('simurgPolarBridgeShell');
+	    return section;
+	  }
+	  function displaySleep(entry){
+	    if(!entry) return '-';
+	    return entry.sleepDurationText || fmtSleep(entry.sleepDurationMinutes);
+	  }
+		  function metricCard(label,value,wide){
+		    return '<div class="polarBridgeMetric '+(wide?'wide':'')+'"><small>'+esc(label)+'</small><b>'+esc(value==null||value===''?'-':value)+'</b></div>';
+		  }
+		  function signalCardHtml(entry){
+		    var sig=signal(entry);
+		    return '<div class="polarBridgeSignalCard '+esc(sig.cls)+'"><div class="polarBridgeSignalTitle"><div><small>Simurg Recovery Signal</small><b>'+esc(sig.label)+'</b></div><span class="polarBridgeSignal '+esc(sig.cls)+'">'+esc(sig.label)+'</span></div><p>'+esc(sig.note)+'</p></div>';
+		  }
+		  function minuteText(min){
+		    if(min==null) return '-';
+		    var h=Math.floor(min/60), m=Math.round(min%60);
+		    return h? h+'h '+m+'m' : m+'m';
+		  }
+		  function recoveryCardHtml(entry,b){
+		    var sig=signal(entry), score=recoveryScore(entry), scoreText=score==null?'-':score;
+		    var meta=[];
+		    if(entry&&entry.device) meta.push(entry.device);
+		    if(b&&b.lastSync) meta.push('Son senkron: '+fmtDateTime(b.lastSync));
+		    if(entry&&(entry.dataSource||entry.source)) meta.push('Kaynak: '+(entry.dataSource||entry.source));
+		    if(!meta.length) meta.push('Shortcut verisi bekleniyor');
+		    return '<div class="polarRecoveryV1 '+esc(sig.cls)+'">'
+		      +'<div class="polarRecoveryHeadV1"><div><h1>Polar Recovery</h1><span class="polarRecoveryMetaV1">'+esc(meta.join(' · '))+'</span></div><span class="polarStatusPillV1 '+esc(sig.cls)+'">'+esc(sig.label)+'</span></div>'
+		      +'<div class="polarRecoveryBodyV1">'
+		      +'<div class="polarRecoveryRingV1" style="--polarScore:'+esc(score==null?0:score)+'%;--polarRing:'+esc(ringColor(sig.cls))+'"><div class="polarRingInnerV1"><b>'+esc(scoreText)+'</b><small>'+esc(score==null?'waiting':'recovery')+'</small></div></div>'
+		      +'<div class="polarRecoveryMeaningV1"><b>'+esc(sig.label)+'</b><p>'+esc(signalMeaning(entry))+'</p></div>'
+		      +'</div></div>';
+		  }
+		  function metricGridHtml(entry){
+		    if(!entry) return '';
+		    return '<div class="polarMetricGridV1">'
+		      +metricMini('Nightly Recharge',entry.nightlyRecharge,'%', 'nightly',entry)
+		      +metricMini('Sleep Score',entry.sleepScore,'%', 'sleepScore',entry)
+		      +metricMini('HRV',entry.hrvMs,'ms', 'hrv',entry)
+		      +metricMini('Resting HR',entry.restingHr,'bpm', 'rhr',entry)
+		      +metricMini('Sleep HR',entry.sleepHr,'bpm', 'sleepHr',entry)
+		      +metricMini('Respiratory Rate',entry.respiratoryRate,'rpm', 'resp',entry)
+		      +metricMini('Steps',entry.steps,'steps', 'steps',entry)
+		      +metricMini('Active Energy',entry.activeEnergyKcal,'kcal', 'energy',entry)
+		      +'</div>';
+		  }
+		  function sleepStagesCardHtml(entry){
+		    var stages=entry&&entry.sleepStages;
+		    if(!stages) return '';
+		    var rows=[
+		      ['Deep',stages.deepMinutes,'#4776ff'],
+		      ['REM',stages.remMinutes,'#7657d6'],
+		      ['Light',stages.lightMinutes,'#2f9bff'],
+		      ['Awake',stages.awakeMinutes,'#f87171']
+		    ].filter(function(x){return x[1]!=null;});
+		    if(!rows.length) return '';
+		    var total=rows.reduce(function(sum,x){return sum+(x[1]||0);},0);
+		    if(!total) return '';
+		    return '<div class="polarStageCardV1"><div class="polarStageHeadV1"><b>SLEEP STAGES</b><span>'+esc(displaySleep(entry))+'</span></div>'
+		      +'<div class="polarStageStackV1">'+rows.map(function(x){return '<span class="polarStageSegV1" style="width:'+clamp((x[1]/total)*100,1,100)+'%;background:'+esc(x[2])+'"></span>';}).join('')+'</div>'
+		      +'<div class="polarStageLegendV1">'+rows.map(function(x){var p=Math.round((x[1]/total)*100);return '<div><span><i style="background:'+esc(x[2])+'"></i>'+esc(x[0])+'</span><b>'+esc(minuteText(x[1])+' ('+p+'%)')+'</b></div>';}).join('')+'</div>'
+		      +'</div>';
+		  }
+		  function activityLoadCardHtml(entry){
+		    var level=loadLevel(entry), w=latestWorkout(entry);
+		    if(!level && !w) return '';
+		    var controlled=entry&&activityLoadModerate(entry);
+		    return '<div class="polarActivityCardV1"><div class="polarActivityHeadV1"><b>ACTIVITY LOAD</b><span class="polarActivityLevelV1 '+esc(level?level.tone:'normal')+'">'+esc(level?level.label:'Workout')+(entry&&entry.cardioLoad!=null?' · '+esc(entry.cardioLoad)+'/100':'')+'</span></div>'
+		      +(controlled?'<span class="polarChipV1 caution">Start controlled</span>':'')
+		      +(w?'<div class="polarWorkoutV1"><div><b>'+esc(w.type||'Workout')+'</b><span>'+esc(w.duration||'')+'</span></div><span>'+esc(w.rpe!=null?'RPE '+w.rpe:'')+'</span><div class="polarWorkoutStatsV1">'
+		        +'<div>'+esc(metric(w.activeEnergy,' kcal'))+'<small>active</small></div>'
+		        +'<div>'+esc(metric(w.avgHr,' avg'))+'<small>HR</small></div>'
+		        +'<div>'+esc(metric(w.maxHr,' max'))+'<small>HR</small></div>'
+		        +'<div>'+esc(w.rpe==null?'-':w.rpe)+'<small>RPE</small></div>'
+		        +'</div></div>':'')
+		      +'</div>';
+		  }
+		  function coachSentenceHtml(entry){
+		    if(!entry) return '';
+		    return '<div class="polarCoachSentenceV1"><b>Readiness explanation</b>'+esc(signalMeaning(entry))+'</div>';
+		  }
+		  function stagesHtml(entry){
+		    var stages=entry&&entry.sleepStages;
+	    if(!stages) return '';
+	    var rows=[
+	      ['Deep',stages.deepMinutes],
+	      ['REM',stages.remMinutes],
+	      ['Light',stages.lightMinutes],
+	      ['Awake',stages.awakeMinutes]
+	    ].filter(function(x){return x[1]!=null;});
+	    if(!rows.length) return '';
+	    var max=Math.max.apply(null,rows.map(function(x){return x[1]||0;}));
+	    return '<div class="polarBridgeMetric polarBridgeStages"><small>Sleep Stages</small><div class="polarBridgeStageList">'
+	      +rows.map(function(x){
+	        var width=max?Math.max(8,Math.round((x[1]/max)*100)):8;
+	        return '<div class="polarBridgeStage"><span>'+esc(x[0])+'</span><em style="width:'+width+'%"></em><b>'+esc(x[1]+' dk')+'</b></div>';
+	      }).join('')
+	      +'</div></div>';
+	  }
+	  function workoutHtml(entry){
+	    var list=entry&&Array.isArray(entry.workouts)?entry.workouts:[];
+	    if(!list.length) return '';
+	    var w=list[0];
+	    var parts=[text(w.type,'Workout')];
+	    if(w.duration) parts.push(w.duration);
+	    if(w.activeEnergy!=null) parts.push(w.activeEnergy+' kcal');
+	    if(w.avgHr!=null) parts.push('Avg HR '+w.avgHr);
+	    if(w.maxHr!=null) parts.push('Max HR '+w.maxHr);
+	    if(w.rpe!=null) parts.push('RPE '+w.rpe);
+	    return '<div class="polarBridgeWorkout"><b>Latest workout</b>'+esc(parts.join(' · '))+'</div>';
+	  }
+	  function notesHtml(entry){
+	    var notes=entry&&Array.isArray(entry.readinessNotes)?entry.readinessNotes:[];
+	    if(!notes.length) return '';
+	    return '<div class="polarBridgeNotes"><b>Readiness notes</b>'+notes.map(function(n){return esc(n);}).join('<br>')+'</div>';
+	  }
+		  function renderPolarBridgeTab(){
+		    var section=ensurePolarSection();
+		    if(!section) return;
+		    var entry=latestEntry(), b=bridge();
+		    if(!entry){
+		      section.innerHTML='<div class="polarDashboardV1">'
+		        +recoveryCardHtml(null,b)
+		        +'<div class="polarBridgeEmpty"><b>Waiting for Polar Bridge</b><p>Run the iOS Shortcut from Apple Health. This dashboard will fill with recovery score, sleep, HRV, activity load, and workout context.</p></div>'
+		        +'</div>';
+		      return;
+		    }
+		    section.innerHTML='<div class="polarDashboardV1">'
+		      +recoveryCardHtml(entry,b)
+		      +metricGridHtml(entry)
+		      +sleepStagesCardHtml(entry)
+		      +activityLoadCardHtml(entry)
+		      +coachSentenceHtml(entry)
+		      +'</div>';
+		  }
+	  var lastHomePolarSentence='';
+	  function homePolarSentence(entry){
+	    if(!entry) return '';
+	    var sig=signal(entry);
+	    if(sig.cls==='controlled') return 'Polar signal controlled: keep today\'s program, but avoid aggressive progression.';
+	    if(sig.cls==='ready') return 'Polar signal good: sleep and HRV support today\'s plan.';
+	    return '';
+	  }
+	  function renderHomePolarNote(){
+	    var note=document.getElementById('homeCoachNote');
+	    if(!note) return;
+	    var current=note.textContent||'';
+	    if(lastHomePolarSentence && current.indexOf(lastHomePolarSentence)>-1) current=current.replace(lastHomePolarSentence,'').trim();
+	    var sentence=homePolarSentence(latestEntry());
+	    lastHomePolarSentence=sentence;
+	    if(sentence) note.textContent=(current.replace(/\s+$/,'')+' '+sentence).trim();
+	    else note.textContent=current.trim();
+	  }
+		  function renderCoachingPolarCard(){
+		    var old=document.getElementById('polarBridgeCoachCard');
+		    if(old) old.remove();
+		    var entry=latestEntry();
+		    if(!entry) return;
+		    var section=document.getElementById('coaching');
+		    if(!section) return;
+		    var sig=signal(entry);
+		    var aggression=sig.cls==='waiting'?'WAITING':(sig.cls==='controlled'?'REDUCED':'NORMAL');
+		    function line(label,status,value,width){
+		      var tone=statusTone(status);
+		      return '<div class="polarCoachLineV1 '+esc(tone)+'" style="--polarBar:'+clamp(width,0,100)+'%">'
+		        +'<small>'+esc(label)+'</small><b>'+esc(status)+'</b>'
+		        +(value?'<span class="polarChipV1 '+esc(tone)+'">'+esc(value)+'</span>':'')
+		        +'<div class="polarCoachBarTrackV1"><span></span></div>'
+		        +'</div>';
+		    }
+		    var sleepWidth=entry.sleepDurationMinutes==null?0:clamp(entry.sleepDurationMinutes/480*100,8,100);
+		    var hrvWidth=entry.hrvMs==null?0:clamp(entry.hrvMs/80*100,8,100);
+		    var rhrWidth=entry.restingHr==null?0:clamp((75-entry.restingHr)/30*100,8,100);
+		    var actWidth=entry.cardioLoad!=null?clamp(entry.cardioLoad,8,100):(activityLoadModerate(entry)?60:38);
+		    var targetWidth=aggression==='NORMAL'?82:(aggression==='REDUCED'?48:12);
+		    var card=document.createElement('div');
+		    card.id='polarBridgeCoachCard';
+		    card.className='card polarBridgeCoachCard';
+		    card.innerHTML='<div class="polarBridgeCoachHeadV1"><h2>Polar Signal / Readiness</h2><span class="polarStatusPillV1 '+esc(sig.cls)+'">'+esc(sig.label)+'</span></div>'
+		      +'<div class="polarBridgeCoachGrid">'
+		      +line('Sleep',sleepStatus(entry),displaySleep(entry),sleepWidth)
+		      +line('HRV',hrvStatus(entry),metric(entry.hrvMs,' ms'),hrvWidth)
+		      +line('RHR',rhrStatus(entry),metric(entry.restingHr,' bpm'),rhrWidth)
+		      +line('Activity Load',activityStatus(entry),entry.cardioLoad!=null?entry.cardioLoad+'/100':(entry.activityLoad||''),actWidth)
+		      +line('Target',aggression,'aggressiveness',targetWidth)
+		      +'</div>'
+		      +'<p>'+esc(signalMeaning(entry))+' Program otomatik değişmedi.</p>';
+		    var anchor=document.getElementById('coachV11SmartFilter') || document.getElementById('coachV8Premium') || section.querySelector('.coachingGrid') || section.firstElementChild;
+		    if(anchor && anchor.parentNode) anchor.parentNode.insertBefore(card,anchor.nextSibling);
+		    else section.appendChild(card);
+	  }
+		  function polarAlertSummary(entry){
+		    return 'Sleep '+displaySleep(entry)+' · HRV '+metric(entry.hrvMs,' ms')+' · RHR '+metric(entry.restingHr,' bpm');
+		  }
+		  function insertPolarAlertCard(){
+		    var entry=latestEntry();
+		    if(!entry) return;
+		    var box=document.getElementById('simurgAlertItems');
+		    if(!box || box.querySelector('[data-polar-bridge-alert]')) return;
+		    var sig=signal(entry);
+		    var note=activityLoadModerate(entry)?'Extra load detected. Start press/row movements controlled.':'Polar data received from Apple Health Shortcut.';
+		    box.insertAdjacentHTML('beforeend','<div data-polar-bridge-alert="1" class="psAlertItem polarAlertCardV1 '+esc(sig.cls)+'"><i>⌚</i><div class="polarAlertBodyV1"><div class="polarAlertTopV1"><b>Polar Bridge</b><span class="polarStatusPillV1 '+esc(sig.cls)+'">'+esc(sig.label)+'</span></div><span class="polarAlertKeyV1">'+esc(polarAlertSummary(entry))+'</span><span class="polarAlertNoteV1">'+esc(note)+'</span></div></div>');
+		  }
+	  function renderAll(){
+	    try{store();renderDataCenterBridge();renderPolarBridgeTab();renderCoachingPolarCard();renderHomePolarNote();}catch(e){console.warn('polar bridge render',e);}
+	  }
+
+	  window.simurgReceivePolarBridge=function(payload){
+	    var normalized=normalize(payload);
+	    var b=bridge();
+	    b.lastSync=normalized.receivedAt;
+	    b.daily[normalized.date]=normalized;
+    persist();
+    renderAll();
+	    try{if(typeof renderPolarDashboard==='function') renderPolarDashboard();}catch(e){}
+	    return {ok:true,storedAt:'simurgData.polarBridge.daily.'+normalized.date,polarBridge:b,normalizedPayload:normalized};
+	  };
+
+	  window.simurgSavePolarBridgeTestPayload=function(){
+	    var box=document.getElementById('polarBridgeTestPayload');
+	    var raw=box&&box.value?box.value.trim():'';
+	    var payload;
+	    try{payload=raw?JSON.parse(raw):samplePayload();}
+	    catch(e){
+	      var errorStatus=document.getElementById('polarBridgeTestStatus');
+	      if(errorStatus) errorStatus.textContent='Test payload okunamadı: '+e.message;
+	      return null;
+	    }
+	    var result=window.simurgReceivePolarBridge(payload);
+	    try{renderPolarBridgeTab();}catch(e){}
+	    var status=document.getElementById('polarBridgeTestStatus');
+	    if(status && result && result.normalizedPayload) status.textContent='Test payload kaydedildi: '+result.normalizedPayload.date;
+	    return result;
+	  };
+
+	  window.simurgOpenPolarBridgeTab=function(){
+	    try{renderPolarBridgeTab();}catch(e){}
+	    if(typeof window.simurgV8Go==='function') return window.simurgV8Go('polar','polar');
+	    if(typeof window.show==='function') return window.show('polar',null);
+	    return null;
+	  };
+
+	  var previousRender=window.render;
+  if(typeof previousRender==='function' && !previousRender.__polarBridgeV1){
+    window.render=function(){
+      var result=previousRender.apply(this,arguments);
+      setTimeout(renderAll,0);
+      return result;
+    };
+    window.render.__polarBridgeV1=true;
+  }
+
+  var previousGo=window.simurgV8Go;
+	  if(typeof previousGo==='function' && !previousGo.__polarBridgeV1){
+	    window.simurgV8Go=function(id,key){
+	      var result=previousGo.apply(this,arguments);
+	      setTimeout(renderAll,0);
+	      if(id==='coaching' || key==='coaching') setTimeout(renderCoachingPolarCard,220);
+	      if(id==='home' || key==='home') setTimeout(renderHomePolarNote,220);
+	      return result;
+	    };
+	    window.simurgV8Go.__polarBridgeV1=true;
+  }
+
+  var previousOpenAlert=window.simurgOpenAlert;
+	  if(typeof previousOpenAlert==='function' && !previousOpenAlert.__polarBridgeV1){
+	    window.simurgOpenAlert=function(){
+	      var result=previousOpenAlert.apply(this,arguments);
+	      setTimeout(insertPolarAlertCard,0);
+	      return result;
+	    };
+	    window.simurgOpenAlert.__polarBridgeV1=true;
+  }
+
+  function installHooks(){
+    var renderFn=window.render;
+    if(typeof renderFn==='function' && !renderFn.__polarBridgeV1){
+      window.render=function(){
+        var result=renderFn.apply(this,arguments);
+        setTimeout(renderAll,0);
+        return result;
+      };
+      window.render.__polarBridgeV1=true;
+    }
+
+    var goFn=window.simurgV8Go;
+	    if(typeof goFn==='function' && !goFn.__polarBridgeV1){
+	      window.simurgV8Go=function(id,key){
+	        var result=goFn.apply(this,arguments);
+	        setTimeout(renderAll,0);
+	        if(id==='coaching' || key==='coaching') setTimeout(renderCoachingPolarCard,220);
+	        if(id==='home' || key==='home') setTimeout(renderHomePolarNote,220);
+	        return result;
+	      };
+	      window.simurgV8Go.__polarBridgeV1=true;
+    }
+
+    var openAlertFn=window.simurgOpenAlert;
+	    if(typeof openAlertFn==='function' && !openAlertFn.__polarBridgeV1){
+	      window.simurgOpenAlert=function(){
+	        var result=openAlertFn.apply(this,arguments);
+	        setTimeout(insertPolarAlertCard,0);
+	        return result;
+	      };
+	      window.simurgOpenAlert.__polarBridgeV1=true;
+    }
+  }
+
+  installHooks();
+  ready(function(){
+    installHooks();
+    store();
+    renderAll();
+    setTimeout(function(){installHooks();renderAll();},400);
+    setTimeout(function(){installHooks();renderAll();},1200);
+  });
 })();
 </script>
