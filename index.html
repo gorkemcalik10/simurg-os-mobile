@@ -4658,6 +4658,12 @@ textarea,input,select{
 
 </style>
 
+
+
+
+
+
+
 <link rel="manifest" href="manifest.json">
 <meta name="application-name" content="SIMURG OS">
 <meta name="mobile-web-app-capable" content="yes">
@@ -11386,9 +11392,18 @@ button,.btn,.gymMiniBtn,input,select,textarea{
 
   /* Logger chart/volume tooltips: never overflow outside mobile viewport */
   #workout .tooltipItem:hover:after,
+  #workout .tooltipItem:active:after,
+  #workout .tooltipItem:focus-visible:after,
   #workout .bar.tooltipItem:hover:after,
+  #workout .bar.tooltipItem:active:after,
+  #workout .bar.tooltipItem:focus-visible:after,
   #workout .leg.tooltipItem:hover:after,
-  #workout .donut.tooltipItem:hover:after{
+  #workout .leg.tooltipItem:active:after,
+  #workout .leg.tooltipItem:focus-visible:after,
+  #workout .donut.tooltipItem:hover:after,
+  #workout .donut.tooltipItem:active:after,
+  #workout .donut.tooltipItem:focus-visible:after{
+    content:attr(data-tip)!important;
     position:fixed!important;
     left:50%!important;
     right:auto!important;
@@ -12681,5 +12696,928 @@ m Shell V4: Logger information architecture fix -->
   });
   window.addEventListener('resize',function(){setTimeout(refreshShell,80);});
   window.addEventListener('pageshow',refreshShell);
+})();
+</script>
+
+<!-- SIMURG OS Premium Visual System v1: reference-led dark mobile polish -->
+<style id="simurgPremiumVisualSystemV1">
+@media(max-width:860px){
+  :root{
+    --pv-bg:#050609;
+    --pv-bg-deep:#020304;
+    --pv-surface:#0b0f15;
+    --pv-surface-2:#10161f;
+    --pv-surface-3:#151b24;
+    --pv-line:rgba(232,238,247,.085);
+    --pv-line-strong:rgba(232,238,247,.16);
+    --pv-text:#f7f9fc;
+    --pv-muted:#8993a2;
+    --pv-muted-2:#5e6876;
+    --pv-red:#d9252e;
+    --pv-red-dark:#97131b;
+    --pv-green:#49d66d;
+    --pv-blue:#5b8cff;
+    --pv-purple:#a35cf6;
+    --pv-yellow:#f0b84b;
+    --pv-radius-lg:22px;
+    --pv-radius-md:17px;
+    --pv-shadow:0 18px 42px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.035);
+    --pv-shadow-soft:0 10px 26px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.025);
+  }
+
+  body,
+  main > .section.active{
+    color:var(--pv-text)!important;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",Arial,sans-serif!important;
+    letter-spacing:0!important;
+  }
+
+  .app{
+    background:
+      radial-gradient(circle at 10% -8%,rgba(217,37,46,.16),transparent 28%),
+      radial-gradient(circle at 88% 0%,rgba(73,214,109,.08),transparent 24%),
+      linear-gradient(180deg,var(--pv-bg),var(--pv-bg-deep) 62%,#030405)!important;
+  }
+
+  main > .section.active{
+    background:transparent!important;
+  }
+
+  h1,
+  .topbar h1,
+  .title h1,
+  .psGreeting h1,
+  .polarAppHeader h1{
+    color:var(--pv-text)!important;
+    font-weight:850!important;
+    letter-spacing:-.35px!important;
+  }
+
+  h2,
+  h3,
+  .groupTitle,
+  .panel h3,
+  .gymCardHead b,
+  .gymExerciseName,
+  .psTrainingTop h2,
+  .v4Outlook h2{
+    color:var(--pv-text)!important;
+    font-weight:820!important;
+    letter-spacing:-.2px!important;
+  }
+
+  p,
+  .sub,
+  .title .sub,
+  .v4ScoreInfo p,
+  .v4Training p,
+  .coachInsight p,
+  .contextCoach,
+  .reportText{
+    color:var(--pv-muted)!important;
+    line-height:1.42!important;
+    font-weight:520!important;
+  }
+
+  small,
+  .psLabel,
+  .v4Kicker,
+  .v4OutlookTop small,
+  .v4TrainingTop small,
+  .metricCard small,
+  .polarMetricCard small,
+  .coachV8Kicker,
+  .coachV11Top small{
+    color:var(--pv-muted-2)!important;
+    font-weight:900!important;
+    letter-spacing:.13em!important;
+    text-transform:uppercase!important;
+  }
+
+  .psRecoveryCard,
+  .psCoachCard,
+  .psTrainingCard,
+  .psMiniCard,
+  .psPolarCard,
+  .v4Outlook,
+  .v4ScoreCard,
+  .v4Metric,
+  .v4Training,
+  .v4Mini,
+  .metricCard,
+  .polarMetricCard,
+  .trendPanel,
+  .coachInsight,
+  .group,
+  .card,
+  .panel,
+  .exerciseCard,
+  .gymHero,
+  .gymCard,
+  .gymExerciseCard,
+  .gymAddCard,
+  .activitySessionCard,
+  .dailyMiniCard,
+  .analyticsBestCard,
+  .cloudSyncCard,
+  .localStatusCard,
+  .universalImportCard,
+  .versionBadgeCard,
+  .coachV8Hero,
+  .coachV8Card,
+  .coachV11Hero,
+  .coachV11Item{
+    background:linear-gradient(180deg,rgba(17,23,31,.98),rgba(8,11,16,.99))!important;
+    border:1px solid var(--pv-line)!important;
+    border-radius:var(--pv-radius-lg)!important;
+    box-shadow:var(--pv-shadow-soft)!important;
+  }
+
+  .psRecoveryCard,
+  .v4Outlook,
+  .recoveryHero,
+  .gymHero,
+  .coachV8Hero,
+  .coachV11Hero{
+    background:
+      linear-gradient(180deg,rgba(18,25,35,.99),rgba(8,11,16,.99))!important;
+    border-color:var(--pv-line-strong)!important;
+    box-shadow:var(--pv-shadow)!important;
+  }
+
+  .psRecoveryCard:before,
+  .v4Metric:after,
+  .metricCard:after,
+  .polarMetricCard:after{
+    opacity:.85!important;
+  }
+
+  .psRecoveryMain b,
+  #homeReadinessScore,
+  #recoveryScore,
+  .readinessCircle,
+  .coachV8Pill{
+    color:var(--pv-green)!important;
+  }
+
+  .psTrack,
+  .v4Track,
+  .loadBar{
+    background:rgba(255,255,255,.07)!important;
+    border-radius:999px!important;
+    overflow:hidden!important;
+  }
+
+  .psTrack i,
+  .v4Track i,
+  .loadBar span{
+    background:linear-gradient(90deg,var(--pv-green),#78f08f)!important;
+  }
+
+  .v4Metric.blue:after,
+  .psMiniLine,
+  .polarTrendBar,
+  .bar{
+    background:linear-gradient(180deg,var(--pv-blue),#2b5ed8)!important;
+  }
+
+  .v4Metric.amber:after,
+  .metricCard.amber:after{
+    background:linear-gradient(90deg,var(--pv-yellow),rgba(240,184,75,.14))!important;
+  }
+
+  .v4Metric.purple:after,
+  .metricCard.purple:after{
+    background:linear-gradient(90deg,var(--pv-purple),rgba(163,92,246,.14))!important;
+  }
+
+  .btn,
+  .weekBtn,
+  .ctrl,
+  .gymMiniBtn,
+  .v4Outlook button,
+  .psStartBtn,
+  .detailBtn,
+  .checkCard button,
+  .simurgV8Grid button{
+    border-radius:var(--pv-radius-md)!important;
+    border:1px solid rgba(255,255,255,.09)!important;
+    background:linear-gradient(180deg,#151b24,#0c1118)!important;
+    color:#edf2f8!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important;
+    font-weight:850!important;
+    letter-spacing:0!important;
+  }
+
+  .btn:not(.sec),
+  .psStartBtn,
+  .gymMiniBtn.primary,
+  .v4Outlook button{
+    background:linear-gradient(180deg,var(--pv-red),var(--pv-red-dark))!important;
+    border-color:rgba(255,88,96,.38)!important;
+    color:#fff!important;
+    box-shadow:0 12px 26px rgba(217,37,46,.22),inset 0 1px 0 rgba(255,255,255,.10)!important;
+  }
+
+  .btn.sec,
+  .gymMiniBtn:not(.primary),
+  .weekBtn,
+  .ctrl{
+    background:linear-gradient(180deg,#131923,#0b1017)!important;
+    color:#d6dde7!important;
+  }
+
+  input,
+  select,
+  textarea,
+  .jsonBox{
+    background:#070a0f!important;
+    border:1px solid rgba(255,255,255,.09)!important;
+    border-radius:15px!important;
+    color:var(--pv-text)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus{
+    border-color:rgba(217,37,46,.50)!important;
+    outline:none!important;
+  }
+
+  .topbar,
+  .polarAppHeader{
+    background:transparent!important;
+    border:0!important;
+    box-shadow:none!important;
+    padding-top:4px!important;
+  }
+
+  .titleIcon,
+  .psAlertBtn,
+  .roundSync,
+  .activityIcon{
+    background:linear-gradient(180deg,#161d27,#0a0e14)!important;
+    border:1px solid rgba(255,255,255,.09)!important;
+    border-radius:16px!important;
+    color:var(--pv-text)!important;
+    box-shadow:var(--pv-shadow-soft)!important;
+  }
+
+  .psAlertBtn:after{
+    background:var(--pv-red)!important;
+    box-shadow:0 0 0 3px rgba(217,37,46,.16)!important;
+  }
+
+  #simurgV8Nav{
+    background:#07090d!important;
+    border-color:rgba(255,255,255,.12)!important;
+    box-shadow:0 -10px 30px rgba(0,0,0,.50),inset 0 1px 0 rgba(255,255,255,.045)!important;
+  }
+
+  #simurgV8Nav button{
+    border:1px solid transparent!important;
+    color:#7f8794!important;
+    background:transparent!important;
+  }
+
+  #simurgV8Nav button.active,
+  #simurgV8Nav.ps-key-home button[data-key="home"],
+  #simurgV8Nav.ps-key-recovery button[data-key="recovery"],
+  #simurgV8Nav.ps-key-gym button[data-key="gym"],
+  #simurgV8Nav.ps-key-logger button[data-key="logger"],
+  #simurgV8Nav.ps-key-polar button[data-key="polar"],
+  #simurgV8Nav.ps-key-menu button[data-key="menu"]{
+    background:rgba(217,37,46,.13)!important;
+    border-color:rgba(217,37,46,.38)!important;
+    color:#ff4d55!important;
+    box-shadow:none!important;
+  }
+
+  #simurgV8Nav button i{
+    color:inherit!important;
+  }
+
+  #simurgV8Sheet{
+    background:linear-gradient(180deg,#111720,#070a0f)!important;
+    border-color:rgba(255,255,255,.12)!important;
+    border-radius:26px!important;
+  }
+
+  .simurgV8Grid.simurgPremiumMenuGrid button,
+  .simurgV8Grid.simurgV11MenuGrid button,
+  .simurgV8Grid button{
+    min-height:76px!important;
+    background:linear-gradient(180deg,#151b24,#0b1017)!important;
+    border-color:rgba(255,255,255,.09)!important;
+  }
+
+  .simurgV8Grid button i{
+    color:#ff4d55!important;
+  }
+
+  .dayProgram,
+  .weekStrip,
+  .v4Tabs{
+    gap:8px!important;
+  }
+
+  .dayBtn,
+  .dateBtn,
+  .polarDayChip{
+    background:linear-gradient(180deg,#121821,#080c12)!important;
+    border:1px solid var(--pv-line)!important;
+    box-shadow:none!important;
+    color:#dbe2ec!important;
+  }
+
+  .dayBtn.active,
+  .dateBtn.active,
+  .polarDayChip.active{
+    background:rgba(217,37,46,.14)!important;
+    border-color:rgba(217,37,46,.38)!important;
+    color:#fff!important;
+    box-shadow:none!important;
+  }
+
+  .setTable th,
+  .setTable td{
+    border-bottom-color:rgba(255,255,255,.065)!important;
+  }
+
+  .gymSetInputRow,
+  .watchStat,
+  .workoutContextItem,
+  .coachV8Metric,
+  .activityStatBox,
+  .weeklyMetricBox,
+  .programIntelMini,
+  .monthlyStandaloneItem{
+    background:rgba(255,255,255,.035)!important;
+    border:1px solid rgba(255,255,255,.07)!important;
+    border-radius:15px!important;
+  }
+
+  #simurgAlertPanel .psAlertSheet{
+    background:linear-gradient(180deg,#111720,#05070b)!important;
+    border-color:rgba(255,255,255,.12)!important;
+    box-shadow:0 28px 72px rgba(0,0,0,.64)!important;
+  }
+
+  #simurgAlertPanel .psAlertItem{
+    background:rgba(255,255,255,.04)!important;
+    border-color:rgba(255,255,255,.08)!important;
+    border-radius:18px!important;
+  }
+}
+</style>
+
+<!-- SIMURG OS Premium Visual System v1 refinement: darker blue accent pass + containment fixes -->
+<style id="simurgPremiumVisualSystemV1Refinement">
+@media(max-width:860px){
+  :root{
+    --pv-bg:#030713;
+    --pv-bg-deep:#01030a;
+    --pv-surface:#07101d;
+    --pv-surface-2:#0a1524;
+    --pv-surface-3:#102033;
+    --pv-line:rgba(117,158,220,.13);
+    --pv-line-strong:rgba(128,169,232,.24);
+    --pv-blue:#5f8ff7;
+    --pv-blue-2:#1e4fa8;
+    --pv-blue-soft:rgba(95,143,247,.16);
+    --pv-red:#d43b43;
+    --pv-red-dark:#8f1720;
+    --pv-green:#4ade80;
+  }
+
+  .app{
+    background:
+      radial-gradient(circle at 18% -10%,rgba(53,96,178,.22),transparent 32%),
+      radial-gradient(circle at 92% 3%,rgba(42,73,132,.14),transparent 26%),
+      linear-gradient(180deg,var(--pv-bg),var(--pv-bg-deep) 68%,#010207)!important;
+  }
+
+  .psRecoveryCard,
+  .v4Outlook,
+  .recoveryHero,
+  .gymHero,
+  .psLoggerHero,
+  .coachV8Hero,
+  .coachV11Hero{
+    background:
+      radial-gradient(circle at 14% 0%,rgba(95,143,247,.10),transparent 35%),
+      linear-gradient(180deg,rgba(10,21,36,.99),rgba(3,7,14,.99))!important;
+    border-color:var(--pv-line-strong)!important;
+  }
+
+  .psRecoveryCard,
+  .psCoachCard,
+  .psTrainingCard,
+  .psMiniCard,
+  .psPolarCard,
+  .v4Outlook,
+  .v4ScoreCard,
+  .v4Metric,
+  .v4Training,
+  .v4Mini,
+  .metricCard,
+  .polarMetricCard,
+  .trendPanel,
+  .coachInsight,
+  .group,
+  .card,
+  .panel,
+  .exerciseCard,
+  .gymHero,
+  .gymCard,
+  .gymExerciseCard,
+  .gymAddCard,
+  .activitySessionCard,
+  .dailyMiniCard,
+  .analyticsBestCard,
+  .cloudSyncCard,
+  .localStatusCard,
+  .universalImportCard,
+  .versionBadgeCard,
+  .psLoggerHero,
+  .coachV8Hero,
+  .coachV8Card,
+  .coachV11Hero,
+  .coachV11Item{
+    background:linear-gradient(180deg,rgba(9,18,31,.98),rgba(3,7,14,.99))!important;
+    border-color:var(--pv-line)!important;
+  }
+
+  .v4Metric.blue:after,
+  .psMiniLine,
+  .polarTrendBar,
+  .bar,
+  .blueLine{
+    background:linear-gradient(180deg,var(--pv-blue),var(--pv-blue-2))!important;
+  }
+
+  .btn:not(.sec),
+  .v4Outlook button,
+  .gymMiniBtn.primary,
+  .detailBtn,
+  .checkCard button{
+    background:linear-gradient(180deg,#214f9d,#0c2b67)!important;
+    border-color:rgba(95,143,247,.36)!important;
+    color:#f7fbff!important;
+    box-shadow:0 12px 26px rgba(20,60,140,.24),inset 0 1px 0 rgba(255,255,255,.10)!important;
+  }
+
+  .btn.danger,
+  .activityDeleteBtn,
+  .psStartBtn{
+    background:linear-gradient(180deg,var(--pv-red),var(--pv-red-dark))!important;
+    border-color:rgba(255,101,108,.36)!important;
+    color:#fff!important;
+    box-shadow:0 12px 26px rgba(143,23,32,.22),inset 0 1px 0 rgba(255,255,255,.10)!important;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus{
+    border-color:rgba(95,143,247,.55)!important;
+    box-shadow:0 0 0 3px rgba(95,143,247,.10)!important;
+  }
+
+  .psAlertBtn:after{
+    background:var(--pv-blue)!important;
+    box-shadow:0 0 0 3px rgba(95,143,247,.16),0 0 18px rgba(95,143,247,.35)!important;
+  }
+
+  #simurgV8Nav{
+    background:#040914!important;
+    border-color:rgba(128,169,232,.18)!important;
+    box-shadow:0 -10px 30px rgba(0,0,0,.52),inset 0 1px 0 rgba(141,174,230,.08)!important;
+  }
+
+  #simurgV8Nav button.active,
+  #simurgV8Nav.ps-key-home button[data-key="home"],
+  #simurgV8Nav.ps-key-recovery button[data-key="recovery"],
+  #simurgV8Nav.ps-key-gym button[data-key="gym"],
+  #simurgV8Nav.ps-key-logger button[data-key="logger"],
+  #simurgV8Nav.ps-key-polar button[data-key="polar"],
+  #simurgV8Nav.ps-key-menu button[data-key="menu"]{
+    background:rgba(95,143,247,.15)!important;
+    border-color:rgba(95,143,247,.42)!important;
+    color:#91b7ff!important;
+    box-shadow:none!important;
+  }
+
+  .simurgV8Grid button i{
+    color:#91b7ff!important;
+  }
+
+  .dayBtn.active,
+  .dateBtn.active,
+  .polarDayChip.active{
+    background:rgba(95,143,247,.15)!important;
+    border-color:rgba(95,143,247,.42)!important;
+    color:#f7fbff!important;
+    box-shadow:none!important;
+  }
+
+  .psSpark{
+    width:108px!important;
+    height:46px!important;
+    flex:0 0 108px!important;
+    border-radius:18px!important;
+    position:relative!important;
+    overflow:hidden!important;
+    background:
+      linear-gradient(180deg,rgba(74,222,128,.10),rgba(95,143,247,.045)),
+      rgba(3,9,16,.72)!important;
+    border:1px solid rgba(74,222,128,.14)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+  }
+
+  .psSpark:before{
+    content:""!important;
+    position:absolute!important;
+    inset:7px 8px 8px!important;
+    height:auto!important;
+    width:auto!important;
+    right:8px!important;
+    bottom:8px!important;
+    left:8px!important;
+    top:7px!important;
+    border-radius:0!important;
+    background-color:transparent!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 32'%3E%3Cpath d='M3 24 C12 21 17 15 27 16 C36 17 39 23 49 18 C58 13 60 8 70 10 C78 11 83 15 89 7' fill='none' stroke='%234ade80' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M3 24 C12 21 17 15 27 16 C36 17 39 23 49 18 C58 13 60 8 70 10 C78 11 83 15 89 7' fill='none' stroke='%23bbf7d0' stroke-width='1.1' stroke-linecap='round' stroke-linejoin='round' opacity='.8'/%3E%3C/svg%3E")!important;
+    background-repeat:no-repeat!important;
+    background-size:100% 100%!important;
+    box-shadow:none!important;
+    transform:none!important;
+    filter:drop-shadow(0 0 6px rgba(74,222,128,.28))!important;
+  }
+
+  .psSpark:after{
+    content:""!important;
+    position:absolute!important;
+    left:10px!important;
+    right:10px!important;
+    bottom:10px!important;
+    height:1px!important;
+    border-radius:999px!important;
+    background:linear-gradient(90deg,transparent,rgba(74,222,128,.28),transparent)!important;
+    opacity:.75!important;
+  }
+
+  #simurgAlertPanel,
+  #simurgAlertPanel .psAlertSheet,
+  #simurgAlertPanel .psAlertSheet *,
+  #simurgAlertItems{
+    box-sizing:border-box!important;
+    min-width:0!important;
+  }
+
+  #simurgAlertPanel .psAlertSheet{
+    background:
+      radial-gradient(circle at 18% 0%,rgba(95,143,247,.11),transparent 32%),
+      linear-gradient(180deg,#07111f,#02050b)!important;
+    border-color:rgba(128,169,232,.20)!important;
+    overflow-x:hidden!important;
+  }
+
+  #simurgAlertItems{
+    display:grid!important;
+    gap:8px!important;
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:hidden!important;
+  }
+
+  #simurgAlertPanel .psAlertScore,
+  #simurgAlertPanel .psAlertDecision,
+  #simurgAlertPanel .psAlertItem,
+  #simurgAlertPanel .psAlertItem > div{
+    min-width:0!important;
+    max-width:100%!important;
+    overflow-x:hidden!important;
+  }
+
+  #simurgAlertPanel .psAlertDecision b,
+  #simurgAlertPanel .psAlertDecision p,
+  #simurgAlertPanel .psAlertItem,
+  #simurgAlertPanel .psAlertItem b,
+  #simurgAlertPanel .psAlertItem span,
+  #simurgAlertPanel .psAlertItem p,
+  #simurgAlertPanel .psAlertItem div{
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+    word-break:normal!important;
+    line-height:1.36!important;
+  }
+
+  #workout .right,
+  #workout .panel,
+  #workout #trendBars,
+  #workout .bars{
+    overflow:visible!important;
+  }
+
+  #workout .tooltipItem:hover:after,
+  #workout .bar.tooltipItem:hover:after,
+  #workout .leg.tooltipItem:hover:after,
+  #workout .donut.tooltipItem:hover:after{
+    position:fixed!important;
+    left:50vw!important;
+    right:auto!important;
+    top:auto!important;
+    bottom:calc(var(--simurgNativeNavH,76px) + 22px + env(safe-area-inset-bottom,0px))!important;
+    transform:translateX(-50%)!important;
+    width:calc(100vw - 32px)!important;
+    max-width:330px!important;
+    min-width:0!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+    word-break:normal!important;
+    text-align:center!important;
+    padding:10px 12px!important;
+    line-height:1.32!important;
+    font-size:11.5px!important;
+    z-index:2147483600!important;
+    pointer-events:none!important;
+  }
+}
+</style>
+
+<!-- SIMURG OS Premium Visual System v1 micro-fix: Alert card breathing room + mobile-safe tooltips -->
+<style id="simurgPremiumVisualSystemV1MicroFix">
+@media(max-width:860px){
+  #simurgAlertPanel .psAlertSheet{
+    width:calc(100vw - 24px)!important;
+    max-width:520px!important;
+    padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))!important;
+    border-radius:28px!important;
+    background:
+      radial-gradient(circle at 16% 0%,rgba(95,143,247,.13),transparent 34%),
+      linear-gradient(180deg,#081423,#02050b)!important;
+    border-color:rgba(128,169,232,.22)!important;
+    box-shadow:0 28px 72px rgba(0,0,0,.66),inset 0 1px 0 rgba(255,255,255,.045)!important;
+    overflow-x:hidden!important;
+  }
+
+  #simurgAlertPanel .psAlertHead{
+    margin-bottom:14px!important;
+    min-width:0!important;
+  }
+
+  #simurgAlertItems{
+    gap:10px!important;
+    overflow-x:hidden!important;
+  }
+
+  #simurgAlertPanel .psAlertScore{
+    grid-template-columns:72px minmax(0,1fr)!important;
+    gap:13px!important;
+    align-items:center!important;
+    padding:14px!important;
+    border-radius:22px!important;
+    background:linear-gradient(180deg,rgba(13,28,48,.82),rgba(5,10,18,.86))!important;
+    border:1px solid rgba(128,169,232,.15)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.045)!important;
+    overflow:hidden!important;
+  }
+
+  #simurgAlertPanel .psAlertScoreRing{
+    width:66px!important;
+    height:66px!important;
+    min-width:66px!important;
+  }
+
+  #simurgAlertPanel .psAlertDecision{
+    min-width:0!important;
+    max-width:100%!important;
+  }
+
+  #simurgAlertPanel .psAlertDecision small{
+    display:block!important;
+    margin-bottom:6px!important;
+    color:#91b7ff!important;
+    font-size:9.5px!important;
+    line-height:1.15!important;
+    letter-spacing:.12em!important;
+    white-space:normal!important;
+    overflow-wrap:break-word!important;
+  }
+
+  #simurgAlertPanel .psAlertDecision b{
+    display:block!important;
+    margin-bottom:6px!important;
+    color:#f8fbff!important;
+    font-size:17px!important;
+    line-height:1.18!important;
+    letter-spacing:-.2px!important;
+    white-space:normal!important;
+    overflow-wrap:break-word!important;
+  }
+
+  #simurgAlertPanel .psAlertDecision p{
+    margin:0!important;
+    color:#c6d3e4!important;
+    font-size:13px!important;
+    line-height:1.5!important;
+    white-space:normal!important;
+    overflow-wrap:break-word!important;
+  }
+
+  #simurgAlertPanel .psAlertItem{
+    grid-template-columns:34px minmax(0,1fr)!important;
+    gap:12px!important;
+    align-items:start!important;
+    padding:14px!important;
+    border-radius:20px!important;
+    background:
+      linear-gradient(180deg,rgba(12,26,44,.78),rgba(5,10,18,.86))!important;
+    border:1px solid rgba(128,169,232,.14)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important;
+    overflow:hidden!important;
+    max-width:100%!important;
+  }
+
+  #simurgAlertPanel .psAlertItem:not(:has(i)){
+    display:block!important;
+  }
+
+  #simurgAlertPanel .psAlertItem i{
+    width:34px!important;
+    height:34px!important;
+    min-width:34px!important;
+    border-radius:14px!important;
+    background:rgba(95,143,247,.12)!important;
+    border:1px solid rgba(145,183,255,.12)!important;
+  }
+
+  #simurgAlertPanel .psAlertItem > div{
+    min-width:0!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+  }
+
+  #simurgAlertPanel .psAlertItem b{
+    display:block!important;
+    margin:0 0 5px!important;
+    color:#f7fbff!important;
+    font-size:13.5px!important;
+    line-height:1.24!important;
+    letter-spacing:0!important;
+    white-space:normal!important;
+    overflow-wrap:break-word!important;
+  }
+
+  #simurgAlertPanel .psAlertItem span,
+  #simurgAlertPanel .psAlertItem p,
+  #simurgAlertPanel .psAlertItem div{
+    color:#b9c7d9!important;
+    font-size:12.8px!important;
+    line-height:1.5!important;
+    white-space:normal!important;
+    overflow-wrap:break-word!important;
+    word-break:normal!important;
+  }
+
+  #simurgAlertPanel .psAlertItem.good{
+    border-color:rgba(74,222,128,.18)!important;
+    background:linear-gradient(180deg,rgba(12,36,34,.72),rgba(5,10,18,.88))!important;
+  }
+
+  #simurgAlertPanel .psAlertItem.warn{
+    border-color:rgba(240,184,75,.22)!important;
+    background:linear-gradient(180deg,rgba(41,31,14,.72),rgba(5,10,18,.88))!important;
+  }
+
+  #simurgAlertPanel .psAlertItem.risk{
+    border-color:rgba(212,59,67,.22)!important;
+    background:linear-gradient(180deg,rgba(44,16,22,.72),rgba(5,10,18,.88))!important;
+  }
+
+  #workout .tooltipItem:hover:after,
+  #workout .tooltipItem:active:after,
+  #workout .tooltipItem:focus-visible:after,
+  #workout .bar.tooltipItem:hover:after,
+  #workout .bar.tooltipItem:active:after,
+  #workout .bar.tooltipItem:focus-visible:after,
+  #workout .leg.tooltipItem:hover:after,
+  #workout .leg.tooltipItem:active:after,
+  #workout .leg.tooltipItem:focus-visible:after,
+  #workout .donut.tooltipItem:hover:after,
+  #workout .donut.tooltipItem:active:after,
+  #workout .donut.tooltipItem:focus-visible:after{
+    content:attr(data-tip)!important;
+    position:fixed!important;
+    left:max(12px, env(safe-area-inset-left,0px))!important;
+    right:max(12px, env(safe-area-inset-right,0px))!important;
+    bottom:calc(var(--simurgNativeNavH,76px) + 18px + env(safe-area-inset-bottom,0px))!important;
+    top:auto!important;
+    transform:none!important;
+    width:auto!important;
+    max-width:none!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+    padding:10px 12px!important;
+    border-radius:14px!important;
+    background:linear-gradient(180deg,#0a1626,#03070f)!important;
+    border:1px solid rgba(145,183,255,.28)!important;
+    color:#f7fbff!important;
+    box-shadow:0 18px 46px rgba(0,0,0,.54),inset 0 1px 0 rgba(255,255,255,.055)!important;
+    white-space:normal!important;
+    overflow-wrap:break-word!important;
+    word-break:normal!important;
+    text-align:center!important;
+    line-height:1.38!important;
+    font-size:12px!important;
+    max-height:min(128px,calc(100dvh - var(--simurgNativeNavH,76px) - 44px))!important;
+    overflow:hidden!important;
+    z-index:2147483600!important;
+    pointer-events:none!important;
+  }
+
+  #workout .tooltipItem:hover:before,
+  #workout .tooltipItem:active:before,
+  #workout .tooltipItem:focus-visible:before,
+  #workout .bar.tooltipItem:hover:before,
+  #workout .bar.tooltipItem:active:before,
+  #workout .bar.tooltipItem:focus-visible:before,
+  #workout .leg.tooltipItem:hover:before,
+  #workout .leg.tooltipItem:active:before,
+  #workout .leg.tooltipItem:focus-visible:before,
+  #workout .donut.tooltipItem:hover:before,
+  #workout .donut.tooltipItem:active:before,
+  #workout .donut.tooltipItem:focus-visible:before{
+    display:none!important;
+  }
+}
+</style>
+
+<!-- SIMURG OS Logger mobile trend tooltip disable: keep bars, remove popups -->
+<style id="simurgLoggerMobileTrendTooltipDisable">
+@media(max-width:860px){
+  #workout #trendBars .bar.tooltipItem,
+  #workout #trendBars .bar.tooltipItem:hover,
+  #workout #trendBars .bar.tooltipItem:active,
+  #workout #trendBars .bar.tooltipItem:focus-visible{
+    pointer-events:none!important;
+    cursor:default!important;
+    filter:none!important;
+    box-shadow:none!important;
+    outline:none!important;
+  }
+
+  #workout #trendBars .bar.tooltipItem:before,
+  #workout #trendBars .bar.tooltipItem:after,
+  #workout #trendBars .bar.tooltipItem:hover:before,
+  #workout #trendBars .bar.tooltipItem:hover:after,
+  #workout #trendBars .bar.tooltipItem:active:before,
+  #workout #trendBars .bar.tooltipItem:active:after,
+  #workout #trendBars .bar.tooltipItem:focus-visible:before,
+  #workout #trendBars .bar.tooltipItem:focus-visible:after{
+    content:none!important;
+    display:none!important;
+  }
+}
+</style>
+<script id="simurgLoggerMobileTrendTooltipDisableScript">
+(function(){
+  var MOBILE_WIDTH=860;
+  function isMobile(){return window.innerWidth<=MOBILE_WIDTH;}
+  function bars(){return document.querySelectorAll('#workout #trendBars .bar.tooltipItem');}
+  function apply(){
+    bars().forEach(function(bar){
+      if(isMobile()){
+        if(!bar.dataset.simurgTooltipDisabled){
+          if(bar.hasAttribute('data-tip')) bar.dataset.simurgOriginalTip=bar.getAttribute('data-tip')||'';
+          if(bar.hasAttribute('title')) bar.dataset.simurgOriginalTitle=bar.getAttribute('title')||'';
+          bar.dataset.simurgTooltipDisabled='1';
+        }
+        bar.removeAttribute('data-tip');
+        bar.removeAttribute('title');
+        bar.setAttribute('aria-label','Hacim trend bar');
+        bar.setAttribute('tabindex','-1');
+      }else if(bar.dataset.simurgTooltipDisabled){
+        if(bar.dataset.simurgOriginalTip) bar.setAttribute('data-tip',bar.dataset.simurgOriginalTip);
+        if(bar.dataset.simurgOriginalTitle) bar.setAttribute('title',bar.dataset.simurgOriginalTitle);
+        bar.removeAttribute('aria-label');
+        bar.removeAttribute('tabindex');
+        delete bar.dataset.simurgTooltipDisabled;
+      }
+    });
+  }
+  function ready(fn){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();}
+  ready(function(){
+    apply();
+    setTimeout(apply,300);
+    setTimeout(apply,900);
+    var trend=document.getElementById('trendBars');
+    if(trend && window.MutationObserver){
+      new MutationObserver(apply).observe(trend,{childList:true,subtree:true,attributes:true,attributeFilter:['data-tip','title']});
+    }
+  });
+  window.addEventListener('resize',function(){setTimeout(apply,80);});
+  window.simurgDisableLoggerTrendTooltip=apply;
 })();
 </script>
