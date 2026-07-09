@@ -4681,6 +4681,858 @@ if(!window.CSS){window.CSS={};}
 if(!CSS.escape){CSS.escape=function(s){return String(s).replace(/["\\]/g,'\\$&');};}
 </script>
 
+<!-- SIMURG OS Mobile Home/Recovery premium correction: WHOOP-like contained screens -->
+<style id="simurgHomeRecoveryPremiumFixStyle">
+@media(max-width:860px){
+  #home.simurgPremiumHomeV1,
+  #recovery.simurgPremiumHomeV1{
+    background:
+      radial-gradient(circle at 50% -20%,rgba(47,132,255,.13),transparent 30%),
+      linear-gradient(180deg,#121c24 0%,#071018 48%,#04070c 100%)!important;
+    color:#f8fbff!important;
+  }
+
+  .spvShell{
+    max-width:480px!important;
+    margin:0 auto!important;
+    display:grid!important;
+    gap:15px!important;
+    padding:2px 0 12px!important;
+  }
+
+  .spvTop{
+    display:grid!important;
+    grid-template-columns:42px minmax(0,1fr) 42px!important;
+    align-items:center!important;
+    gap:10px!important;
+  }
+
+  .spvLogo,
+  .spvAlertButton{
+    width:42px!important;
+    height:42px!important;
+    display:grid!important;
+    place-items:center!important;
+    border-radius:50%!important;
+    border:1px solid rgba(255,255,255,.14)!important;
+    color:#f8fbff!important;
+    background:#05070b!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06)!important;
+  }
+
+  .spvLogo{
+    background:
+      radial-gradient(circle at 50% 18%,rgba(45,212,191,.16),transparent 42%),
+      #05070b!important;
+  }
+
+  .spvLogoMark{
+    display:block!important;
+    font-size:23px!important;
+    line-height:1!important;
+    filter:drop-shadow(0 0 10px rgba(45,212,191,.20))!important;
+  }
+
+  .spvAlertButton{
+    border-radius:16px!important;
+    background:rgba(255,255,255,.045)!important;
+    font-size:17px!important;
+    font-weight:950!important;
+  }
+
+  .spvDate{
+    justify-self:center!important;
+    min-width:136px!important;
+    padding:10px 16px!important;
+    border-radius:999px!important;
+    text-align:center!important;
+    color:#f8fbff!important;
+    background:rgba(255,255,255,.075)!important;
+    border:1px solid rgba(255,255,255,.09)!important;
+    font-size:13px!important;
+    font-weight:1000!important;
+    letter-spacing:.16em!important;
+  }
+
+  .spvTitle h1{
+    margin:2px 0 4px!important;
+    color:#f8fbff!important;
+    font-size:22px!important;
+    line-height:1.08!important;
+    letter-spacing:0!important;
+    font-weight:900!important;
+  }
+
+  #home .spvTitle h1{
+    font-size:20px!important;
+    line-height:1.12!important;
+  }
+
+  .spvTitle p{
+    margin:0!important;
+    color:#8f9aa7!important;
+    font-size:12.5px!important;
+    line-height:1.35!important;
+  }
+
+  .spvTabs{
+    display:grid!important;
+    gap:0!important;
+    margin-top:0!important;
+  }
+
+  .spvTabs.homeTabs{grid-template-columns:1fr!important;}
+  .spvTabs.recoveryTabs{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+
+  .spvTabs button{
+    min-width:0!important;
+    border:0!important;
+    background:transparent!important;
+    color:#8d96a2!important;
+    padding:11px 0 13px!important;
+    border-radius:0!important;
+    font-size:12px!important;
+    font-weight:1000!important;
+    letter-spacing:.14em!important;
+    position:relative!important;
+    box-shadow:none!important;
+  }
+
+  .spvTabs button.active{color:#f8fbff!important;}
+
+  .spvTabs button.active:after{
+    content:""!important;
+    position:absolute!important;
+    left:12%!important;
+    right:12%!important;
+    bottom:4px!important;
+    height:3px!important;
+    border-radius:999px!important;
+    background:#f8fbff!important;
+  }
+
+  .spvCard,
+  .spvMetric,
+  .spvPlanCard,
+  .spvActivityCard{
+    min-width:0!important;
+    max-width:100%!important;
+    border:1px solid rgba(128,169,232,.14)!important;
+    border-radius:22px!important;
+    background:linear-gradient(180deg,rgba(18,28,38,.92),rgba(7,12,18,.98))!important;
+    box-shadow:0 18px 48px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.045)!important;
+    overflow:hidden!important;
+  }
+
+  .spvOverviewHero{
+    padding:16px 14px 14px!important;
+    background:
+      radial-gradient(circle at 50% 0%,rgba(50,168,255,.12),transparent 46%),
+      linear-gradient(180deg,rgba(18,27,36,.96),rgba(7,12,18,.99))!important;
+  }
+
+  .spvOverviewRings{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:7px!important;
+    align-items:start!important;
+  }
+
+  .spvRingUnit{
+    min-width:0!important;
+    display:grid!important;
+    justify-items:center!important;
+    gap:8px!important;
+    text-align:center!important;
+  }
+
+  .spvRing{
+    width:88px!important;
+    height:88px!important;
+    border-radius:50%!important;
+    position:relative!important;
+    display:grid!important;
+    place-items:center!important;
+    background:conic-gradient(var(--spvColor,#39a7ff) 0 var(--spvScore,0%),rgba(92,108,128,.22) var(--spvScore,0%) 100%)!important;
+    box-shadow:0 0 20px rgba(0,0,0,.22)!important;
+  }
+
+  .spvRing.main{
+    width:104px!important;
+    height:104px!important;
+  }
+
+  .spvHeroSplit .spvRing{
+    width:126px!important;
+    height:126px!important;
+  }
+
+  .spvRing:before{
+    content:""!important;
+    position:absolute!important;
+    inset:8px!important;
+    border-radius:50%!important;
+    background:#071019!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06)!important;
+  }
+
+  .spvRingInner{
+    position:relative!important;
+    display:grid!important;
+    place-items:center!important;
+    text-align:center!important;
+  }
+
+  .spvRingInner b{
+    color:#f8fbff!important;
+    font-size:22px!important;
+    line-height:.95!important;
+    letter-spacing:0!important;
+  }
+
+  .spvRing.main .spvRingInner b{font-size:27px!important;}
+  .spvHeroSplit .spvRingInner b{font-size:30px!important;}
+
+  .spvRingInner em{
+    color:#9aa4b1!important;
+    font-style:normal!important;
+    font-size:8.5px!important;
+    font-weight:950!important;
+    margin-top:4px!important;
+    letter-spacing:.08em!important;
+  }
+
+  .spvRingLabel{
+    color:#f8fbff!important;
+    font-size:10.5px!important;
+    font-weight:1000!important;
+    letter-spacing:.10em!important;
+  }
+
+  .spvRingSub{
+    max-width:100%!important;
+    color:#87919e!important;
+    font-size:10.5px!important;
+    font-weight:800!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+
+  .spvSentence{
+    margin:12px 0 0!important;
+    padding-top:12px!important;
+    border-top:1px solid rgba(255,255,255,.07)!important;
+    color:#cbd5e1!important;
+    font-size:13.5px!important;
+    line-height:1.42!important;
+    font-weight:680!important;
+    overflow-wrap:break-word!important;
+  }
+
+  .spvCompactStack{
+    display:grid!important;
+    gap:10px!important;
+  }
+
+  .spvPlanCard,
+  .spvActivityCard{
+    padding:14px!important;
+  }
+
+  .spvPlanRow,
+  .spvActivityRow{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:12px!important;
+    align-items:center!important;
+  }
+
+  .spvPlanCard small,
+  .spvActivityCard small,
+  .spvMetric small,
+  .spvCardHead small{
+    display:block!important;
+    color:#8e98a6!important;
+    font-size:9.5px!important;
+    font-weight:1000!important;
+    letter-spacing:.14em!important;
+    text-transform:uppercase!important;
+  }
+
+  .spvPlanCard b,
+  .spvActivityCard b,
+  .spvCardHead b{
+    display:block!important;
+    color:#f8fbff!important;
+    font-size:15px!important;
+    line-height:1.18!important;
+    overflow-wrap:break-word!important;
+  }
+
+  .spvChip{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    max-width:100%!important;
+    border-radius:999px!important;
+    padding:6px 9px!important;
+    border:1px solid rgba(57,167,255,.25)!important;
+    background:rgba(57,167,255,.10)!important;
+    color:#93c5fd!important;
+    font-size:10px!important;
+    font-weight:1000!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+
+  .spvChip.good{color:#86efac!important;border-color:rgba(34,197,94,.30)!important;background:rgba(34,197,94,.12)!important;}
+  .spvChip.caution{color:#facc15!important;border-color:rgba(250,204,21,.30)!important;background:rgba(250,204,21,.11)!important;}
+  .spvChip.risk{color:#fca5a5!important;border-color:rgba(239,68,68,.30)!important;background:rgba(239,68,68,.11)!important;}
+  .spvChip.missing{color:#cbd5e1!important;border-color:rgba(148,163,184,.22)!important;background:rgba(148,163,184,.10)!important;}
+
+  .spvActivityStats{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:8px!important;
+    margin-top:12px!important;
+  }
+
+  .spvActivityStats div{
+    min-width:0!important;
+    color:#f8fbff!important;
+    font-size:13px!important;
+    font-weight:950!important;
+  }
+
+  .spvActivityStats span{
+    display:block!important;
+    color:#8e98a6!important;
+    font-size:9.5px!important;
+    margin-top:2px!important;
+  }
+
+  .spvActivityTitle{
+    display:flex!important;
+    align-items:center!important;
+    gap:9px!important;
+    min-width:0!important;
+  }
+
+  .spvActivityEmoji{
+    width:32px!important;
+    height:32px!important;
+    border-radius:13px!important;
+    display:grid!important;
+    place-items:center!important;
+    flex:0 0 auto!important;
+    background:rgba(57,167,255,.11)!important;
+    border:1px solid rgba(128,169,232,.16)!important;
+    font-size:17px!important;
+  }
+
+  .spvHeroSplit{
+    display:grid!important;
+    grid-template-columns:126px minmax(0,1fr)!important;
+    gap:16px!important;
+    align-items:center!important;
+  }
+
+  .spvHeroCopy h2{
+    margin:0 0 8px!important;
+    color:#f8fbff!important;
+    font-size:22px!important;
+    line-height:1.08!important;
+    letter-spacing:0!important;
+  }
+
+  .spvHeroCopy p{
+    margin:0 0 10px!important;
+    color:#aab4c2!important;
+    font-size:13px!important;
+    line-height:1.42!important;
+    overflow-wrap:break-word!important;
+  }
+
+  .spvSleepHero{
+    padding:16px!important;
+    display:grid!important;
+    gap:14px!important;
+    background:
+      radial-gradient(circle at 16% 0%,rgba(143,184,209,.15),transparent 38%),
+      linear-gradient(180deg,rgba(18,30,42,.94),rgba(7,12,18,.99))!important;
+  }
+
+  .spvMiniGrid{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+
+  .spvMetric{
+    padding:12px!important;
+    border-radius:18px!important;
+    background:linear-gradient(180deg,rgba(20,27,35,.92),rgba(9,13,19,.98))!important;
+  }
+
+  .spvMetric b{
+    display:block!important;
+    color:#f8fbff!important;
+    font-size:19px!important;
+    line-height:1!important;
+    margin:7px 0!important;
+    letter-spacing:0!important;
+    overflow-wrap:break-word!important;
+  }
+
+  .spvMetric span{
+    display:block!important;
+    color:#8f9aa7!important;
+    font-size:10.5px!important;
+    line-height:1.25!important;
+  }
+
+  .spvBar{
+    height:6px!important;
+    border-radius:999px!important;
+    background:rgba(255,255,255,.11)!important;
+    overflow:hidden!important;
+    margin-top:9px!important;
+  }
+
+  .spvBar i{
+    display:block!important;
+    width:var(--spvBar,0%)!important;
+    height:100%!important;
+    border-radius:999px!important;
+    background:linear-gradient(90deg,var(--spvColor,#39a7ff),rgba(255,255,255,.48))!important;
+  }
+
+  .spvStages{
+    padding:14px!important;
+  }
+
+  .spvCardHead{
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    margin-bottom:12px!important;
+  }
+
+  .spvStageStack{
+    display:flex!important;
+    height:16px!important;
+    border-radius:999px!important;
+    overflow:hidden!important;
+    background:rgba(255,255,255,.12)!important;
+    margin:12px 0!important;
+  }
+
+  .spvStageStack span{min-width:3px!important;}
+
+  .spvStageLegend{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+
+  .spvStageLegend div{
+    display:flex!important;
+    justify-content:space-between!important;
+    align-items:center!important;
+    gap:7px!important;
+    min-width:0!important;
+    color:#cbd5e1!important;
+    font-size:11px!important;
+  }
+
+  .spvStageLegend i{
+    width:8px!important;
+    height:8px!important;
+    border-radius:3px!important;
+    flex:0 0 auto!important;
+  }
+
+  .spvStageLegend span{
+    min-width:0!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+
+  .spvStageLegend b{
+    color:#f8fbff!important;
+    font-size:11px!important;
+    white-space:nowrap!important;
+  }
+
+  .spvHiddenLegacy{display:none!important;}
+
+  #simurgAlertPanel .polarAlertCardV1{
+    display:block!important;
+    padding:13px!important;
+    border-radius:19px!important;
+    border-color:rgba(128,169,232,.18)!important;
+    background:radial-gradient(circle at 0% 0%,rgba(47,132,255,.12),transparent 38%),linear-gradient(180deg,rgba(8,20,33,.98),rgba(3,9,18,.99))!important;
+  }
+
+  #simurgAlertPanel .polarAlertCardV1.controlled{
+    border-color:rgba(250,204,21,.26)!important;
+    background:radial-gradient(circle at 0% 0%,rgba(250,204,21,.10),transparent 36%),linear-gradient(180deg,rgba(8,20,33,.98),rgba(3,9,18,.99))!important;
+  }
+}
+</style>
+<script id="simurgHomeRecoveryPremiumFixScript">
+(function(){
+  var TABS_BY_SCREEN={home:['OVERVIEW'],recovery:['RECOVERY','SLEEP','LOAD']};
+  var state={home:'OVERVIEW',recovery:'RECOVERY'};
+
+  function ready(fn){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();}
+  function isMobile(){return window.innerWidth<=860;}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function dataRoot(){try{return DATA||window.simurgData||{};}catch(e){return window.simurgData||{};}}
+  function num(v){
+    if(v==null || v==='') return null;
+    if(typeof v==='number' && Number.isFinite(v)) return v;
+    var cleaned=String(v).replace(',','.').replace(/[^\d.-]/g,'');
+    if(!cleaned) return null;
+    var n=Number(cleaned);
+    return Number.isFinite(n)?n:null;
+  }
+  function clamp(v,min,max){v=Number(v); if(!Number.isFinite(v)) return min; return Math.max(min,Math.min(max,v));}
+  function text(id){var el=document.getElementById(id); return el?(el.textContent||'').trim():'';}
+  function selectedDate(){try{return window.selectedDate || new Date().toISOString().slice(0,10);}catch(e){return new Date().toISOString().slice(0,10);}}
+  function latestPolar(){
+    var data=dataRoot(), b=data.polarBridge||{};
+    if(b.latest && typeof b.latest==='object') return b.latest;
+    var daily=b.daily||{};
+    var dates=Object.keys(daily).filter(Boolean).sort();
+    return dates.length?daily[dates[dates.length-1]]:null;
+  }
+  function legacyRecovery(){
+    var data=dataRoot(), date=selectedDate(), rec=(data.recoveryEntries&&data.recoveryEntries[date])||{};
+    return rec&&typeof rec==='object'?rec:{};
+  }
+  function sleepMinutesFromText(raw){
+    raw=String(raw||'').toLowerCase();
+    var h=raw.match(/(\d+)\s*(?:s|h|hour|hours)/);
+    var m=raw.match(/(\d+)\s*(?:dk|m|min|minute)/);
+    if(h || m) return (h?Number(h[1])*60:0)+(m?Number(m[1]):0);
+    var colon=raw.match(/(\d+):(\d+)/);
+    return colon?Number(colon[1])*60+Number(colon[2]):null;
+  }
+  function fmtSleep(min){
+    if(min==null) return '-';
+    var h=Math.floor(min/60), m=Math.round(min%60);
+    return h+'h '+String(m).padStart(2,'0')+'m';
+  }
+  function pct(v){return v==null?'-':Math.round(v)+'%';}
+  function metric(v,unit){return v==null?'-':String(v)+(unit||'');}
+  function currentProgramLabel(){
+    try{
+      var p=window.program||[], date=selectedDate(), ws=window.weekStart;
+      var idx=0;
+      if(ws) idx=Math.max(0,Math.min(6,Math.round((new Date(date)-new Date(ws))/86400000)));
+      var item=p[idx]||p[0];
+      if(!item) return text('psTodayTraining') || 'Bugunun Plani';
+      return window.getProgramType?window.getProgramType(item[0]):(item[1]||item[0]||'Bugunun Plani');
+    }catch(e){return text('psTodayTraining') || 'Bugunun Plani';}
+  }
+  function workoutFor(date){
+    var data=dataRoot(), rows=(data.workouts||[]).filter(function(w){return String(w.date||'')===String(date);});
+    var sets=rows.length, volume=rows.reduce(function(a,w){return a+(num(w.weight)||0)*(num(w.reps)||0);},0);
+    return {sets:sets,volume:Math.round(volume)};
+  }
+  function latestWorkout(entry){
+    if(entry && Array.isArray(entry.workouts) && entry.workouts.length) return entry.workouts[0];
+    var data=dataRoot(), rows=(data.appleWatch||[]).slice().filter(function(x){return x&&x.date;}).sort(function(a,b){return String(a.date).localeCompare(String(b.date));});
+    if(rows.length){
+      var a=rows[rows.length-1];
+      return {type:a.activityType||a.type||'Activity',duration:a.duration||a.durationText||'',activeEnergy:num(a.activeCal||a.activeEnergy||a.activeEnergyKcal),avgHr:num(a.avgHR||a.avgHr),maxHr:num(a.maxHR||a.maxHr),rpe:num(a.rpe)};
+    }
+    return null;
+  }
+  function activityLoadLevel(raw,cardio){
+    var s=String(raw||'').toLowerCase();
+    if(/high|heavy|very|yuksek|yüksek/.test(s) || (cardio!=null && cardio>=80)) return 'High';
+    if(/moderate|medium|orta/.test(s) || (cardio!=null && cardio>=55)) return 'Moderate';
+    if(raw || cardio!=null) return 'Low';
+    return 'Waiting';
+  }
+  function model(){
+    var entry=latestPolar(), rec=legacyRecovery(), date=selectedDate(), gym=workoutFor(date);
+    var sleepMin=num(entry&&entry.sleepDurationMinutes);
+    if(sleepMin==null) sleepMin=num(rec.sleepDurationMinutes||rec.sleepMinutes);
+    if(sleepMin==null) sleepMin=sleepMinutesFromText(text('homeSleep'));
+    var sleepText=(entry&&entry.sleepDurationText)||fmtSleep(sleepMin);
+    var sleepScore=num(entry&&entry.sleepScore);
+    if(sleepScore==null) sleepScore=num(rec.sleepScore);
+    if(sleepScore==null && sleepMin!=null) sleepScore=clamp(Math.round((sleepMin/450)*100),0,100);
+    var nightly=num(entry&&entry.nightlyRecharge);
+    if(nightly==null) nightly=num(rec.nightlyRecharge);
+    if(nightly==null) nightly=num(text('homeNightly'));
+    var hrv=num(entry&&entry.hrvMs);
+    if(hrv==null) hrv=num(rec.hrvMs||rec.hrv);
+    if(hrv==null) hrv=num(text('homeHrv'));
+    var rhr=num(entry&&entry.restingHr);
+    if(rhr==null) rhr=num(rec.restingHr||rec.restingHR||rec.rhr);
+    if(rhr==null) rhr=num(text('homeRhr'));
+    var sleepHr=num(entry&&entry.sleepHr);
+    if(sleepHr==null) sleepHr=num(rec.sleepHr||rec.sleepHR||rec.sleepAverageHeartRate);
+    var resp=num(entry&&entry.respiratoryRate);
+    var cardio=num(entry&&entry.cardioLoad);
+    var activeEnergy=num(entry&&entry.activeEnergyKcal);
+    var loadText=entry&&entry.activityLoad;
+    var loadScore=cardio;
+    if(loadScore==null) loadScore=num(rec.activityLoad);
+    if(loadScore==null) loadScore=num(text('homeLoadPct'));
+    if(loadScore==null && gym.sets) loadScore=clamp(gym.sets*4,0,100);
+    if(loadScore==null && loadText){
+      var inferred=activityLoadLevel(loadText,null);
+      loadScore=inferred==='High'?85:inferred==='Moderate'?55:30;
+    }
+    var recovery=nightly;
+    if(recovery==null) recovery=num(text('homeReadinessScore'));
+    if(recovery==null && sleepScore!=null && hrv!=null && rhr!=null){
+      recovery=clamp(Math.round((sleepScore*.35)+(clamp(hrv,35,85)/85*100*.35)+(clamp(70-rhr,0,35)/35*100*.30)),0,100);
+    }
+    var workout=latestWorkout(entry);
+    var loadLevel=activityLoadLevel(loadText,loadScore);
+    var signal='WAITING';
+    if(recovery!=null || sleepScore!=null || hrv!=null || rhr!=null){
+      signal='READY';
+      if((sleepMin!=null && sleepMin<360) || (hrv!=null && hrv<45) || (rhr!=null && rhr>60) || loadLevel==='High' || loadLevel==='Moderate') signal='CONTROLLED';
+      if(recovery!=null && recovery<52) signal='CONTROLLED';
+    }
+    return {
+      entry:entry,date:date,program:currentProgramLabel(),
+      sleepMin:sleepMin,sleepText:sleepText,sleepScore:sleepScore,sleepTargetMin:450,
+      recovery:recovery,nightly:nightly,hrv:hrv,rhr:rhr,sleepHr:sleepHr,resp:resp,
+      loadScore:loadScore,loadLevel:loadLevel,cardio:cardio,activeEnergy:activeEnergy,
+      workout:workout,gym:gym,signal:signal,stages:entry&&entry.sleepStages
+    };
+  }
+  function colorForScore(score,kind,signal){
+    if(score==null) return '#64748b';
+    if(kind==='sleep') return score>=70?'#8fb8d1':score>=55?'#5fa7d8':'#facc15';
+    if(kind==='load') return score>=80?'#f59e0b':score>=55?'#facc15':'#39a7ff';
+    if(score<45) return '#ef4444';
+    return signal==='CONTROLLED' || score<70?'#facc15':'#25f24f';
+  }
+  function chipTone(signal){
+    if(signal==='READY' || signal==='NORMAL') return 'good';
+    if(signal==='CONTROLLED' || signal==='REDUCED' || signal==='Moderate' || signal==='High') return 'caution';
+    return 'missing';
+  }
+  function ring(label,value,kind,main,sub,signal){
+    var score=value==null?0:clamp(Math.round(value),0,100);
+    var display=value==null?'-':(kind==='load'?Math.round(value):Math.round(value)+'%');
+    var color=colorForScore(value,kind,signal);
+    return '<div class="spvRingUnit"><div class="spvRing '+(main?'main':'')+'" style="--spvScore:'+score+'%;--spvColor:'+color+'"><div class="spvRingInner"><b>'+esc(display)+'</b><em>'+esc(label)+'</em></div></div><div class="spvRingLabel">'+esc(label)+'</div><div class="spvRingSub">'+esc(sub||'')+'</div></div>';
+  }
+  function tabsFor(screen){return TABS_BY_SCREEN[screen]||TABS_BY_SCREEN.home;}
+  function tabs(screen){
+    var list=tabsFor(screen);
+    if(list.indexOf(state[screen])<0) state[screen]=list[0];
+    return '<div class="spvTabs '+(screen==='recovery'?'recoveryTabs':'homeTabs')+'">'+list.map(function(t){return '<button class="'+(state[screen]===t?'active':'')+'" onclick="simurgPremiumLocalTab(\''+screen+'\',\''+t+'\')">'+t+'</button>';}).join('')+'</div>';
+  }
+  function simurgLogoMark(){
+    var icons=['🕊️','🔥','💠','⚡','🏋️','🌙'];
+    var idx=Math.floor(Date.now()/60000)%icons.length;
+    return icons[idx];
+  }
+  function header(screen){
+    var title=screen==='home'?'Muhittin Güzel Bir Gün Diler 😊':'Recovery Dashboard';
+    var sub=screen==='home'?'Günlük hazırlık komuta merkezi':'Recovery ve hazırlık sinyali';
+    return '<div class="spvTop"><div class="spvLogo" aria-hidden="true"><span class="spvLogoMark">'+esc(simurgLogoMark())+'</span></div><div class="spvDate">TODAY</div><button class="spvAlertButton" onclick="simurgOpenAlert&&simurgOpenAlert()" aria-label="Simurg Alert">🔔</button></div>'
+      +'<div class="spvTitle"><h1>'+esc(title)+'</h1><p>'+esc(sub)+'</p></div>'+tabs(screen);
+  }
+  function sentence(m){
+    if(m.signal==='READY') return 'Polar signal good: sleep and HRV support today’s plan.';
+    if(m.signal==='CONTROLLED') return 'Polar signal controlled: keep today’s program, but avoid aggressive progression.';
+    return 'Polar Bridge veya recovery verisi bekleniyor.';
+  }
+  function sleepSentence(m){
+    if(m.sleepMin==null) return 'Uyku verisi bekleniyor.';
+    return m.sleepMin>=420?'Uyku süresi planı destekliyor.':'Uyku sınırlı; agresif progresyon yapma.';
+  }
+  function recoverySentence(m){
+    if(m.hrv==null && m.rhr==null && m.nightly==null) return 'Recovery verisi bekleniyor.';
+    if(m.signal==='READY') return 'HRV ve dinlenik nabız kontrollü aralıkta.';
+    return 'Recovery sinyali kontrollü; ilk setleri sakin başlat.';
+  }
+  function loadSentence(m){
+    if(m.loadLevel==='Waiting') return 'Load verisi bekleniyor.';
+    if(m.loadLevel==='Moderate' || m.loadLevel==='High') return 'Ek yük orta seviyede; ilk setlere kontrollü başla.';
+    return 'Load normal; programı sakin biçimde koru.';
+  }
+  function metricCard(label,value,sub,score,color){
+    return '<div class="spvMetric" style="--spvBar:'+clamp(score||0,0,100)+'%;--spvColor:'+esc(color||'#39a7ff')+'"><small>'+esc(label)+'</small><b>'+esc(value==null||value===''?'-':value)+'</b><span>'+esc(sub||'')+'</span><div class="spvBar"><i></i></div></div>';
+  }
+  function activityIcon(type){
+    var t=String(type||'').toLowerCase();
+    if(t.indexOf('badminton')>=0) return '🏸';
+    if(t.indexOf('tennis')>=0 || t.indexOf('tenis')>=0) return '🎾';
+    if(t.indexOf('football')>=0 || t.indexOf('soccer')>=0 || t.indexOf('futbol')>=0) return '⚽';
+    if(t.indexOf('swim')>=0 || t.indexOf('yüz')>=0 || t.indexOf('yuz')>=0) return '🏊';
+    if(t.indexOf('walk')>=0 || t.indexOf('yürü')>=0 || t.indexOf('yuru')>=0) return '🚶';
+    if(t.indexOf('run')>=0 || t.indexOf('koş')>=0 || t.indexOf('kos')>=0) return '🏃';
+    if(t.indexOf('cycl')>=0 || t.indexOf('bike')>=0 || t.indexOf('bisiklet')>=0) return '🚴';
+    if(t.indexOf('fitness')>=0 || t.indexOf('gym')>=0 || t.indexOf('workout')>=0 || t.indexOf('strength')>=0) return '🏋️';
+    return '🔥';
+  }
+  function planDisplay(label){
+    var text=String(label||'').trim();
+    if(/^bug[uü]n[uü]n plan[ıi]$/i.test(text) || /^bugunun plani$/i.test(text)) return '';
+    return text;
+  }
+  function activityCard(m){
+    var w=m.workout;
+    if(!w) return '';
+    return '<div class="spvActivityCard"><div class="spvActivityRow"><div class="spvActivityTitle"><span class="spvActivityEmoji" aria-hidden="true">'+esc(activityIcon(w.type))+'</span><div><small>Latest Activity</small><b>'+esc(w.type||'Activity')+'</b></div></div><span class="spvChip '+(m.loadLevel==='Moderate'||m.loadLevel==='High'?'caution':'')+'">'+esc(w.duration||m.loadLevel)+'</span></div>'
+      +'<div class="spvActivityStats"><div>'+esc(metric(w.activeEnergy,' kcal'))+'<span>active</span></div><div>'+esc(metric(w.avgHr,' avg'))+'<span>HR</span></div><div>'+esc(metric(w.maxHr,' max'))+'<span>HR</span></div><div>'+esc(w.rpe==null?'-':w.rpe)+'<span>RPE</span></div></div></div>';
+  }
+  function overviewHome(m){
+    var planChip=m.signal==='WAITING'?'WAITING':(m.signal==='CONTROLLED'?'CONTROLLED':'READY');
+    var plan=planDisplay(m.program);
+    return '<div class="spvCard spvOverviewHero"><div class="spvOverviewRings">'
+      +ring('SLEEP',m.sleepScore,'sleep',false,m.sleepText||'waiting',m.signal)
+      +ring('RECOVERY',m.recovery,'recovery',true,m.signal,m.signal)
+      +ring('LOAD',m.loadScore,'load',false,m.loadLevel,m.signal)
+      +'</div><p id="homeCoachNote" class="spvSentence">'+esc(sentence(m))+'</p></div>'
+      +'<div class="spvCompactStack">'
+      +'<div class="spvPlanCard"><div class="spvPlanRow"><div><small>Today’s Plan</small>'+(plan?'<b>'+esc(plan)+'</b>':'')+'</div><span class="spvChip '+chipTone(m.signal)+'">'+esc(planChip)+'</span></div></div>'
+      +activityCard(m)
+      +'</div>';
+  }
+  function overviewRecovery(m){
+    return '<div class="spvCard" style="padding:16px!important"><div class="spvHeroSplit">'
+      +ring('RECOVERY',m.recovery,'recovery',true,m.signal,m.signal)
+      +'<div class="spvHeroCopy"><h2>'+esc(m.signal==='READY'?'Recovery iyi':m.signal==='CONTROLLED'?'Kontrollü gün':'Waiting')+'</h2><p>'+esc(recoverySentence(m))+'</p></div>'
+      +'</div></div><div class="spvMiniGrid">'
+      +metricCard('Nightly',pct(m.nightly||m.recovery),'Recharge',m.nightly||m.recovery,'#25f24f')
+      +metricCard('HRV',metric(m.hrv,' ms'),'Recovery marker',m.hrv==null?0:clamp(m.hrv/80*100,0,100),'#39a7ff')
+      +metricCard('RHR',metric(m.rhr,' bpm'),'Resting HR',m.rhr==null?0:clamp((75-m.rhr)/30*100,0,100),'#25f24f')
+      +'</div>';
+  }
+  function stages(m){
+    var s=m.stages;
+    if(!s) return '';
+    var rows=[['Deep',s.deepMinutes,'#4776ff'],['REM',s.remMinutes,'#7657d6'],['Light',s.lightMinutes,'#2f9bff'],['Awake',s.awakeMinutes,'#f87171']].filter(function(x){return x[1]!=null;});
+    var total=rows.reduce(function(a,x){return a+(num(x[1])||0);},0);
+    if(!total) return '';
+    return '<div class="spvCard spvStages"><div class="spvCardHead"><div><small>Sleep Stages</small><b>'+esc(m.sleepText||fmtSleep(total))+'</b></div></div>'
+      +'<div class="spvStageStack">'+rows.map(function(x){return '<span style="width:'+clamp((x[1]/total)*100,1,100)+'%;background:'+esc(x[2])+'"></span>';}).join('')+'</div>'
+      +'<div class="spvStageLegend">'+rows.map(function(x){var p=Math.round((x[1]/total)*100);return '<div><span><i style="background:'+esc(x[2])+'"></i>'+esc(x[0])+'</span><b>'+esc(fmtSleep(x[1])+' ('+p+'%)')+'</b></div>';}).join('')+'</div></div>';
+  }
+  function sleepContent(m){
+    return '<div class="spvCard spvSleepHero"><div class="spvHeroSplit">'
+      +ring('SLEEP',m.sleepScore,'sleep',true,m.sleepText||'waiting',m.signal)
+      +'<div class="spvHeroCopy"><h2>'+esc(pct(m.sleepScore))+'</h2><p>'+esc(sleepSentence(m))+'</p></div></div>'
+      +'<div class="spvMiniGrid">'
+      +metricCard('Duration',m.sleepText||fmtSleep(m.sleepMin),'actual sleep',m.sleepMin==null?0:clamp(m.sleepMin/480*100,0,100),'#8fb8d1')
+      +metricCard('Needed',fmtSleep(m.sleepTargetMin),'target',100,'#19e99f')
+      +metricCard('Score',pct(m.sleepScore),'sleep quality',m.sleepScore,'#8fb8d1')
+      +'</div></div>'+stages(m);
+  }
+  function recoveryContent(m){
+    return '<div class="spvCard" style="padding:16px!important"><div class="spvHeroSplit">'
+      +ring('RECOVERY',m.recovery,'recovery',true,m.signal,m.signal)
+      +'<div class="spvHeroCopy"><h2>'+esc(pct(m.nightly||m.recovery))+'</h2><p>'+esc(recoverySentence(m))+'</p><span class="spvChip '+chipTone(m.signal)+'">'+esc(m.signal)+'</span></div></div></div>'
+      +'<div class="spvMiniGrid">'
+      +metricCard('Nightly',pct(m.nightly),'Recharge',m.nightly,'#25f24f')
+      +metricCard('HRV',metric(m.hrv,' ms'),'Normal range',m.hrv==null?0:clamp(m.hrv/80*100,0,100),'#39a7ff')
+      +metricCard('RHR',metric(m.rhr,' bpm'),'Resting HR',m.rhr==null?0:clamp((75-m.rhr)/30*100,0,100),'#25f24f')
+      +metricCard('Sleep HR',metric(m.sleepHr,' bpm'),'Sleep average',m.sleepHr==null?0:clamp((75-m.sleepHr)/30*100,0,100),'#8fb8d1')
+      +metricCard('Resp Rate',metric(m.resp,' rpm'),'Respiratory',m.resp==null?0:70,'#39a7ff')
+      +'</div>';
+  }
+  function loadContent(m){
+    var aggression=m.signal==='WAITING'?'WAITING':(m.signal==='CONTROLLED'?'REDUCED':'NORMAL');
+    return '<div class="spvCard" style="padding:16px!important"><div class="spvHeroSplit">'
+      +ring('LOAD',m.loadScore,'load',true,m.loadLevel,m.signal)
+      +'<div class="spvHeroCopy"><h2>'+esc(m.loadLevel)+'</h2><p>'+esc(loadSentence(m))+'</p><span class="spvChip '+chipTone(aggression)+'">'+esc(aggression)+'</span></div></div></div>'
+      +'<div class="spvMiniGrid">'
+      +metricCard('Activity Load',m.loadLevel,m.cardio==null?'cardio waiting':'cardio '+m.cardio+'/100',m.cardio==null?m.loadScore:m.cardio,colorForScore(m.loadScore,'load',m.signal))
+      +metricCard('Active Energy',metric(m.activeEnergy,' kcal'),'daily active',m.activeEnergy==null?0:clamp(m.activeEnergy/600*100,0,100),'#39a7ff')
+      +metricCard('RPE',m.workout&&m.workout.rpe!=null?m.workout.rpe:'-','latest workout',m.workout&&m.workout.rpe!=null?clamp(m.workout.rpe*10,0,100):0,'#facc15')
+      +'</div>'+activityCard(m);
+  }
+  function content(screen,m){
+    var tab=state[screen];
+    if(screen==='home'){
+      return overviewHome(m);
+    }
+    if(tab==='SLEEP') return sleepContent(m);
+    if(tab==='LOAD') return loadContent(m);
+    if(tab==='RECOVERY') return recoveryContent(m);
+    return recoveryContent(m);
+  }
+  function legacyHidden(screen,m){
+    if(screen==='recovery'){
+      return '<div class="spvHiddenLegacy"><span id="recoveryScore">'+esc(m.recovery==null?'':Math.round(m.recovery))+'</span><span id="recoveryStatus">'+esc(m.signal)+'</span><span id="recoveryCoach">'+esc(recoverySentence(m))+'</span></div>';
+    }
+    return '<div class="spvHiddenLegacy"><span id="homeReadinessScore">'+esc(m.recovery==null?'':Math.round(m.recovery))+'</span><span id="homeReadinessLabel">'+esc(m.signal)+'</span><span id="homeNightly">'+esc(m.nightly==null?'':Math.round(m.nightly))+'</span><span id="homeSleep">'+esc(m.sleepText||fmtSleep(m.sleepMin))+'</span><span id="homeHrv">'+esc(m.hrv==null?'':m.hrv)+'</span><span id="homeRhr">'+esc(m.rhr==null?'':m.rhr)+'</span><span id="homeLoadPct">'+esc(m.loadScore==null?'':Math.round(m.loadScore)+'%')+'</span><span id="homeLoadStatus">'+esc(m.loadLevel)+'</span></div>';
+  }
+  function renderScreen(screen){
+    if(!isMobile()) return;
+    var section=document.getElementById(screen);
+    if(!section) return;
+    var m=model();
+    section.classList.add('simurgPremiumHomeV1');
+    section.innerHTML='<div class="spvShell">'+header(screen)+content(screen,m)+legacyHidden(screen,m)+'</div>';
+  }
+  function renderAll(){renderScreen('home');renderScreen('recovery');}
+
+  window.simurgPremiumLocalTab=function(screen,tab){
+    if(screen!=='home' && screen!=='recovery') return;
+    if(tabsFor(screen).indexOf(tab)<0) return;
+    state[screen]=tab;
+    renderScreen(screen);
+  };
+
+  function installHooks(){
+    var oldRender=window.render;
+    if(typeof oldRender==='function' && !oldRender.__simurgPremiumHomeFix){
+      window.render=function(){
+        var result=oldRender.apply(this,arguments);
+        setTimeout(renderAll,120);
+        return result;
+      };
+      window.render.__simurgPremiumHomeFix=true;
+    }
+    var oldGo=window.simurgV8Go;
+    if(typeof oldGo==='function' && !oldGo.__simurgPremiumHomeFix){
+      window.simurgV8Go=function(id,key){
+        var result=oldGo.apply(this,arguments);
+        if(id==='home' || id==='recovery') setTimeout(function(){renderScreen(id);},140);
+        return result;
+      };
+      window.simurgV8Go.__simurgPremiumHomeFix=true;
+    }
+    var oldReceive=window.simurgReceivePolarBridge;
+    if(typeof oldReceive==='function' && !oldReceive.__simurgPremiumHomeFix){
+      window.simurgReceivePolarBridge=function(payload){
+        var result=oldReceive.apply(this,arguments);
+        setTimeout(renderAll,90);
+        return result;
+      };
+      window.simurgReceivePolarBridge.__simurgPremiumHomeFix=true;
+    }
+  }
+
+  window.simurgPremiumHomeRender=renderAll;
+  ready(function(){
+    installHooks();
+    renderAll();
+    setTimeout(function(){installHooks();renderAll();},450);
+    setTimeout(function(){installHooks();renderAll();},1300);
+  });
+  window.addEventListener('resize',function(){setTimeout(function(){installHooks();renderAll();},120);});
+})();
+</script>
+
 
 
 <style>
@@ -5174,7 +6026,7 @@ body{background:#050607!important;}
     <div class="title">
       <div class="titleIcon">📱</div>
       <div>
-        <h1>Gym Mode</h1>
+        <h1>🏋️ Gym Mode</h1>
         <div class="sub">Fast logging view for the selected training day.</div>
       </div>
     </div>
@@ -14425,16 +15277,18 @@ m Shell V4: Logger information architecture fix -->
 	    line-height:1.2!important;
 	  }
 
-	  .polarAlertCardV1{
-	    align-items:flex-start!important;
-	    gap:10px!important;
-	    border-color:rgba(34,197,94,.24)!important;
-	    background:radial-gradient(circle at 0% 0%,rgba(34,197,94,.10),transparent 38%),linear-gradient(180deg,rgba(8,20,33,.98),rgba(3,9,18,.99))!important;
+	  #simurgAlertPanel .polarAlertCardV1{
+	    display:block!important;
+	    padding:13px!important;
+	    border-radius:19px!important;
+	    border-color:rgba(128,169,232,.18)!important;
+	    background:radial-gradient(circle at 0% 0%,rgba(47,132,255,.12),transparent 38%),linear-gradient(180deg,rgba(8,20,33,.98),rgba(3,9,18,.99))!important;
+	    box-shadow:inset 0 1px 0 rgba(255,255,255,.045)!important;
 	  }
 
-	  .polarAlertCardV1.controlled{
-	    border-color:rgba(250,204,21,.28)!important;
-	    background:radial-gradient(circle at 0% 0%,rgba(250,204,21,.10),transparent 38%),linear-gradient(180deg,rgba(8,20,33,.98),rgba(3,9,18,.99))!important;
+	  #simurgAlertPanel .polarAlertCardV1.controlled{
+	    border-color:rgba(250,204,21,.26)!important;
+	    background:radial-gradient(circle at 0% 0%,rgba(250,204,21,.10),transparent 36%),linear-gradient(180deg,rgba(8,20,33,.98),rgba(3,9,18,.99))!important;
 	  }
 
 	  .polarAlertBodyV1{
@@ -14447,7 +15301,7 @@ m Shell V4: Logger information architecture fix -->
 	    justify-content:space-between!important;
 	    align-items:center!important;
 	    gap:8px!important;
-	    margin-bottom:6px!important;
+	    margin-bottom:7px!important;
 	  }
 
 	  .polarAlertTopV1 b{
@@ -14459,13 +15313,14 @@ m Shell V4: Logger information architecture fix -->
 	  .polarAlertNoteV1{
 	    display:block!important;
 	    color:#cbd5e1!important;
-	    font-size:12px!important;
-	    line-height:1.4!important;
-	    overflow-wrap:anywhere!important;
+	    font-size:12.2px!important;
+	    line-height:1.45!important;
+	    overflow-wrap:break-word!important;
+	    word-break:normal!important;
 	  }
 
 	  .polarAlertNoteV1{
-	    margin-top:7px!important;
+	    margin-top:8px!important;
 	    color:#facc15!important;
 	  }
 	}
@@ -14884,7 +15739,6 @@ m Shell V4: Logger information architecture fix -->
 		      +metricMini('Resting HR',entry.restingHr,'bpm', 'rhr',entry)
 		      +metricMini('Sleep HR',entry.sleepHr,'bpm', 'sleepHr',entry)
 		      +metricMini('Respiratory Rate',entry.respiratoryRate,'rpm', 'resp',entry)
-		      +metricMini('Steps',entry.steps,'steps', 'steps',entry)
 		      +metricMini('Active Energy',entry.activeEnergyKcal,'kcal', 'energy',entry)
 		      +'</div>';
 		  }
@@ -15042,8 +15896,8 @@ m Shell V4: Logger information architecture fix -->
 		    var box=document.getElementById('simurgAlertItems');
 		    if(!box || box.querySelector('[data-polar-bridge-alert]')) return;
 		    var sig=signal(entry);
-		    var note=activityLoadModerate(entry)?'Extra load detected. Start press/row movements controlled.':'Polar data received from Apple Health Shortcut.';
-		    box.insertAdjacentHTML('beforeend','<div data-polar-bridge-alert="1" class="psAlertItem polarAlertCardV1 '+esc(sig.cls)+'"><i>⌚</i><div class="polarAlertBodyV1"><div class="polarAlertTopV1"><b>Polar Bridge</b><span class="polarStatusPillV1 '+esc(sig.cls)+'">'+esc(sig.label)+'</span></div><span class="polarAlertKeyV1">'+esc(polarAlertSummary(entry))+'</span><span class="polarAlertNoteV1">'+esc(note)+'</span></div></div>');
+		    var note=activityLoadModerate(entry)?'Extra load detected. Start controlled.':'Polar data received from Apple Health Shortcut.';
+		    box.insertAdjacentHTML('beforeend','<div data-polar-bridge-alert="1" class="psAlertItem polarAlertCardV1 '+esc(sig.cls)+'"><div class="polarAlertBodyV1"><div class="polarAlertTopV1"><b>Polar Bridge</b><span class="polarStatusPillV1 '+esc(sig.cls)+'">'+esc(sig.label)+'</span></div><span class="polarAlertKeyV1">'+esc(polarAlertSummary(entry))+'</span><span class="polarAlertNoteV1">'+esc(note)+'</span></div></div>');
 		  }
 	  function renderAll(){
 	    try{store();renderDataCenterBridge();renderPolarBridgeTab();renderCoachingPolarCard();renderHomePolarNote();}catch(e){console.warn('polar bridge render',e);}
