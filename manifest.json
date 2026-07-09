@@ -1,0 +1,30 @@
+{
+  "name": "SIMURG OS Premium — Professional App Mode",
+  "short_name": "SIMURG OS Premium",
+  "description": "Personal training intelligence, workout logging, cloud sync and performance review system.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#040810",
+  "theme_color": "#07111d",
+  "categories": [
+    "health",
+    "fitness",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
