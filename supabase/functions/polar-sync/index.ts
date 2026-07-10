@@ -78,12 +78,15 @@ Deno.serve(async (req) => {
     if (logId) await admin.from("polar_sync_log").update({ status, finished_at: now, error_message: warnings.length ? warnings.join(" ") : null, raw_count: rawRows.length }).eq("id", logId);
     return json(req, {
       ok: true,
+      connected: true,
+      lastSyncAt: now,
       status,
       connection: { ...publicConnection(connection), status: "connected", lastSyncAt: now, errorMessage: warnings.length ? warnings.join(" ") : null },
       workouts,
+      activity: activities,
       activities,
       profile,
-      counts: { workouts: workouts.length, activities: activities.length, profile: profile ? 1 : 0 },
+      counts: { workouts: workouts.length, activity: activities.length, activities: activities.length, profile: profile ? 1 : 0 },
       warnings,
     });
   } catch (error) {

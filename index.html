@@ -7405,6 +7405,8 @@ function resetProgramNameEdit(){
   save();
 }
 function save(){localStorage.setItem('atlas_summary_reports',JSON.stringify(DATA));render()}
+window.simurgGetData=function(){return DATA};
+window.simurgPersistData=function(){save();return DATA};
 function clearManual(){['exercise','sets','reps','weight'].forEach(id=>document.getElementById(id).value='')}
 function addMetric(){DATA.metrics.push({date:selectedDate,weight:metricWeight.value,waist:metricWaist.value,notes:metricNotes.value});save()}
 function addNutrition(){DATA.nutrition.push({date:selectedDate,protein:protein.value,water:water.value,note:nutritionNote.value});save()}
@@ -7467,7 +7469,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=polar-accesslink-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=polar-accesslink-v2').catch(function(){});
   });
 }
 </script>
@@ -16017,5 +16019,5 @@ m Shell V4: Logger information architecture fix -->
 <script src="./polar-workout.js?v=7"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=9">
 <script src="./premium-standard.js?v=7"></script>
-<link rel="stylesheet" href="./polar-accesslink.css?v=1">
-<script src="./polar-accesslink.js?v=1"></script>
+<link rel="stylesheet" href="./polar-accesslink.css?v=2">
+<script src="./polar-accesslink.js?v=2"></script>
