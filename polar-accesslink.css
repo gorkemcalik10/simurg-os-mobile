@@ -1,0 +1,29 @@
+/* Polar AccessLink v1: compact connection surface only. */
+#polar .polarAccessLinkCard{
+  margin:0 0 10px!important;
+  padding:13px!important;
+  border:1px solid rgba(16,185,255,.20)!important;
+  border-radius:18px!important;
+  background:radial-gradient(circle at 100% 0%,rgba(16,185,255,.08),transparent 38%),linear-gradient(180deg,rgba(6,27,43,.98),rgba(3,17,28,.99))!important;
+  box-shadow:0 12px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.025)!important;
+  color:#f7fbff!important;
+  overflow:hidden!important;
+}
+#polar .polarAccessLinkHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;min-width:0}
+#polar .polarAccessLinkHead>div{min-width:0}
+#polar .polarAccessLinkHead small{display:block;color:#10b9ff;font-size:7px;font-weight:950;letter-spacing:1px;line-height:1.2;margin:0 0 4px}
+#polar .polarAccessLinkHead h2{margin:0!important;color:#fff!important;font-size:16px!important;line-height:1.1!important;letter-spacing:-.25px!important}
+#polar .polarAccessLinkStatus{flex:0 0 auto;display:inline-flex;align-items:center;min-height:25px;padding:5px 8px;border-radius:999px;border:1px solid rgba(139,155,170,.22);background:rgba(139,155,170,.08);color:#aebdca;font-size:8px;font-weight:900;white-space:nowrap}
+#polar .polarAccessLinkStatus.connected{border-color:rgba(128,199,46,.30);background:rgba(128,199,46,.09);color:#a7dc5b}
+#polar .polarAccessLinkStatus.error{border-color:rgba(227,58,70,.30);background:rgba(227,58,70,.09);color:#ff98a2}
+#polar .polarAccessLinkCard>p{margin:9px 0 0!important;color:#aebdca!important;font-size:10px!important;line-height:1.45!important}
+#polar .polarAccessLinkMeta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:8px 9px;border:1px solid rgba(88,173,231,.12);border-radius:11px;background:rgba(3,16,26,.58)}
+#polar .polarAccessLinkMeta small{color:#8294a5;font-size:7px;text-transform:uppercase;letter-spacing:.55px}
+#polar .polarAccessLinkMeta b{color:#e7f6ff;font-size:9px;text-align:right}
+#polar .polarAccessLinkActions{display:flex;gap:7px;margin-top:10px}
+#polar .polarAccessLinkActions button{min-height:34px;padding:8px 11px;border:1px solid rgba(16,185,255,.32);border-radius:11px;background:linear-gradient(180deg,rgba(14,73,104,.96),rgba(5,35,53,.98));color:#eafbff;font-size:9px;font-weight:900;cursor:pointer}
+#polar .polarAccessLinkActions button.secondary{border-color:rgba(149,165,180,.20);background:rgba(255,255,255,.035);color:#b9c7d3}
+#polar .polarAccessLinkActions button:disabled{opacity:.55;cursor:default}
+#polar .polarAccessLinkNote{margin-top:8px;color:#7f94a7;font-size:8px;line-height:1.35;overflow-wrap:anywhere}
+#polar .polarAccessLinkNote.error{color:#ff929d}
+@media(max-width:420px){#polar .polarAccessLinkCard{padding:12px!important}#polar .polarAccessLinkActions button{flex:1;min-width:0;padding-left:7px;padding-right:7px}}

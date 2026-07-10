@@ -1,0 +1,11 @@
+[functions.polar-connect]
+verify_jwt = false
+
+[functions.polar-callback]
+verify_jwt = false
+
+[functions.polar-sync]
+verify_jwt = false
+
+[functions.polar-disconnect]
+verify_jwt = false
