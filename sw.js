@@ -1,10 +1,12 @@
-const SIMURG_CACHE = 'simurg-polar-workout-v4';
+const SIMURG_CACHE = 'simurg-program-micro-fix-v9';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './polar-workout.css?v=4',
-  './polar-workout.js?v=4',
+  './polar-workout.css?v=7',
+  './polar-workout.js?v=7',
+  './premium-standard.css?v=9',
+  './premium-standard.js?v=7',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

@@ -1,0 +1,242 @@
+:root{
+  --gp-bg:#02070d;
+  --gp-card:#061827;
+  --gp-card2:#04111c;
+  --gp-line:rgba(88,173,231,.16);
+  --gp-line-strong:rgba(16,185,255,.30);
+  --gp-blue:#10b9ff;
+  --gp-blue2:#168ed5;
+  --gp-text:#f7fbff;
+  --gp-muted:#91a2b4;
+  --gp-good:#80c72e;
+  --gp-warn:#f1b721;
+  --gp-danger:#e33a46;
+}
+
+html,body{background:#02070d!important;color:var(--gp-text);overflow-x:hidden!important}
+body{background:radial-gradient(circle at 50% -10%,rgba(16,185,255,.11),transparent 28%),linear-gradient(180deg,#020912,#02070d 50%,#010509)!important}
+main,.app,.section{max-width:100vw!important}
+main>.section:not(#polar-workout){color:var(--gp-text)}
+aside .nav button[onclick*="'recovery'"]{display:none!important}
+
+/* The approved Polar Workout dashboard is deliberately excluded. */
+main>.section:not(#polar-workout) :is(.card,.panel,.group,.metricCard,.trendPanel,.coachInsight,.weeklyPremiumCard,.programIntelPremium,.programIntelDelta,.monthlyReviewCard,.monthlyBestProgress,.dailyMiniCard,.gymCard,.gymExerciseCard,.psLoggerHero,.psLoggerInsight,.polarBridgeCard,.polarBridgeHero,.polarBridgeMetric,.polarBridgeSignalCard,.polarBridgeCoachCard,.psPolarHero,.psPolarCard){
+  background:radial-gradient(circle at 100% 0%,rgba(16,185,255,.055),transparent 34%),linear-gradient(180deg,rgba(6,27,43,.97),rgba(3,17,28,.99))!important;
+  border:1px solid var(--gp-line)!important;
+  box-shadow:0 15px 36px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.025)!important;
+  color:var(--gp-text)!important;
+}
+main>.section:not(#polar-workout) :is(.card,.panel,.group,.weeklyPremiumCard,.programIntelPremium,.programIntelDelta,.monthlyReviewCard,.monthlyBestProgress,.dailyMiniCard,.gymCard,.gymExerciseCard){border-radius:18px!important}
+main>.section:not(#polar-workout) :is(h1,h2,h3,b,strong){color:var(--gp-text)}
+main>.section:not(#polar-workout) :is(.sub,p,small,span){overflow-wrap:break-word}
+main>.section:not(#polar-workout) .sub{color:var(--gp-muted)!important}
+main>.section:not(#polar-workout) .topbar{padding:8px 2px 13px!important;margin:0!important}
+main>.section:not(#polar-workout) .topbar h1{font-size:24px!important;letter-spacing:-.55px!important}
+main>.section:not(#polar-workout) .titleIcon{background:rgba(16,185,255,.08)!important;border-color:var(--gp-line-strong)!important;box-shadow:0 0 20px rgba(16,185,255,.09)!important}
+main>.section:not(#polar-workout) :is(.btn,.weekBtn,.ctrl){border:1px solid rgba(16,185,255,.22)!important;background:linear-gradient(180deg,rgba(10,45,67,.96),rgba(4,23,36,.98))!important;color:#dff6ff!important;box-shadow:none!important}
+main>.section:not(#polar-workout) :is(.btn,.weekBtn,.ctrl):not(.danger):hover{border-color:rgba(16,185,255,.48)!important}
+main>.section:not(#polar-workout) .btn.danger{background:rgba(227,58,70,.15)!important;border-color:rgba(227,58,70,.38)!important;color:#ffc4ca!important}
+main>.section:not(#polar-workout) :is(input,select,textarea){background:#03101a!important;border:1px solid rgba(88,173,231,.18)!important;color:#f4f9ff!important;border-radius:13px!important;box-shadow:inset 0 1px 8px rgba(0,0,0,.22)!important}
+main>.section:not(#polar-workout) :is(input,select,textarea):focus{outline:0!important;border-color:rgba(16,185,255,.58)!important;box-shadow:0 0 0 3px rgba(16,185,255,.08)!important}
+
+/* Six stable primary destinations. */
+@media(max-width:860px){
+  #simurgV8Nav{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:3px!important;left:8px!important;right:8px!important}
+  #simurgV8Nav button{font-size:8.8px!important;line-height:1.03!important;padding:3px 1px!important}
+  #simurgV8Nav button i{font-size:14px!important}
+  #simurgV8Nav button[data-key="recovery"]{display:none!important}
+  #simurgV8Nav button[data-key="home"]{order:1}
+  #simurgV8Nav button[data-key="gym"]{order:2}
+  #simurgV8Nav button[data-key="logger"]{order:3}
+  #simurgV8Nav button[data-key="polarWorkout"]{order:4}
+  #simurgV8Nav button[data-key="polar"]{order:5}
+  #simurgV8Nav button[data-key="menu"]{order:6}
+  main{padding-left:10px!important;padding-right:10px!important}
+}
+
+/* Home / Ana */
+#home.gp-home{width:100%;max-width:760px;margin:0 auto;padding:0 0 104px!important;overflow-x:hidden!important}
+.gp-home-shell{width:100%;border-radius:28px;overflow:hidden;background:radial-gradient(circle at 50% -8%,rgba(16,185,255,.11),transparent 30%),linear-gradient(180deg,#020a12,#02070d 46%,#02060a);border:1px solid rgba(118,183,225,.12);box-shadow:0 24px 68px rgba(0,0,0,.38)}
+.gp-home-head{display:flex;align-items:center;gap:12px;padding:17px 15px 13px}
+.gp-home-icon{width:43px;height:43px;flex:0 0 43px;border-radius:14px;padding:7px;background:linear-gradient(180deg,rgba(11,45,67,.95),rgba(3,17,28,.98));border:1px solid rgba(16,185,255,.24);box-shadow:0 0 20px rgba(16,185,255,.10);object-fit:contain}
+.gp-home-title small{display:block;color:var(--gp-blue);font-size:8px;font-weight:950;letter-spacing:1.8px;margin-bottom:5px}
+.gp-home-title h1{margin:0!important;color:#fff!important;font-size:23px!important;line-height:1.04!important;letter-spacing:-.55px!important}
+.gp-home-title p{margin:5px 0 0;color:#8fa1b3;font-size:10px}
+.gp-home-tabs{display:grid;grid-template-columns:repeat(4,1fr);padding:0 9px;border-top:1px solid rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);background:rgba(2,10,17,.82)}
+.gp-home-tab{position:relative;border:0;background:transparent;color:#8393a5;padding:13px 2px 12px;font-size:9.5px;font-weight:900;cursor:pointer}
+.gp-home-tab.active{color:#fff}.gp-home-tab.active:after{content:"";position:absolute;left:5px;right:5px;bottom:-1px;height:2px;border-radius:999px;background:var(--gp-blue);box-shadow:0 0 11px rgba(16,185,255,.75)}
+.gp-home-content{padding:10px}
+.gp-home-pane{display:none;animation:gpFade .16s ease}.gp-home-pane.active{display:block}
+@keyframes gpFade{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:none}}
+.gp-card{margin:0 0 9px;padding:14px;border-radius:17px;border:1px solid var(--gp-line);background:radial-gradient(circle at 100% 0%,rgba(16,185,255,.055),transparent 34%),linear-gradient(180deg,rgba(6,27,43,.98),rgba(3,17,28,.99));box-shadow:0 15px 36px rgba(0,0,0,.23),inset 0 1px 0 rgba(255,255,255,.025);overflow:hidden}
+.gp-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:11px}.gp-card-head h2{margin:0!important;font-size:14px!important;color:#f8fbff!important}.gp-card-head span{color:var(--gp-blue);font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.7px}
+.gp-ring-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gp-ring-card{padding:11px 6px 10px;border-radius:16px;border:1px solid rgba(88,173,231,.13);background:rgba(3,17,28,.72);text-align:center}
+.gp-ring{--gp-value:0%;width:74px;height:74px;border-radius:50%;padding:4px;margin:0 auto 8px;background:conic-gradient(var(--gp-ring-color,var(--gp-blue)) 0 var(--gp-value),rgba(106,140,163,.17) var(--gp-value) 100%);filter:drop-shadow(0 0 7px rgba(16,185,255,.10))}
+.gp-ring>div{height:100%;border-radius:50%;background:#03101a;display:flex;align-items:center;justify-content:center;flex-direction:column;border:1px solid rgba(255,255,255,.035)}
+.gp-ring b{font-size:20px!important;line-height:1;color:#fff}.gp-ring small{font-size:7px;color:#8fa1b3;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.gp-ring-card>small{display:block;color:#9aabba;font-size:8px;text-transform:uppercase;letter-spacing:.6px}
+.gp-duo{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.gp-plan h3,.gp-activity h3{font-size:18px!important;margin:4px 0 7px!important}.gp-plan p,.gp-activity p{margin:0;color:#aebbc8;font-size:10.5px;line-height:1.45}
+.gp-kicker{display:block;color:var(--gp-blue)!important;font-size:8px!important;font-weight:950!important;letter-spacing:1px!important;text-transform:uppercase!important}
+.gp-metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gp-metric{border:1px solid rgba(88,173,231,.12);border-radius:14px;background:rgba(3,16,26,.72);padding:11px 9px;min-height:66px}
+.gp-metric small{display:block;color:#8798aa;font-size:7.5px;text-transform:uppercase;letter-spacing:.55px}.gp-metric b{display:block;color:#fff;font-size:18px;margin-top:6px;line-height:1.05;overflow-wrap:anywhere}.gp-metric b em{font-size:8px;color:#91a2b4;font-style:normal;margin-left:2px}
+.gp-hero-row{display:grid;grid-template-columns:116px 1fr;gap:12px;align-items:center}.gp-hero-ring{width:108px;height:108px}.gp-hero-copy h2{font-size:20px!important;margin:4px 0 8px!important}.gp-hero-copy p{margin:0;color:#aebbc8;font-size:10.5px;line-height:1.5}
+.gp-interpret{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);color:#aab8c6;font-size:10px;line-height:1.5}
+.gp-stage-bar{display:flex;height:12px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.06);margin:10px 0 12px}.gp-stage-bar span:nth-child(1){background:#168ed5}.gp-stage-bar span:nth-child(2){background:#37b8e8}.gp-stage-bar span:nth-child(3){background:#70a9c7}.gp-stage-bar span:nth-child(4){background:#d3a72c}
+.gp-stage-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.gp-stage{padding:9px 5px;border-radius:12px;background:rgba(3,16,26,.7);border:1px solid rgba(88,173,231,.11);text-align:center}.gp-stage small{display:block;color:#8da0b2;font-size:7px;text-transform:uppercase}.gp-stage b{display:block;color:#fff;font-size:13px;margin-top:5px}
+.gp-status{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 9px;background:rgba(16,185,255,.09);border:1px solid rgba(16,185,255,.20);color:#76dfff;font-size:9px;font-weight:950}.gp-status.good{color:#a6df55;border-color:rgba(128,199,46,.25);background:rgba(128,199,46,.08)}.gp-status.warn{color:#f7cd5c;border-color:rgba(241,183,33,.25);background:rgba(241,183,33,.08)}
+.gp-coach{display:flex;gap:9px;align-items:flex-start}.gp-coach i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex:0 0 22px;border:1px solid rgba(16,185,255,.35);color:var(--gp-blue);font-style:normal}.gp-coach p{margin:1px 0 0;color:#b7c3cf;font-size:10.5px;line-height:1.48}
+.gp-empty{padding:22px;text-align:center;color:#8fa1b3;font-size:11px;border:1px dashed rgba(88,173,231,.20);border-radius:14px}
+
+/* Coaching stays intentionally empty while its logic remains loaded. */
+#coaching.gp-coaching-empty{max-width:760px;margin:0 auto}
+#coaching.gp-coaching-empty>*:not(.gp-coaching-shell){display:none!important}
+.gp-coaching-shell{border-radius:24px;border:1px solid var(--gp-line);background:linear-gradient(180deg,rgba(6,27,43,.97),rgba(3,17,28,.99));padding:18px;min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 20px 52px rgba(0,0,0,.28)}
+.gp-coaching-shell img{width:54px;height:54px;object-fit:contain;margin-bottom:15px;filter:drop-shadow(0 0 12px rgba(16,185,255,.18))}.gp-coaching-shell h1{font-size:23px!important;margin:0 0 8px!important}.gp-coaching-shell p{margin:0;color:#91a2b4;font-size:11px}
+
+/* Program, reports and Data Center */
+#programReport,#weeklyReport,#monthlyReport{display:flex!important;flex-direction:column!important;gap:9px!important}
+#programReport>*:not(.programReportUtilityBar),#weeklyReport>*,#monthlyReport>*{margin:0!important}
+#programReport :is(.card,[class*="Card"],[class*="Panel"]),#weeklyReport :is(.card,[class*="Card"],[class*="Panel"]),#monthlyReport :is(.card,[class*="Card"],[class*="Panel"]){padding:12px!important;border-radius:17px!important}
+#programReport :is(p,.programIntelPremiumText,.programIntelDeltaText),#weeklyReport p,#monthlyReport p{font-size:11px!important;line-height:1.42!important}
+#programReport :is(small,label),#weeklyReport :is(small,label),#monthlyReport :is(small,label){font-size:8px!important;letter-spacing:.55px!important}
+.programReportUtilityBar,.gp-report-copy{order:9999!important;margin-top:3px!important;border:1px solid var(--gp-line)!important;border-radius:17px!important;background:linear-gradient(180deg,rgba(6,27,43,.97),rgba(3,17,28,.99))!important;padding:12px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important}
+.programReportUtilityBar small,.gp-report-copy small{display:block;color:var(--gp-blue)!important;font-size:8px!important;letter-spacing:.7px!important;text-transform:uppercase!important}.programReportUtilityBar b,.gp-report-copy b{display:block;color:#fff!important;font-size:11px!important;margin-top:4px!important}.gp-report-copy button,.programReportUtilityBar button{flex:0 0 auto;min-height:36px!important;padding:8px 11px!important;border-radius:12px!important;font-size:10px!important}
+
+#data .localStatusCard,#data .polarImportHelper,#data #dataHealthCard,#data #coachReportCard,#data #polarBridgeDataCard,#data .versionBadgeCard{display:none!important}
+#data .cloudSyncCard,#data .universalImportCard,#data .gp-general-data-card{margin-bottom:9px!important;padding:14px!important;border-radius:18px!important}
+#data .cloudSyncCard h2,#data .universalImportCard h2,#data .gp-general-data-card h2{font-size:16px!important;margin-bottom:7px!important}
+
+/* Gym, Logger, Polar and menu visual alignment only. */
+#gym :is(.gymCard,.gymExerciseCard,.gymHero){background:linear-gradient(180deg,rgba(6,27,43,.97),rgba(3,17,28,.99))!important;border-color:var(--gp-line)!important;box-shadow:none!important}
+#gym :is(.gymCard,.gymExerciseCard){padding:12px!important;border-radius:17px!important}
+#gym .gymSetInputRow{background:rgba(3,16,26,.72)!important;border-color:rgba(88,173,231,.13)!important}
+#workout .psLoggerHero{background:radial-gradient(circle at 18% 0%,rgba(16,185,255,.12),transparent 35%),linear-gradient(180deg,rgba(6,27,43,.98),rgba(3,17,28,.99))!important;border-color:var(--gp-line)!important}
+#workout :is(.group,.panel,.exerciseCard){background:linear-gradient(180deg,rgba(6,27,43,.97),rgba(3,17,28,.99))!important;border-color:var(--gp-line)!important;box-shadow:none!important}
+#workout :is(.group,.panel){padding:12px!important;border-radius:17px!important}
+#polar :is(.polarDashboardV1,.polarRecoveryCardV1,.polarMetricCardV1,.polarStageCardV1,.polarActivityCardV1,.polarBridgeEmpty,.polarCoachSentenceV1){background:linear-gradient(180deg,rgba(6,27,43,.97),rgba(3,17,28,.99))!important;border-color:var(--gp-line)!important;box-shadow:none!important}
+#simurgV8Sheet{background:linear-gradient(180deg,#061827,#03101a)!important;border:1px solid var(--gp-line)!important}
+#simurgV8Sheet .simurgV8Grid button{background:linear-gradient(180deg,rgba(7,31,48,.98),rgba(3,17,28,.99))!important;border:1px solid var(--gp-line)!important;color:#e8f6ff!important;box-shadow:none!important}
+
+@media(max-width:520px){
+  .gp-home-shell{border:0;border-radius:0;box-shadow:none;min-height:calc(100dvh - 82px)}
+  .gp-duo{grid-template-columns:1fr}.gp-metric-grid{grid-template-columns:repeat(2,1fr)}
+  .gp-ring{width:68px;height:68px}.gp-ring b{font-size:18px!important}
+  .programReportUtilityBar,.gp-report-copy{align-items:stretch!important;flex-direction:column!important}.gp-report-copy button,.programReportUtilityBar button{width:100%!important}
+}
+@media(max-width:360px){.gp-home-content{padding:8px}.gp-ring-grid{gap:5px}.gp-ring-card{padding-left:3px;padding-right:3px}.gp-ring{width:62px;height:62px}.gp-home-tab{font-size:8.7px}.gp-stage-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* Refinement pass v2 */
+#home:not(.gp-home){visibility:hidden!important}
+#home.gp-home{visibility:visible!important}
+.gp-ring-grid{align-items:stretch;gap:9px}
+.gp-ring-card{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:13px 5px 11px;border-color:rgba(88,173,231,.16);background:linear-gradient(180deg,rgba(6,27,43,.88),rgba(3,16,26,.92))}
+.gp-ring{width:86px;height:86px;padding:7px;margin:0 auto 9px;background:conic-gradient(from -42deg,var(--gp-ring-color) 0 var(--gp-value),rgba(94,132,158,.18) var(--gp-value) 100%);filter:drop-shadow(0 0 10px color-mix(in srgb,var(--gp-ring-color) 28%,transparent))}
+.gp-ring>div{background:radial-gradient(circle at 50% 36%,#082033,#03101a 70%);border:1px solid rgba(177,217,240,.14);box-shadow:inset 0 0 18px rgba(0,0,0,.42)}
+.gp-ring b{font-size:23px!important;letter-spacing:-.55px}.gp-ring-card>small{font-size:8.5px;font-weight:900;letter-spacing:.7px}
+
+@media(max-width:860px){
+  /* Gym navigation header only. */
+  #gym.gp-gym-refined .topbar{display:grid!important;grid-template-columns:1fr!important;gap:7px!important;padding:8px 2px 10px!important}
+  #gym.gp-gym-refined .topbar .title{display:block!important;margin:0!important}
+  #gym.gp-gym-refined .topbar .titleIcon{display:none!important}
+  #gym.gp-gym-refined .topbar h1{font-size:23px!important;letter-spacing:-.55px!important;margin:0!important}
+  #gym.gp-gym-refined .gp-gym-nav{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;width:100%!important;overflow:visible!important}
+  #gym.gp-gym-refined .gp-gym-nav .weekBtn{width:100%!important;min-height:38px!important;margin:0!important}
+  html body main #gym.gp-gym-refined #gymDateLabel.gp-gym-date-line{display:block!important;width:100%!important;min-height:0!important;margin:2px 0 3px!important;padding:2px 3px!important;border:0!important;background:none!important;box-shadow:none!important;text-align:center!important;color:#d9e8f4!important;font-size:13px!important;font-weight:850!important;letter-spacing:.15px!important}
+  #gym.gp-gym-refined .gymBadge,#gym.gp-gym-refined .gymImportJsonBtn{display:none!important}
+
+  /* Logger flattened visual flow; render/data ownership stays unchanged. */
+  #workout.gp-logger-refined .controls>#weekLabel{color:#d6e8f5!important;border-color:rgba(16,185,255,.18)!important;background:rgba(16,185,255,.045)!important;font-size:12px!important;font-weight:850!important;letter-spacing:.25px!important;padding:8px 9px!important}
+  #workout.gp-logger-refined .controls .weekBtn{font-size:10.5px!important}
+  #workout.gp-logger-refined .layout{display:flex!important;flex-direction:column!important;gap:10px!important}
+  #workout.gp-logger-refined .layout>div:first-child,#workout.gp-logger-refined .right,#workout.gp-logger-refined #workoutGroups{display:contents!important}
+  #workout.gp-logger-refined #psLoggerHero{order:10!important;margin:0!important}
+  #workout.gp-logger-refined .gp-logger-exercises-title{order:20!important;padding:5px 3px 0}
+  #workout.gp-logger-refined .gp-logger-exercises-title small{display:block;color:var(--gp-blue);font-size:8px;font-weight:950;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:4px}
+  #workout.gp-logger-refined .gp-logger-exercises-title h2{font-size:16px!important;line-height:1.1!important;margin:0!important;color:#f7fbff!important}
+  #workout.gp-logger-refined #workoutGroups>.group,
+  #workout.gp-logger-refined #workoutGroups>.restDayCard{order:30!important;margin:0!important}
+  #workout.gp-logger-refined .gp-logger-muscle{order:40!important}
+  #workout.gp-logger-refined .gp-logger-trend{order:50!important}
+  #workout.gp-logger-refined .gp-logger-raw{order:60!important}
+  #workout.gp-logger-refined #workoutGroups>.activitySessionCard{order:70!important;margin:0!important}
+  #workout.gp-logger-refined #psLoggerInsight{order:80!important;margin:0!important}
+  #workout.gp-logger-refined #workoutContextPanel,#workout.gp-logger-refined .gp-logger-hidden{display:none!important}
+  #workout.gp-logger-refined .right>.panel{margin:0!important}
+
+  /* Program Intelligence: compact two-column information grid. */
+  #programReport .programIntelPremiumGrid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin:0!important}
+  #programReport .programIntelPremiumCard:not(.wide),#programReport .programIntelDeltaCard{aspect-ratio:1/1;min-height:auto!important;padding:9px!important;border-radius:16px!important;display:flex!important;flex-direction:column!important;gap:5px!important;overflow:visible!important}
+  #programReport .programIntelPremiumCard.wide{grid-column:1/-1!important;padding:10px!important;border-radius:16px!important}
+  #programReport .programIntelPremiumHead,#programReport .programIntelDeltaHead{display:flex!important;flex-direction:row!important;align-items:flex-start!important;gap:5px!important;margin:0!important}
+  #programReport .programIntelPremiumHead b,#programReport .programIntelDeltaHead b{font-size:11px!important;line-height:1.08!important}
+  #programReport .programIntelPremiumHead small,#programReport .programIntelDeltaHead small{font-size:6.8px!important;letter-spacing:.45px!important}
+  #programReport .programIntelPremiumScore,#programReport .programIntelDeltaPill{align-self:flex-start!important;flex:0 0 auto!important;padding:5px 6px!important;font-size:9px!important;line-height:1!important}
+  #programReport .programIntelPremiumText,#programReport .programIntelDeltaText{margin:0!important;font-size:8.4px!important;line-height:1.25!important}
+  #programReport .programIntelMetricGrid,#programReport .programIntelDeltaGrid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important;margin-top:auto!important}
+  #programReport .programIntelMetric,#programReport .programIntelDeltaMetric{padding:6px!important;border-radius:10px!important;min-height:0!important}
+  #programReport .programIntelMetric small,#programReport .programIntelDeltaMetric small{font-size:6.5px!important;margin-bottom:3px!important}
+  #programReport .programIntelMetric b,#programReport .programIntelDeltaMetric b{font-size:9px!important;line-height:1.08!important}
+  #programReport .programIntelPanelHero{padding:12px!important;border-radius:17px!important;margin:0!important}
+  #programReport .programIntelHeroTitle{font-size:18px!important}#programReport .programIntelHeroText{font-size:10px!important;line-height:1.35!important}
+}
+@media(max-width:520px){.gp-ring{width:78px;height:78px;padding:6px}.gp-ring b{font-size:21px!important}}
+@media(max-width:360px){.gp-ring{width:70px;height:70px}.gp-ring-card{padding-left:2px;padding-right:2px}.gp-ring b{font-size:19px!important}}
+
+/* Targeted correction pass: no global redesign. */
+#home>*:not(.gp-home-shell){display:none!important}
+#home,#home.gp-home,#home .gp-home-shell,#home .gp-home-pane{animation:none!important;transition:none!important}
+
+@media(max-width:860px){
+  /* Logger session summary density and title only. */
+  #workout.gp-logger-refined #psLoggerHero{padding:11px!important;border-radius:19px!important;min-height:0!important;box-shadow:0 10px 25px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.025)!important}
+  #workout.gp-logger-refined #psLoggerHero .psLoggerHeroTop{margin-bottom:7px!important;gap:8px!important}
+  #workout.gp-logger-refined #psLoggerHero h2{font-size:19px!important;line-height:1.06!important;letter-spacing:-.45px!important}
+  #workout.gp-logger-refined #psLoggerHero .psLoggerKicker{font-size:7px!important;letter-spacing:1px!important;margin-bottom:4px!important}
+  #workout.gp-logger-refined #psLoggerHero .psLoggerDatePill{padding:6px 8px!important;font-size:9px!important;line-height:1!important}
+  #workout.gp-logger-refined #psLoggerHero .psLoggerStatus{padding:8px 9px!important;margin-bottom:7px!important;border-radius:12px!important;min-height:0!important}
+  #workout.gp-logger-refined #psLoggerHero .psLoggerMetrics{gap:6px!important}
+  #workout.gp-logger-refined #psLoggerHero .psLoggerMetric{padding:8px 9px!important;min-height:52px!important;border-radius:12px!important}
+  #workout.gp-logger-refined #psLoggerHero .psLoggerMetric small{font-size:6.5px!important;margin-bottom:4px!important}
+  #workout.gp-logger-refined #psLoggerHero .psLoggerMetric b{font-size:19px!important;line-height:1!important}
+  #workout.gp-logger-refined .gp-logger-exercises-title{padding-top:2px!important}
+
+  /* Program Intelligence ring cards keep the compact two-column grid. */
+  #programReport .programIntelPremiumCard.gp-program-ring-card{padding:10px!important;gap:4px!important;overflow:visible!important;justify-content:flex-start!important}
+  #programReport .gp-program-ring-card .programIntelPremiumHead{display:contents!important}
+  #programReport .gp-program-ring-card .programIntelPremiumHead>div:first-child{order:1;text-align:center;min-height:23px}
+  #programReport .gp-program-ring-card .programIntelPremiumHead small{display:block!important;font-size:6.8px!important;line-height:1.15!important;letter-spacing:.6px!important;margin:0 0 2px!important}
+  #programReport .gp-program-ring-card .programIntelPremiumHead b{display:block!important;font-size:10px!important;line-height:1.15!important;margin:0!important}
+  #programReport .gp-program-ring-card .gp-program-value-ring{--gp-tone:var(--gp-blue);order:2;align-self:center!important;display:grid!important;place-items:center!important;width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;margin:1px auto!important;padding:0!important;overflow:hidden!important;isolation:isolate!important;border-radius:50%!important;border:1px solid rgba(133,201,239,.17)!important;color:#fff!important;font-size:11px!important;font-weight:950!important;line-height:1!important;background:radial-gradient(circle,#06131e 0 66%,transparent 68%),conic-gradient(from -42deg,var(--gp-tone) 0 var(--gp-score),rgba(99,132,154,.22) var(--gp-score) 100%)!important;background-clip:padding-box!important;box-shadow:inset 0 0 10px rgba(0,0,0,.30)!important}
+  #programReport .gp-program-ring-card .gp-program-value-ring[data-gp-tone="good"]{--gp-tone:var(--gp-good)}
+  #programReport .gp-program-ring-card .gp-program-value-ring[data-gp-tone="neutral"]{--gp-tone:var(--gp-blue)}
+  #programReport .gp-program-ring-card .gp-program-value-ring[data-gp-tone="caution"]{--gp-tone:#e9a91b}
+  #programReport .gp-program-ring-card .gp-program-value-ring[data-gp-tone="risk"]{--gp-tone:var(--gp-danger)}
+  #programReport .gp-program-ring-card .gp-program-value-ring[data-gp-tone="unknown"]{--gp-tone:#718294}
+  #programReport .gp-program-ring-card .programIntelPremiumText{order:3!important;margin:1px 0 0!important;font-size:8px!important;line-height:1.32!important;text-align:center!important}
+  #programReport .gp-program-ring-card .programIntelMetricGrid{order:4!important;width:100%!important;gap:5px!important;margin-top:auto!important}
+  #programReport .gp-program-ring-card .programIntelMetric{padding:5px 6px!important;border-radius:9px!important}
+  #programReport .gp-program-ring-card .programIntelMetric small{font-size:6.2px!important;line-height:1.12!important;margin-bottom:3px!important}
+  #programReport .gp-program-ring-card .programIntelMetric b{font-size:8.5px!important;line-height:1.15!important}
+  #programReport .programIntelDeltaHead>div:first-child small{display:block!important;margin:0 0 5px!important;line-height:1.2!important}
+  #programReport .programIntelDeltaHead>div:first-child b{display:block!important;line-height:1.18!important;margin:0!important}
+
+  /* One strategy card with flat copy and compact information chips. */
+  #programReport .programIntelPremiumCard.gp-program-strategy{padding:12px!important;gap:8px!important;overflow:visible!important}
+  #programReport .gp-program-strategy .programIntelPremiumHead{align-items:center!important;margin:0!important}
+  #programReport .gp-program-strategy .programIntelPremiumHead>div:first-child{min-width:0}
+  #programReport .gp-program-strategy .programIntelPremiumHead small{font-size:7px!important;line-height:1.15!important;margin-bottom:3px!important}
+  #programReport .gp-program-strategy .programIntelPremiumHead b{font-size:13px!important;line-height:1.15!important}
+  #programReport .gp-program-strategy .programIntelPremiumScore{align-self:center!important;border-radius:999px!important;padding:6px 9px!important}
+  #programReport .gp-program-strategy .programIntelCoachBody{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;margin:0!important}
+  #programReport .gp-program-strategy .programIntelVerdictBox{padding:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;color:#b9c8d5!important;font-size:9px!important;line-height:1.42!important}
+  #programReport .gp-program-strategy .programIntelVerdictBox h3{display:inline-flex!important;margin:0 0 5px!important;padding:5px 8px!important;border:1px solid rgba(16,185,255,.22)!important;border-radius:999px!important;background:rgba(16,185,255,.075)!important;color:#dff7ff!important;font-size:10px!important;line-height:1!important}
+  #programReport .gp-program-strategy .programIntelNextBox{margin:7px 0 0!important;padding:7px 8px!important;border:1px solid rgba(16,185,255,.14)!important;border-left:2px solid var(--gp-blue)!important;border-radius:9px!important;background:rgba(16,185,255,.045)!important;font-size:8.5px!important;line-height:1.35!important}
+  #programReport .gp-program-strategy .programIntelMetricGrid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;margin:0!important}
+  #programReport .gp-program-strategy .programIntelMetric{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:7px!important;min-height:0!important;padding:7px 8px!important;border:1px solid rgba(88,173,231,.12)!important;border-radius:10px!important;background:rgba(3,16,26,.55)!important;box-shadow:none!important}
+  #programReport .gp-program-strategy .programIntelMetric small{font-size:6.5px!important;line-height:1.12!important;margin:0!important}
+  #programReport .gp-program-strategy .programIntelMetric b{font-size:9px!important;line-height:1.12!important;text-align:right!important}
+}

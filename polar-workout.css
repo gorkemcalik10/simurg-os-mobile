@@ -140,8 +140,10 @@ body[data-simurg-active-screen="polarWorkout"] #simurgV8Nav button[data-key="pol
 .pw-empty button{margin-top:20px;border:1px solid rgba(16,185,255,.35);border-radius:14px;padding:11px 15px;background:rgba(16,185,255,.1);color:#7bddff;font-size:11px;font-weight:900}
 
 @media(max-width:860px){
-  #polar-workout{padding-bottom:96px!important}
-  #polar-workout .pw-shell{border:0;border-radius:0;box-shadow:none;min-height:calc(100dvh - 88px)}
+  #polar-workout{height:100%!important;min-height:0!important;padding-bottom:96px!important;overflow-x:hidden!important;overflow-y:auto!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain!important;scroll-behavior:auto!important;contain:none!important;transform:none!important;will-change:auto!important}
+  #polar-workout .pw-shell{border:0;border-radius:0;box-shadow:none;min-height:calc(100dvh - 88px);overflow:visible!important}
+  #polar-workout .pw-content,#polar-workout .pw-pane{overflow:visible!important;touch-action:pan-y!important;contain:none!important;transform:none!important;will-change:auto!important}
+  #polar-workout .pw-card{box-shadow:0 9px 24px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.025)}
   #polar-workout .pw-header{padding-top:13px}
   #simurgV8Nav{grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:2px!important;left:7px!important;right:7px!important;padding:5px!important}
   #simurgV8Nav button{font-size:8px!important;line-height:1.02!important;padding:3px 0!important;overflow:hidden!important}

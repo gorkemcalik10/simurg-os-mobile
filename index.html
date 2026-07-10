@@ -5880,6 +5880,7 @@ body{background:#050607!important;}
 
 </style>
 
+<style id="gpHomeNoFlash">#home:not(.gp-home){visibility:hidden!important}#home.gp-home{visibility:visible!important}#home>*:not(.gp-home-shell){display:none!important}#home{animation:none!important;transition:none!important}</style>
 </head>
 <body class="simurg-lock-scroll">
 
@@ -7466,7 +7467,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=polar-workout-v4').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=targeted-fix-v7').catch(function(){});
   });
 }
 </script>
@@ -16012,5 +16013,7 @@ m Shell V4: Logger information architecture fix -->
   });
 })();
 </script>
-<link rel="stylesheet" href="./polar-workout.css?v=4">
-<script src="./polar-workout.js?v=4"></script>
+<link rel="stylesheet" href="./polar-workout.css?v=7">
+<script src="./polar-workout.js?v=7"></script>
+<link rel="stylesheet" href="./premium-standard.css?v=9">
+<script src="./premium-standard.js?v=7"></script>
