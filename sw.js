@@ -1,8 +1,10 @@
-const SIMURG_CACHE = 'simurg-premium-shell-v11-coach-logic-v2';
+const SIMURG_CACHE = 'simurg-polar-workout-v4';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './polar-workout.css?v=4',
+  './polar-workout.js?v=4',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

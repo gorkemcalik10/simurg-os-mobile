@@ -7463,12 +7463,10 @@ render()
   });
 })();
 </script>
-
-
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=mobile-v11-cleanup').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=polar-workout-v4').catch(function(){});
   });
 }
 </script>
@@ -16014,3 +16012,5 @@ m Shell V4: Logger information architecture fix -->
   });
 })();
 </script>
+<link rel="stylesheet" href="./polar-workout.css?v=4">
+<script src="./polar-workout.js?v=4"></script>
