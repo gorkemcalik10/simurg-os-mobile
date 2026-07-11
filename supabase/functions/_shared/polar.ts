@@ -223,6 +223,22 @@ function numeric(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function objectValue(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : null;
+}
+
+function safeRaw<T>(value: T): T | null {
+  try {
+    return JSON.parse(JSON.stringify(value, (key, item) => {
+      if (/access.?token|refresh.?token|authorization|client.?secret|client.?key|encryption.?key/i.test(key)) return undefined;
+      if (typeof item === "number" && !Number.isFinite(item)) return null;
+      return item;
+    })) as T;
+  } catch {
+    return null;
+  }
+}
+
 function durationSeconds(value: unknown): number {
   if (typeof value === "number" && Number.isFinite(value)) return Math.max(0, value);
   const source = String(value || "").trim();
@@ -281,12 +297,14 @@ export function normalizeExercise(input: Record<string, unknown>) {
   const sport = String(pick(input, ["sport"]) || "Polar Workout");
   const detail = String(pick(input, ["detailed_sport_info", "detailed-sport-info"]) || sport);
   const calories = numeric(pick(input, ["calories"]));
-  const rpeSource = pick((pick(input, ["training_load_pro", "training-load-pro"]) || {}) as Record<string, unknown>, ["user_rpe", "user-rpe"]);
+  const trainingLoadPro = objectValue(pick(input, ["training_load_pro", "training-load-pro"]));
+  const rpeSource = pick(trainingLoadPro, ["user_rpe", "user-rpe"]);
   return {
     type: "polar_flow_workout",
     source: "Polar Flow",
     polarExerciseId: String(pick(input, ["id"]) || ""),
     device: String(pick(input, ["device"]) || "Polar device"),
+    deviceId: pick(input, ["device_id", "device-id"]),
     activityType: sport,
     workoutType: detail,
     date,
@@ -302,6 +320,11 @@ export function normalizeExercise(input: Record<string, unknown>) {
     rpe: numeric(rpeSource),
     trainingLoad: numeric(pick(input, ["training_load", "training-load"])),
     trainingLoadType: "Polar Training Load",
+    cardioLoad: numeric(pick(trainingLoadPro, ["cardio_load", "cardio-load"])),
+    muscleLoad: numeric(pick(trainingLoadPro, ["muscle_load", "muscle-load"])),
+    perceivedLoad: numeric(pick(trainingLoadPro, ["perceived_load", "perceived-load"])),
+    distance: numeric(pick(input, ["distance"])),
+    runningIndex: numeric(pick(input, ["running_index", "running-index"])),
     zones,
     zoneSummary: {
       easyControlled: durationText(zoneDuration(zones, ["zone1", "zone2"])),
@@ -310,8 +333,11 @@ export function normalizeExercise(input: Record<string, unknown>) {
       unclassifiedTime: durationText(Math.max(0, seconds - classified)),
     },
     fuel: hasFuel ? fuelValues : null,
+    samples: Array.isArray(input.samples) ? safeRaw(input.samples) : null,
     notes: String(pick(input, ["notes", "note"]) || ""),
+    syncedAt: new Date().toISOString(),
     importedAt: new Date().toISOString(),
+    raw: safeRaw(input),
   };
 }
 
@@ -333,6 +359,7 @@ export function normalizeActivity(input: Record<string, unknown>) {
     distanceFromSteps: numeric(pick(input, ["distance_from_steps", "distance-from-steps"])),
     inactivityAlertCount: numeric(pick(input, ["inactivity_alert_count", "inactivity-alert-count"])),
     syncedAt: new Date().toISOString(),
+    raw: safeRaw(input),
   };
 }
 
@@ -351,7 +378,102 @@ export function normalizeProfile(input: Record<string, unknown>) {
     weightSource: pick(input, ["weight_source", "weight-source"]),
     trainingBackground: pick(input, ["training_background"]),
     typicalDay: pick(input, ["typical_day"]),
+    sleepGoal: numeric(pick(input, ["sleep_goal", "sleep-goal"])),
     modified: pick(input, ["modified", "created"]),
     syncedAt: new Date().toISOString(),
+    raw: safeRaw(input),
+  };
+}
+
+export function normalizeSleep(input: Record<string, unknown>) {
+  const date = String(pick(input, ["date"]) || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const startTime = pick(input, ["sleep_start_time", "sleep-start-time", "start_time"]);
+  const endTime = pick(input, ["sleep_end_time", "sleep-end-time", "end_time"]);
+  const startMs = startTime ? Date.parse(String(startTime)) : NaN;
+  const endMs = endTime ? Date.parse(String(endTime)) : NaN;
+  const seconds = Number.isFinite(startMs) && Number.isFinite(endMs) && endMs >= startMs ? Math.round((endMs - startMs) / 1000) : null;
+  return {
+    date,
+    source: "Polar Flow",
+    startTime: startTime || null,
+    endTime: endTime || null,
+    duration: seconds === null ? null : durationText(seconds),
+    durationSeconds: seconds,
+    sleepScore: numeric(pick(input, ["sleep_score", "sleep-score"])),
+    continuity: numeric(pick(input, ["continuity"])),
+    continuityClass: numeric(pick(input, ["continuity_class", "continuity-class"])),
+    sleepCycles: numeric(pick(input, ["sleep_cycles", "sleep-cycles"])),
+    interruptions: numeric(pick(input, ["total_interruption_duration", "total-interruption-duration"])),
+    deepSleep: numeric(pick(input, ["deep_sleep", "deep-sleep"])),
+    lightSleep: numeric(pick(input, ["light_sleep", "light-sleep"])),
+    remSleep: numeric(pick(input, ["rem_sleep", "rem-sleep"])),
+    awakeTime: numeric(pick(input, ["awake_time", "awake-time"])),
+    unrecognizedSleepStage: numeric(pick(input, ["unrecognized_sleep_stage", "unrecognized-sleep-stage"])),
+    sleepGoal: numeric(pick(input, ["sleep_goal", "sleep-goal"])),
+    sleepCharge: numeric(pick(input, ["sleep_charge", "sleep-charge"])),
+    syncedAt: new Date().toISOString(),
+    raw: safeRaw(input),
+  };
+}
+
+export function normalizeNightlyRecharge(input: Record<string, unknown>) {
+  const date = String(pick(input, ["date"]) || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  return {
+    date,
+    source: "Polar Flow",
+    heartRateAvg: numeric(pick(input, ["heart_rate_avg", "heart-rate-avg"])),
+    beatToBeatAvg: numeric(pick(input, ["beat_to_beat_avg", "beat-to-beat-avg"])),
+    heartRateVariabilityAvg: numeric(pick(input, ["heart_rate_variability_avg", "heart-rate-variability-avg"])),
+    breathingRateAvg: numeric(pick(input, ["breathing_rate_avg", "breathing-rate-avg"])),
+    nightlyRechargeStatus: numeric(pick(input, ["nightly_recharge_status", "nightly-recharge-status"])),
+    ansCharge: numeric(pick(input, ["ans_charge", "ans-charge"])),
+    ansChargeStatus: numeric(pick(input, ["ans_charge_status", "ans-charge-status"])),
+    hrvSamples: safeRaw(objectValue(pick(input, ["hrv_samples", "hrv-samples"]))),
+    breathingSamples: safeRaw(objectValue(pick(input, ["breathing_samples", "breathing-samples"]))),
+    syncedAt: new Date().toISOString(),
+    raw: safeRaw(input),
+  };
+}
+
+export function normalizeContinuousHr(input: Record<string, unknown>) {
+  const date = String(pick(input, ["date"]) || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const rawSamples = Array.isArray(pick(input, ["heart_rate_samples", "heart-rate-samples"])) ? pick(input, ["heart_rate_samples", "heart-rate-samples"]) as Array<Record<string, unknown>> : [];
+  const samples = rawSamples.map((sample) => ({
+    sampleTime: pick(sample, ["sample_time", "sample-time"]) || null,
+    heartRate: numeric(pick(sample, ["heart_rate", "heart-rate"])),
+  })).filter((sample) => sample.heartRate !== null);
+  const values = samples.map((sample) => sample.heartRate as number);
+  return {
+    date,
+    source: "Polar Flow",
+    samples,
+    sampleCount: samples.length,
+    averageHr: values.length ? Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 10) / 10 : null,
+    minHr: values.length ? Math.min(...values) : null,
+    maxHr: values.length ? Math.max(...values) : null,
+    syncedAt: new Date().toISOString(),
+    raw: safeRaw(input),
+  };
+}
+
+export function normalizeCardioLoad(input: Record<string, unknown>) {
+  const date = String(pick(input, ["date"]) || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const status = pick(input, ["cardio_load_status", "cardio-load-status"]);
+  return {
+    date,
+    source: "Polar Flow",
+    cardioLoad: numeric(pick(input, ["cardio_load", "cardio-load"])),
+    cardioLoadStatus: status || null,
+    strain: numeric(pick(input, ["strain"])),
+    tolerance: numeric(pick(input, ["tolerance"])),
+    cardioLoadRatio: numeric(pick(input, ["cardio_load_ratio", "cardio-load-ratio"])),
+    loadStatus: status || null,
+    cardioLoadLevel: safeRaw(objectValue(pick(input, ["cardio_load_level", "cardio-load-level"]))),
+    syncedAt: new Date().toISOString(),
+    raw: safeRaw(input),
   };
 }

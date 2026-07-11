@@ -19,6 +19,7 @@
 #polar .polarAccessLinkCard>p{margin:9px 0 0!important;color:#aebdca!important;font-size:10px!important;line-height:1.45!important}
 #polar .polarAccessLinkDebug{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:10px}
 #polar .polarAccessLinkDebug>div{min-width:0;padding:7px 8px;border:1px solid rgba(88,173,231,.12);border-radius:10px;background:rgba(3,16,26,.58)}
+#polar .polarAccessLinkDebug>div.wide{grid-column:1/-1}
 #polar .polarAccessLinkDebug small{display:block;color:#8294a5;font-size:6.5px;text-transform:uppercase;letter-spacing:.45px;line-height:1.15}
 #polar .polarAccessLinkDebug b{display:block;margin-top:4px;color:#e7f6ff;font-size:8.5px;line-height:1.2;overflow-wrap:anywhere}
 #polar .polarAccessLinkActions{display:flex;gap:7px;margin-top:10px}

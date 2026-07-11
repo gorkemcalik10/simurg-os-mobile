@@ -31,6 +31,9 @@
     return rows.length?rows[rows.length-1]:null;
   }
   function polarWorkout(data){return data.polarWorkouts&&data.polarWorkouts.latest?data.polarWorkouts.latest:null;}
+  function polarLatest(data,key){return data[key]&&data[key].latest?data[key].latest:null;}
+  function nightlyStatusLabel(value){var labels={1:'Very Poor',2:'Poor',3:'Compromised',4:'OK',5:'Good',6:'Very Good'};return labels[Math.round(number(value)||0)]||null;}
+  function secondsToMinutes(value){var n=number(value);return n==null?null:n/60;}
   function latestApple(data){
     var rows=Array.isArray(data.appleWatch)?data.appleWatch.slice().filter(function(x){return x&&x.date;}):[];
     rows.sort(function(a,b){return (String(a.date)+String(a.startTime||'')).localeCompare(String(b.date)+String(b.startTime||''));});
@@ -38,22 +41,24 @@
   }
   function homeModel(){
     var data=dataRoot(),bridge=bridgeEntry(data)||{},recovery=recoveryEntry(data)||{},polar=polarWorkout(data),apple=latestApple(data);
-    var sleepMinutes=firstNumber(bridge.sleepDurationMinutes,recovery.sleepDurationMinutes,recovery.sleepMinutes);
-    var sleepScore=firstNumber(bridge.sleepScore,recovery.sleepScore);
+    var polarSleep=polarLatest(data,'polarSleep'),polarNightly=polarLatest(data,'polarNightlyRecharge'),polarCardio=polarLatest(data,'polarCardioLoad');
+    var sleepMinutes=firstNumber(polarSleep&&polarSleep.durationMinutes,polarSleep&&secondsToMinutes(polarSleep.durationSeconds),bridge.sleepDurationMinutes,recovery.sleepDurationMinutes,recovery.sleepMinutes);
+    var sleepScore=firstNumber(polarSleep&&polarSleep.sleepScore,bridge.sleepScore,recovery.sleepScore);
     var nightly=firstNumber(bridge.nightlyRecharge,recovery.nightlyRecharge,recovery.nightlyRechargeScore);
+    var nightlyDisplay=nightlyStatusLabel(polarNightly&&polarNightly.nightlyRechargeStatus)||(nightly==null?null:nightly);
     var readiness=firstNumber(recovery.readiness,recovery.readinessScore,nightly);
-    var hrv=firstNumber(bridge.hrvMs,recovery.hrvMs,recovery.hrv);
-    var rhr=firstNumber(bridge.restingHr,recovery.restingHr,recovery.restingHR,recovery.rhr);
+    var hrv=firstNumber(polarNightly&&polarNightly.heartRateVariabilityAvg,bridge.hrvMs,recovery.hrvMs,recovery.hrv);
+    var rhr=firstNumber(polarNightly&&polarNightly.heartRateAvg,bridge.restingHr,recovery.restingHr,recovery.restingHR,recovery.rhr);
     var sleepHr=firstNumber(bridge.sleepHr,recovery.sleepHr,recovery.sleepHR);
-    var respiratory=firstNumber(bridge.respiratoryRate,recovery.respiratoryRate);
-    var load=polar?firstNumber(polar.trainingLoad):firstNumber(bridge.cardioLoad,recovery.activityLoad,recovery.physicalLoad);
+    var respiratory=firstNumber(polarNightly&&polarNightly.breathingRateAvg,bridge.respiratoryRate,recovery.respiratoryRate);
+    var load=firstNumber(polarCardio&&polarCardio.cardioLoad,polar&&polar.trainingLoad,bridge.cardioLoad,recovery.activityLoad,recovery.physicalLoad);
     var activeEnergy=firstNumber(bridge.activeEnergyKcal,bridge.activeEnergy,polar&&polar.activeCal,apple&&apple.activeCal);
     var rpe=firstNumber(polar&&polar.rpe,bridge.workouts&&bridge.workouts[0]&&bridge.workouts[0].rpe,apple&&apple.rpe);
-    var stages=bridge.sleepStages||recovery.sleepStages||null;
+    var stages=polarSleep?{deepMinutes:secondsToMinutes(polarSleep.deepSleep),remMinutes:secondsToMinutes(polarSleep.remSleep),lightMinutes:secondsToMinutes(polarSleep.lightSleep),awakeMinutes:secondsToMinutes(polarSleep.awakeTime)}:(bridge.sleepStages||recovery.sleepStages||null);
     var activity=polar?{name:activityLabel(polar.workoutType||polar.activityType||'Polar Workout'),duration:polar.duration,date:polar.date,cal:polar.activeCal,avgHR:polar.avgHR,source:'Polar Flow'}:
       apple?{name:activityLabel(apple.activityType||apple.workoutType||'Activity'),duration:apple.duration,date:apple.date,cal:apple.activeCal,avgHR:apple.avgHR,source:'Apple Watch'}:
       bridge.workouts&&bridge.workouts[0]?{name:activityLabel(bridge.workouts[0].type||'Workout'),duration:bridge.workouts[0].duration,date:bridge.date,cal:bridge.workouts[0].activeEnergy,avgHR:bridge.workouts[0].avgHr,source:'Polar Bridge'}:null;
-    return {data:data,bridge:bridge,recovery:recovery,polar:polar,apple:apple,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,readiness:readiness,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
+    return {data:data,bridge:bridge,recovery:recovery,polar:polar,apple:apple,polarSleep:polarSleep,polarNightly:polarNightly,polarCardio:polarCardio,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
   }
   function metric(label,value,unit){var textValue=label==='Latest Activity'||label==='Aggressiveness';return '<div class="gp-metric '+(textValue?'gp-metric-text':'')+'"><small>'+esc(label)+'</small><b>'+esc(value==null?'—':value)+(value==null?'':'<em>'+esc(unit||'')+'</em>')+'</b></div>';}
   function ring(label,value,color){var pct=value==null?0:clamp(value,0,100);return '<div class="gp-ring-card"><div class="gp-ring" style="--gp-value:'+pct+'%;--gp-ring-color:'+color+'"><div><b>'+esc(value==null?'—':Math.round(value))+'</b><small>/100</small></div></div><small>'+esc(label)+'</small></div>';}
@@ -90,7 +95,7 @@
     return '<div class="gp-home-pane active" data-home-pane="overview"><div class="gp-card"><div class="gp-card-head"><h2>Daily Summary</h2><span>'+esc(formatDate(today()))+'</span></div><div class="gp-ring-grid">'+ring('Sleep',model.sleepScore,'#57c7f2')+ring('Recovery',model.readiness,recoveryRingColor(model.readiness))+ring('Load',model.load,loadRingColor(model.load))+'</div></div><div class="gp-duo"><div class="gp-card gp-plan"><small class="gp-kicker">Today\'s Plan</small><h3>'+esc(planName(model))+'</h3><p>Program logic remains unchanged. Start with a controlled ramp-up.</p></div><div class="gp-card gp-activity"><small class="gp-kicker">Latest Activity</small><h3>'+esc(activity?activity.name:'No activity yet')+'</h3><p>'+(activity?esc([activity.duration,activity.cal!=null?activity.cal+' kcal':'',activity.source].filter(Boolean).join(' · ')):'Import activity data from Data Center.')+'</p></div></div><div class="gp-card gp-coach"><i>⌁</i><p>'+esc(coachSentence(model))+'</p></div></div>';
   }
   function recoveryPane(model){
-    return '<div class="gp-home-pane active" data-home-pane="recovery"><div class="gp-card"><div class="gp-hero-row"><div class="gp-ring gp-hero-ring" style="--gp-value:'+(model.readiness==null?0:clamp(model.readiness,0,100))+'%;--gp-ring-color:#80c72e"><div><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>Recovery</small></div></div><div class="gp-hero-copy"><small class="gp-kicker">Recovery</small><h2>'+esc(model.readiness==null?'Waiting for data':model.readiness>=70?'Ready signal':'Controlled signal')+'</h2><p>'+esc(recoveryInterpretation(model))+'</p></div></div></div><div class="gp-card"><div class="gp-card-head"><h2>Recovery Metrics</h2><span>Polar</span></div><div class="gp-metric-grid">'+metric('Nightly Recharge',model.nightly,'')+metric('HRV',model.hrv,'ms')+metric('Resting HR',model.rhr,'bpm')+metric('Sleep HR',model.sleepHr,'bpm')+metric('Respiratory Rate',model.respiratory,'/min')+metric('Recovery',model.readiness,'/100')+'</div><div class="gp-interpret">'+esc(recoveryInterpretation(model))+'</div></div></div>';
+    return '<div class="gp-home-pane active" data-home-pane="recovery"><div class="gp-card"><div class="gp-hero-row"><div class="gp-ring gp-hero-ring" style="--gp-value:'+(model.readiness==null?0:clamp(model.readiness,0,100))+'%;--gp-ring-color:#80c72e"><div><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>Recovery</small></div></div><div class="gp-hero-copy"><small class="gp-kicker">Recovery</small><h2>'+esc(model.readiness==null?'Waiting for data':model.readiness>=70?'Ready signal':'Controlled signal')+'</h2><p>'+esc(recoveryInterpretation(model))+'</p></div></div></div><div class="gp-card"><div class="gp-card-head"><h2>Recovery Metrics</h2><span>'+(model.polarNightly?'Polar AccessLink':'Polar')+'</span></div><div class="gp-metric-grid">'+metric('Nightly Recharge',model.nightlyDisplay,'')+metric('HRV',model.hrv,'ms')+metric('Resting HR',model.rhr,'bpm')+metric('Sleep HR',model.sleepHr,'bpm')+metric('Respiratory Rate',model.respiratory,'/min')+metric('Recovery',model.readiness,'/100')+'</div><div class="gp-interpret">'+esc(recoveryInterpretation(model))+'</div></div></div>';
   }
   function stageBar(stages){
     if(!stages)return '<div class="gp-empty">Sleep stages are not available from the latest sync.</div>';
@@ -106,7 +111,7 @@
     var status=loadAggressiveness(model),tone=status==='NORMAL'?'good':status==='REDUCED'?'warn':'';
     return '<div class="gp-home-pane active" data-home-pane="load"><div class="gp-card"><div class="gp-card-head"><h2>Load Summary</h2><span class="gp-status '+tone+'">'+status+'</span></div><div class="gp-metric-grid">'+metric('Activity / Cardio Load',model.load,'')+metric('Active Energy',model.activeEnergy,'kcal')+metric('RPE',model.rpe,'/10')+metric('Polar Workout Load',model.polar&&number(model.polar.trainingLoad),'')+metric('Latest Activity',model.activity?model.activity.name:'—','')+metric('Aggressiveness',status,'')+'</div><div class="gp-interpret">'+esc(loadInterpretation(model))+'</div></div>'+(model.activity?'<div class="gp-card gp-activity"><small class="gp-kicker">Latest Workout / Activity</small><h3>'+esc(model.activity.name)+'</h3><p>'+esc([model.activity.date,model.activity.duration,model.activity.cal!=null?model.activity.cal+' kcal':'',model.activity.avgHR!=null?'Avg HR '+model.activity.avgHR:''].filter(Boolean).join(' · '))+'</p></div>':'')+'</div>';
   }
-  function homeShell(){return '<div class="gp-home-shell"><header class="gp-home-head"><img class="gp-home-icon" src="./icons/icon-192.png" alt="Simurg"><div class="gp-home-title"><small>SIMURG OS · DAILY</small><h1>Good Morning, Gorkem</h1><p>Your training, recovery and load at a glance.</p></div></header><div class="gp-home-tabs" role="tablist">'+homeTabs.map(function(tab){return '<button class="gp-home-tab '+(tab===homeTab?'active':'')+'" data-home-tab="'+tab+'" role="tab" aria-selected="'+(tab===homeTab?'true':'false')+'" type="button" onclick="homePremiumSetTab(\''+tab+'\')">'+tab.toUpperCase()+'</button>';}).join('')+'</div><div id="gpHomeContent" class="gp-home-content"></div></div>';}
+  function homeShell(){return '<div class="gp-home-shell"><header class="gp-home-head"><img class="gp-home-icon" src="./icons/icon-192.png" alt="Simurg"><div class="gp-home-title"><small>SIMURG OS · DAILY</small><h1>Ready for Today</h1><p>Recovery, sleep, load and training status.</p></div></header><div class="gp-home-tabs" role="tablist">'+homeTabs.map(function(tab){return '<button class="gp-home-tab '+(tab===homeTab?'active':'')+'" data-home-tab="'+tab+'" role="tab" aria-selected="'+(tab===homeTab?'true':'false')+'" type="button" onclick="homePremiumSetTab(\''+tab+'\')">'+tab.toUpperCase()+'</button>';}).join('')+'</div><div id="gpHomeContent" class="gp-home-content"></div></div>';}
   function renderHome(){
     var home=document.getElementById('home');if(!home)return;
     home.classList.add('gp-home');home.dataset.globalPremium='1';
