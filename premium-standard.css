@@ -77,11 +77,12 @@ main>.section:not(#polar-workout) :is(input,select,textarea):focus{outline:0!imp
 .gp-ring b{font-size:20px!important;line-height:1;color:#fff}.gp-ring small{font-size:7px;color:#8fa1b3;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
 .gp-ring-card>small{display:block;color:#9aabba;font-size:8px;text-transform:uppercase;letter-spacing:.6px}
 .gp-duo{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.gp-plan h3,.gp-activity h3{font-size:18px!important;margin:4px 0 7px!important}.gp-plan p,.gp-activity p{margin:0;color:#aebbc8;font-size:10.5px;line-height:1.45}
+.gp-plan h3,.gp-activity h3{font-size:18px!important;margin:4px 0 7px!important;line-height:1.16!important;overflow-wrap:anywhere}.gp-plan p,.gp-activity p{margin:0;color:#aebbc8;font-size:10.5px;line-height:1.45}
 .gp-kicker{display:block;color:var(--gp-blue)!important;font-size:8px!important;font-weight:950!important;letter-spacing:1px!important;text-transform:uppercase!important}
 .gp-metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .gp-metric{border:1px solid rgba(88,173,231,.12);border-radius:14px;background:rgba(3,16,26,.72);padding:11px 9px;min-height:66px}
 .gp-metric small{display:block;color:#8798aa;font-size:7.5px;text-transform:uppercase;letter-spacing:.55px}.gp-metric b{display:block;color:#fff;font-size:18px;margin-top:6px;line-height:1.05;overflow-wrap:anywhere}.gp-metric b em{font-size:8px;color:#91a2b4;font-style:normal;margin-left:2px}
+.gp-metric-text b{font-size:13px;line-height:1.22;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .gp-hero-row{display:grid;grid-template-columns:116px 1fr;gap:12px;align-items:center}.gp-hero-ring{width:108px;height:108px}.gp-hero-copy h2{font-size:20px!important;margin:4px 0 8px!important}.gp-hero-copy p{margin:0;color:#aebbc8;font-size:10.5px;line-height:1.5}
 .gp-interpret{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);color:#aab8c6;font-size:10px;line-height:1.5}
 .gp-stage-bar{display:flex;height:12px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.06);margin:10px 0 12px}.gp-stage-bar span:nth-child(1){background:#168ed5}.gp-stage-bar span:nth-child(2){background:#37b8e8}.gp-stage-bar span:nth-child(3){background:#70a9c7}.gp-stage-bar span:nth-child(4){background:#d3a72c}
@@ -124,6 +125,8 @@ main>.section:not(#polar-workout) :is(input,select,textarea):focus{outline:0!imp
   .gp-home-shell{border:0;border-radius:0;box-shadow:none;min-height:calc(100dvh - 82px)}
   .gp-duo{grid-template-columns:1fr}.gp-metric-grid{grid-template-columns:repeat(2,1fr)}
   .gp-ring{width:68px;height:68px}.gp-ring b{font-size:18px!important}
+  .gp-card-head{min-width:0}.gp-card-head h2{min-width:0}.gp-card-head .gp-status{flex:0 0 auto}
+  .gp-metric-grid{gap:7px}.gp-metric{padding:10px 8px}.gp-metric-text b{font-size:12.5px}
   .programReportUtilityBar,.gp-report-copy{align-items:stretch!important;flex-direction:column!important}.gp-report-copy button,.programReportUtilityBar button{width:100%!important}
 }
 @media(max-width:360px){.gp-home-content{padding:8px}.gp-ring-grid{gap:5px}.gp-ring-card{padding-left:3px;padding-right:3px}.gp-ring{width:62px;height:62px}.gp-home-tab{font-size:8.7px}.gp-stage-grid{grid-template-columns:repeat(2,1fr)}}

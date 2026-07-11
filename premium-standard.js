@@ -6,9 +6,14 @@
   function ready(fn){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();}
   function dataRoot(){try{return DATA||{};}catch(e){return window.simurgData||window.DATA||{};}}
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  function number(value){var n=Number(value);return Number.isFinite(n)?n:null;}
+  function number(value){if(value==null||value==='')return null;var n=Number(value);return Number.isFinite(n)?n:null;}
   function firstNumber(){for(var i=0;i<arguments.length;i++){var n=number(arguments[i]);if(n!=null)return n;}return null;}
   function text(value,fallback){var result=String(value==null?'':value).trim();return result||fallback||'';}
+  function activityLabel(value){
+    var raw=text(value,'Polar Workout');
+    if(raw.toLowerCase()==='polar_flow_workout') return 'Polar Workout';
+    return raw.replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim().toLowerCase().replace(/(^|\s)\S/g,function(letter){return letter.toUpperCase();});
+  }
   function clamp(value,min,max){return Math.max(min,Math.min(max,value));}
   function today(){var d=new Date(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return d.getFullYear()+'-'+m+'-'+day;}
   function formatSleep(minutes){if(minutes==null)return '—';var h=Math.floor(minutes/60),m=Math.round(minutes%60);return h+'h '+String(m).padStart(2,'0')+'m';}
@@ -45,12 +50,12 @@
     var activeEnergy=firstNumber(bridge.activeEnergyKcal,bridge.activeEnergy,polar&&polar.activeCal,apple&&apple.activeCal);
     var rpe=firstNumber(polar&&polar.rpe,bridge.workouts&&bridge.workouts[0]&&bridge.workouts[0].rpe,apple&&apple.rpe);
     var stages=bridge.sleepStages||recovery.sleepStages||null;
-    var activity=polar?{name:polar.workoutType||polar.activityType||'Polar Workout',duration:polar.duration,date:polar.date,cal:polar.activeCal,avgHR:polar.avgHR,source:'Polar Flow'}:
-      apple?{name:apple.activityType||apple.workoutType||'Activity',duration:apple.duration,date:apple.date,cal:apple.activeCal,avgHR:apple.avgHR,source:'Apple Watch'}:
-      bridge.workouts&&bridge.workouts[0]?{name:bridge.workouts[0].type||'Workout',duration:bridge.workouts[0].duration,date:bridge.date,cal:bridge.workouts[0].activeEnergy,avgHR:bridge.workouts[0].avgHr,source:'Polar Bridge'}:null;
+    var activity=polar?{name:activityLabel(polar.workoutType||polar.activityType||'Polar Workout'),duration:polar.duration,date:polar.date,cal:polar.activeCal,avgHR:polar.avgHR,source:'Polar Flow'}:
+      apple?{name:activityLabel(apple.activityType||apple.workoutType||'Activity'),duration:apple.duration,date:apple.date,cal:apple.activeCal,avgHR:apple.avgHR,source:'Apple Watch'}:
+      bridge.workouts&&bridge.workouts[0]?{name:activityLabel(bridge.workouts[0].type||'Workout'),duration:bridge.workouts[0].duration,date:bridge.date,cal:bridge.workouts[0].activeEnergy,avgHR:bridge.workouts[0].avgHr,source:'Polar Bridge'}:null;
     return {data:data,bridge:bridge,recovery:recovery,polar:polar,apple:apple,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,readiness:readiness,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
   }
-  function metric(label,value,unit){return '<div class="gp-metric"><small>'+esc(label)+'</small><b>'+esc(value==null?'—':value)+(value==null?'':'<em>'+esc(unit||'')+'</em>')+'</b></div>';}
+  function metric(label,value,unit){var textValue=label==='Latest Activity'||label==='Aggressiveness';return '<div class="gp-metric '+(textValue?'gp-metric-text':'')+'"><small>'+esc(label)+'</small><b>'+esc(value==null?'—':value)+(value==null?'':'<em>'+esc(unit||'')+'</em>')+'</b></div>';}
   function ring(label,value,color){var pct=value==null?0:clamp(value,0,100);return '<div class="gp-ring-card"><div class="gp-ring" style="--gp-value:'+pct+'%;--gp-ring-color:'+color+'"><div><b>'+esc(value==null?'—':Math.round(value))+'</b><small>/100</small></div></div><small>'+esc(label)+'</small></div>';}
   function recoveryRingColor(value){if(value==null||value>=60)return '#80c72e';if(value>=40)return '#f1b721';return '#e33a46';}
   function loadRingColor(value){if(value==null||value<55)return '#168ed5';if(value<70)return '#f1b721';if(value<85)return '#e77d18';return '#e33a46';}

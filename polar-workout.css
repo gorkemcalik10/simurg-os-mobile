@@ -43,12 +43,13 @@ body[data-simurg-active-screen="polarWorkout"] #simurgV8Nav button[data-key="pol
   color:#eef9ff;background:linear-gradient(180deg,rgba(14,43,64,.9),rgba(3,17,28,.95));
   display:grid;place-items:center;font-size:22px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
 }
-.pw-head-copy{text-align:center}
+.pw-head-copy{text-align:center;min-width:0}
 .pw-brand{display:block;color:var(--pw-cyan);font-size:9px;line-height:1;letter-spacing:2.2px;font-weight:900;margin-bottom:7px}
 .pw-head-copy h1{margin:0!important;font-size:22px!important;line-height:1.05!important;letter-spacing:-.35px!important;color:#fff!important}
 .pw-subtitle{margin:6px 0 0;color:#bbc6d2;font-size:10.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pw-source{display:flex;align-items:center;justify-content:center;gap:7px;color:#a8b7c7;font-size:10.5px;margin:9px 0 0}
+.pw-source{display:flex;align-items:center;justify-content:center;gap:7px;color:#a8b7c7;font-size:10.5px;margin:9px 0 0;min-width:0}
 .pw-source i{width:10px;height:18px;border:1.5px solid var(--pw-cyan);border-radius:8px;display:inline-block;box-shadow:0 0 10px rgba(16,185,255,.3)}
+.pw-source span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pw-tabs{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid rgba(255,255,255,.07);padding:0 10px;background:rgba(2,10,17,.88)}
 .pw-tab{position:relative;border:0;background:transparent;color:#8796a8;padding:14px 2px 12px;font-size:10px;font-weight:850;letter-spacing:.15px;cursor:pointer}
 .pw-tab.active{color:#fff}
@@ -86,7 +87,7 @@ body[data-simurg-active-screen="polarWorkout"] #simurgV8Nav button[data-key="pol
 .pw-metric{padding:5px 7px 7px;border-right:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.055)}
 .pw-metric:nth-child(3n){border-right:0}.pw-metric:nth-child(n+4){border-bottom:0}
 .pw-metric small{display:block;color:#8594a6;font-size:7.5px;letter-spacing:.35px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pw-metric b{display:block;color:#fff;font-size:17px;line-height:1.05;margin-top:6px;white-space:nowrap}
+.pw-metric b{display:block;max-width:100%;color:#fff;font-size:17px;line-height:1.05;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pw-metric b em{font-style:normal;color:#a8b5c3;font-size:8px;font-weight:650;margin-left:2px}
 .pw-interpret{display:flex;align-items:flex-start;gap:9px;border-top:1px solid rgba(255,255,255,.06);margin-top:12px;padding-top:10px;color:#aebbc8;font-size:10px;line-height:1.5}
 .pw-interpret i{flex:0 0 21px;width:21px;height:21px;border:1px solid var(--pw-cyan);border-radius:50%;display:grid;place-items:center;color:#59d7ff;font-style:normal;font-size:12px}
@@ -107,16 +108,18 @@ body[data-simurg-active-screen="polarWorkout"] #simurgV8Nav button[data-key="pol
 .pw-fuel-stat{text-align:center;border-right:1px solid rgba(255,255,255,.06)}.pw-fuel-stat:last-child{border-right:0}
 .pw-fuel-stat b{display:block;font-size:19px;line-height:1}.pw-fuel-stat small{display:block;color:#a1afbd;font-size:8.5px;margin-top:6px}
 .pw-fuel-stat.carb b{color:#ff8c1a}.pw-fuel-stat.protein b{color:#21b6ff}.pw-fuel-stat.fat b{color:#ffd52d}
+.pw-unavailable{min-height:34px;display:flex;align-items:center;color:#8fa1b3;font-size:11px;line-height:1.4}
 .pw-impact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
 .pw-impact-item{text-align:center;padding:2px 7px;border-right:1px solid rgba(255,255,255,.07)}.pw-impact-item:last-child{border-right:0}
 .pw-impact-item small{display:block;color:#8d9cad;font-size:7.5px;text-transform:uppercase;letter-spacing:.4px}
 .pw-impact-item b{display:block;color:#27c3ff;font-size:17px;margin:6px 0 3px}.pw-impact-item:nth-child(2) b{color:#a970ff}
+.pw-impact-item .pw-impact-value{font-size:11px;line-height:1.25;overflow-wrap:anywhere}
 .pw-impact-item span{display:block;color:#78dfff;font-size:8.5px;line-height:1.25}
 .pw-coach-inline{border-top:1px solid rgba(255,255,255,.06);margin-top:11px;padding-top:9px;color:#aab8c6;font-size:9.5px;line-height:1.45}
 .pw-coach-inline b{color:#5cdfff}
 .pw-hr-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
 .pw-hr-stat{padding:2px 11px;border-right:1px solid rgba(255,255,255,.07)}.pw-hr-stat:last-child{border-right:0}
-.pw-hr-stat b{display:block;color:#fff;font-size:20px;line-height:1}.pw-hr-stat small{display:block;color:#8f9fb0;font-size:8.5px;margin-top:7px;text-transform:uppercase}
+.pw-hr-stat b{display:block;color:#fff;font-size:20px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pw-hr-stat small{display:block;color:#8f9fb0;font-size:8.5px;margin-top:7px;text-transform:uppercase}
 .pw-hr-stat .red{color:#ff3d4d}.pw-hr-stat .mint{color:#26e5bd}.pw-hr-stat .gray{color:#c2ccda}
 .pw-chart-box{position:relative;height:148px;border-radius:12px;background:linear-gradient(180deg,rgba(3,13,22,.7),rgba(2,9,15,.88));border:1px solid rgba(255,255,255,.04);overflow:hidden}
 .pw-chart-box svg{display:block;width:100%;height:100%}
@@ -125,12 +128,12 @@ body[data-simurg-active-screen="polarWorkout"] #simurgV8Nav button[data-key="pol
 .pw-chart-empty{height:132px;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;border:1px dashed rgba(98,151,187,.25);border-radius:12px;background:rgba(2,11,18,.55);color:#8fa1b3;font-size:11px;line-height:1.45}
 .pw-summary-list{display:grid;gap:0}
 .pw-summary-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:10.5px}.pw-summary-row:last-child{border-bottom:0;padding-bottom:1px}
-.pw-summary-name{display:flex;align-items:center;gap:8px;color:#cbd6e1}.pw-summary-name i{width:11px;height:11px;border-radius:50%;display:block}.pw-summary-time{color:#e4edf5;font-variant-numeric:tabular-nums}.pw-summary-pct{color:#a4b1bf;min-width:28px;text-align:right}
+.pw-summary-name{display:flex;align-items:center;gap:8px;color:#cbd6e1;min-width:0}.pw-summary-name i{width:11px;height:11px;border-radius:50%;display:block;flex:0 0 auto}.pw-summary-time{color:#e4edf5;font-variant-numeric:tabular-nums}.pw-summary-pct{color:#a4b1bf;min-width:28px;text-align:right}
 .pw-copy{color:#b9c5d1;font-size:11px;line-height:1.62;margin:0}.pw-copy + .pw-copy{margin-top:3px}
 .pw-load-pro{display:grid;grid-template-columns:112px 1fr;gap:18px;align-items:center}
 .pw-load-number{text-align:center;border-right:1px solid rgba(255,255,255,.07);padding-right:15px}.pw-load-number b{display:block;color:#8ecb32;font-size:46px;line-height:.95}.pw-load-number span{display:block;color:#9ee12f;font-size:12px;margin-top:7px}
 .pw-load-copy small{display:block;color:#d5dee8;font-size:10px;margin-bottom:9px}.pw-load-copy p{margin:0;color:#aebac7;font-size:10.5px;line-height:1.55}
-.pw-impact-list{display:grid;gap:0}.pw-impact-line{display:grid;grid-template-columns:10px 1fr auto;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.055);font-size:10px}.pw-impact-line:last-child{border-bottom:0}.pw-impact-line i{width:10px;height:10px;border-radius:50%;background:#83c82b}.pw-impact-line:nth-child(2) i{background:#f2b917}.pw-impact-line span{color:#b9c5d1}.pw-impact-line b{color:#9edc31;text-align:right;font-size:10px}
+.pw-impact-list{display:grid;gap:0}.pw-impact-line{display:grid;grid-template-columns:10px minmax(0,1fr) minmax(82px,46%);gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.055);font-size:10px}.pw-impact-line:last-child{border-bottom:0}.pw-impact-line i{width:10px;height:10px;border-radius:50%;background:#83c82b}.pw-impact-line:nth-child(2) i{background:#f2b917}.pw-impact-line span{color:#b9c5d1}.pw-impact-line b{color:#9edc31;text-align:right;font-size:10px;line-height:1.25;overflow-wrap:anywhere}
 .pw-rpe-head{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:12px;margin-bottom:12px}.pw-rpe-head b{font-size:20px}.pw-rpe-head b span{color:#8f9dab;font-size:13px}.pw-rpe-head em{font-style:normal;color:#cdd7e1;font-size:11px}
 .pw-rpe-scale{position:relative;height:10px;border-radius:999px;background:linear-gradient(90deg,#53ad32 0 28%,#c6d82c 28% 52%,#f5bb19 52% 70%,#e56f16 70% 84%,#df263d 84% 100%)}
 .pw-rpe-marker{position:absolute;top:-4px;width:6px;height:18px;border-radius:2px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 0 8px rgba(255,255,255,.45);transform:translateX(-50%)}
@@ -153,6 +156,19 @@ body[data-simurg-active-screen="polarWorkout"] #simurgV8Nav button[data-key="pol
 @media(min-width:861px){
   #polar-workout{padding-bottom:30px}
   #polar-workout .pw-shell{margin-top:4px}
+}
+@media(max-width:520px){
+  .pw-hero-grid{grid-template-columns:116px minmax(0,1fr);gap:9px}
+  .pw-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pw-metric{padding:6px 6px 7px}
+  .pw-metric:nth-child(3n){border-right:1px solid rgba(255,255,255,.07)}
+  .pw-metric:nth-child(2n){border-right:0}
+  .pw-metric:nth-child(n+4){border-bottom:1px solid rgba(255,255,255,.055)}
+  .pw-metric:nth-child(n+5){border-bottom:0}
+  .pw-metric b{font-size:clamp(14px,4.1vw,16px)}
+  .pw-hr-stat{padding-left:7px;padding-right:7px}
+  .pw-hr-stat b{font-size:clamp(16px,4.7vw,19px)}
+  .pw-summary-row{grid-template-columns:minmax(0,1fr) auto auto;gap:8px}
 }
 @media(max-width:370px){
   .pw-content{padding:8px}.pw-card{padding:12px}

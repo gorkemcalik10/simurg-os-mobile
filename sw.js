@@ -1,12 +1,12 @@
-const SIMURG_CACHE = 'simurg-polar-accesslink-v2';
+const SIMURG_CACHE = 'simurg-polar-real-data-ui-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './polar-workout.css?v=7',
-  './polar-workout.js?v=7',
-  './premium-standard.css?v=9',
-  './premium-standard.js?v=7',
+  './polar-workout.css?v=8',
+  './polar-workout.js?v=8',
+  './premium-standard.css?v=10',
+  './premium-standard.js?v=8',
   './polar-accesslink.css?v=2',
   './polar-accesslink.js?v=2',
   './icons/icon-192.png',
