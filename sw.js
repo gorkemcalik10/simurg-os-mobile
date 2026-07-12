@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-polar-data-ui-cleanup-v3';
+const SIMURG_CACHE = 'simurg-desktop-home-date-nav';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -9,6 +9,8 @@ const CORE_ASSETS = [
   './premium-standard.js?v=10',
   './polar-accesslink.css?v=3',
   './polar-accesslink.js?v=4',
+  './desktop-alignment.css?v=10',
+  './desktop-alignment.js?v=10',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
