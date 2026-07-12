@@ -1,14 +1,14 @@
-const SIMURG_CACHE = 'simurg-polar-data-expansion-v2';
+const SIMURG_CACHE = 'simurg-polar-data-ui-cleanup-v3';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './polar-workout.css?v=8',
-  './polar-workout.js?v=8',
-  './premium-standard.css?v=10',
-  './premium-standard.js?v=9',
+  './polar-workout.css?v=9',
+  './polar-workout.js?v=9',
+  './premium-standard.css?v=11',
+  './premium-standard.js?v=10',
   './polar-accesslink.css?v=3',
-  './polar-accesslink.js?v=3',
+  './polar-accesslink.js?v=4',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
