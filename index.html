@@ -6089,7 +6089,7 @@ body{background:#050607!important;}
 
     <div class="card readinessCard">
       <h2>Readiness & Activity</h2>
-      <div id="readinessPanel" class="coachText">Apple Watch / Gym verisi bekleniyor.</div>
+      <div id="readinessPanel" class="coachText">Polar / Gym verisi bekleniyor.</div>
     </div>
 
     <div class="card injuryRiskCard">
@@ -6891,7 +6891,7 @@ function calculateReadiness(date){
 function renderReadinessHtml(date){
   let r=calculateReadiness(date);
   let t=r.today;
-  let typeText=t.types.length?t.types.join(' + '):'No watch activity';
+  let typeText=t.source||(t.types.length?t.types.join(' + '):'Workout verisi yok');
   let reasonText=r.reasons.length?r.reasons.slice(0,3).join(', '):'olumsuz sinyal yok';
   let bg=`conic-gradient(#23ce7a 0 ${r.score}%, #172033 ${r.score}% 100%)`;
   return `<div class="readinessScoreBox"><div class="readinessCircle" style="background:${bg}">${r.score}</div><div class="readinessMeta"><b>${r.status}</b><br>${r.advice}<div class="readinessPills"><span class="readinessPill activityTag">${typeText}</span><span class="readinessPill">Load: ${t.level}</span><span class="readinessPill">${Math.round(t.minutes)} dk</span><span class="readinessPill">${t.active} aktif kcal</span><span class="readinessPill">${t.avgHR||'-'} bpm</span></div><div class="activityLoadCard"><b>Etkenler:</b> ${reasonText}</div></div></div>`;
@@ -6899,8 +6899,9 @@ function renderReadinessHtml(date){
 function renderReadinessPanel(){
   let el=document.getElementById('readinessPanel');
   if(!el) return;
-  let has=dayData(selectedDate).length || watchRowsForDate(selectedDate).length;
-  if(!has){el.innerHTML='Bu gün için gym veya Apple Watch aktivite verisi yok.';return;}
+  let source=window.SimurgWorkoutSource&&window.SimurgWorkoutSource.day?window.SimurgWorkoutSource.day(selectedDate):null;
+  let has=dayData(selectedDate).length || watchRowsForDate(selectedDate).length || (source&&source.primaryPolar);
+  if(!has){el.innerHTML='Bu gün için Polar veya Gym workout verisi yok.';return;}
   el.innerHTML=renderReadinessHtml(selectedDate);
 }
 
@@ -6937,12 +6938,12 @@ function calculateInjuryRisk(date){
   if(level==='Moderate') deload='Bugün yük artırma. Failure yerine 1-2 tekrar rezerv bırak; ağrı olan hareketlerde set azalt.';
   if(level==='High') deload='Deload / koruma önerilir: ana hareketlerde yük artırma, setleri yaklaşık %20-30 azalt, ağrı varsa pressing veya çekiş varyasyonunu değiştir.';
   if(coach.painWarning) deload='Pain Warning var: ağrılı hareketi zorlamadan değiştir veya çıkar. Bugün hedef performans değil, eklem güvenliği.';
-  if(!today.gym.sets && today.watch.length){
+  if(!today.gym.sets && today.primary){
     if(level==='Low') deload='Gym yok; aktivite recovery/kondisyon olarak kaydedildi. Yorgunluk belirtisi yoksa sonraki gym günü normal başlayabilir.';
     else deload+=' Gym yapılmasa bile aktivite yükünü toparlanma hesabına dahil et.';
   }
-  if(!today.gym.sets && !today.watch.length){
-    deload='Bu gün için veri yok. Risk hesabı için RPE/Form/Pain veya Apple Watch aktivitesi girilmeli.';
+  if(!today.gym.sets && !today.primary){
+    deload='Bu gün için veri yok. Risk hesabı için Polar workout veya Gym RPE/Form/Pain verisi gerekli.';
   }
   return {score,level,signals,deload,readiness,today,prev,prev2};
 }
@@ -6964,7 +6965,8 @@ function renderInjuryRiskPanel(){
   if(!el) return;
   let card=el.closest('.injuryRiskCard');
   if(card) card.classList.remove('riskLow','riskModerate','riskHigh');
-  let has=dayData(selectedDate).length || watchRowsForDate(selectedDate).length;
+  let source=window.SimurgWorkoutSource&&window.SimurgWorkoutSource.day?window.SimurgWorkoutSource.day(selectedDate):null;
+  let has=dayData(selectedDate).length || watchRowsForDate(selectedDate).length || (source&&source.primaryPolar);
   if(!has){el.innerHTML='Bu gün için risk hesabı yapılacak veri yok.';return;}
   let risk=calculateInjuryRisk(selectedDate);
   if(card){
@@ -6975,7 +6977,8 @@ function renderInjuryRiskPanel(){
 
 
 function renderDailyReport(){
-let dates=[...new Set([...(DATA.workouts||[]).map(w=>w.date),...(DATA.appleWatch||[]).map(w=>w.date)])].filter(Boolean).sort((a,b)=>parseDate(b)-parseDate(a));
+let policy=window.SimurgWorkoutSource;
+let dates=[...new Set([...(DATA.workouts||[]).map(w=>w.date),...(DATA.appleWatch||[]).map(w=>w.date),...(policy?policy.allDates():[])])].filter(Boolean).sort((a,b)=>parseDate(b)-parseDate(a));
 if(!dates.length){
   dailyReport.innerHTML='<div class="card"><h2>Daily Summary</h2><div class="reportText">Henüz antrenman veya aktivite verisi yok.</div></div>';
   return;
@@ -6983,7 +6986,9 @@ if(!dates.length){
 let cards=[];
 dates.forEach(date=>{
   let items=dayData(date), c=calc(items);
-  let activity=activitySummaryForDate(date);
+  let source=policy?policy.day(date):null;
+  let physical=source&&source.primary;
+  let activity=source&&source.primaryPolar?{name:activityDisplayName(physical.workoutType||physical.activityType||'Polar Workout'),primary:physical.workoutType||physical.activityType||'Polar Workout',emoji:'⌁',duration:physical.duration||'-',active:Number(physical.activeCal||physical.calories)||0,avgHR:Number(physical.avgHR)||0,dist:physical.distance||'-',rows:[physical],source:source.source}:activitySummaryForDate(date);
   let readiness=calculateReadiness(date);
   let hasGym=items.length>0;
   let hasActivity=!!activity;
@@ -6992,7 +6997,7 @@ dates.forEach(date=>{
     let best=items.slice().sort((a,b)=>b.weight-a.weight)[0];
     let exCount=Object.keys(c.exs).length;
     let exMini=Object.keys(c.exs).map(ex=>`<em>${ex}</em>`).join('');
-    let activityLine=hasActivity?`<span>Extra Activity: ${activity.emoji} ${escapeAttr(activity.name)} • ${activity.duration||'-'} • ${activity.active||0} kcal</span>`:'';
+    let activityLine=hasActivity?`<span>${source&&source.primaryPolar?'Workout Source':'Extra Activity'}: ${activity.emoji} ${escapeAttr(activity.name)} • ${activity.duration||'-'} • ${activity.active||0} kcal • ${escapeAttr(source&&source.source||'Apple Watch Legacy')}</span>`:'';
     cards.push(`<div class="dailyMiniCard dailyGymCard" onclick="selectedDate='${date}';show('workout',document.querySelector('.nav button'));render()">
       <div class="dailyMiniTop">
         <div>
@@ -7025,7 +7030,7 @@ dates.forEach(date=>{
           <b>${trDate(date)}</b>
           <span>${dayName(date)} · Activity Day</span>
         </div>
-        <strong>${loadLabel}</strong>
+        <strong>${escapeAttr(source&&source.source||'Apple Watch Legacy')}</strong>
       </div>
       <div class="dailyActivityTypeLine">
         <div class="emoji">${activity.emoji}</div>
@@ -7469,7 +7474,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=desktop-home-date-nav').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=polar-first-workout-source').catch(function(){});
   });
 }
 </script>
@@ -7869,15 +7874,15 @@ async function checkCloudStatus() {
     let tg=document.getElementById('nextTargets');
     if(!el || !tg) return;
     let rows=dayData(selectedDate), c=calc(rows), readiness=calculateReadiness(selectedDate), injury=calculateInjuryRisk(selectedDate);
-    let hasWatch=readiness.today.watch.length>0;
-    if(!rows.length && !hasWatch){
+    let hasPhysical=!!readiness.today.primary;
+    if(!rows.length && !hasPhysical){
       el.innerHTML='<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>Veri bekleniyor</b></div><div class="coachPremiumPill">Pending</div></div><div class="coachPremiumMessage"><b>Karar:</b> Bugün için antrenman veya aktivite verisi yok. Veri girilince koç kararı oluşacak.</div></div>';
       tg.innerHTML='<div class="nextTargetsPremium"><div class="nextTargetPremiumItem"><div><b>Hedef bekleniyor</b><span>İlk kayıt sonrası sonraki seans hedefleri oluşacak.</span></div><div class="nextTargetBadge">Pending</div></div></div>';return;
     }
     let reasons=topReasons(readiness,injury);
     let decision=injury.level==='High'?'Koruma öncelikli.':(injury.level==='Moderate'?'Kontrollü yüklen.':(readiness.status==='Recovery'?'Recovery odaklı ilerle.':'Plan uygulanabilir.'));
     let recommendation=injury.level==='High'?injury.deload:(injury.level==='Moderate'?'Bugün yük artırma; 1-2 tekrar rezerv bırak.':readiness.advice);
-    let activityText=readiness.today.types.length?readiness.today.types.join(' + '):(rows.length?'Gym':'No activity');
+    let activityText=readiness.today.source||(readiness.today.types.length?readiness.today.types.join(' + '):(rows.length?'Gym':'No activity'));
     el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>${trDate(selectedDate)} karar özeti</b></div><div class="coachPremiumPill">${readiness.status}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Aktivite</small><b>${activityText}</b></div><div class="coachPremiumStat"><small>Readiness</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${injury.level}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${decision}<br><b>Neden:</b> ${reasons.length?reasons.join(' · '):'belirgin olumsuz sinyal yok'}.<br><b>Öneri:</b> ${recommendation}</div></div>`;
     if(!rows.length){
       tg.innerHTML='<div class="nextTargetsPremium"><div class="nextTargetPremiumItem"><div><b>Gym hedefi yok</b><span>Bugün aktivite yükü recovery/kondisyon olarak işlendi. Sonraki gym gününde readiness ve risk skorunu baz al.</span></div><div class="nextTargetBadge">Activity</div></div></div>';return;
@@ -7892,9 +7897,9 @@ async function checkCloudStatus() {
   };
   window.renderPhoenixReport=function(){
     let el=document.getElementById('phoenixReport'); if(!el) return;
-    let dates=weekDates(); let rows=DATA.workouts.filter(w=>dates.includes(w.date)); let watch=(DATA.appleWatch||[]).filter(r=>dates.includes(r.date)).map(normalizeWatchRecord);
-    if(!rows.length && !watch.length){el.innerHTML='<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Report</small><b>Hafta bekleniyor</b></div><div class="coachPremiumPill">No Data</div></div><div class="coachPremiumMessage">Bu hafta için veri yok. İlk kayıt geldiğinde haftalık yük, aktivite ve toparlanma yorumu oluşacak.</div></div>';return;}
-    let c=calc(rows); let completed=[...new Set([...rows.map(r=>r.date),...watch.map(r=>r.date)])].length; let active=watch.reduce((a,r)=>a+n(r.activeCal),0); let minutes=Math.round(watch.reduce((a,r)=>a+durationMinutes(r.duration),0));
+    let dates=weekDates(); let rows=DATA.workouts.filter(w=>dates.includes(w.date)); let sessions=window.SimurgWorkoutSource?dates.map(function(d){return window.SimurgWorkoutSource.metrics(d);}).filter(function(x){return x.primary||x.gym.sets;}):[];
+    if(!rows.length && !sessions.length){el.innerHTML='<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Report</small><b>Hafta bekleniyor</b></div><div class="coachPremiumPill">No Data</div></div><div class="coachPremiumMessage">Bu hafta için veri yok. İlk kayıt geldiğinde haftalık yük, aktivite ve toparlanma yorumu oluşacak.</div></div>';return;}
+    let c=calc(rows); let completed=[...new Set([...rows.map(r=>r.date),...sessions.map(r=>r.session.date)])].length; let active=sessions.reduce((a,r)=>a+n(r.active),0); let minutes=Math.round(sessions.reduce((a,r)=>a+n(r.minutes),0));
     let groups={}; rows.forEach(r=>groups[r.bodyPart]=(groups[r.bodyPart]||0)+(n(r.sets)||1)); let top=Object.entries(groups).sort((a,b)=>b[1]-a[1])[0];
     let verdict=c.sets>24?'Hacim yüksek; recovery sinyallerini takip et.':(active>350?'Aktivite yükü belirgin; sonraki gym gününde kontrollü başla.':'Hafta yönetilebilir görünüyor.');
     el.innerHTML=`<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Report</small><b>Haftalık koç özeti</b></div><div class="coachPremiumPill">${completed}/7 gün</div></div><div class="phoenixPremiumRows"><div class="phoenixPremiumRow"><span>Gym yükü</span><b>${c.sets} set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div><div class="phoenixPremiumRow"><span>Aktivite</span><b>${minutes} dk • ${active} kcal</b></div><div class="phoenixPremiumRow"><span>Ana odak</span><b>${top?top[0]+' • '+top[1]+' set':'Aktivite / Recovery'}</b></div></div><div class="coachPremiumMessage"><b>Simurg yorumu:</b> ${verdict}</div></div>`;
@@ -7903,7 +7908,7 @@ async function checkCloudStatus() {
   function polishDataCenter(){
     const dc=document.getElementById('data'); if(!dc) return;
     const cloud=dc.querySelector('.cloudSyncCard .sub'); if(cloud) cloud.innerHTML='Telefon ve Mac arasında veriyi eşitle. <b>Eski cihazda Push</b>, diğer cihazda <b>Pull</b> yap.';
-    const universal=dc.querySelector('.universalImportCard .sub'); if(universal) universal.innerHTML='Tek veri giriş noktası: workout, Apple Watch, yüzme, futbol, masa tenisi, plaj voleybolu gibi aktiviteleri otomatik tanır. Dizi veya segmentli kayıtları da destekler.';
+    const universal=dc.querySelector('.universalImportCard .sub'); if(universal) universal.innerHTML='Tek veri giriş noktası: Polar Flow, Gym, legacy Apple Watch ve activity JSON kayıtlarını otomatik tanır. Dizi veya segmentli kayıtları da destekler.';
   }
   const oldRender=window.render;
   if(typeof oldRender==='function'){
@@ -12766,7 +12771,7 @@ m Shell V4: Logger information architecture fix -->
   function selected(){try{return window.selectedDate || new Date().toISOString().slice(0,10);}catch(e){return new Date().toISOString().slice(0,10);}}
   function day(){try{return typeof window.dayData==='function' ? (dayData(selected())||[]) : [];}catch(e){return [];}}
   function calcs(){try{return typeof window.calc==='function' ? calc(day()) : {sets:0,reps:0,vol:0};}catch(e){return {sets:0,reps:0,vol:0};}}
-  function activity(){try{return typeof window.activitySummaryForDate==='function' ? activitySummaryForDate(selected()) : null;}catch(e){return null;}}
+  function activity(){try{var source=window.SimurgWorkoutSource&&window.SimurgWorkoutSource.day?window.SimurgWorkoutSource.day(selected()):null;if(source&&source.primary){var p=source.primary;return {name:String(p.workoutType||p.activityType||p.type||'Workout').replace(/[_-]+/g,' '),duration:p.duration||p.durationText||'',source:source.source};}return typeof window.activitySummaryForDate==='function' ? activitySummaryForDate(selected()) : null;}catch(e){return null;}}
   function programLabel(){try{return typeof window.getProgramLabelForDate==='function'?getProgramLabelForDate(selected()):text('psTodayTraining','Bugünün antrenmanı');}catch(e){return text('psTodayTraining','Bugünün antrenmanı');}}
   function fmt(v){return Math.round(Number(v)||0).toLocaleString('tr-TR');}
   function lastPainRisk(){
@@ -12790,7 +12795,7 @@ m Shell V4: Logger information architecture fix -->
     items.push({icon:'🏋️',tone:c.sets>=24?'warn':'',title:'Son seans yükü',body:(c.sets||0)+' set · '+fmt(c.vol)+' kg hacim · '+(c.reps||0)+' tekrar. Yük toleransını buna göre değerlendir.'});
     if(risk.pain>0 || risk.rpeHigh>0) items.push({icon:'⚠️',tone:'risk',title:'Risk / deload notu',body:'Pain kaydı: '+risk.pain+' · yüksek RPE seti: '+risk.rpeHigh+'. Bugün gereksiz yoğunluk ekleme.'});
     else items.push({icon:'🛡️',tone:'good',title:'Risk / deload notu',body:'Belirgin pain veya aşırı RPE sinyali yok. Yine de form kalitesi ana kriter.'});
-    items.push({icon:'⌚',tone:a?'good':'warn',title:'Veri kaynağı',body:a?('Apple Watch aktivitesi: '+(a.name||'Activity')+' · '+(a.duration||'-')+'.'):'Bugün activity verisi yok. Polar Loop gelince bu panel Flow verisiyle güçlenecek.'});
+    items.push({icon:'⌁',tone:a?'good':'',title:'Veri kaynağı',body:a?((a.source||'Workout')+': '+(a.name||'Activity')+' · '+(a.duration||'-')+'.'):'Bugün kayıtlı workout yok.'});
     return {reco:reco,items:items,rec:rec};
   }
   function installAlert(){
@@ -16017,9 +16022,10 @@ m Shell V4: Logger information architecture fix -->
 </script>
 <link rel="stylesheet" href="./polar-workout.css?v=9">
 <script src="./polar-workout.js?v=9"></script>
+<script src="./workout-source-policy.js?v=1"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=11">
-<script src="./premium-standard.js?v=10"></script>
+<script src="./premium-standard.js?v=11"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=3">
 <script src="./polar-accesslink.js?v=4"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=10">
-<script src="./desktop-alignment.js?v=10"></script>
+<script src="./desktop-alignment.js?v=11"></script>

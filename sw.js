@@ -1,16 +1,17 @@
-const SIMURG_CACHE = 'simurg-desktop-home-date-nav';
+const SIMURG_CACHE = 'simurg-polar-first-workout-source';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './polar-workout.css?v=9',
   './polar-workout.js?v=9',
+  './workout-source-policy.js?v=1',
   './premium-standard.css?v=11',
-  './premium-standard.js?v=10',
+  './premium-standard.js?v=11',
   './polar-accesslink.css?v=3',
   './polar-accesslink.js?v=4',
   './desktop-alignment.css?v=10',
-  './desktop-alignment.js?v=10',
+  './desktop-alignment.js?v=11',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
