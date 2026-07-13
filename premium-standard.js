@@ -183,6 +183,11 @@
   }
   function cleanCoaching(){
     var section=document.getElementById('coaching');if(!section)return;
+    if(window.matchMedia&&window.matchMedia('(min-width:901px)').matches){
+      section.classList.remove('gp-coaching-empty');
+      var desktopShell=section.querySelector('.gp-coaching-shell');if(desktopShell)desktopShell.remove();
+      return;
+    }
     section.classList.add('gp-coaching-empty');
     var shell=section.querySelector('.gp-coaching-shell');
     if(!shell){shell=document.createElement('div');shell.className='gp-coaching-shell';shell.innerHTML='<img src="./icons/icon-192.png" alt="Simurg"><h1>Coaching</h1><p>Coaching module will be rebuilt.</p>';section.appendChild(shell);}
