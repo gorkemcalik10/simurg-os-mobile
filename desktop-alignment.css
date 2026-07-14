@@ -4,17 +4,17 @@
   html,body{min-width:0!important;background:radial-gradient(circle at 82% -12%,rgba(70,64,181,.14),transparent 35%),linear-gradient(180deg,#020814,#01050c)!important}
   body{overflow-x:hidden!important}
   .app{display:grid!important;grid-template-columns:250px minmax(0,1fr)!important;min-height:100vh!important;background:transparent!important}
-  .app>aside{position:sticky!important;top:0!important;width:250px!important;min-width:250px!important;height:100vh!important;padding:14px 12px!important;overflow:hidden!important;background:linear-gradient(180deg,rgba(15,35,61,.99),rgba(3,13,25,.99) 48%,rgba(2,9,17,.99))!important;border-right:1px solid rgba(95,159,224,.26)!important;box-shadow:18px 0 55px rgba(0,0,0,.24)!important}
+  .app>aside{position:sticky!important;top:0!important;display:flex!important;flex-direction:column!important;width:250px!important;min-width:250px!important;height:100vh!important;padding:14px 12px!important;overflow:hidden!important;background:linear-gradient(180deg,rgba(15,35,61,.99),rgba(3,13,25,.99) 48%,rgba(2,9,17,.99))!important;border-right:1px solid rgba(95,159,224,.26)!important;box-shadow:18px 0 55px rgba(0,0,0,.24)!important}
   .app>aside .logo{display:flex!important;min-height:76px!important;padding:15px!important;border:1px solid rgba(106,167,229,.21)!important;border-radius:20px!important;background:linear-gradient(145deg,rgba(35,72,119,.55),rgba(12,29,51,.8))!important;box-shadow:inset 0 1px rgba(255,255,255,.05)!important}
   .app>aside .brandMain{font-size:19px!important}.app>aside .brandOs{font-size:15px!important}.app>aside .logo small{font-size:9px!important;letter-spacing:.12em!important}
-  aside .nav{display:flex!important;flex-direction:column!important;gap:7px!important;margin-top:20px!important}
+  aside .nav{display:flex!important;flex:0 1 auto!important;flex-direction:column!important;gap:7px!important;margin-top:20px!important}
   aside .nav button{display:none!important}
   aside .nav button[data-desktop-nav]{display:flex!important;order:var(--desktop-order)!important;align-items:center!important;gap:10px!important;width:100%!important;min-height:43px!important;margin:0!important;padding:0 13px!important;border:1px solid rgba(91,154,224,.13)!important;border-radius:13px!important;background:linear-gradient(180deg,rgba(7,23,39,.95),rgba(4,16,29,.98))!important;color:#aebdd0!important;text-align:left!important;opacity:1!important;overflow:hidden!important;cursor:pointer!important;transition:.16s!important}
   aside .nav button[data-desktop-nav]>span{display:grid!important;place-items:center!important;width:21px!important;flex:0 0 21px!important;font-size:15px!important}
   aside .nav button[data-desktop-nav]>b{display:block!important;min-width:0!important;color:inherit!important;font-size:12px!important;line-height:1.2!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
   aside .nav button[data-desktop-nav]:hover{color:#fff!important;border-color:rgba(79,201,255,.32)!important;transform:translateX(2px)!important}
   aside .nav button[data-desktop-nav].active{color:#fff!important;border-color:rgba(79,159,255,.74)!important;background:radial-gradient(circle at 95% 50%,rgba(69,143,255,.28),transparent 28%),linear-gradient(135deg,rgba(47,128,255,.56),rgba(32,76,151,.48))!important;box-shadow:0 10px 25px rgba(18,91,199,.23),inset 0 1px rgba(255,255,255,.12)!important}
-  .app>aside .sidecard{position:absolute!important;left:12px!important;right:12px!important;bottom:14px!important;margin:0!important;padding:16px!important;border-radius:18px!important;background:linear-gradient(145deg,rgba(25,52,85,.78),rgba(3,15,27,.95))!important;border:1px solid rgba(91,154,224,.22)!important;box-shadow:inset 0 1px rgba(255,255,255,.04)!important}
+  .app>aside .sidecard{display:block!important;position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;flex:0 0 auto!important;margin:14px 0 0!important;margin-top:auto!important;padding:16px!important;border-radius:18px!important;background:linear-gradient(145deg,rgba(25,52,85,.78),rgba(3,15,27,.95))!important;border:1px solid rgba(91,154,224,.22)!important;box-shadow:inset 0 1px rgba(255,255,255,.04)!important}
   .app>aside .sidecard .quoteText{font-size:13px!important;line-height:1.45!important}.app>aside .sidecard p{color:#e9bc7c!important;font-size:9px!important;letter-spacing:.14em!important}
   .app>main{min-width:0!important;width:auto!important;padding:20px 24px 44px!important;overflow:visible!important}
   .section{max-width:none!important}.section.active{display:block!important}
@@ -37,6 +37,15 @@
 }
 @media (min-width:901px) and (max-width:1279px){
   .app{grid-template-columns:240px minmax(0,1fr)!important}.app>aside{width:240px!important;min-width:240px!important}.app>main{padding:18px!important}.dlLoggerLayout{grid-template-columns:1fr}.dlLoggerLayout>aside{grid-template-columns:repeat(2,minmax(0,1fr))}.dlExerciseGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.dlProgramGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.dlProgramGrid>section.wide{grid-column:1/-1}.dlActivityMetrics{grid-template-columns:repeat(3,minmax(0,1fr))}.dlPolarGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.dlHeader{align-items:flex-start;flex-direction:column}.dlHeader nav{justify-content:flex-start;width:100%}
+}
+@media (min-width:901px) and (max-height:850px){
+  .app>aside{padding-top:10px!important;padding-bottom:10px!important}
+  .app>aside .logo{min-height:66px!important;padding:11px!important}
+  aside .nav{gap:4px!important;margin-top:12px!important}
+  aside .nav button[data-desktop-nav]{min-height:35px!important}
+  .app>aside .sidecard{padding:11px!important;border-radius:15px!important}
+  .app>aside .sidecard .quoteText{font-size:11px!important;line-height:1.35!important}
+  .app>aside .sidecard p{font-size:8px!important}
 }
 @media (min-width:1440px){.dlExerciseGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.dlLoggerLayout{grid-template-columns:minmax(0,3.25fr) minmax(280px,1fr)}}
 @media (min-width:1800px){.app{grid-template-columns:260px minmax(0,1fr)!important}.app>aside{width:260px!important;min-width:260px!important}.dlWorkspace{max-width:1760px}}
