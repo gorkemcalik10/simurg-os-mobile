@@ -1,15 +1,25 @@
 <!doctype html>
-<html lang="tr">
+<html lang="tr" data-theme="horizon">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080b0f">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Simurg OS Cloud Sync</title>
+<style id="horizonCritical">
+html[data-theme="horizon"],html[data-theme="horizon"] body{margin:0;background:#080b0f;color:#f3f1eb}
+html[data-theme="horizon"] #app,html[data-theme="horizon"] .app-shell,html[data-theme="horizon"] .loading-screen,html[data-theme="horizon"] .boot-screen,html[data-theme="horizon"] .splash-screen,html[data-theme="horizon"] #simurgBoot{background:#080b0f}
+</style>
 <style>
 :root{
-  --bg:#040810;--panel:#0c1724;--panel2:#101d2d;--line:#213247;--text:#f8fbff;--muted:#8fa1b7;
-  --blue:#2f84ff;--green:#23ce7a;--yellow:#ffbd3d;--purple:#8b5cf6;--red:#ff4d5f;
+  --hz-bg:#080b0f;--hz-bg-soft:#0a0f14;--hz-surface:#0e141a;--hz-surface-raised:#121a21;--hz-surface-hover:#171f26;
+  --hz-border:rgba(255,255,255,.075);--hz-border-strong:rgba(255,255,255,.13);--hz-text:#f3f1eb;--hz-text-secondary:#a1a8ae;--hz-text-muted:#717a82;
+  --hz-amber:#f59e0b;--hz-amber-bright:#ffae19;--hz-amber-soft:rgba(245,158,11,.12);--hz-green:#55d68b;--hz-green-soft:rgba(85,214,139,.12);--hz-cyan:#3abff8;--hz-cyan-soft:rgba(58,191,248,.11);--hz-red:#ff6572;--hz-red-soft:rgba(255,101,114,.12);--hz-violet:#a78bfa;--hz-radius-sm:10px;--hz-radius-md:14px;--hz-radius-lg:20px;
+  --bg:var(--hz-bg);--panel:var(--hz-surface);--panel2:var(--hz-surface-raised);--line:var(--hz-border);--text:var(--hz-text);--muted:var(--hz-text-secondary);
+  --blue:var(--hz-cyan);--green:var(--hz-green);--yellow:var(--hz-amber);--purple:var(--hz-violet);--red:var(--hz-red);
 }
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at 15% 0%,rgba(47,132,255,.18),transparent 28%),linear-gradient(140deg,#03060c,#07111d 55%,#03070d);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{margin:0;background:#080b0f;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 .app{display:grid;grid-template-columns:265px 1fr;min-height:100vh}
 aside{border-right:1px solid var(--line);background:linear-gradient(180deg,rgba(10,19,31,.96),rgba(5,10,18,.98));padding:26px 18px;position:sticky;top:0;height:100vh}
 .logo{display:flex;align-items:center;gap:12px}.mark{font-size:54px;font-weight:1000;color:var(--blue);text-shadow:0 0 30px rgba(47,132,255,.45)}.brand{font-size:30px;font-weight:950;letter-spacing:5px}.brand small{display:block;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:2px}
@@ -5748,21 +5758,20 @@ if(!CSS.escape){CSS.escape=function(s){return String(s).replace(/["\\]/g,'\\$&')
 
 <style id="simurgAppModeStyle">
 /* SIMURG OS APP MODE V1: installable PWA polish */
-html{background:#040810;overscroll-behavior:none;}
+html{background:#080b0f;overscroll-behavior:none;}
 body{min-height:100vh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
 body.simurg-lock-scroll{overflow:hidden;}
 #simurgBoot{
   position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(circle at 50% 20%,rgba(47,132,255,.24),transparent 32%),linear-gradient(145deg,#02050b,#07111d 58%,#02060d);
-  color:#f8fbff;transition:opacity .38s ease,visibility .38s ease;visibility:visible;opacity:1;
+  background:#080b0f;color:#f3f1eb;transition:opacity .38s ease,visibility .38s ease;visibility:visible;opacity:1;
 }
 #simurgBoot.hidden{opacity:0;visibility:hidden;pointer-events:none;}
-.simurgBootBox{width:min(360px,86vw);text-align:center;border:1px solid rgba(148,163,184,.18);border-radius:28px;padding:30px 24px;background:rgba(7,17,30,.62);box-shadow:0 30px 90px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.05);backdrop-filter:blur(18px);}
-.simurgBootMark{width:82px;height:82px;border-radius:26px;margin:0 auto 18px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(47,132,255,.30),rgba(255,177,104,.14));border:1px solid rgba(255,255,255,.10);font-size:38px;box-shadow:0 0 34px rgba(47,132,255,.20);}
+.simurgBootBox{width:min(360px,86vw);text-align:center;border:1px solid rgba(255,255,255,.10);border-radius:28px;padding:30px 24px;background:#0e141a;box-shadow:0 30px 90px rgba(0,0,0,.46),inset 0 1px 0 rgba(255,255,255,.04);}
+.simurgBootMark{width:82px;height:82px;border-radius:26px;margin:0 auto 18px;display:grid;place-items:center;background:#121a21;border:1px solid rgba(245,158,11,.34);color:#f59e0b;font-size:38px;box-shadow:0 0 28px rgba(245,158,11,.10);}
 .simurgBootTitle{font-size:25px;font-weight:950;letter-spacing:3px;margin-bottom:6px;}
-.simurgBootSub{color:#9fb7d5;font-size:13px;line-height:1.45;margin-bottom:18px;}
-.simurgBootBar{height:5px;border-radius:999px;overflow:hidden;background:#07111e;border:1px solid rgba(148,163,184,.12);}
-.simurgBootBar span{display:block;width:44%;height:100%;border-radius:999px;background:linear-gradient(90deg,#2f84ff,#23ce7a);animation:simurgBootMove 1.05s ease-in-out infinite alternate;}
+.simurgBootSub{color:#a1a8ae;font-size:13px;line-height:1.45;margin-bottom:18px;}
+.simurgBootBar{height:5px;border-radius:999px;overflow:hidden;background:#0a0f14;border:1px solid rgba(255,255,255,.08);}
+.simurgBootBar span{display:block;width:44%;height:100%;border-radius:999px;background:linear-gradient(90deg,#f59e0b,#ffbf47);animation:simurgBootMove 1.05s ease-in-out infinite alternate;}
 @keyframes simurgBootMove{from{transform:translateX(-12%)}to{transform:translateX(142%)}}
 .simurgStandaloneHint{display:none;position:fixed;left:14px;right:14px;bottom:14px;z-index:80;background:rgba(7,17,30,.92);border:1px solid rgba(47,132,255,.28);border-radius:16px;padding:12px 13px;color:#dce8f5;font-size:12px;line-height:1.45;box-shadow:0 16px 46px rgba(0,0,0,.35);backdrop-filter:blur(14px);}
 .simurgStandaloneHint b{color:#f8fbff}.simurgStandaloneHint button{float:right;margin-left:10px;background:#10213a;border:1px solid rgba(148,163,184,.18);color:#f8fbff;border-radius:10px;padding:6px 9px;font-weight:800;}
@@ -7474,7 +7483,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=desktop-legacy-polar-data-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=simurg-horizon-v7').catch(function(){});
   });
 }
 </script>
@@ -16020,14 +16029,18 @@ m Shell V4: Logger information architecture fix -->
   });
 })();
 </script>
-<link rel="stylesheet" href="./polar-workout.css?v=10">
-<script src="./polar-workout.js?v=10"></script>
-<script src="./workout-source-policy.js?v=1"></script>
+<link rel="stylesheet" href="./polar-workout.css?v=11">
+<script src="./polar-workout.js?v=13"></script>
+<script src="./workout-source-policy.js?v=2"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=12">
 <script src="./premium-standard.js?v=13"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=3">
-<script src="./polar-accesslink.js?v=4"></script>
+<script src="./polar-accesslink.js?v=9"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=18">
-<script src="./desktop-alignment.js?v=18"></script>
+<script src="./desktop-alignment.js?v=22"></script>
 <link rel="stylesheet" href="./gym-draft-navigation-coach.css?v=11">
-<script src="./gym-draft-navigation-coach.js?v=11"></script>
+<script src="./gym-draft-navigation-coach.js?v=12"></script>
+<link rel="stylesheet" href="./coach-logic-v3.css?v=19">
+<script src="./coach-logic-v3.js?v=21"></script>
+<link rel="stylesheet" href="./desktop-refinement-v3.css?v=20">
+<script src="./desktop-refinement-v3.js?v=11"></script>

@@ -228,7 +228,7 @@
     var card=existing||document.createElement('section');card.id='mobileLoggerPolarCard';card.className='mobileLoggerPolarCard';
     card.innerHTML='<header><div><small>POLAR WORKOUT</small><h2>'+html(polarLabel(firstValue(polar.workoutType,polar.activityType,polar.type,polar.name)))+'</h2></div><span>'+html(source)+'</span></header>'
       +'<div class="mobileLoggerPolarMetrics">'+polarMetric('Süre',duration)+polarMetric('Kalori',calories,'kcal')+polarMetric('Ort. HR',avgHr,'bpm')+polarMetric('Maks. HR',maxHr,'bpm')+polarMetric('Cardio Load',cardio)+polarMetric('Başlangıç',polarStart(firstValue(polar.startTime,polar.start_time)))+'</div>'
-      +polarZoneSummary(polar.zones||polar.heartRateZones)
+      +polarZoneSummary(typeof window.simurgNormalizePolarZoneData==='function'?window.simurgNormalizePolarZoneData(polar).zones:(polar.zones||polar.heartRateZones))
       +(session.extraPolar&&session.extraPolar.length?'<div class="mobileLoggerPolarExtra">+'+session.extraPolar.length+' ek Polar aktivitesi</div>':'');
     hero.insertAdjacentElement('afterend',card);
   }
