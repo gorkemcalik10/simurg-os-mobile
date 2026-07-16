@@ -1216,3 +1216,104 @@ main>.section:not(#polar-workout) :is(input,select,textarea):focus{outline:0!imp
   }
   #coaching.section .phoenixPremiumRow :is(span,b){white-space:normal!important;overflow-wrap:break-word!important}
 }
+
+/* B Horizon Mobile Phase 4: module menu and existing bottom navigation only. */
+@media(max-width:860px){
+  #simurgV8Shade{
+    background:rgba(2,6,11,.91)!important;
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    transition:none!important;
+  }
+  #simurgV8Shade.open{opacity:1!important;pointer-events:auto!important}
+  #simurgV8Shade.open~#simurgV8Nav{pointer-events:none!important}
+
+  #simurgV8Sheet{
+    --bmenu-surface:#0d151e;--bmenu-surface-2:#09111a;--bmenu-line:rgba(158,183,211,.13);
+    left:10px!important;right:10px!important;bottom:calc(var(--simurgNativeNavH,64px) + 18px + env(safe-area-inset-bottom,0px))!important;
+    width:auto!important;max-width:500px!important;max-height:none!important;margin:0 auto!important;padding:12px!important;
+    overflow:visible!important;overscroll-behavior:contain!important;border:1px solid var(--bmenu-line)!important;border-radius:22px!important;
+    background:linear-gradient(180deg,#0f1822 0%,#090f16 100%)!important;
+    box-shadow:0 24px 56px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.03)!important;
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  }
+  #simurgV8Sheet .simurgV8Handle{
+    width:34px!important;min-height:3px!important;margin:0 auto 9px!important;border-radius:999px!important;background:#4d5b69!important;
+  }
+  #simurgV8Sheet .simurgV8SheetHead{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
+    margin:0 0 11px!important;padding:0 1px!important;
+  }
+  #simurgV8Sheet .simurgV8SheetHead>div{min-width:0!important}
+  #simurgV8Sheet .simurgV8SheetHead b{
+    display:block!important;margin:0!important;color:#f2f6fa!important;font-size:18px!important;line-height:1.08!important;
+    font-weight:790!important;letter-spacing:-.35px!important;
+  }
+  #simurgV8Sheet .simurgV8SheetHead br{display:none!important}
+  #simurgV8Sheet .simurgV8SheetHead span{
+    display:block!important;margin:3px 0 0!important;color:#8996a4!important;font-size:9.5px!important;line-height:1.3!important;
+  }
+  #simurgV8Sheet .simurgV8SheetHead>.btn{
+    min-height:36px!important;margin:0!important;padding:7px 10px!important;border:1px solid rgba(56,189,221,.20)!important;
+    border-radius:12px!important;background:rgba(56,189,221,.075)!important;color:#c9f3fc!important;
+    font-size:9.5px!important;line-height:1!important;font-weight:800!important;box-shadow:none!important;
+  }
+
+  #simurgV8Sheet .simurgPremiumMenuGrid{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:1fr!important;
+    gap:8px!important;width:100%!important;margin:0!important;overflow:visible!important;
+  }
+  #simurgV8Sheet .simurgPremiumMenuGrid>button{
+    display:grid!important;grid-template-columns:34px minmax(0,1fr)!important;align-items:start!important;justify-items:stretch!important;
+    gap:9px!important;min-width:0!important;min-height:88px!important;margin:0!important;padding:11px!important;
+    overflow:visible!important;text-align:left!important;border:1px solid rgba(158,183,211,.11)!important;border-radius:17px!important;
+    background:linear-gradient(145deg,rgba(16,26,37,.99),rgba(9,15,23,.99))!important;color:#f2f6fa!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 9px 20px rgba(0,0,0,.18)!important;
+  }
+  #simurgV8Sheet .simurgPremiumMenuGrid>button:active{
+    border-color:rgba(56,189,221,.30)!important;background:linear-gradient(145deg,rgba(17,34,45,.99),rgba(9,17,25,.99))!important;
+  }
+  #simurgV8Sheet .simurgPremiumMenuGrid>button>i{
+    display:grid!important;place-items:center!important;width:34px!important;min-width:34px!important;min-height:34px!important;
+    margin:0!important;border:1px solid rgba(56,189,221,.15)!important;border-radius:11px!important;
+    background:rgba(56,189,221,.055)!important;color:#83d8eb!important;font-size:17px!important;line-height:1!important;font-style:normal!important;
+  }
+  #simurgV8Sheet .simurgPremiumMenuGrid>button>span{display:block!important;min-width:0!important;overflow:visible!important}
+  #simurgV8Sheet .simurgPremiumMenuGrid>button>span>b{
+    display:block!important;margin:1px 0 5px!important;color:#f2f6fa!important;font-size:13px!important;line-height:1.15!important;
+    font-weight:780!important;letter-spacing:-.15px!important;white-space:normal!important;overflow-wrap:break-word!important;word-break:normal!important;
+  }
+  #simurgV8Sheet .simurgPremiumMenuGrid>button>span>small{
+    display:block!important;min-height:0!important;margin:0!important;overflow:visible!important;
+    -webkit-box-orient:initial!important;-webkit-line-clamp:unset!important;
+    color:#8795a3!important;font-size:9px!important;line-height:1.35!important;font-weight:620!important;
+    letter-spacing:0!important;text-transform:none!important;white-space:normal!important;overflow-wrap:break-word!important;word-break:normal!important;
+  }
+
+  #simurgV8Nav{
+    display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;align-items:stretch!important;
+    left:8px!important;right:8px!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;
+    width:auto!important;height:auto!important;min-height:60px!important;margin:0!important;padding:5px!important;gap:3px!important;
+    border:1px solid rgba(158,183,211,.13)!important;border-radius:21px!important;
+    background:#070c12!important;box-shadow:0 -8px 24px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.03)!important;
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  }
+  #simurgV8Nav button{
+    display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;
+    min-width:0!important;min-height:48px!important;margin:0!important;padding:4px 1px!important;
+    border:1px solid transparent!important;border-radius:15px!important;background:transparent!important;color:#7f8c99!important;
+    box-shadow:none!important;font-size:8px!important;line-height:1.05!important;font-weight:760!important;letter-spacing:0!important;text-align:center!important;
+  }
+  #simurgV8Nav button i{
+    display:block!important;margin:0!important;color:inherit!important;font-size:14px!important;line-height:1!important;font-style:normal!important;
+  }
+  #simurgV8Nav button.active,
+  #simurgV8Nav.ps-key-home button[data-key="home"],
+  #simurgV8Nav.ps-key-gym button[data-key="gym"],
+  #simurgV8Nav.ps-key-logger button[data-key="logger"],
+  #simurgV8Nav.ps-key-polarWorkout button[data-key="polarWorkout"],
+  #simurgV8Nav.ps-key-polar button[data-key="polar"],
+  #simurgV8Nav.ps-key-menu button[data-key="menu"]{
+    border-color:rgba(56,189,221,.24)!important;background:rgba(56,189,221,.075)!important;
+    color:#9de3f1!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;font-weight:850!important;
+  }
+}
