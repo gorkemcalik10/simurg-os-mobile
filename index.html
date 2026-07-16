@@ -11709,7 +11709,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     var old=document.getElementById('simurgV8Nav'); if(old) old.remove();
     var shade=document.getElementById('simurgV8Shade'); if(!shade){document.body.insertAdjacentHTML('beforeend','<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div>');}
     var sheet=document.getElementById('simurgV8Sheet'); if(!sheet){document.body.insertAdjacentHTML('beforeend','<div id="simurgV8Sheet"></div>'); sheet=document.getElementById('simurgV8Sheet');}
-    sheet.innerHTML='<div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Simurg OS modülleri</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i>Coaching</button><button onclick="simurgV8Go(\'program\',\'menu\')"><i>🧭</i>Program</button><button onclick="simurgV8Go(\'weekly\',\'menu\')"><i>📈</i>Weekly</button><button onclick="simurgV8Go(\'monthly\',\'menu\')"><i>🗓️</i>Monthly</button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>💾</i>Data Center</button></div>';
+    sheet.innerHTML='<div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Simurg OS modülleri</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i><span><b>Coaching</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go(\'program\',\'menu\')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go(\'weekly\',\'menu\')"><i>📈</i><span><b>Weekly</b><small>Haftalık yük ve performans</small></span></button><button onclick="simurgV8Go(\'monthly\',\'menu\')"><i>🗓️</i><span><b>Monthly</b><small>Aylık gelişim görünümü</small></span></button><button onclick="simurgV8Go(\'polar\',\'menu\')"><i>⌁</i><span><b>Polar Data</b><small>Recovery, sleep ve load</small></span></button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>💾</i><span><b>Data Center</b><small>Sync, backup ve veri yönetimi</small></span></button></div>';
     document.body.insertAdjacentHTML('beforeend','<nav id="simurgV8Nav" aria-label="Simurg premium mobile navigation"><button data-key="home" class="active" onclick="simurgV8Go(\'home\',\'home\')"><i>🏠</i>Ana</button><button data-key="recovery" onclick="simurgV8Go(\'recovery\',\'recovery\')"><i>💠</i>Recovery</button><button data-key="gym" onclick="simurgV8Go(\'gym\',\'gym\')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go(\'workout\',\'logger\')"><i>📋</i>Logger</button><button data-key="polar" onclick="simurgV8Go(\'polar\',\'polar\')"><i>⌚</i>Polar</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>');
   }
   function ensureAlertPanel(){
@@ -16023,7 +16023,7 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./polar-workout.css?v=9">
 <script src="./polar-workout.js?v=9"></script>
 <script src="./workout-source-policy.js?v=1"></script>
-<link rel="stylesheet" href="./premium-standard.css?v=11">
+<link rel="stylesheet" href="./premium-standard.css?v=12">
 <script src="./premium-standard.js?v=13"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=3">
 <script src="./polar-accesslink.js?v=4"></script>
