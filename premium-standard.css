@@ -350,3 +350,367 @@ main>.section:not(#polar-workout) :is(input,select,textarea):focus{outline:0!imp
     white-space:normal!important;
   }
 }
+
+/* Mobile Workout Logger presentation; the existing renderer and DOM stay authoritative. */
+@media(max-width:860px){
+  #workout.gp-logger-refined{
+    padding-bottom:calc(var(--simurgNativeBottom,90px) + 48px)!important;
+  }
+  #workout.gp-logger-refined .topbar{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:9px!important;
+    margin:0 0 10px!important;
+    padding:10px!important;
+    border:1px solid rgba(128,169,232,.14)!important;
+    border-radius:20px!important;
+    background:linear-gradient(180deg,rgba(13,23,35,.96),rgba(6,11,18,.98))!important;
+    box-shadow:0 14px 32px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.035)!important;
+  }
+  #workout.gp-logger-refined .topbar .title{
+    display:block!important;
+    margin:0!important;
+  }
+  #workout.gp-logger-refined .topbar .titleIcon,
+  #workout.gp-logger-refined .topbar .sub{
+    display:none!important;
+  }
+  #workout.gp-logger-refined .topbar h1{
+    margin:0!important;
+    color:#f7fbff!important;
+    font-size:22px!important;
+    line-height:1.05!important;
+    letter-spacing:-.45px!important;
+  }
+  #workout.gp-logger-refined .gp-logger-week-controls{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+    width:100%!important;
+    margin:0!important;
+  }
+  #workout.gp-logger-refined .gp-logger-week-controls>#weekLabel{
+    grid-column:1/-1!important;
+    order:1!important;
+    width:100%!important;
+    margin:0!important;
+    padding:7px 9px!important;
+    text-align:center!important;
+    border-radius:12px!important;
+    font-size:11px!important;
+    line-height:1.2!important;
+  }
+  #workout.gp-logger-refined .gp-logger-week-controls>button:nth-of-type(1),
+  #workout.gp-logger-refined .gp-logger-week-controls>button:nth-of-type(2){
+    order:2!important;
+  }
+  #workout.gp-logger-refined .gp-logger-week-controls>button:nth-of-type(3),
+  #workout.gp-logger-refined .gp-logger-week-controls>button:nth-of-type(4){
+    order:3!important;
+  }
+  #workout.gp-logger-refined .gp-logger-week-controls>button{
+    width:100%!important;
+    margin:0!important;
+    padding:9px 7px!important;
+    border-radius:13px!important;
+    font-size:10px!important;
+    line-height:1.12!important;
+    white-space:normal!important;
+  }
+
+  #workout.gp-logger-refined .dayProgram,
+  #workout.gp-logger-refined .weekStrip{
+    display:flex!important;
+    gap:8px!important;
+    width:100%!important;
+    margin:0 0 9px!important;
+    padding:2px 12px 8px 2px!important;
+    overflow-x:auto!important;
+    overflow-y:visible!important;
+    scroll-padding-inline:2px 12px!important;
+    scroll-snap-type:x proximity!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  #workout.gp-logger-refined .dayBtn{
+    flex:0 0 clamp(118px,34vw,136px)!important;
+    min-width:0!important;
+    padding:11px 9px!important;
+    border-radius:17px!important;
+    scroll-snap-align:start!important;
+    overflow:visible!important;
+  }
+  #workout.gp-logger-refined .dayBtn .main{
+    font-size:13px!important;
+    line-height:1.15!important;
+    white-space:normal!important;
+  }
+  #workout.gp-logger-refined .dayBtn .type{
+    display:block!important;
+    margin-top:5px!important;
+    font-size:10.5px!important;
+    line-height:1.25!important;
+    white-space:normal!important;
+    overflow:visible!important;
+  }
+  #workout.gp-logger-refined .dateBtn{
+    flex:0 0 78px!important;
+    min-width:0!important;
+    padding:9px 6px!important;
+    border-radius:15px!important;
+    scroll-snap-align:start!important;
+    overflow:visible!important;
+  }
+  #workout.gp-logger-refined .dateBtn .d{
+    font-size:12px!important;
+    line-height:1.1!important;
+    white-space:normal!important;
+  }
+  #workout.gp-logger-refined .dateBtn .day{
+    margin-top:4px!important;
+    font-size:9.5px!important;
+    line-height:1.1!important;
+    white-space:normal!important;
+    overflow:visible!important;
+  }
+  #workout.gp-logger-refined :is(.dayBtn,.dateBtn).active{
+    color:#f7fbff!important;
+    border-color:rgba(95,143,247,.66)!important;
+    background:linear-gradient(180deg,rgba(71,116,201,.30),rgba(17,36,67,.94))!important;
+    box-shadow:inset 0 -3px 0 #75a6ff,0 10px 24px rgba(28,75,150,.18)!important;
+  }
+
+  #workout.gp-logger-refined #psLoggerHero{
+    margin:0!important;
+    padding:12px!important;
+    border-radius:19px!important;
+    overflow:visible!important;
+  }
+  #workout.gp-logger-refined #psLoggerHero .psLoggerHeroTop{
+    align-items:flex-start!important;
+    gap:8px!important;
+    margin-bottom:8px!important;
+  }
+  #workout.gp-logger-refined #psLoggerHero .psLoggerKicker{
+    margin-bottom:4px!important;
+    font-size:7px!important;
+    letter-spacing:1px!important;
+  }
+  #workout.gp-logger-refined #psLoggerHero h2{
+    font-size:18px!important;
+    line-height:1.1!important;
+  }
+  #workout.gp-logger-refined #psLoggerHero .psLoggerDatePill{
+    padding:6px 8px!important;
+    font-size:9px!important;
+    line-height:1.1!important;
+  }
+  #workout.gp-logger-refined #psLoggerHero .psLoggerStatus{
+    align-items:center!important;
+    gap:8px!important;
+    margin-bottom:8px!important;
+    padding:8px 9px!important;
+    border-radius:12px!important;
+  }
+  #workout.gp-logger-refined #psLoggerHero .psLoggerStatus b,
+  #workout.gp-logger-refined #psLoggerHero .psLoggerStatus span{
+    font-size:10.5px!important;
+    line-height:1.25!important;
+  }
+  #workout.gp-logger-refined #psLoggerHero .psLoggerMetrics{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+  }
+  #workout.gp-logger-refined #psLoggerHero .psLoggerMetric{
+    min-width:0!important;
+    padding:9px!important;
+    border-radius:13px!important;
+  }
+  #workout.gp-logger-refined #psLoggerHero .psLoggerMetric small{
+    margin-bottom:4px!important;
+    font-size:7px!important;
+    white-space:normal!important;
+    overflow:visible!important;
+  }
+  #workout.gp-logger-refined #psLoggerHero .psLoggerMetric b{
+    font-size:18px!important;
+    line-height:1.05!important;
+    white-space:normal!important;
+    overflow:visible!important;
+  }
+  #workout.gp-logger-refined #psLoggerHero .psLoggerMetric span{
+    margin-top:3px!important;
+    font-size:8px!important;
+    white-space:normal!important;
+    overflow:visible!important;
+  }
+
+  #workout.gp-logger-refined #workoutGroups{
+    gap:10px!important;
+    overflow:visible!important;
+  }
+  #workout.gp-logger-refined #workoutGroups>.group{
+    margin:0!important;
+    padding:12px!important;
+    overflow:visible!important;
+    border-radius:20px!important;
+    border:1px solid rgba(128,169,232,.13)!important;
+    background:linear-gradient(180deg,rgba(13,22,34,.98),rgba(6,10,17,.99))!important;
+    box-shadow:0 14px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.03)!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .groupHead{
+    align-items:flex-start!important;
+    gap:9px!important;
+    margin:0 0 10px!important;
+    padding-bottom:9px!important;
+    border-bottom:1px solid rgba(255,255,255,.065)!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .groupHead>div:first-child{
+    min-width:0!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .groupTitle{
+    display:block!important;
+    color:#f7fbff!important;
+    font-size:14px!important;
+    line-height:1.15!important;
+    letter-spacing:.55px!important;
+    text-transform:uppercase!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .groupMeta{
+    display:block!important;
+    margin:4px 0 0!important;
+    color:#8fa1b5!important;
+    font-size:9.5px!important;
+    line-height:1.25!important;
+    white-space:normal!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .groupPill{
+    flex:0 0 auto!important;
+    padding:6px 8px!important;
+    border-radius:999px!important;
+    font-size:9px!important;
+    line-height:1!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .exerciseGrid{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+    overflow:visible!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .exerciseCard{
+    padding:10px!important;
+    overflow:visible!important;
+    border-radius:16px!important;
+    border:1px solid rgba(255,255,255,.065)!important;
+    background:rgba(255,255,255,.028)!important;
+    box-shadow:none!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .exTop{
+    align-items:center!important;
+    gap:8px!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .exName{
+    min-width:0!important;
+    color:#eef5ff!important;
+    font-size:13px!important;
+    line-height:1.25!important;
+    white-space:normal!important;
+    overflow:visible!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .setTable{
+    width:100%!important;
+    margin-top:7px!important;
+    table-layout:fixed!important;
+    font-size:11px!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .setTable th{
+    padding:6px 4px!important;
+    color:#718095!important;
+    font-size:8px!important;
+    letter-spacing:.75px!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .setTable td{
+    padding:7px 4px!important;
+    color:#dce7f5!important;
+    font-size:11.5px!important;
+  }
+
+  #workout.gp-logger-refined #workoutGroups>.activitySessionCard,
+  #workout.gp-logger-refined #psLoggerInsight{
+    margin:0!important;
+    padding:12px!important;
+    overflow:visible!important;
+    border-radius:18px!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .activitySessionTop{
+    gap:8px!important;
+    margin-bottom:8px!important;
+  }
+  #workout.gp-logger-refined #workoutGroups .activityStatsGrid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+  }
+  #workout.gp-logger-refined #psLoggerInsight{
+    font-size:11px!important;
+    line-height:1.45!important;
+  }
+  #workout.gp-logger-refined #psLoggerInsight b{
+    margin-bottom:5px!important;
+    font-size:13px!important;
+  }
+
+  #workout.gp-logger-refined :is(.gp-logger-muscle,.gp-logger-trend,.gp-logger-raw){
+    margin:0!important;
+    padding:12px!important;
+    overflow:visible!important;
+    border-radius:18px!important;
+  }
+  #workout.gp-logger-refined :is(.gp-logger-muscle,.gp-logger-trend,.gp-logger-raw)>h3{
+    margin:0 0 9px!important;
+    font-size:10px!important;
+    line-height:1.2!important;
+    letter-spacing:1px!important;
+  }
+  #workout.gp-logger-refined .gp-logger-muscle .legend{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:6px!important;
+    margin-top:9px!important;
+  }
+  #workout.gp-logger-refined .gp-logger-muscle .leg{
+    min-width:0!important;
+    gap:6px!important;
+    padding:6px 7px!important;
+    border-radius:10px!important;
+    background:rgba(255,255,255,.03)!important;
+    font-size:9.5px!important;
+  }
+  #workout.gp-logger-refined .gp-logger-trend .bars{
+    gap:7px!important;
+    margin-top:4px!important;
+    padding-inline:4px!important;
+  }
+  #workout.gp-logger-refined .gp-logger-trend .scaleLegend{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    gap:5px 9px!important;
+    margin-top:8px!important;
+    font-size:9px!important;
+  }
+  #workout.gp-logger-refined .gp-logger-raw .summaryRow{
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:space-between!important;
+    gap:9px!important;
+    padding:8px 0!important;
+    font-size:10px!important;
+    line-height:1.3!important;
+  }
+  #workout.gp-logger-refined .gp-logger-raw .summaryRow b{
+    font-size:10px!important;
+    line-height:1.3!important;
+    text-align:right!important;
+    white-space:normal!important;
+  }
+}
