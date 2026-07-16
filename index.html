@@ -10854,7 +10854,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   window.simurgV8Go=go; window.simurgV8OpenMenu=openMenu; window.simurgV8CloseMenu=closeMenu;
   ready(function(){
     if(!document.getElementById('simurgV8Nav')){
-      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Simurg Menü</b><br><span>Detay modüller</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgV11MenuGrid"><button onclick="simurgV8Go('weekly','menu')"><i>📅</i>Weekly</button><button onclick="simurgV8Go('program','menu')"><i>🧭</i>Program</button><button onclick="simurgV8Go('monthly','menu')"><i>🗓️</i>Monthly</button><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i>Coach</button><button onclick="simurgV8Go('data','menu')"><i>💾</i>Data</button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobile navigation"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="recovery" onclick="simurgV8Go('recovery','recovery')"><i>💠</i>Recovery</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>🏋️</i>Logger</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>📱</i>Gym</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
+      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Simurg OS modülleri</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Coaching</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('program','menu')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go('weekly','menu')"><i>📈</i><span><b>Weekly</b><small>Haftalık yük ve performans</small></span></button><button onclick="simurgV8Go('monthly','menu')"><i>🗓️</i><span><b>Monthly</b><small>Aylık gelişim görünümü</small></span></button><button onclick="simurgV8Go('data','menu')"><i>💾</i><span><b>Data Center</b><small>Cloud Sync, backup ve veri yönetimi</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobile navigation"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Logger</button><button data-key="polar" onclick="simurgV8Go('polar','polar')"><i>⌚</i>Polar</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
     }
     // Convert heavy browser scroll transitions to instant switches on phone.
     const oldShow=window.show;
@@ -11300,7 +11300,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     var grid=document.querySelector('#simurgV8Sheet .simurgV8Grid');
     if(grid && !grid.classList.contains('simurgV11MenuGrid')){
       grid.classList.add('simurgV11MenuGrid');
-      grid.innerHTML='<button onclick="simurgV8Go(\'weekly\',\'menu\')"><i>📅</i>Weekly</button><button onclick="simurgV8Go(\'program\',\'menu\')"><i>🧭</i>Program</button><button onclick="simurgV8Go(\'monthly\',\'menu\')"><i>🗓️</i>Monthly</button><button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i>Coach</button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>💾</i>Data</button>';
+      grid.innerHTML='<button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i><span><b>Coaching</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go(\'program\',\'menu\')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go(\'weekly\',\'menu\')"><i>📈</i><span><b>Weekly</b><small>Haftalık yük ve performans</small></span></button><button onclick="simurgV8Go(\'monthly\',\'menu\')"><i>🗓️</i><span><b>Monthly</b><small>Aylık gelişim görünümü</small></span></button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>💾</i><span><b>Data Center</b><small>Cloud Sync, backup ve veri yönetimi</small></span></button>';
     }
   }
   document.addEventListener('DOMContentLoaded',cleanupMenu);
@@ -11655,7 +11655,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   .psQuickGrid button small{display:block;color:#94a3b8!important;font-size:10px!important;letter-spacing:1.1px!important;text-transform:uppercase!important;margin-bottom:8px!important;}
 
   /* Six-tab bottom nav */
-  #simurgV8Nav{grid-template-columns:repeat(6,1fr)!important;left:8px!important;right:8px!important;height:70px!important;padding:6px!important;gap:3px!important;border-radius:27px!important;}
+  #simurgV8Nav{grid-template-columns:repeat(5,1fr)!important;left:8px!important;right:8px!important;height:70px!important;padding:6px!important;gap:3px!important;border-radius:27px!important;}
   #simurgV8Nav button{font-size:9.2px!important;border-radius:19px!important;padding:3px 1px!important;}
   #simurgV8Nav button i{font-size:16px!important;}
   #simurgV8Nav button.active{background:#f3f7fb!important;color:#05070b!important;box-shadow:0 9px 22px rgba(255,255,255,.08)!important;}
@@ -11709,8 +11709,8 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     var old=document.getElementById('simurgV8Nav'); if(old) old.remove();
     var shade=document.getElementById('simurgV8Shade'); if(!shade){document.body.insertAdjacentHTML('beforeend','<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div>');}
     var sheet=document.getElementById('simurgV8Sheet'); if(!sheet){document.body.insertAdjacentHTML('beforeend','<div id="simurgV8Sheet"></div>'); sheet=document.getElementById('simurgV8Sheet');}
-    sheet.innerHTML='<div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Simurg OS modülleri</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i><span><b>Coaching</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go(\'program\',\'menu\')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go(\'weekly\',\'menu\')"><i>📈</i><span><b>Weekly</b><small>Haftalık yük ve performans</small></span></button><button onclick="simurgV8Go(\'monthly\',\'menu\')"><i>🗓️</i><span><b>Monthly</b><small>Aylık gelişim görünümü</small></span></button><button onclick="simurgV8Go(\'polar\',\'menu\')"><i>⌁</i><span><b>Polar Data</b><small>Recovery, sleep ve load</small></span></button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>💾</i><span><b>Data Center</b><small>Sync, backup ve veri yönetimi</small></span></button></div>';
-    document.body.insertAdjacentHTML('beforeend','<nav id="simurgV8Nav" aria-label="Simurg premium mobile navigation"><button data-key="home" class="active" onclick="simurgV8Go(\'home\',\'home\')"><i>🏠</i>Ana</button><button data-key="recovery" onclick="simurgV8Go(\'recovery\',\'recovery\')"><i>💠</i>Recovery</button><button data-key="gym" onclick="simurgV8Go(\'gym\',\'gym\')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go(\'workout\',\'logger\')"><i>📋</i>Logger</button><button data-key="polar" onclick="simurgV8Go(\'polar\',\'polar\')"><i>⌚</i>Polar</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>');
+    sheet.innerHTML='<div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Simurg OS modülleri</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i><span><b>Coaching</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go(\'program\',\'menu\')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go(\'weekly\',\'menu\')"><i>📈</i><span><b>Weekly</b><small>Haftalık yük ve performans</small></span></button><button onclick="simurgV8Go(\'monthly\',\'menu\')"><i>🗓️</i><span><b>Monthly</b><small>Aylık gelişim görünümü</small></span></button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>💾</i><span><b>Data Center</b><small>Cloud Sync, backup ve veri yönetimi</small></span></button></div>';
+    document.body.insertAdjacentHTML('beforeend','<nav id="simurgV8Nav" aria-label="Simurg premium mobile navigation"><button data-key="home" class="active" onclick="simurgV8Go(\'home\',\'home\')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go(\'gym\',\'gym\')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go(\'workout\',\'logger\')"><i>📋</i>Logger</button><button data-key="polar" onclick="simurgV8Go(\'polar\',\'polar\')"><i>⌚</i>Polar</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>');
   }
   function ensureAlertPanel(){
     if(document.getElementById('simurgAlertPanel')) return;
@@ -12074,7 +12074,6 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     box-shadow:none!important;
   }
   #simurgV8Nav.ps-key-home button[data-key="home"],
-  #simurgV8Nav.ps-key-recovery button[data-key="recovery"],
   #simurgV8Nav.ps-key-gym button[data-key="gym"],
   #simurgV8Nav.ps-key-logger button[data-key="logger"],
   #simurgV8Nav.ps-key-polar button[data-key="polar"],
@@ -12086,7 +12085,6 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     font-weight:1000!important;
   }
   #simurgV8Nav.ps-key-home button[data-key="home"] i,
-  #simurgV8Nav.ps-key-recovery button[data-key="recovery"] i,
   #simurgV8Nav.ps-key-gym button[data-key="gym"] i,
   #simurgV8Nav.ps-key-logger button[data-key="logger"] i,
   #simurgV8Nav.ps-key-polar button[data-key="polar"] i,
@@ -12115,7 +12113,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     window.__simurgCurrentMobileKey=key;
     var nav=document.getElementById('simurgV8Nav');
     if(!nav) return;
-    ['home','recovery','gym','logger','polar','menu'].forEach(function(k){nav.classList.toggle('ps-key-'+k,k===key);});
+    ['home','gym','logger','polar','menu'].forEach(function(k){nav.classList.toggle('ps-key-'+k,k===key);});
     nav.querySelectorAll('button').forEach(function(b){b.classList.toggle('active', b.dataset.key===key);});
   }
   function bindStableNav(){
@@ -12307,7 +12305,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     var nav=document.getElementById('simurgV8Nav'); if(!nav) return;
     var key=window.__simurgCurrentMobileKey || window.__simurgStableNavKey || 'home';
     window.__simurgCurrentMobileKey=key; window.__simurgStableNavKey=key;
-    ['home','recovery','gym','logger','polar','menu'].forEach(function(k){nav.classList.toggle('ps-key-'+k,k===key);});
+    ['home','gym','logger','polar','menu'].forEach(function(k){nav.classList.toggle('ps-key-'+k,k===key);});
     nav.querySelectorAll('button[data-key]').forEach(function(b){
       var on=b.dataset.key===key;
       if(b.classList.contains('active')!==on) b.classList.toggle('active',on);
@@ -12539,7 +12537,7 @@ m Shell V4: Logger information architecture fix -->
 <style id="simurgPremiumShellV5V6Style">
 @media(max-width:860px){
   /* Hard persistent six-tab nav visual state */
-  #simurgV8Nav{grid-template-columns:repeat(6,1fr)!important;height:70px!important;left:8px!important;right:8px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;}
+  #simurgV8Nav{grid-template-columns:repeat(5,1fr)!important;height:70px!important;left:8px!important;right:8px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;}
   #simurgV8Nav button{transition:none!important;-webkit-tap-highlight-color:transparent!important;}
   #simurgV8Nav button.active{background:#f3f7fb!important;color:#05070b!important;border-color:#f3f7fb!important;box-shadow:0 10px 24px rgba(255,255,255,.08)!important;}
   #simurgV8Nav button:not(.active){background:transparent!important;color:#8f9aaa!important;}
@@ -12637,7 +12635,7 @@ m Shell V4: Logger information architecture fix -->
     if(!nav) return;
     var hasPolar=nav.querySelector('[data-key="polar"]');
     if(!hasPolar){
-      nav.innerHTML='<button data-key="home"><i>🏠</i>Ana</button><button data-key="recovery"><i>💠</i>Recovery</button><button data-key="gym"><i>🏋️</i>Gym</button><button data-key="logger"><i>📋</i>Logger</button><button data-key="polar"><i>⌚</i>Polar</button><button data-key="menu"><i>☰</i>Menü</button>';
+      nav.innerHTML='<button data-key="home"><i>🏠</i>Ana</button><button data-key="gym"><i>🏋️</i>Gym</button><button data-key="logger"><i>📋</i>Logger</button><button data-key="polar"><i>⌚</i>Polar</button><button data-key="menu"><i>☰</i>Menü</button>';
     }
     nav.querySelectorAll('button').forEach(function(btn){
       if(btn.__simurgV5V6Bound) return; btn.__simurgV5V6Bound=true;
@@ -13360,7 +13358,7 @@ m Shell V4: Logger information architecture fix -->
 
   #simurgV8Nav{
     display:grid!important;
-    grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
     position:fixed!important;
     left:8px!important;
     right:8px!important;
@@ -13420,7 +13418,6 @@ m Shell V4: Logger information architecture fix -->
 
   #simurgV8Nav button.active,
   #simurgV8Nav.ps-key-home button[data-key="home"],
-  #simurgV8Nav.ps-key-recovery button[data-key="recovery"],
   #simurgV8Nav.ps-key-gym button[data-key="gym"],
   #simurgV8Nav.ps-key-logger button[data-key="logger"],
   #simurgV8Nav.ps-key-polar button[data-key="polar"],
@@ -13454,7 +13451,7 @@ m Shell V4: Logger information architecture fix -->
   function keyFromId(id){
     if(id==='workout') return 'logger';
     if(id==='gym') return 'gym';
-    if(id==='recovery') return 'recovery';
+    if(id==='recovery') return 'home';
     if(id==='polar') return 'polar';
     if(id==='home') return 'home';
     return 'menu';
@@ -13470,7 +13467,7 @@ m Shell V4: Logger information architecture fix -->
 
     var nav=document.getElementById('simurgV8Nav');
     if(nav){
-      ['home','recovery','gym','logger','polar','menu'].forEach(function(k){nav.classList.toggle('ps-key-'+k,k===key);});
+      ['home','gym','logger','polar','menu'].forEach(function(k){nav.classList.toggle('ps-key-'+k,k===key);});
       nav.querySelectorAll('button[data-key]').forEach(function(button){button.classList.toggle('active',button.dataset.key===key);});
     }
   }
@@ -13843,7 +13840,6 @@ m Shell V4: Logger information architecture fix -->
 
   #simurgV8Nav button.active,
   #simurgV8Nav.ps-key-home button[data-key="home"],
-  #simurgV8Nav.ps-key-recovery button[data-key="recovery"],
   #simurgV8Nav.ps-key-gym button[data-key="gym"],
   #simurgV8Nav.ps-key-logger button[data-key="logger"],
   #simurgV8Nav.ps-key-polar button[data-key="polar"],
@@ -14057,7 +14053,6 @@ m Shell V4: Logger information architecture fix -->
 
   #simurgV8Nav button.active,
   #simurgV8Nav.ps-key-home button[data-key="home"],
-  #simurgV8Nav.ps-key-recovery button[data-key="recovery"],
   #simurgV8Nav.ps-key-gym button[data-key="gym"],
   #simurgV8Nav.ps-key-logger button[data-key="logger"],
   #simurgV8Nav.ps-key-polar button[data-key="polar"],
@@ -15783,6 +15778,9 @@ m Shell V4: Logger information architecture fix -->
 		    if(!entry) return '';
 		    return '<div class="polarCoachSentenceV1"><b>Readiness explanation</b>'+esc(signalMeaning(entry))+'</div>';
 		  }
+		  function polarWorkoutAccessHtml(){
+		    return '<button type="button" class="polarWorkoutAccessV1" onclick="simurgOpenPolarWorkout()"><span><small>POLAR FLOW</small><b>Workout / Antrenmanlar</b><em>Geçmiş antrenmanlar ve detaylı workout görünümü</em></span><i>›</i></button>';
+		  }
 		  function stagesHtml(entry){
 		    var stages=entry&&entry.sleepStages;
 	    if(!stages) return '';
@@ -15826,6 +15824,7 @@ m Shell V4: Logger information architecture fix -->
 		      section.innerHTML='<div class="polarDashboardV1">'
 		        +recoveryCardHtml(null,b)
 		        +'<div class="polarBridgeEmpty"><b>Waiting for Polar Bridge</b><p>Run the iOS Shortcut from Apple Health. This dashboard will fill with recovery score, sleep, HRV, activity load, and workout context.</p></div>'
+		        +polarWorkoutAccessHtml()
 		        +'</div>';
 		      return;
 		    }
@@ -15835,6 +15834,7 @@ m Shell V4: Logger information architecture fix -->
 		      +sleepStagesCardHtml(entry)
 		      +activityLoadCardHtml(entry)
 		      +coachSentenceHtml(entry)
+		      +polarWorkoutAccessHtml()
 		      +'</div>';
 		  }
 	  var lastHomePolarSentence='';
@@ -16021,10 +16021,10 @@ m Shell V4: Logger information architecture fix -->
 })();
 </script>
 <link rel="stylesheet" href="./polar-workout.css?v=9">
-<script src="./polar-workout.js?v=9"></script>
+<script src="./polar-workout.js?v=10"></script>
 <script src="./workout-source-policy.js?v=1"></script>
-<link rel="stylesheet" href="./premium-standard.css?v=17">
-<script src="./premium-standard.js?v=13"></script>
+<link rel="stylesheet" href="./premium-standard.css?v=22">
+<script src="./premium-standard.js?v=18"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=3">
 <script src="./polar-accesslink.js?v=4"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=16">

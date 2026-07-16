@@ -293,12 +293,6 @@
     var next=renderers[currentTab](workout);if(content.innerHTML!==next)content.innerHTML=next;
   }
   function ensureNavigation(){
-    var nav=document.getElementById('simurgV8Nav');
-    if(nav&&!nav.querySelector('[data-key="polarWorkout"]')){
-      var button=document.createElement('button');
-      button.dataset.key='polarWorkout';button.type='button';button.innerHTML='<i>⌁</i>Polar Workout';button.onclick=function(){window.simurgV8Go('polar-workout','polarWorkout');};
-      var menu=nav.querySelector('[data-key="menu"]');nav.insertBefore(button,menu||null);
-    }
     var desktop=document.querySelector('aside .nav');
     if(desktop&&!desktop.querySelector('[data-polar-workout-nav]')){
       var desktopButton=document.createElement('button');desktopButton.dataset.polarWorkoutNav='1';desktopButton.innerHTML='⌁ Polar Workout';desktopButton.onclick=function(){window.simurgOpenPolarWorkout(desktopButton);};desktop.appendChild(desktopButton);

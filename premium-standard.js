@@ -106,9 +106,53 @@
     if(model.readiness!=null&&model.readiness<60)return 'Toparlanma kontrollü. Planı koru ancak ilk çalışma setlerini daha sakin uygula.';
     return 'Bugünkü veriler mevcut planı destekliyor. Yoğunluğu kademeli artır ve form kalitesini koru.';
   }
+  function homeDateValue(){try{return selectedDate||today();}catch(e){return today();}}
+  function homeDateLabel(){var value=homeDateValue();try{return new Intl.DateTimeFormat('tr-TR',{day:'numeric',month:'long',year:'numeric',weekday:'long',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));}catch(e){return formatDate(value);}}
+  function readinessDecision(model){
+    if(model.readiness==null)return {label:model.hasRecoverySignals?'Sinyaller Birikiyor':'Veri Bekleniyor',tone:'waiting'};
+    if(model.readiness>=70)return {label:'Good to Train',tone:'good'};
+    if(model.readiness>=55)return {label:'Kontrollü İlerle',tone:'caution'};
+    return {label:'Recovery Öncelikli',tone:'recovery'};
+  }
+  function latestGymSession(model){
+    var rows=Array.isArray(model.data.workouts)?model.data.workouts.filter(function(row){return row&&row.date;}):[];
+    if(!rows.length)return null;
+    var date=rows.map(function(row){return row.date;}).sort().pop(),session=rows.filter(function(row){return row.date===date;}),summary;
+    try{summary=typeof calc==='function'?calc(session):null;}catch(e){summary=null;}
+    var name='Gym Session';
+    try{if(typeof getProgramType==='function'&&typeof dayName==='function')name=getProgramType(dayName(date))||name;}catch(e){}
+    return {date:date,name:name,sets:summary?summary.sets:session.length,reps:summary?summary.reps:null,volume:summary?summary.vol:null};
+  }
+  function gymSessionCard(model){
+    var session=latestGymSession(model);
+    if(!session)return '<button type="button" class="gp-card gp-recent-card gp-recent-workout" onclick="simurgV8Go(\'workout\',\'logger\')"><small class="gp-kicker">Son Antrenman</small><h3>Kayıt bekleniyor</h3><p>İlk Gym kaydı Logger ile burada görünecek.</p></button>';
+    return '<button type="button" class="gp-card gp-recent-card gp-recent-workout" onclick="simurgV8Go(\'workout\',\'logger\')"><small class="gp-kicker">Son Antrenman</small><h3>'+esc(session.name)+'</h3><span class="gp-recent-date">'+esc(activityDate(session.date,true))+'</span><div class="gp-recent-metrics"><span><b>'+esc(session.sets)+'</b><small>Set</small></span><span><b>'+esc(session.reps==null?'—':session.reps)+'</b><small>Tekrar</small></span><span><b>'+esc(session.volume==null?'—':Math.round(session.volume).toLocaleString('tr-TR'))+'</b><small>kg</small></span></div></button>';
+  }
+  function weeklySnapshot(model){
+    var start;
+    try{start=typeof mondayOf==='function'?mondayOf(homeDateValue()):homeDateValue();}catch(e){start=homeDateValue();}
+    var dates=[];for(var i=0;i<7;i++){try{dates.push(typeof addDays==='function'?addDays(start,i):start);}catch(e){dates.push(start);}}
+    var rows=Array.isArray(model.data.workouts)?model.data.workouts.filter(function(row){return dates.indexOf(row.date)>-1;}):[],summary;
+    try{summary=typeof calc==='function'?calc(rows):{sets:rows.length,reps:0,vol:0};}catch(e){summary={sets:rows.length,reps:0,vol:0};}
+    var daily=dates.map(function(date){var dayRows=rows.filter(function(row){return row.date===date;}),daySummary;try{daySummary=typeof calc==='function'?calc(dayRows):{vol:0};}catch(e){daySummary={vol:0};}return {date:date,volume:Number(daySummary.vol)||0,active:dayRows.length>0};});
+    var max=Math.max.apply(null,daily.map(function(day){return day.volume;}));
+    return {days:daily,max:max||1,active:daily.filter(function(day){return day.active;}).length,sets:summary.sets||0,volume:summary.vol||0};
+  }
+  function weeklyCard(model){
+    var week=weeklySnapshot(model),labels=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+    return '<div class="gp-card gp-weekly"><div class="gp-section-title"><div><small>HAFTALIK ÖZET</small><h3>Yük akışı</h3></div><b>'+week.active+'/7 gün</b></div><div class="gp-weekly-body"><div class="gp-week-bars">'+week.days.map(function(day,index){var level=day.active?Math.max(18,Math.round(day.volume/week.max*100)):8;return '<span><i style="--gp-day:'+level+'%"></i><small>'+labels[index]+'</small></span>';}).join('')+'</div><div class="gp-week-totals"><span><b>'+Math.round(week.volume).toLocaleString('tr-TR')+'</b><small>kg hacim</small></span><span><b>'+week.sets+'</b><small>set</small></span></div></div></div>';
+  }
   function overviewPane(model){
-    var activity=model.activity;
-    return '<div class="gp-home-pane active" data-home-pane="overview"><div class="gp-card"><div class="gp-card-head"><h2>Daily Summary</h2><span>'+esc(formatDate(today()))+'</span></div><div class="gp-ring-grid">'+ring('Sleep',model.sleepScore,'#57c7f2')+ring('Recovery',model.readiness,recoveryRingColor(model.readiness),model.readiness==null&&model.hasRecoverySignals?'SIGNALS':'')+ring('Load',model.load,loadRingColor(model.load))+'</div></div><div class="gp-duo"><div class="gp-card gp-plan"><small class="gp-kicker">Today\'s Plan</small><h3>'+esc(planName(model))+'</h3><p>Programı koru ve çalışma setlerine kontrollü bir yükselişle başla.</p></div>'+(activity?activityCard(activity,'Latest Activity',false):'<div class="gp-card gp-activity"><small class="gp-kicker">Latest Activity</small><h3>Henüz aktivite yok</h3><p>Polar Flow senkronizasyonundan sonra burada görünür.</p></div>')+'</div><div class="gp-card gp-coach"><i>⌁</i><p>'+esc(coachSentence(model))+'</p></div></div>';
+    if(window.innerWidth>860){var desktopActivity=model.activity;return '<div class="gp-home-pane active" data-home-pane="overview"><div class="gp-card"><div class="gp-card-head"><h2>Daily Summary</h2><span>'+esc(formatDate(today()))+'</span></div><div class="gp-ring-grid">'+ring('Sleep',model.sleepScore,'#57c7f2')+ring('Recovery',model.readiness,recoveryRingColor(model.readiness),model.readiness==null&&model.hasRecoverySignals?'SIGNALS':'')+ring('Load',model.load,loadRingColor(model.load))+'</div></div><div class="gp-duo"><div class="gp-card gp-plan"><small class="gp-kicker">Today\'s Plan</small><h3>'+esc(planName(model))+'</h3><p>Programı koru ve çalışma setlerine kontrollü bir yükselişle başla.</p></div>'+(desktopActivity?activityCard(desktopActivity,'Latest Activity',false):'<div class="gp-card gp-activity"><small class="gp-kicker">Latest Activity</small><h3>Henüz aktivite yok</h3><p>Polar Flow senkronizasyonundan sonra burada görünür.</p></div>')+'</div><div class="gp-card gp-coach"><i>⌁</i><p>'+esc(coachSentence(model))+'</p></div></div>';}
+    var activity=model.activity,decision=readinessDecision(model),score=model.readiness==null?'—':Math.round(model.readiness);
+    var activityHtml=activity?activityCard(activity,'Son Aktivite',false):'<div class="gp-card gp-recent-card gp-activity"><small class="gp-kicker">Son Aktivite</small><h3>Aktivite bekleniyor</h3><p>Polar Flow senkronizasyonundan sonra burada görünür.</p></div>';
+    return '<div class="gp-home-pane active" data-home-pane="overview">'
+      +'<div class="gp-card gp-prime '+decision.tone+'"><div class="gp-prime-score"><small>READINESS PRIME</small><b>'+esc(score)+'</b><strong>'+esc(decision.label)+'</strong></div><p>'+esc(coachSentence(model))+'</p><span>›</span></div>'
+      +'<div class="gp-card gp-horizon"><small class="gp-kicker">METRİK HORIZON</small><div class="gp-horizon-flow"><div class="recovery"><i>♥</i><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>Recovery</small></div><div class="sleep"><i>◒</i><b>'+esc(model.sleepScore==null?'—':Math.round(model.sleepScore))+'</b><small>Sleep</small></div><div class="load"><i>⌁</i><b>'+esc(model.load==null?'—':formatLoad(model.load))+'</b><small>Load</small></div></div></div>'
+      +'<button type="button" class="gp-card gp-plan" onclick="simurgV8Go(\'gym\',\'gym\')"><i>⌘</i><div><small class="gp-kicker">BUGÜNKÜ PLAN</small><h3>'+esc(planName(model))+'</h3><p>Programını koru ve çalışma setlerine kontrollü bir yükselişle başla.</p></div><span>›</span></button>'
+      +'<div class="gp-recent-grid">'+gymSessionCard(model)+activityHtml+'</div>'
+      +'<div class="gp-card gp-coach-flow"><small class="gp-kicker">KOÇUN BUGÜN SENİN İÇİN</small><div><i>◎</i><b>Ana Hedef</b><span>'+esc(planName(model))+' planında kaliteli tekrar ve tam hareket açıklığı.</span></div><div><i>◇</i><b>Dikkat</b><span>'+esc(recoveryInterpretation(model))+'</span></div><div class="opportunity"><i>↗</i><b>Fırsat</b><span>'+esc(loadInterpretation(model))+'</span></div></div>'
+      +weeklyCard(model)+'</div>';
   }
   function recoveryPane(model){
     var title=model.readiness!=null?(model.readiness>=70?'Ready signal':'Controlled signal'):(model.hasRecoverySignals?'Partial Recovery Data':'No recovery data yet');
@@ -128,11 +172,15 @@
     var metrics=[];if(model.load!=null)metrics.push(metric('Activity Load',formatLoad(model.load),''));if(model.activeEnergy!=null)metrics.push(metric('Active Energy',formatLoad(model.activeEnergy),'kcal'));if(model.rpe!=null)metrics.push(metric('RPE',formatLoad(model.rpe),'/10'));if(model.polar&&number(model.polar.trainingLoad)!=null)metrics.push(metric('Polar Workout Load',formatLoad(model.polar.trainingLoad),''));metrics.push(metric('Aggressiveness',status,''));
     return '<div class="gp-home-pane active" data-home-pane="load"><div class="gp-card"><div class="gp-card-head"><h2>Load Summary</h2><span class="gp-status '+tone+'">'+status+'</span></div><div class="gp-metric-grid">'+metrics.join('')+'</div><div class="gp-interpret">'+esc(loadInterpretation(model))+'</div></div>'+(model.activity?activityCard(model.activity,'Latest Workout / Activity',true):'')+'</div>';
   }
-  function homeShell(){return '<div class="gp-home-shell"><header class="gp-home-head"><img class="gp-home-icon" src="./icons/icon-192.png" alt="Simurg"><div class="gp-home-title"><small>SIMURG OS · DAILY</small><h1>Ready for Today</h1><p>Recovery, sleep, load and training status.</p></div></header><div class="gp-home-tabs" role="tablist">'+homeTabs.map(function(tab){return '<button class="gp-home-tab '+(tab===homeTab?'active':'')+'" data-home-tab="'+tab+'" role="tab" aria-selected="'+(tab===homeTab?'true':'false')+'" type="button" onclick="homePremiumSetTab(\''+tab+'\')">'+tab.toUpperCase()+'</button>';}).join('')+'</div><div id="gpHomeContent" class="gp-home-content"></div></div>';}
+  function homeShell(){
+    if(window.innerWidth>860)return '<div class="gp-home-shell"><header class="gp-home-head"><img class="gp-home-icon" src="./icons/icon-192.png" alt="Simurg"><div class="gp-home-title"><small>SIMURG OS · DAILY</small><h1>Ready for Today</h1><p>Recovery, sleep, load and training status.</p></div></header><div class="gp-home-tabs" role="tablist">'+homeTabs.map(function(tab){return '<button class="gp-home-tab '+(tab===homeTab?'active':'')+'" data-home-tab="'+tab+'" role="tab" aria-selected="'+(tab===homeTab?'true':'false')+'" type="button" onclick="homePremiumSetTab(\''+tab+'\')">'+tab.toUpperCase()+'</button>';}).join('')+'</div><div id="gpHomeContent" class="gp-home-content"></div></div>';
+    return '<div class="gp-home-shell"><header class="gp-home-head"><img class="gp-home-icon" src="./icons/icon-192.png" alt="Simurg"><div class="gp-home-title"><small>SIMURG OS</small><h1>Günaydın, Görkem</h1><p>Bugün için koçun seni analiz etti.</p></div><button type="button" class="gp-home-alert" aria-label="Bildirimler" onclick="simurgOpenAlert()">🔔<i></i></button></header><div class="gp-home-date"><span>▣</span><b id="gpHomeDateLabel">'+esc(homeDateLabel())+'</b><button type="button" aria-label="Önceki gün" onclick="selectedDate=addDays(selectedDate,-1);weekStart=mondayOf(selectedDate);render()">‹</button><button type="button" aria-label="Sonraki gün" onclick="selectedDate=addDays(selectedDate,1);weekStart=mondayOf(selectedDate);render()">›</button></div><div class="gp-home-tabs" role="tablist">'+homeTabs.map(function(tab){return '<button class="gp-home-tab '+(tab===homeTab?'active':'')+'" data-home-tab="'+tab+'" role="tab" aria-selected="'+(tab===homeTab?'true':'false')+'" type="button" onclick="homePremiumSetTab(\''+tab+'\')">'+tab.toUpperCase()+'</button>';}).join('')+'</div><div id="gpHomeContent" class="gp-home-content"></div></div>';
+  }
   function renderHome(){
     var home=document.getElementById('home');if(!home)return;
     home.classList.add('gp-home');home.dataset.globalPremium='1';
     if(!home.querySelector('.gp-home-shell'))home.innerHTML=homeShell();
+    var dateLabel=document.getElementById('gpHomeDateLabel');if(dateLabel)dateLabel.textContent=homeDateLabel();
     home.querySelectorAll('[data-home-tab]').forEach(function(button){var active=button.dataset.homeTab===homeTab;button.classList.toggle('active',active);button.setAttribute('aria-selected',active?'true':'false');});
     var content=document.getElementById('gpHomeContent');if(!content)return;
     var model=homeModel(),panes={overview:overviewPane,recovery:recoveryPane,sleep:sleepPane,load:loadPane},next=panes[homeTab](model);if(content.innerHTML!==next)content.innerHTML=next;
@@ -175,8 +223,7 @@
 
   function normalizeNav(){
     var nav=document.getElementById('simurgV8Nav');if(!nav)return;
-    var recovery=nav.querySelector('[data-key="recovery"]');if(recovery)recovery.remove();
-    var order=['home','gym','logger','polarWorkout','polar','menu'];
+    var order=['home','gym','logger','polar','menu'];
     var current=Array.from(nav.children).filter(function(item){return item.matches('button[data-key]');}).map(function(item){return item.dataset.key;});
     var expected=order.filter(function(key){return nav.querySelector('[data-key="'+key+'"]');});
     if(current.join('|')!==expected.join('|'))expected.forEach(function(key){var item=nav.querySelector('[data-key="'+key+'"]');if(item)nav.appendChild(item);});
