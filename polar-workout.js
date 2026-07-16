@@ -20,10 +20,6 @@
   }
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function num(value,fallback){var n=Number(value);return Number.isFinite(n)?n:(fallback==null?0:fallback);}
-  function usableNumber(value){if(value==null||value===''||value===false)return null;var n=Number(value);return Number.isFinite(n)&&n!==-1?n:null;}
-  function firstUsable(){for(var i=0;i<arguments.length;i++){var n=usableNumber(arguments[i]);if(n!=null)return n;}return null;}
-  function pick(object,keys){if(!object||typeof object!=='object')return null;for(var i=0;i<keys.length;i++){if(object[keys[i]]!=null)return object[keys[i]];}return null;}
-  function displayStatus(value){var raw=text(value,'');if(!raw||/^(?:-1|null|undefined|nan|load_status_not_available|not_available)$/i.test(raw))return null;return raw.replace(/^LOAD_STATUS_/i,'').replace(/[_-]+/g,' ').toLowerCase().replace(/(^|\s)\S/g,function(x){return x.toUpperCase();});}
   function clamp(value,min,max){return Math.max(min,Math.min(max,value));}
   function text(value,fallback){var result=String(value==null?'':value).trim();return result||fallback||'';}
   function workoutLabel(value){
@@ -133,26 +129,11 @@
   }
   function latest(){return selectedWorkout();}
   function loadStatus(workout){
-    var selected=workoutLoad(workout);if(!selected)return 'Unavailable';
-    var load=selected.value;
+    if(workout.trainingLoad==null) return 'Unavailable';
+    var load=num(workout.trainingLoad,0);
     if(load<=39) return 'Controlled';
     if(load<=69) return 'Moderate';
     return 'High';
-  }
-  function workoutLoad(workout){
-    workout=workout||{};var raw=workout.raw&&typeof workout.raw==='object'?workout.raw:{},pro=pick(raw,['training_load_pro','training-load-pro'])||{};
-    var candidates=[
-      {key:'cardio',label:'Cardio Load',value:firstUsable(workout.cardioLoad,pick(raw,['cardioLoad','cardio_load','cardio-load']),pick(pro,['cardioLoad','cardio_load','cardio-load']))},
-      {key:'training',label:'Training Load',value:firstUsable(workout.trainingLoad,pick(raw,['trainingLoad','training_load','training-load']))},
-      {key:'muscle',label:'Muscle Load',value:firstUsable(workout.muscleLoad,pick(raw,['muscleLoad','muscle_load','muscle-load']),pick(pro,['muscleLoad','muscle_load','muscle-load']))},
-      {key:'perceived',label:'Perceived Load',value:firstUsable(workout.perceivedLoad,pick(raw,['perceivedLoad','perceived_load','perceived-load']),pick(pro,['perceivedLoad','perceived_load','perceived-load']))}
-    ];
-    return candidates.find(function(item){return item.value!=null;})||null;
-  }
-  function dailyCardioLoad(date){
-    var data=root(),entry=data&&data.polarCardioLoad&&data.polarCardioLoad.daily&&data.polarCardioLoad.daily[date];if(!entry||typeof entry!=='object')return null;var raw=entry.raw&&typeof entry.raw==='object'?entry.raw:{};
-    var result={cardioLoad:firstUsable(entry.cardioLoad,pick(raw,['cardioLoad','cardio_load','cardio-load'])),strain:firstUsable(entry.strain,raw.strain),tolerance:firstUsable(entry.tolerance,raw.tolerance),ratio:firstUsable(entry.cardioLoadRatio,entry.ratio,pick(raw,['cardioLoadRatio','cardio_load_ratio','cardio-load-ratio'])),status:displayStatus(entry.cardioLoadStatus||entry.loadStatus||entry.status||pick(raw,['cardio_load_status','cardio-load-status']))};
-    return [result.cardioLoad,result.strain,result.tolerance,result.ratio,result.status].some(function(value){return value!=null&&value!=='';})?result:null;
   }
   function impactLabel(value){return text(value,'Unavailable').split('_').filter(function(part){return part.toLowerCase()!=='to';}).map(function(part){return part?part.charAt(0).toUpperCase()+part.slice(1):'';}).join(' - ');}
   function dateLabel(workout){
@@ -175,19 +156,23 @@
     return '<div class="pw-card"><div class="pw-card-title"><h2>'+esc(title)+'</h2><span class="pw-info">i</span></div><div class="pw-zone-list">'+zoneRows(workout,detailed)+'</div>'+(footnote?'<div class="pw-footnote"><i>◉</i>'+esc(footnote)+'</div>':'')+'</div>';
   }
   function metric(label,value,unit){return '<div class="pw-metric"><small>'+esc(label)+'</small><b>'+esc(value)+'<em>'+esc(unit||'')+'</em></b></div>';}
-  function heroMetric(icon,label,value,unit,tone){return '<div class="pw-hero-metric '+esc(tone||'')+'"><i>'+esc(icon)+'</i><div><small>'+esc(label)+'</small><b>'+esc(value)+'<em>'+esc(unit||'')+'</em></b></div></div>';}
   function formattedNumber(value){var number=Number(value);if(!Number.isFinite(number))return '—';var rounded=Math.round(number*10)/10;return String(Number.isInteger(rounded)?Math.round(rounded):rounded);}
   function heroCard(workout){
-    var load=workoutLoad(workout),metrics=[];
-    if(usableNumber(workout.activeCal)!=null)metrics.push(heroMetric('🔥','Calories',formattedNumber(workout.activeCal),'kcal','calories'));
-    if(usableNumber(workout.avgHR)!=null)metrics.push(heroMetric('♡','Average HR',formattedNumber(workout.avgHR),'bpm','avg-hr'));
-    if(usableNumber(workout.maxHR)!=null)metrics.push(heroMetric('♥','Maximum HR',formattedNumber(workout.maxHR),'bpm','max-hr'));
-    if(load)metrics.push(heroMetric('⌁',load.label,formattedNumber(load.value),'','load'));
-    return '<div class="pw-card pw-workout-hero"><div class="pw-workout-hero-top"><div class="pw-duration-block"><small>Duration</small><b>'+esc(compactDuration(workout.duration||'—'))+'</b></div><div class="pw-workout-identity"><span class="pw-source-badge"><i></i>'+esc(workout.source||'Polar Flow')+'</span><h2>'+esc(workoutLabel(workout.workoutType||workout.activityType))+'</h2><p>'+esc([dateLabel(workout),workout.startTime].filter(Boolean).join(' · '))+'</p></div></div><div class="pw-hero-metrics">'+metrics.join('')+'</div><div class="pw-interpret"><i>⌁</i><span>'+esc(overviewInterpretation(workout))+'</span></div></div>';
+    var metrics=[];
+    if(workout.duration)metrics.push(metric('Duration',workout.duration,''));
+    if(workout.activeCal!=null)metrics.push(metric('Calories',formattedNumber(workout.activeCal),'kcal'));
+    if(workout.avgHR!=null)metrics.push(metric('Avg HR',formattedNumber(workout.avgHR),'bpm'));
+    if(workout.maxHR!=null)metrics.push(metric('Max HR',formattedNumber(workout.maxHR),'bpm'));
+    if(workout.minHR!=null)metrics.push(metric('Min HR',formattedNumber(workout.minHR),'bpm'));
+    if(workout.rpe!=null)metrics.push(metric('RPE',formattedNumber(workout.rpe)+'/10',''));
+    metrics.push(metric('Source','Polar Flow',''));
+    var hasLoad=workout.trainingLoad!=null,ringHtml='';
+    if(hasLoad){var ring=clamp(num(workout.trainingLoad,0)*2,8,86);ringHtml='<div class="pw-load-ring" style="--pw-ring:'+ring+'%"><div class="pw-load-inner"><small>LOAD</small><b>'+esc(formattedNumber(workout.trainingLoad))+'</b><span>'+esc(loadStatus(workout))+'</span></div></div>';}
+    return '<div class="pw-card pw-hero '+(hasLoad?'':'no-load')+'"><div class="pw-hero-grid">'+ringHtml+'<div class="pw-metrics">'+metrics.join('')+'</div></div>'+(hasLoad?'<div class="pw-interpret"><i>⌁</i><span>'+esc(overviewInterpretation(workout))+'</span></div>':'')+'</div>';
   }
   function overviewInterpretation(workout){
     var low=pctFor(workout,'zone1')+pctFor(workout,'zone2');
-    if(!workoutLoad(workout)) return hasZoneData(workout)?'Nabız zone detayları Polar’dan geldi; bu seans için ayrı workout load değeri mevcut değil.':'Workout load ve sınıflandırılmış nabız zone detayı mevcut değil.';
+    if(workout.trainingLoad==null) return hasZoneData(workout)?'Nabız zone detayları Polar’dan geldi; antrenman yükü değeri mevcut değil.':'Antrenman yükü ve sınıflandırılmış nabız zone detayı mevcut değil.';
     if(loadStatus(workout)==='Controlled' && low>=50) return 'Seans kontrollü ilerlemiş. Düşük-orta yoğunluk dağılımı toparlanma maliyetini yönetilebilir tutuyor.';
     if(loadStatus(workout)==='High') return 'Antrenman yükü yüksek. Sonraki seansa kontrollü başla ve toparlanma sinyallerini izle.';
     return 'Mevcut yük yönetilebilir görünüyor. Sonraki çalışma setlerine kontrollü başla.';
@@ -204,7 +189,7 @@
     var impact=workout.trainingImpact||{},available=[impact.loadLevel,impact.recoveryEffect,impact.nextSessionAggressiveness].some(function(value){return text(value,'')!=='';});
     if(!available)return '';
     var next=impactLabel(workout.trainingImpact&&workout.trainingImpact.nextSessionAggressiveness);
-    var load=workoutLoad(workout);return '<div class="pw-card"><div class="pw-card-title"><h2>Training Impact</h2></div><div class="pw-impact-grid"><div class="pw-impact-item"><small>Training Load</small><b>'+esc(load?formattedNumber(load.value):'—')+'</b><span>'+esc(load?loadStatus(workout):'Unavailable')+'</span></div><div class="pw-impact-item"><small>RPE</small><b>'+esc(workout.rpe==null?'—':formattedNumber(workout.rpe)+'/10')+'</b><span>'+esc(workout.rpeLabel||'—')+'</span></div><div class="pw-impact-item"><small>Next Session</small><b class="pw-impact-value">'+esc(next)+'</b><span>Suggested Focus</span></div></div><div class="pw-coach-inline"><b>▣</b> Sonraki seansa kontrollü başla ve mevcut planı toparlanma sinyallerine göre uygula.</div></div>';
+    return '<div class="pw-card"><div class="pw-card-title"><h2>Training Impact</h2></div><div class="pw-impact-grid"><div class="pw-impact-item"><small>Training Load</small><b>'+esc(workout.trainingLoad==null?'—':formattedNumber(workout.trainingLoad))+'</b><span>'+esc(loadStatus(workout))+'</span></div><div class="pw-impact-item"><small>RPE</small><b>'+esc(workout.rpe==null?'—':formattedNumber(workout.rpe)+'/10')+'</b><span>'+esc(workout.rpeLabel||'—')+'</span></div><div class="pw-impact-item"><small>Next Session</small><b class="pw-impact-value">'+esc(next)+'</b><span>Suggested Focus</span></div></div><div class="pw-coach-inline"><b>▣</b> Sonraki seansa kontrollü başla ve mevcut planı toparlanma sinyallerine göre uygula.</div></div>';
   }
   function seriesValues(workout){
     if(!Array.isArray(workout.heartRateSeries)) return [];
@@ -257,9 +242,8 @@
     return '<div class="pw-card"><div class="pw-card-title"><h2>◉ &nbsp;Zone Interpretation</h2></div><p class="pw-copy">'+esc(copy)+'</p><p class="pw-copy">Yüzdeler Polar’dan geldiği haliyle korunur; sınıflandırılmamış süre yeniden dağıtılmaz.</p></div>';
   }
   function loadProCard(workout){
-    var load=workoutLoad(workout);if(load)return '<div class="pw-card"><div class="pw-card-title"><h2>Training Load Pro</h2></div><div class="pw-load-pro"><div class="pw-load-number"><b>'+esc(formattedNumber(load.value))+'</b><span>'+esc(loadStatus(workout))+'</span></div><div class="pw-load-copy"><small>'+esc(load.label)+'</small><p>Bu değer seçili Polar workout’un kendi yük verisidir. Günlük Cardio Load ile toplanmaz.</p></div></div></div>';
-    var daily=dailyCardioLoad(workout.date);if(daily){var metrics=[];if(daily.cardioLoad!=null)metrics.push(metric('Günlük Cardio Load',formattedNumber(daily.cardioLoad),''));if(daily.strain!=null)metrics.push(metric('Strain',formattedNumber(daily.strain),''));if(daily.tolerance!=null)metrics.push(metric('Tolerance',formattedNumber(daily.tolerance),''));if(daily.ratio!=null)metrics.push(metric('Ratio',formattedNumber(daily.ratio),''));if(daily.status)metrics.push(metric('Load Status',daily.status,''));return '<div class="pw-card pw-daily-load"><div class="pw-card-title"><h2>Günün Cardio Load Özeti</h2><span class="pw-info">i</span></div><p>Polar bu seans için ayrı workout load değeri göndermedi. Aşağıda günün Cardio Load özeti gösteriliyor.</p><div class="pw-daily-load-grid">'+metrics.join('')+'</div></div>';}
-    return '<div class="pw-card pw-load-empty"><div class="pw-card-title"><h2>Bu seans için yük verisi bulunmuyor</h2></div><p>Polar süre, nabız ve zone verisini gönderdi ancak bu antrenman için training load hesaplamadı.</p><small>Bu durum bazı workout türlerinde normal olabilir.</small></div>';
+    if(workout.trainingLoad==null)return '<div class="pw-card pw-compact-note"><div class="pw-card-title"><h2>Antrenman yükü mevcut değil</h2></div><p>Polar bu antrenman için training load değeri göndermedi.</p></div>';
+    return '<div class="pw-card"><div class="pw-card-title"><h2>Training Load Pro</h2></div><div class="pw-load-pro"><div class="pw-load-number"><b>'+esc(formattedNumber(workout.trainingLoad))+'</b><span>'+esc(loadStatus(workout))+'</span></div><div class="pw-load-copy"><small>'+esc(workout.trainingLoadType||'Kardiyo yükü TRIMP')+'</small><p>Mevcut yükü toparlanma sinyalleriyle birlikte değerlendir ve sonraki seansa kontrollü başla.</p></div></div></div>';
   }
   function hasImpactData(workout){var impact=workout.trainingImpact||{};return [impact.loadLevel,impact.recoveryEffect,impact.nextSessionAggressiveness].some(function(value){return text(value,'')!=='';});}
   function loadImpactCard(workout){

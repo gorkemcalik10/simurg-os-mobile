@@ -35,24 +35,6 @@
   function polarWorkout(data){return data.polarWorkouts&&data.polarWorkouts.latest?data.polarWorkouts.latest:null;}
   function polarLatest(data,key){return data[key]&&data[key].latest?data[key].latest:null;}
   function nightlyStatusLabel(value){var labels={1:'Very Poor',2:'Poor',3:'Compromised',4:'OK',5:'Good',6:'Very Good'};return labels[Math.round(number(value)||0)]||null;}
-  function signalNumber(value){if(value==null||value===''||value===false)return null;var n=Number(value);return Number.isFinite(n)&&n!==-1?n:null;}
-  function firstSignalNumber(){for(var i=0;i<arguments.length;i++){var n=signalNumber(arguments[i]);if(n!=null)return n;}return null;}
-  function rawValue(raw,keys){if(!raw||typeof raw!=='object')return null;for(var i=0;i<keys.length;i++){if(raw[keys[i]]!=null)return raw[keys[i]];}return null;}
-  function nightlyLabel(value){
-    var numeric=signalNumber(value),labels={1:'Çok düşük',2:'Düşük',3:'Baskılanmış',4:'Normal',5:'İyi',6:'Çok iyi'};
-    if(numeric!=null&&labels[Math.round(numeric)])return labels[Math.round(numeric)];
-    var raw=text(value,'').toLowerCase().replace(/[\s-]+/g,'_');
-    return {very_poor:'Çok düşük',poor:'Düşük',compromised:'Baskılanmış',ok:'Normal',good:'İyi',very_good:'Çok iyi'}[raw]||null;
-  }
-  function nightlyHeartRate(entry){
-    entry=entry||{};var raw=entry.raw&&typeof entry.raw==='object'?entry.raw:{};
-    return firstSignalNumber(entry.nightlyHeartRateAvg,entry.heartRateAvg,entry.averageHeartRate,entry.heart_rate_avg,raw.nightlyHeartRateAvg,raw.heartRateAvg,raw.averageHeartRate,raw.heart_rate_avg,raw['heart-rate-avg']);
-  }
-  function recoveryProgress(data){
-    var daily=data.polarNightlyRecharge&&data.polarNightlyRecharge.daily||{},nights=Object.keys(daily).filter(function(date){var x=daily[date]||{},raw=x.raw||{},status=nightlyLabel(x.nightlyRechargeStatus!=null?x.nightlyRechargeStatus:raw.nightly_recharge_status);return [firstSignalNumber(x.heartRateVariabilityAvg,x.hrv,raw.heart_rate_variability_avg),nightlyHeartRate(x),firstSignalNumber(x.breathingRateAvg,x.respiratoryRate,raw.breathing_rate_avg),status].some(function(v){return v!=null&&v!=='';});}).length;
-    var explicit=text(data.readinessMode||(data.readinessCoach&&data.readinessCoach.mode),'');
-    return {nights:Math.min(nights,7),totalNights:nights,required:7,mode:explicit||(nights>=14?'FULL_COACH':nights>=7?'LEARNING_BASELINE':'DATA_COLLECTION'),confidence:nights>=14?'Yüksek':nights>=7?'Orta':'Düşük'};
-  }
   function secondsToMinutes(value){var n=number(value);return n==null?null:n/60;}
   function latestApple(data){
     var rows=Array.isArray(data.appleWatch)?data.appleWatch.slice().filter(function(x){return x&&x.date;}):[];
@@ -64,14 +46,13 @@
     var polarSleep=polarLatest(data,'polarSleep'),polarNightly=polarLatest(data,'polarNightlyRecharge'),polarCardio=polarLatest(data,'polarCardioLoad');
     var sleepMinutes=firstNumber(polarSleep&&polarSleep.durationMinutes,polarSleep&&secondsToMinutes(polarSleep.durationSeconds),bridge.sleepDurationMinutes,recovery.sleepDurationMinutes,recovery.sleepMinutes);
     var sleepScore=firstNumber(polarSleep&&polarSleep.sleepScore,bridge.sleepScore,recovery.sleepScore);
-    var nightly=firstSignalNumber(bridge.nightlyRecharge,recovery.nightlyRecharge,recovery.nightlyRechargeScore);
-    var nightlyRaw=polarNightly&&polarNightly.raw||{},nightlyDisplay=nightlyLabel(polarNightly&&(polarNightly.nightlyRechargeStatus!=null?polarNightly.nightlyRechargeStatus:rawValue(nightlyRaw,['nightly_recharge_status','nightly-recharge-status'])))||nightlyLabel(nightly)||(nightly==null?null:nightly);
-    var readiness=firstSignalNumber(recovery.readiness,recovery.readinessScore);
-    var hrv=firstSignalNumber(polarNightly&&polarNightly.heartRateVariabilityAvg,nightlyRaw.heart_rate_variability_avg,nightlyRaw['heart-rate-variability-avg'],bridge.hrvMs,recovery.hrvMs,recovery.hrv);
-    var sleepHr=nightlyHeartRate(polarNightly)||firstSignalNumber(bridge.sleepHr,recovery.sleepHr,recovery.sleepHR);
-    var rhr=firstSignalNumber(bridge.restingHr,recovery.restingHr,recovery.restingHR,recovery.rhr,polarNightly&&polarNightly.heartRateAvg);
-    var respiratory=firstSignalNumber(polarNightly&&polarNightly.breathingRateAvg,nightlyRaw.breathing_rate_avg,nightlyRaw['breathing-rate-avg'],bridge.respiratoryRate,recovery.respiratoryRate);
-    var recoveryState=recoveryProgress(data);
+    var nightly=firstNumber(bridge.nightlyRecharge,recovery.nightlyRecharge,recovery.nightlyRechargeScore);
+    var nightlyDisplay=nightlyStatusLabel(polarNightly&&polarNightly.nightlyRechargeStatus)||(nightly==null?null:nightly);
+    var readiness=firstNumber(recovery.readiness,recovery.readinessScore,nightly);
+    var hrv=firstNumber(polarNightly&&polarNightly.heartRateVariabilityAvg,bridge.hrvMs,recovery.hrvMs,recovery.hrv);
+    var rhr=firstNumber(polarNightly&&polarNightly.heartRateAvg,bridge.restingHr,recovery.restingHr,recovery.restingHR,recovery.rhr);
+    var sleepHr=firstNumber(bridge.sleepHr,recovery.sleepHr,recovery.sleepHR);
+    var respiratory=firstNumber(polarNightly&&polarNightly.breathingRateAvg,bridge.respiratoryRate,recovery.respiratoryRate);
     var load=firstNumber(polarCardio&&polarCardio.cardioLoad,polar&&polar.trainingLoad,bridge.cardioLoad,recovery.activityLoad,recovery.physicalLoad);
     var activeEnergy=firstNumber(bridge.activeEnergyKcal,bridge.activeEnergy,polar&&polar.activeCal,polar&&polar.calories,apple&&apple.activeCal);
     var gymRpes=gym.map(function(x){return number(x.rpe);}).filter(function(x){return x!=null;});
@@ -81,10 +62,10 @@
       apple?{name:activityLabel(apple.activityType||apple.workoutType||'Activity'),duration:apple.duration,date:apple.date,startTime:apple.startTime,cal:apple.activeCal,avgHR:apple.avgHR,maxHR:apple.maxHR,source:'Apple Watch Legacy'}:
       bridge.workouts&&bridge.workouts[0]?{name:activityLabel(bridge.workouts[0].type||'Workout'),duration:bridge.workouts[0].duration,date:bridge.date,cal:bridge.workouts[0].activeEnergy,avgHR:bridge.workouts[0].avgHr,maxHR:bridge.workouts[0].maxHr,source:'Polar Bridge'}:null;
     var hasRecoverySignals=[hrv,rhr,respiratory,nightlyDisplay].some(function(value){return value!=null&&value!=='';});
-    return {data:data,bridge:bridge,recovery:recovery,polar:polar,apple:apple,gym:gym,workoutSource:chosen&&chosen.source,polarSleep:polarSleep,polarNightly:polarNightly,polarCardio:polarCardio,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,hasRecoverySignals:hasRecoverySignals,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,recoveryState:recoveryState,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
+    return {data:data,bridge:bridge,recovery:recovery,polar:polar,apple:apple,gym:gym,workoutSource:chosen&&chosen.source,polarSleep:polarSleep,polarNightly:polarNightly,polarCardio:polarCardio,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,hasRecoverySignals:hasRecoverySignals,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
   }
   function metric(label,value,unit){var textValue=label==='Latest Activity'||label==='Aggressiveness';return '<div class="gp-metric '+(textValue?'gp-metric-text':'')+'"><small>'+esc(label)+'</small><b>'+esc(value==null?'—':value)+(value==null?'':'<em>'+esc(unit||'')+'</em>')+'</b></div>';}
-  function ring(label,value,color,stateLabel){var pct=value==null?0:clamp(value,0,100);return '<div class="gp-ring-card '+(stateLabel?'partial':'')+'"><div class="gp-ring" style="--gp-value:'+pct+'%;--gp-ring-color:'+color+'"><div><b>'+esc(value==null&&stateLabel?'Veri':value==null?'—':Math.round(value))+'</b><small>'+esc(stateLabel||'/100')+'</small></div></div><small>'+esc(label)+'</small>'+(stateLabel?'<span>Gerçek sinyaller birikiyor</span>':'')+'</div>';}
+  function ring(label,value,color,stateLabel){var pct=value==null?0:clamp(value,0,100);return '<div class="gp-ring-card '+(stateLabel?'partial':'')+'"><div class="gp-ring" style="--gp-value:'+pct+'%;--gp-ring-color:'+color+'"><div><b>'+esc(value==null?'—':Math.round(value))+'</b><small>'+esc(stateLabel||'/100')+'</small></div></div><small>'+esc(label)+'</small>'+(stateLabel?'<span>Partial data</span>':'')+'</div>';}
   function recoveryRingColor(value){if(value==null||value>=60)return '#80c72e';if(value>=40)return '#f1b721';return '#e33a46';}
   function loadRingColor(value){if(value==null||value<55)return '#168ed5';if(value<70)return '#f1b721';if(value<85)return '#e77d18';return '#e33a46';}
   function planName(model){
@@ -103,7 +84,7 @@
   }
   function recoveryInterpretation(model){
     if(!model.hasRecoverySignals&&model.readiness==null)return 'Henüz toparlanma verisi yok.';
-    if(model.readiness==null&&model.hasRecoverySignals){var parts=['Readiness Coach veri birikim modunda.'];if(model.nightlyDisplay)parts.push('Nightly Recharge: '+model.nightlyDisplay+'.');if(/düşük|baskılanmış/i.test(model.nightlyDisplay||''))parts.push('Toparlanmayı önceliklendir.');if(model.hrv!=null)parts.push('HRV '+formatLoad(model.hrv)+' ms; kişisel baseline oluşmadan iyi veya kötü yorumu yapılmıyor.');if(model.rhr!=null)parts.push('Dinlenik nabız '+formatLoad(model.rhr)+' bpm.');if(model.respiratory!=null)parts.push('Solunum '+formatLoad(model.respiratory)+'/dk.');return parts.join(' ');}
+    if(model.readiness==null&&model.hasRecoverySignals)return 'Bugünkü toparlanma verisi kısmi. Mevcut HRV, dinlenik nabız ve solunum sinyallerini kontrollü yorumla; net recovery skoru için daha fazla Polar verisi gerekiyor.';
     if((model.readiness!=null&&model.readiness<60)||(model.hrv!=null&&model.hrv<45)||(model.rhr!=null&&model.rhr>60))return 'Toparlanma sinyalleri kontrollü bir başlangıç öneriyor. Planı koru, agresif progresyondan kaçın.';
     return 'Mevcut toparlanma sinyalleri bugünkü planı destekliyor. Çalışma setlerine kontrollü başla.';
   }
@@ -127,12 +108,11 @@
   }
   function overviewPane(model){
     var activity=model.activity;
-    return '<div class="gp-home-pane active" data-home-pane="overview"><div class="gp-card"><div class="gp-card-head"><h2>Daily Summary</h2><span>'+esc(formatDate(today()))+'</span></div><div class="gp-ring-grid">'+ring('Sleep',model.sleepScore,'#57c7f2')+ring('Recovery',model.readiness,recoveryRingColor(model.readiness),model.readiness==null&&model.hasRecoverySignals?'Birikiyor':'')+ring('Load',model.load,loadRingColor(model.load))+'</div></div><div class="gp-duo"><div class="gp-card gp-plan"><small class="gp-kicker">Today\'s Plan</small><h3>'+esc(planName(model))+'</h3><p>Programı koru ve çalışma setlerine kontrollü bir yükselişle başla.</p></div>'+(activity?activityCard(activity,'Latest Activity',false):'<div class="gp-card gp-activity"><small class="gp-kicker">Latest Activity</small><h3>Henüz aktivite yok</h3><p>Polar Flow senkronizasyonundan sonra burada görünür.</p></div>')+'</div><div class="gp-card gp-coach"><i>⌁</i><p>'+esc(coachSentence(model))+'</p></div></div>';
+    return '<div class="gp-home-pane active" data-home-pane="overview"><div class="gp-card"><div class="gp-card-head"><h2>Daily Summary</h2><span>'+esc(formatDate(today()))+'</span></div><div class="gp-ring-grid">'+ring('Sleep',model.sleepScore,'#57c7f2')+ring('Recovery',model.readiness,recoveryRingColor(model.readiness),model.readiness==null&&model.hasRecoverySignals?'SIGNALS':'')+ring('Load',model.load,loadRingColor(model.load))+'</div></div><div class="gp-duo"><div class="gp-card gp-plan"><small class="gp-kicker">Today\'s Plan</small><h3>'+esc(planName(model))+'</h3><p>Programı koru ve çalışma setlerine kontrollü bir yükselişle başla.</p></div>'+(activity?activityCard(activity,'Latest Activity',false):'<div class="gp-card gp-activity"><small class="gp-kicker">Latest Activity</small><h3>Henüz aktivite yok</h3><p>Polar Flow senkronizasyonundan sonra burada görünür.</p></div>')+'</div><div class="gp-card gp-coach"><i>⌁</i><p>'+esc(coachSentence(model))+'</p></div></div>';
   }
   function recoveryPane(model){
-    var progress=model.recoveryState||{nights:0,required:7,mode:'DATA_COLLECTION',confidence:'Düşük'},status=model.readiness!=null?(model.readiness>=70?'Hazır':model.readiness>=50?'Kontrollü':'Toparlanmayı Önceliklendir'):(/düşük|baskılanmış/i.test(model.nightlyDisplay||'')?'Toparlanmayı Önceliklendir':progress.mode==='DATA_COLLECTION'?'Veri Birikiyor':'Kontrollü'),center=model.readiness!=null?Math.round(model.readiness):(progress.mode==='DATA_COLLECTION'?'Veri Birikiyor':status),ringProgress=model.readiness!=null?clamp(model.readiness,0,100):clamp(progress.nights/progress.required*100,0,100),metrics=[];
-    if(model.nightlyDisplay)metrics.push(metric('Nightly Recharge',model.nightlyDisplay,''));if(model.hrv!=null)metrics.push(metric('HRV',model.hrv,'ms'));if(model.rhr!=null)metrics.push(metric('Resting HR',model.rhr,'bpm'));if(model.respiratory!=null)metrics.push(metric('Respiratory Rate',model.respiratory,'/min'));if(model.sleepHr!=null)metrics.push(metric('Sleep HR',model.sleepHr,'bpm'));if(model.readiness!=null)metrics.push(metric('Recovery Score',model.readiness,'/100'));
-    return '<div class="gp-home-pane active" data-home-pane="recovery"><div class="gp-card"><div class="gp-hero-row"><div><div class="gp-ring gp-hero-ring gp-recovery-ring" style="--gp-value:'+ringProgress+'%;--gp-ring-color:'+(model.readiness==null?'#25cb84':recoveryRingColor(model.readiness))+'"><div><b class="'+(model.readiness==null?'gp-recovery-status':'')+'">'+esc(center)+'</b><small>'+(model.readiness==null?'Durum':'Recovery')+'</small></div></div><div class="gp-recovery-progress"><b>'+progress.nights+' / '+progress.required+' gece</b><span>'+esc(progress.confidence)+' güven</span></div></div><div class="gp-hero-copy"><small class="gp-kicker">Recovery</small><h2>'+esc(status)+'</h2><p>'+esc(recoveryInterpretation(model))+'</p></div></div></div>'+(model.hasRecoverySignals||model.readiness!=null?'<div class="gp-card"><div class="gp-card-head"><h2>Recovery Metrics</h2><span>'+(model.polarNightly?'Polar AccessLink':'Polar')+'</span></div>'+(metrics.length?'<div class="gp-metric-grid">'+metrics.join('')+'</div>':'<div class="gp-empty compact">Henüz hesaplanmadı</div>')+'<div class="gp-interpret">'+esc(recoveryInterpretation(model))+'</div></div>':'')+'</div>';
+    var title=model.readiness!=null?(model.readiness>=70?'Ready signal':'Controlled signal'):(model.hasRecoverySignals?'Partial Recovery Data':'No recovery data yet');
+    return '<div class="gp-home-pane active" data-home-pane="recovery"><div class="gp-card"><div class="gp-hero-row"><div class="gp-ring gp-hero-ring" style="--gp-value:'+(model.readiness==null?0:clamp(model.readiness,0,100))+'%;--gp-ring-color:'+(model.readiness==null?'#64748b':'#80c72e')+'"><div><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>'+(model.readiness==null&&model.hasRecoverySignals?'SIGNALS':'Recovery')+'</small></div></div><div class="gp-hero-copy"><small class="gp-kicker">Recovery</small><h2>'+esc(title)+'</h2><p>'+esc(recoveryInterpretation(model))+'</p></div></div></div>'+(model.hasRecoverySignals||model.readiness!=null?'<div class="gp-card"><div class="gp-card-head"><h2>Recovery Metrics</h2><span>'+(model.polarNightly?'Polar AccessLink':'Polar')+'</span></div><div class="gp-metric-grid">'+metric('Nightly Recharge',model.nightlyDisplay,'')+metric('HRV',model.hrv,'ms')+metric('Resting HR',model.rhr,'bpm')+metric('Respiratory Rate',model.respiratory,'/min')+metric('Sleep HR',model.sleepHr,'bpm')+metric('Recovery Score',model.readiness,'/100')+'</div><div class="gp-interpret">'+esc(recoveryInterpretation(model))+'</div></div>':'')+'</div>';
   }
   function stageBar(stages){
     if(!stages)return '<div class="gp-empty compact">Uyku evreleri henüz mevcut değil.</div>';
