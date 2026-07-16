@@ -1,23 +1,19 @@
-const SIMURG_CACHE = 'simurg-horizon-v7-v39';
+const SIMURG_CACHE = 'simurg-mobile-menu-logger-polar-desktop-cleanup-v2';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './polar-workout.css?v=11',
-  './polar-workout.js?v=13',
-  './workout-source-policy.js?v=2',
+  './polar-workout.css?v=10',
+  './polar-workout.js?v=10',
+  './workout-source-policy.js?v=1',
   './premium-standard.css?v=12',
   './premium-standard.js?v=13',
   './polar-accesslink.css?v=3',
-  './polar-accesslink.js?v=9',
+  './polar-accesslink.js?v=4',
   './desktop-alignment.css?v=18',
-  './desktop-alignment.js?v=22',
+  './desktop-alignment.js?v=18',
   './gym-draft-navigation-coach.css?v=11',
-  './gym-draft-navigation-coach.js?v=12',
-  './coach-logic-v3.css?v=19',
-  './coach-logic-v3.js?v=21',
-  './desktop-refinement-v3.css?v=20',
-  './desktop-refinement-v3.js?v=11',
+  './gym-draft-navigation-coach.js?v=11',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

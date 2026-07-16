@@ -32,7 +32,6 @@
     return raw.replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim().toLowerCase().replace(/(^|\s)\S/g,function(letter){return letter.toUpperCase();});
   }
   function seconds(value){
-    if(typeof window.SimurgWorkoutSource==='object'&&typeof window.SimurgWorkoutSource.durationMinutes==='function')return Math.max(0,window.SimurgWorkoutSource.durationMinutes(value)*60);
     if(typeof value==='number' && Number.isFinite(value)) return Math.max(0,value);
     var parts=String(value||'').split(':').map(Number);
     if(parts.some(function(v){return !Number.isFinite(v);})) return 0;
@@ -40,28 +39,12 @@
     if(parts.length===2) return parts[0]*60+parts[1];
     return parts.length===1?parts[0]:0;
   }
-  function durationText(value){
-    var total=Math.max(0,Math.round(value||0)),hours=Math.floor(total/3600),minutes=Math.floor((total%3600)/60),secs=total%60;
-    return [hours,minutes,secs].map(function(part){return String(part).padStart(2,'0');}).join(':');
-  }
-  function rawZoneRows(input){
-    var raw=input&&input.raw&&typeof input.raw==='object'?input.raw:{},rows=raw.heart_rate_zones||raw['heart-rate-zones']||input&&input.heart_rate_zones||input&&input['heart-rate-zones'];
-    return Array.isArray(rows)?rows:[];
-  }
-  function normalizePolarZoneData(input){
-    input=input&&typeof input==='object'?input:{};var rows=rawZoneRows(input),provided=input.zones&&typeof input.zones==='object'&&!Array.isArray(input.zones)?input.zones:{},zones={zone1:'00:00:00',zone2:'00:00:00',zone3:'00:00:00',zone4:'00:00:00',zone5:'00:00:00'};
-    Object.keys(zones).forEach(function(key){if(provided[key]!=null)zones[key]=provided[key];});
-    if(rows.length){var indexes=rows.map(function(row){return Math.round(num(row&&row.index,-99));}),zeroBased=indexes.indexOf(0)>=0;zones={zone1:'00:00:00',zone2:'00:00:00',zone3:'00:00:00',zone4:'00:00:00',zone5:'00:00:00'};rows.forEach(function(row){var index=Math.round(num(row&&row.index,-99))+(zeroBased?1:0),duration=row&&(row.in_zone!=null?row.in_zone:row['in-zone']!=null?row['in-zone']:row.inzone);if(index>=1&&index<=5)zones['zone'+index]=durationText(seconds(duration));});}
-    var classified=Object.keys(zones).reduce(function(sum,key){return sum+seconds(zones[key]);},0),total=seconds(input.duration)||Math.round(num(input.durationMinutes,0)*60),unclassified=Math.max(0,total-classified);
-    return {zones:zones,zoneSummary:{easyControlled:durationText(seconds(zones.zone1)+seconds(zones.zone2)),moderate:durationText(seconds(zones.zone3)),high:durationText(seconds(zones.zone4)+seconds(zones.zone5)),unclassifiedTime:durationText(unclassified)}};
-  }
-  window.simurgNormalizePolarZoneData=normalizePolarZoneData;
   function compactDuration(value){
-    if(typeof window.formatDuration==='function')return window.formatDuration(value);
-    var source=text(value,'00:00');return source.indexOf('00:')===0?source.slice(3):source;
+    var source=text(value,'00:00');
+    return source.indexOf('00:')===0?source.slice(3):source;
   }
   function durationSeconds(workout){
-    var parsed=workout.duration!=null&&workout.duration!==''?seconds(workout.duration):0;
+    var parsed=seconds(workout.duration);
     return parsed||Math.round(num(workout.durationMinutes,0)*60)||1;
   }
   function ensureStore(){
@@ -85,7 +68,7 @@
   function selectedWorkout(){
     initializeSelection();var list=dayWorkouts(selectedDate);if(!list.length)return null;
     var selected=list.find(function(item){return workoutKey(item)===selectedWorkoutKey;})||list[list.length-1];
-    selectedWorkoutKey=workoutKey(selected);var normalizedZones=normalizePolarZoneData(selected);return Object.assign({},selected,{zones:normalizedZones.zones,zoneSummary:normalizedZones.zoneSummary});
+    selectedWorkoutKey=workoutKey(selected);return selected;
   }
   function navigatorBounds(){var dates=workoutDates(),today=todayDate(),latest=dates.length?dates[dates.length-1]:today;return {min:dates.length?dates[0]:today,max:latest>today?latest:today,latest:latest};}
   function dateChipLabel(value){try{return new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));}catch(e){return value;}}
@@ -106,7 +89,6 @@
   function normalizeWorkout(input){
     var date=text(input.date,'');
     if(!date) throw new Error('polar_flow_workout date eksik');
-    var normalizedZones=normalizePolarZoneData(input);
     return {
       type:'polar_flow_workout',
       source:text(input.source,'Polar Flow'),
@@ -127,8 +109,8 @@
       rpeLabel:text(input.rpeLabel,''),
       trainingLoad:input.trainingLoad==null?null:num(input.trainingLoad,0),
       trainingLoadType:text(input.trainingLoadType,'Kardiyo yükü TRIMP'),
-      zones:normalizedZones.zones,
-      zoneSummary:normalizedZones.zoneSummary,
+      zones:Object.assign({zone1:'00:00:00',zone2:'00:00:00',zone3:'00:00:00',zone4:'00:00:00',zone5:'00:00:00'},input.zones||{}),
+      zoneSummary:Object.assign({easyControlled:'00:00:00',moderate:'00:00:00',high:'00:00:00',unclassifiedTime:'00:00:00'},input.zoneSummary||{}),
       fuel:input.fuel&&typeof input.fuel==='object'?Object.assign({},input.fuel):null,
       trainingImpact:normalizeImpact(input.trainingImpact),
       heartRateSeries:Array.isArray(input.heartRateSeries)?input.heartRateSeries.slice():null,
@@ -184,20 +166,13 @@
   function classifiedZoneSeconds(workout){return ['zone1','zone2','zone3','zone4','zone5'].reduce(function(total,key){return total+seconds(workout.zones&&workout.zones[key]);},0);}
   function hasZoneData(workout){return classifiedZoneSeconds(workout)>0;}
   function zoneRows(workout,detailed){
-    if(!hasZoneData(workout)) return '';
     return ['zone5','zone4','zone3','zone2','zone1'].map(function(key){
       var available=hasZoneData(workout),meta=zoneMeta[key],pct=available?pctFor(workout,key):0,duration=workout.zones&&workout.zones[key]||'';
       return '<div class="pw-zone-row"><span class="pw-zone-badge" style="background:'+meta.color+'">'+key.slice(-1)+'</span><span>'+meta.label+'</span><span class="pw-zone-track"><i style="width:'+pct+'%;background:'+meta.color+'"></i></span><span class="pw-zone-time">'+esc(available?compactDuration(duration):'—')+'</span><span class="pw-zone-pct">'+esc(available?pct+'%':'—')+'</span></div>';
     }).join('');
   }
-  function zoneBar(workout){
-    if(window.SimurgCoachCharts&&typeof window.SimurgCoachCharts.renderZoneBar==='function')return window.SimurgCoachCharts.renderZoneBar(workout.zones,workout.duration||workout.durationMinutes*60);
-    var keys=['zone1','zone2','zone3','zone4','zone5'],colors=['#71879a','#168ed5','#61b72b','#ed7a0b','#e4333c'],values=keys.map(function(key){return seconds(workout.zones&&workout.zones[key]);}),classified=values.reduce(function(a,b){return a+b;},0),total=durationSeconds(workout),unclassified=Math.max(0,total-classified);
-    if(!classified)return '<div class="pw-zone-empty">Zone verisi bulunamadı'+(total?' · Unclassified '+esc(compactDuration(durationText(total))):'')+'</div>';
-    return '<div class="pw-zone-stack" role="img" aria-label="Heart rate zones">'+values.map(function(value,index){return '<i style="width:'+(value/total*100)+'%;background:'+colors[index]+'"></i>';}).join('')+(unclassified?'<i class="unclassified" style="width:'+(unclassified/total*100)+'%"></i>':'')+'</div>';
-  }
   function zoneCard(workout,title,footnote,detailed){
-    var rows=zoneRows(workout,detailed),empty=!hasZoneData(workout);return '<div class="pw-card"><div class="pw-card-title"><h2>'+esc(title)+'</h2><span class="pw-info">i</span></div>'+zoneBar(workout)+(rows?'<div class="pw-zone-list">'+rows+'</div>':'')+(empty?'<div class="pw-footnote"><i>◉</i>Workout süresi sınıflandırılmamış olarak korunuyor.</div>':footnote?'<div class="pw-footnote"><i>◉</i>'+esc(footnote)+'</div>':'')+'</div>';
+    return '<div class="pw-card"><div class="pw-card-title"><h2>'+esc(title)+'</h2><span class="pw-info">i</span></div><div class="pw-zone-list">'+zoneRows(workout,detailed)+'</div>'+(footnote?'<div class="pw-footnote"><i>◉</i>'+esc(footnote)+'</div>':'')+'</div>';
   }
   function metric(label,value,unit){return '<div class="pw-metric"><small>'+esc(label)+'</small><b>'+esc(value)+'<em>'+esc(unit||'')+'</em></b></div>';}
   function heroMetric(icon,label,value,unit,tone){return '<div class="pw-hero-metric '+esc(tone||'')+'"><i>'+esc(icon)+'</i><div><small>'+esc(label)+'</small><b>'+esc(value)+'<em>'+esc(unit||'')+'</em></b></div></div>';}
@@ -208,8 +183,7 @@
     if(usableNumber(workout.avgHR)!=null)metrics.push(heroMetric('♡','Average HR',formattedNumber(workout.avgHR),'bpm','avg-hr'));
     if(usableNumber(workout.maxHR)!=null)metrics.push(heroMetric('♥','Maximum HR',formattedNumber(workout.maxHR),'bpm','max-hr'));
     if(load)metrics.push(heroMetric('⌁',load.label,formattedNumber(load.value),'','load'));
-    var durationValue=workout.duration!=null&&workout.duration!==''?compactDuration(workout.duration):(typeof window.formatDuration==='function'?window.formatDuration(workout.durationMinutes,'minutes'):durationText(num(workout.durationMinutes,0)*60));
-    return '<div class="pw-card pw-workout-hero"><div class="pw-workout-hero-top"><div class="pw-duration-block"><small>Süre</small><b>'+esc(durationValue)+'</b></div><div class="pw-workout-identity"><span class="pw-source-badge"><i></i>'+esc(workout.source||'Polar Flow')+'</span><h2>'+esc(workoutLabel(workout.workoutType||workout.activityType))+'</h2><p>'+esc([dateLabel(workout),workout.startTime].filter(Boolean).join(' · '))+'</p></div></div><div class="pw-hero-metrics">'+metrics.join('')+'</div><div class="pw-interpret"><i>⌁</i><span>'+esc(overviewInterpretation(workout))+'</span></div></div>';
+    return '<div class="pw-card pw-workout-hero"><div class="pw-workout-hero-top"><div class="pw-duration-block"><small>Duration</small><b>'+esc(compactDuration(workout.duration||'—'))+'</b></div><div class="pw-workout-identity"><span class="pw-source-badge"><i></i>'+esc(workout.source||'Polar Flow')+'</span><h2>'+esc(workoutLabel(workout.workoutType||workout.activityType))+'</h2><p>'+esc([dateLabel(workout),workout.startTime].filter(Boolean).join(' · '))+'</p></div></div><div class="pw-hero-metrics">'+metrics.join('')+'</div><div class="pw-interpret"><i>⌁</i><span>'+esc(overviewInterpretation(workout))+'</span></div></div>';
   }
   function overviewInterpretation(workout){
     var low=pctFor(workout,'zone1')+pctFor(workout,'zone2');
