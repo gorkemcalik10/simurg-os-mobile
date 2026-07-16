@@ -841,3 +841,184 @@ main>.section:not(#polar-workout) :is(input,select,textarea):focus{outline:0!imp
   #home.gp-home :is(.gp-stage,.gp-empty){border-color:rgba(158,183,211,.09)!important;background:#0a121b!important}
   #home.gp-home .gp-stage-row{border-bottom-color:rgba(158,183,211,.08)!important}
 }
+
+/* B Horizon Mobile Phase 2: Gym presentation only. */
+@media(max-width:860px){
+  #gym.gp-gym-refined{
+    --bgym-surface:#0d141d;--bgym-surface-2:#101923;--bgym-field:#08111a;
+    --bgym-line:rgba(158,183,211,.12);--bgym-text:#f2f6fa;--bgym-muted:#8e9baa;
+    --bgym-cyan:#38bddd;--bgym-danger:#e36a73;
+    padding-bottom:calc(var(--simurgNativeBottom,90px) + 42px)!important;
+    color:var(--bgym-text)!important;background:linear-gradient(180deg,#080d14,#060a10 58%,#05080d)!important;
+    overflow-x:visible!important;
+  }
+  #gym.gp-gym-refined .topbar{
+    display:grid!important;grid-template-columns:1fr!important;gap:8px!important;margin:0 0 8px!important;padding:10px!important;
+    border:1px solid var(--bgym-line)!important;border-radius:18px!important;
+    background:linear-gradient(180deg,rgba(15,23,33,.98),rgba(10,16,24,.99))!important;
+    box-shadow:0 10px 24px rgba(0,0,0,.19),inset 0 1px 0 rgba(255,255,255,.025)!important;
+  }
+  #gym.gp-gym-refined .topbar .title{display:block!important;margin:0!important}
+  #gym.gp-gym-refined .topbar .titleIcon,#gym.gp-gym-refined .topbar .sub{display:none!important}
+  #gym.gp-gym-refined .topbar h1{
+    margin:0!important;color:var(--bgym-text)!important;font-size:21px!important;line-height:1.08!important;
+    font-weight:780!important;letter-spacing:-.45px!important;
+  }
+  #gym.gp-gym-refined .gp-gym-nav{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important;margin:0!important;overflow:visible!important;
+  }
+  #gym.gp-gym-refined .gp-gym-nav .weekBtn{
+    width:100%!important;min-height:38px!important;margin:0!important;padding:8px!important;
+    border:1px solid rgba(158,183,211,.11)!important;border-radius:13px!important;
+    background:#0a121b!important;color:#afbbc7!important;font-size:10px!important;line-height:1.15!important;box-shadow:none!important;
+  }
+  html body main #gym.gp-gym-refined #gymDateLabel.gp-gym-date-line{
+    display:block!important;width:100%!important;min-height:0!important;margin:0 0 8px!important;padding:6px 9px!important;
+    border:1px solid rgba(56,189,221,.15)!important;border-radius:999px!important;background:rgba(56,189,221,.055)!important;
+    box-shadow:none!important;text-align:center!important;color:#a8dce8!important;font-size:10px!important;line-height:1.1!important;
+    font-weight:800!important;letter-spacing:.35px!important;
+  }
+
+  #gym.gp-gym-refined .gymHero{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
+    margin:0 0 10px!important;padding:11px 12px!important;border:1px solid rgba(56,189,221,.16)!important;
+    border-radius:17px!important;background:linear-gradient(135deg,rgba(15,35,46,.90),rgba(9,16,24,.98))!important;box-shadow:none!important;
+  }
+  #gym.gp-gym-refined .gymHero>div{min-width:0!important}
+  #gym.gp-gym-refined .gymHero small{
+    display:block!important;margin:0 0 3px!important;color:var(--bgym-cyan)!important;font-size:7px!important;
+    line-height:1.1!important;font-weight:800!important;letter-spacing:1.25px!important;
+  }
+  #gym.gp-gym-refined .gymHero b{
+    display:block!important;margin:0!important;color:var(--bgym-text)!important;font-size:17px!important;
+    line-height:1.15!important;font-weight:780!important;letter-spacing:-.25px!important;overflow-wrap:break-word!important;
+  }
+  #gym.gp-gym-refined .gymHero span{
+    display:block!important;margin:3px 0 0!important;color:var(--bgym-muted)!important;font-size:9.5px!important;line-height:1.35!important;overflow-wrap:break-word!important;
+  }
+
+  #gym.gp-gym-refined .gymModeList{
+    display:flex!important;flex-direction:column!important;gap:11px!important;width:100%!important;overflow:visible!important;
+  }
+  #gym.gp-gym-refined .gymAddCard{
+    position:static!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important;
+    margin:0!important;padding:11px 12px!important;border:1px dashed rgba(56,189,221,.20)!important;
+    border-radius:17px!important;background:#0a121b!important;box-shadow:none!important;overflow:visible!important;
+  }
+  #gym.gp-gym-refined .gymAddCard>div{min-width:0!important}
+  #gym.gp-gym-refined .gymAddCard b{display:block!important;color:var(--bgym-text)!important;font-size:13px!important;line-height:1.15!important;font-weight:780!important}
+  #gym.gp-gym-refined .gymAddCard span{display:block!important;margin-top:3px!important;color:var(--bgym-muted)!important;font-size:9px!important;line-height:1.35!important;overflow-wrap:break-word!important}
+  #gym.gp-gym-refined .gymAddCard .btn{
+    min-height:38px!important;padding:8px 10px!important;border:1px solid rgba(56,189,221,.25)!important;
+    border-radius:13px!important;background:rgba(56,189,221,.09)!important;color:#c9f4ff!important;font-size:10px!important;line-height:1.15!important;box-shadow:none!important;
+  }
+
+  #gym.gp-gym-refined .gymCard{
+    position:relative!important;margin:0!important;padding:12px!important;overflow:visible!important;
+    border:1px solid var(--bgym-line)!important;border-radius:19px!important;
+    background:linear-gradient(180deg,rgba(15,23,33,.99),rgba(9,15,23,.99))!important;
+    box-shadow:0 12px 28px rgba(0,0,0,.21),inset 0 1px 0 rgba(255,255,255,.025)!important;
+  }
+  #gym.gp-gym-refined .gymCardHead{
+    display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:start!important;gap:9px!important;margin:0 0 9px!important;
+  }
+  #gym.gp-gym-refined .gymCardHead>div:first-child{min-width:0!important}
+  #gym.gp-gym-refined .gymMetaGrid{
+    display:grid!important;grid-template-columns:minmax(0,1fr) 82px!important;gap:7px!important;width:100%!important;
+  }
+  #gym.gp-gym-refined .gymMetaGrid .gymMetaInput:first-child{grid-column:1/-1!important}
+  #gym.gp-gym-refined .gymMetaInput{display:block!important;min-width:0!important;margin:0!important}
+  #gym.gp-gym-refined .gymMetaInput small,
+  #gym.gp-gym-refined .gymInputBox small,
+  #gym.gp-gym-refined .gymCoachBox small{
+    display:block!important;margin:0 0 4px!important;color:#748292!important;font-size:7.5px!important;
+    line-height:1.1!important;font-weight:800!important;letter-spacing:.7px!important;text-transform:uppercase!important;
+  }
+  #gym.gp-gym-refined .gymMetaInput input{
+    width:100%!important;min-height:38px!important;margin:0!important;padding:8px 9px!important;
+    border:1px solid rgba(158,183,211,.11)!important;border-radius:13px!important;background:var(--bgym-field)!important;
+    color:var(--bgym-text)!important;font-size:12px!important;line-height:1.15!important;font-weight:700!important;box-shadow:none!important;
+  }
+  #gym.gp-gym-refined .gymMetaInput:first-child input{font-size:15px!important;font-weight:780!important;letter-spacing:-.2px!important}
+  #gym.gp-gym-refined .gymBadge{
+    position:static!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;align-self:start!important;
+    margin:0!important;padding:6px 8px!important;border:1px solid rgba(56,189,221,.16)!important;border-radius:999px!important;
+    background:rgba(56,189,221,.055)!important;color:#9ddaea!important;font-size:8px!important;line-height:1!important;white-space:nowrap!important;
+  }
+  #gym.gp-gym-refined .gymProgramNote{margin-top:6px!important;color:#718090!important;font-size:8.5px!important;line-height:1.3!important}
+  #gym.gp-gym-refined .gymTargetBox{
+    display:block!important;margin:8px 0!important;padding:9px 10px!important;overflow:visible!important;
+    border:1px solid rgba(56,189,221,.14)!important;border-radius:14px!important;background:rgba(56,189,221,.045)!important;
+    color:#aebbc7!important;font-size:9.5px!important;line-height:1.4!important;box-shadow:none!important;
+  }
+  #gym.gp-gym-refined .gymTargetBox b{display:block!important;margin:0 0 3px!important;color:#c8f3fd!important;font-size:9px!important;line-height:1.1!important}
+  #gym.gp-gym-refined .gymTargetBox.warning{border-color:rgba(225,170,61,.24)!important;background:rgba(225,170,61,.055)!important}
+  #gym.gp-gym-refined .gymTargetBox.danger{border-color:rgba(227,106,115,.25)!important;background:rgba(227,106,115,.055)!important}
+
+  #gym.gp-gym-refined .gymCoachBox{
+    display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin:9px 0!important;
+  }
+  #gym.gp-gym-refined .gymCoachBox label{
+    min-width:0!important;margin:0!important;padding:7px!important;border:1px solid rgba(158,183,211,.10)!important;
+    border-radius:13px!important;background:#0a121b!important;
+  }
+  #gym.gp-gym-refined .gymCoachBox select{
+    width:100%!important;min-height:34px!important;margin:0!important;padding:6px!important;
+    border:1px solid rgba(158,183,211,.11)!important;border-radius:10px!important;background:#08111a!important;
+    color:var(--bgym-text)!important;font-size:12px!important;line-height:1.1!important;font-weight:750!important;text-align:center!important;box-shadow:none!important;
+  }
+  #gym.gp-gym-refined .gymCoachBox select:focus,
+  #gym.gp-gym-refined :is(.gymMetaInput,.gymInputBox) input:focus{
+    outline:0!important;border-color:rgba(56,189,221,.48)!important;box-shadow:0 0 0 3px rgba(56,189,221,.07)!important;
+  }
+
+  #gym.gp-gym-refined .gymSetList{display:grid!important;gap:7px!important;margin-top:8px!important;overflow:visible!important}
+  #gym.gp-gym-refined .gymSetInputRow{
+    display:grid!important;grid-template-columns:30px minmax(0,1fr) minmax(0,1fr)!important;align-items:center!important;gap:7px!important;
+    margin:0!important;padding:7px!important;overflow:visible!important;border:1px solid rgba(158,183,211,.09)!important;
+    border-radius:14px!important;background:#0a121b!important;box-shadow:none!important;
+  }
+  #gym.gp-gym-refined .gymSetInputRow:has(>button){grid-template-columns:30px minmax(0,1fr) minmax(0,1fr) auto!important}
+  #gym.gp-gym-refined .gymSetInputRow>strong{
+    color:#8fd5e5!important;font-size:12px!important;line-height:1!important;font-weight:800!important;text-align:center!important;
+  }
+  #gym.gp-gym-refined .gymInputBox{display:block!important;min-width:0!important;margin:0!important}
+  #gym.gp-gym-refined .gymInputBox input{
+    width:100%!important;min-height:40px!important;margin:0!important;padding:7px 8px!important;
+    border:1px solid rgba(158,183,211,.11)!important;border-radius:12px!important;background:var(--bgym-field)!important;
+    color:var(--bgym-text)!important;font-size:15px!important;line-height:1!important;font-weight:780!important;text-align:center!important;box-shadow:none!important;
+  }
+  #gym.gp-gym-refined :is(.gymSetDelete,.gymSetRemove,.gymRemoveSet){
+    min-width:34px!important;min-height:34px!important;padding:6px!important;border:1px solid rgba(227,106,115,.24)!important;
+    border-radius:11px!important;background:rgba(227,106,115,.07)!important;color:#f0a2a8!important;box-shadow:none!important;
+  }
+
+  #gym.gp-gym-refined .gymCardActions{
+    position:static!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;margin:9px 0 0!important;padding:0!important;background:transparent!important;overflow:visible!important;
+  }
+  #gym.gp-gym-refined .gymMiniBtn{
+    width:100%!important;min-height:38px!important;margin:0!important;padding:8px!important;
+    border:1px solid rgba(158,183,211,.11)!important;border-radius:13px!important;background:#0b141e!important;
+    color:#aebbc7!important;font-size:10px!important;line-height:1.15!important;font-weight:780!important;box-shadow:none!important;
+  }
+  #gym.gp-gym-refined .gymMiniBtn.primary{
+    grid-column:1/-1!important;grid-row:1!important;border-color:rgba(56,189,221,.30)!important;
+    background:linear-gradient(180deg,rgba(56,189,221,.22),rgba(31,110,130,.20))!important;color:#e4fbff!important;
+  }
+  #gym.gp-gym-refined .gymMiniBtn[onclick*="clearGymExercise"],
+  #gym.gp-gym-refined .gymMiniBtn[onclick*="deleteGymExercise"]{
+    border-color:rgba(227,106,115,.22)!important;background:rgba(227,106,115,.06)!important;color:#ee9aa2!important;
+  }
+  #gym.gp-gym-refined .gymHistoryPanel{
+    overflow:visible!important;margin-top:9px!important;padding-top:9px!important;
+    border-top:1px solid rgba(158,183,211,.08)!important;
+  }
+  #gym.gp-gym-refined .gymHistoryPanel .historyItem{
+    padding:9px!important;border:1px solid rgba(158,183,211,.09)!important;border-radius:14px!important;background:#0a121b!important;box-shadow:none!important;
+  }
+  #gym.gp-gym-refined .gymEmpty{
+    padding:14px!important;border:1px dashed rgba(158,183,211,.14)!important;border-radius:17px!important;
+    background:#0a121b!important;color:var(--bgym-muted)!important;font-size:10px!important;line-height:1.45!important;
+  }
+}
