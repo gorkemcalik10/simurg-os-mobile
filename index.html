@@ -10810,10 +10810,17 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   var activeKey='home';
   function premiumRefresh(id){if(window.SimurgPremium&&typeof window.SimurgPremium.refreshScreen==='function')window.SimurgPremium.refreshScreen(id);}
   function go(id,key){
+    var polarDetail=document.getElementById('polar-workout');
+    if(polarDetail) polarDetail.classList.remove('active');
+    var stableKey=key||id;
+    document.body.setAttribute('data-simurg-active-screen',id);
+    document.documentElement.setAttribute('data-simurg-active-key',stableKey);
+    window.__simurgCurrentMobileKey=stableKey;
+    window.__simurgStableNavKey=stableKey;
     closeMenu();
     if(typeof window.show==='function') window.show(id,null);
     else {document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id)?.classList.add('active');window.scrollTo(0,0);}
-    activeKey=key||id;setActive(activeKey);premiumRefresh(id);
+    activeKey=stableKey;setActive(stableKey);premiumRefresh(id);
     var section=document.getElementById(id);if(section)section.scrollTop=0;
   }
   function setActive(key){
@@ -15929,7 +15936,7 @@ m Shell V4: Logger information architecture fix -->
 <script src="./polar-workout.js?v=11"></script>
 <script src="./workout-source-policy.js?v=2"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=30">
-<script src="./premium-standard.js?v=26"></script>
+<script src="./premium-standard.js?v=27"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=4"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=23">

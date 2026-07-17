@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-critical-stability-ui-fixes-v1-4';
+const SIMURG_CACHE = 'simurg-critical-stability-ui-fixes-v1-5';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -7,7 +7,7 @@ const CORE_ASSETS = [
   './polar-workout.js?v=11',
   './workout-source-policy.js?v=2',
   './premium-standard.css?v=30',
-  './premium-standard.js?v=26',
+  './premium-standard.js?v=27',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=4',
   './desktop-alignment.css?v=23',
