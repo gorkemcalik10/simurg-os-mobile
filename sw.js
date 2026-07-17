@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-horizon-architecture-stabilization-v1-3';
+const SIMURG_CACHE = 'simurg-desktop-horizon-flow-v1-1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -7,11 +7,11 @@ const CORE_ASSETS = [
   './polar-workout.js?v=10',
   './workout-source-policy.js?v=1',
   './premium-standard.css?v=24',
-  './premium-standard.js?v=22',
+  './premium-standard.js?v=23',
   './polar-accesslink.css?v=3',
   './polar-accesslink.js?v=4',
-  './desktop-alignment.css?v=16',
-  './desktop-alignment.js?v=18',
+  './desktop-alignment.css?v=17',
+  './desktop-alignment.js?v=19',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
