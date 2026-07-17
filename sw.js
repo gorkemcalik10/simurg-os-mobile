@@ -1,17 +1,17 @@
-const SIMURG_CACHE = 'simurg-horizon-color-system-unification-v1-2';
+const SIMURG_CACHE = 'simurg-critical-stability-ui-fixes-v1-3';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './polar-workout.css?v=10',
   './polar-workout.js?v=10',
-  './workout-source-policy.js?v=1',
-  './premium-standard.css?v=26',
-  './premium-standard.js?v=24',
+  './workout-source-policy.js?v=2',
+  './premium-standard.css?v=29',
+  './premium-standard.js?v=26',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=4',
-  './desktop-alignment.css?v=19',
-  './desktop-alignment.js?v=20',
+  './desktop-alignment.css?v=22',
+  './desktop-alignment.js?v=21',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

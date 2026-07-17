@@ -6131,7 +6131,7 @@ body{background:#050607!important;}
 
 <div class="card localStatusCard">
   <h2>Local Data Status</h2>
-  <div class="sub">Netlify geçişinden önce bu cihazdaki veri durumunu hızlı kontrol et.</div>
+  <div class="sub">Bu cihazdaki yerel kayıtların ve son senkronizasyon durumunun özeti.</div>
   <div id="localDataStatus" class="localStatusGrid">
     <div class="localStatusBox"><small>Last Local Update</small><b>-</b></div>
     <div class="localStatusBox"><small>Total Workout Days</small><b>-</b></div>
@@ -6153,7 +6153,7 @@ body{background:#050607!important;}
 <div class="card universalImportCard">
   <h2>Universal Import</h2>
   <div class="sub">Tek veri giriş noktası. Workout, Apple Watch ve activity JSON verilerini otomatik tanır; doğru kategoriye ekler.</div>
-  <textarea id="universalJsonBox" class="jsonBox" placeholder='{"type":"apple_watch","activityType":"Swimming","date":"2026-06-23","duration":"41:41","activeCal":186,"totalCal":242,"avgHR":117,"maxHR":137,"rpe":6}'></textarea>
+  <textarea id="universalJsonBox" class="jsonBox" placeholder="JSON verisini buraya yapıştır"></textarea>
   <div class="actions">
     <button class="btn" onclick="universalImport()">Universal Import</button>
     <button class="btn sec" onclick="universalJsonBox.value=''">Temizle</button>
@@ -6893,7 +6893,7 @@ function calculateReadiness(date){
   return {score,status,advice,reasons,today,prev};
 }
 function renderReadinessHtml(date){
-  let r=calculateReadiness(date);
+  let r=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):calculateReadiness(date);
   let t=r.today;
   let typeText=t.source||(t.types.length?t.types.join(' + '):'Workout verisi yok');
   let reasonText=r.reasons.length?r.reasons.slice(0,3).join(', '):'olumsuz sinyal yok';
@@ -6911,7 +6911,7 @@ function renderReadinessPanel(){
 
 
 function calculateInjuryRisk(date){
-  let readiness=calculateReadiness(date);
+  let readiness=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):calculateReadiness(date);
   let today=activityLoadForDate(date);
   let prev=activityLoadForDate(addDays(date,-1));
   let prev2=activityLoadForDate(addDays(date,-2));
@@ -7001,7 +7001,7 @@ dates.forEach(date=>{
     let best=items.slice().sort((a,b)=>b.weight-a.weight)[0];
     let exCount=Object.keys(c.exs).length;
     let exMini=Object.keys(c.exs).map(ex=>`<em>${ex}</em>`).join('');
-    let activityLine=hasActivity?`<span>${source&&source.primaryPolar?'Workout Source':'Extra Activity'}: ${activity.emoji} ${escapeAttr(activity.name)} • ${activity.duration||'-'} • ${activity.active||0} kcal • ${escapeAttr(source&&source.source||'Apple Watch Legacy')}</span>`:'';
+    let activityLine=hasActivity?`<span>${source&&source.primaryPolar?'Workout Source':'Extra Activity'}: ${activity.emoji} ${escapeAttr(activity.name)} • ${activity.duration||'-'} • ${activity.active||0} kcal • ${escapeAttr(source&&source.source||'Apple Health')}</span>`:'';
     cards.push(`<div class="dailyMiniCard dailyGymCard" onclick="selectedDate='${date}';show('workout',document.querySelector('.nav button'));render()">
       <div class="dailyMiniTop">
         <div>
@@ -7034,7 +7034,7 @@ dates.forEach(date=>{
           <b>${trDate(date)}</b>
           <span>${dayName(date)} · Activity Day</span>
         </div>
-        <strong>${escapeAttr(source&&source.source||'Apple Watch Legacy')}</strong>
+        <strong>${escapeAttr(source&&source.source||'Apple Health')}</strong>
       </div>
       <div class="dailyActivityTypeLine">
         <div class="emoji">${activity.emoji}</div>
@@ -7478,7 +7478,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=horizon-color-system-unification-v1-2').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=critical-stability-ui-fixes-v1-1').catch(function(){});
   });
 }
 </script>
@@ -7767,13 +7767,14 @@ async function checkCloudStatus() {
     return '⌚';
   };
   window.activityDisplayName=function(type){
+    const raw=String(type||'Other').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
     const map={
       'Sea Swimming':'Sea Swimming','Pool Swimming':'Pool Swimming','Swimming':'Swimming',
       'Table Tennis':'Table Tennis','Football':'Football','Beach Volleyball':'Beach Volleyball','Volleyball':'Volleyball',
       'Tennis':'Tennis','Padel':'Padel','Basketball':'Basketball','Walking':'Walking','Walk':'Walking','Running':'Running','Run':'Running','Cycling':'Cycling',
       'Mobility':'Mobility','Yoga':'Yoga','Pilates':'Pilates','Boxing':'Boxing','Fitness':'Fitness','Recovery':'Recovery','Other':'Other Activity'
     };
-    return map[type]||type||'Other Activity';
+    return map[raw]||raw.toLowerCase().replace(/\b\p{L}/gu,function(letter){return letter.toUpperCase();})||'Other Activity';
   };
   window.normalizeWatchRecord=function(rec){
     rec={...rec};
@@ -8183,6 +8184,14 @@ async function checkCloudStatus() {
     return {rows,types,primary,name,emoji,duration,active,total,distance,dist,avgHR,maxHR,rpe};
   };
   window.renderActivitySessionCard=function(date){
+    if(window.innerWidth<=900&&window.SimurgWorkoutSource&&typeof window.SimurgWorkoutSource.day==='function'){
+      const shared=window.SimurgWorkoutSource.day(date);
+      if(shared&&shared.primaryPolar){
+        const p=shared.primaryPolar,metric=window.SimurgWorkoutSource.metrics(date),minutes=Math.max(0,Math.round(metric.minutes||0));
+        const summary={rows:[p],primary:p.workoutType||p.activityType||p.type||'Polar Workout',name:activityDisplayName(p.workoutType||p.activityType||p.type||'Polar Workout'),emoji:'⌁',duration:p.duration||(minutes?(Math.floor(minutes/60)?Math.floor(minutes/60)+':':'')+String(minutes%60).padStart(2,'0'):'-'),active:metric.active||0,total:metric.total||0,distance:Number(p.distance)||0,dist:formatDistance(Number(p.distance)||0),avgHR:metric.avgHR||0,maxHR:metric.maxHR||0,rpe:'',sourceLabel:shared.source||'Polar',isPolar:true};
+        return renderSingleActivityCard(date,summary);
+      }
+    }
     const rows=watchRowsForDate(date);
     if(!rows.length) return '';
     const grouped={};
@@ -8194,6 +8203,7 @@ async function checkCloudStatus() {
     return Object.keys(grouped).sort().map(type=>{
       const summary=activitySummaryFromRows(date, grouped[type]);
       if(!summary) return '';
+      if(window.innerWidth<=900)summary.sourceLabel='Apple Health';
       return renderSingleActivityCard(date, summary).replace('activitySessionCard"', 'activitySessionCard" data-activity-type="'+String(type).replace(/"/g,'&quot;')+'"');
     }).join('');
   };
@@ -8280,19 +8290,22 @@ async function checkCloudStatus() {
   function dataCounts(){
     const workouts=(DATA&&DATA.workouts)||[];
     const watch=(DATA&&DATA.appleWatch)||[];
+    const polarDaily=DATA&&DATA.polarWorkouts&&DATA.polarWorkouts.daily||{};
+    const polarCount=Object.keys(polarDaily).reduce((sum,date)=>sum+(Array.isArray(polarDaily[date])?polarDaily[date].filter(Boolean).length:(polarDaily[date]?1:0)),0);
     const workoutDays=new Set(workouts.map(w=>w.date).filter(Boolean)).size;
     const activityKeys=new Set(watch.map(w=>(w.date||'-')+'::'+activityTypeOf(w))).size;
     const notes=DATA&&DATA.activityNotes?Object.keys(DATA.activityNotes).length:0;
-    return {workoutDays, activities:activityKeys, appleWatch:watch.length, notes};
+    return {workoutDays, activities:polarCount+activityKeys, appleWatch:watch.length, notes};
   }
   window.renderDataLocalStatus=function(){
     const el=document.getElementById('localDataStatus');
-    if(!el||!window.DATA) return;
+    if(!el||typeof DATA==='undefined'||!DATA) return;
     ensureMeta();
     const c=dataCounts();
-    const last=(DATA._meta&&DATA._meta.lastLocalUpdate)||'';
+    const last=(DATA._meta&&DATA._meta.lastLocalUpdate)||DATA.lastSyncAt||(DATA.polarConnection&&DATA.polarConnection.lastSyncAt)||'';
+    const lastLabel=last?fmtDateTime(last):(c.workoutDays||c.activities||c.appleWatch?'Kayıt mevcut':'Henüz kayıt yok');
     el.innerHTML=`
-      <div class="localStatusBox"><small>Last Local Update</small><b>${fmtDateTime(last)}</b></div>
+      <div class="localStatusBox"><small>Last Local Update</small><b>${lastLabel}</b></div>
       <div class="localStatusBox"><small>Total Workout Days</small><b>${c.workoutDays}</b></div>
       <div class="localStatusBox"><small>Total Activities</small><b>${c.activities}</b></div>
       <div class="localStatusBox"><small>Apple Watch Entries</small><b>${c.appleWatch}</b></div>
@@ -8348,17 +8361,15 @@ async function checkCloudStatus() {
     const safeType=JSON.stringify(type);
     const safeDate=JSON.stringify(date);
     const noteHtml=note?`<div class="activityQuickNoteBox"><b>Quick Note:</b> ${escapeAttr(note)}</div>`:'';
+    const sourceLabel=a.sourceLabel||'Apple Health';
+    const actions=a.isPolar?`<div class="activityPill">${escapeAttr(sourceLabel)}</div>`:`<div class="activityPill">${escapeAttr(sourceLabel)}</div><button class="activityNoteBtn" onclick='setActivityQuickNote(${safeDate},${safeType});return false;'>Not</button><button class="activityDeleteBtn" onclick='deleteActivityCard(${safeDate},${safeType});return false;'>Sil</button>`;
     return `<div class="activitySessionCard" data-activity-type="${escapeAttr(type)}">
       <div class="activitySessionTop">
         <div class="activitySessionTitle">
           <div class="activityIcon">${a.emoji}</div>
-          <div><small>ACTIVITY SESSION</small><b>${escapeAttr(a.name)}</b><span>${trDate(date)} · Workout Logger aktivitesi</span></div>
+          <div><small>ACTIVITY SESSION</small><b>${escapeAttr(a.name)}</b><span>${trDate(date)} · ${escapeAttr(sourceLabel)}</span></div>
         </div>
-        <div class="activityTopActions">
-          <div class="activityPill">${(a.rows&&a.rows.length>1)?'Combined':'Apple Watch'} Load</div>
-          <button class="activityNoteBtn" onclick='setActivityQuickNote(${safeDate},${safeType});return false;'>Not</button>
-          <button class="activityDeleteBtn" onclick='deleteActivityCard(${safeDate},${safeType});return false;'>Sil</button>
-        </div>
+        <div class="activityTopActions">${actions}</div>
       </div>
       <div class="activityStatsGrid">${stats.map(([k,v])=>`<div class="activityStatBox"><small>${k}</small><b>${escapeAttr(v)}</b></div>`).join('')}</div>
       ${noteHtml}
@@ -15916,10 +15927,10 @@ m Shell V4: Logger information architecture fix -->
 </script>
 <link rel="stylesheet" href="./polar-workout.css?v=10">
 <script src="./polar-workout.js?v=10"></script>
-<script src="./workout-source-policy.js?v=1"></script>
-<link rel="stylesheet" href="./premium-standard.css?v=26">
-<script src="./premium-standard.js?v=24"></script>
+<script src="./workout-source-policy.js?v=2"></script>
+<link rel="stylesheet" href="./premium-standard.css?v=29">
+<script src="./premium-standard.js?v=26"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=4"></script>
-<link rel="stylesheet" href="./desktop-alignment.css?v=19">
-<script src="./desktop-alignment.js?v=20"></script>
+<link rel="stylesheet" href="./desktop-alignment.css?v=22">
+<script src="./desktop-alignment.js?v=21"></script>

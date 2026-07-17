@@ -65,10 +65,10 @@
     var rpe=firstNumber(polar&&polar.rpe,gymRpes.length?gymRpes.reduce(function(a,b){return a+b;},0)/gymRpes.length:null,bridge.workouts&&bridge.workouts[0]&&bridge.workouts[0].rpe,apple&&apple.rpe);
     var stages=polarSleep?{deepMinutes:secondsToMinutes(polarSleep.deepSleep),remMinutes:secondsToMinutes(polarSleep.remSleep),lightMinutes:secondsToMinutes(polarSleep.lightSleep),awakeMinutes:secondsToMinutes(polarSleep.awakeTime)}:(bridge.sleepStages||recovery.sleepStages||null);
     var activity=polar?{name:activityLabel(polar.workoutType||polar.activityType||'Polar Workout'),duration:polar.duration,date:polar.date,startTime:polar.startTime,cal:firstNumber(polar.activeCal,polar.calories),avgHR:polar.avgHR,maxHR:polar.maxHR,zones:polar.zones,source:chosen&&chosen.source||'Polar',polar:true}:
-      apple?{name:activityLabel(apple.activityType||apple.workoutType||'Activity'),duration:apple.duration,date:apple.date,startTime:apple.startTime,cal:apple.activeCal,avgHR:apple.avgHR,maxHR:apple.maxHR,source:'Apple Watch Legacy'}:
+      apple?{name:activityLabel(apple.activityType||apple.workoutType||'Activity'),duration:apple.duration,date:apple.date,startTime:apple.startTime,cal:apple.activeCal,avgHR:apple.avgHR,maxHR:apple.maxHR,source:'Apple Health'}:
       bridge.workouts&&bridge.workouts[0]?{name:activityLabel(bridge.workouts[0].type||'Workout'),duration:bridge.workouts[0].duration,date:bridge.date,cal:bridge.workouts[0].activeEnergy,avgHR:bridge.workouts[0].avgHr,maxHR:bridge.workouts[0].maxHr,source:'Polar Bridge'}:null;
     var hasRecoverySignals=[hrv,rhr,respiratory,nightlyDisplay].some(function(value){return value!=null&&value!=='';});
-    var readinessResult=resolveReadiness(date,{recovery:recovery,hasActivity:!!(polar||apple||gym.length),signals:{hrv:hrv,rhr:rhr,respiratory:respiratory,sleepScore:sleepScore,cardioLoad:load}}),readiness=readinessResult.score;
+    var readinessResult=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):resolveReadiness(date,{recovery:recovery,hasActivity:!!(polar||apple||gym.length),signals:{hrv:hrv,rhr:rhr,respiratory:respiratory,sleepScore:sleepScore,cardioLoad:load}}),readiness=readinessResult.score;
     return {selectedDate:date,data:data,bridge:bridge,recovery:recovery,polar:polar,apple:apple,gym:gym,workoutSource:chosen&&chosen.source,polarSleep:polarSleep,polarNightly:polarNightly,polarCardio:polarCardio,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,readinessResult:readinessResult,hasRecoverySignals:hasRecoverySignals,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
   }
   function metric(label,value,unit){var textValue=label==='Latest Activity'||label==='Aggressiveness';return '<div class="gp-metric '+(textValue?'gp-metric-text':'')+'"><small>'+esc(label)+'</small><b>'+esc(value==null?'—':value)+(value==null?'':'<em>'+esc(unit||'')+'</em>')+'</b></div>';}
@@ -221,6 +221,7 @@
     var exerciseTitle=groups&&groups.querySelector('.gp-logger-exercises-title h2');if(exerciseTitle&&exerciseTitle.textContent!=='Egzersiz')exerciseTitle.textContent='Egzersiz';
     var muscle=loggerPanel('KAS GRUBU'),trend=loggerPanel('HACİM TREND'),raw=loggerPanel('RAW PERFORMANCE'),watch=loggerPanel('APPLE WATCH');
     if(muscle)muscle.classList.add('gp-logger-muscle');if(trend)trend.classList.add('gp-logger-trend');if(raw)raw.classList.add('gp-logger-raw');if(watch)watch.classList.add('gp-logger-hidden');
+    if(window.innerWidth<=900)workout.querySelectorAll('.dayProgram .active,.weekStrip .active').forEach(function(card){card.scrollIntoView({behavior:'auto',block:'nearest',inline:'center'});});
   }
 
   function normalizeNav(){
@@ -235,6 +236,8 @@
     var shell=section.querySelector('.gp-coaching-shell');
     section.classList.remove('gp-coaching-empty');
     if(shell)shell.remove();
+    section.querySelectorAll('.coachPremiumMessage').forEach(function(node){node.innerHTML=node.innerHTML.replace(/\.\s*Neden:/g,'. Neden:').replace(/\.\s*Öneri:/g,'. Öneri:');});
+    section.querySelectorAll('.coachPremiumPill,.coachPremiumStat b').forEach(function(node){var labels={Caution:'Kontrollü',Low:'Düşük',Good:'İyi',None:'Yok'},value=node.textContent.trim();if(labels[value])node.textContent=labels[value];});
   }
   function generalDataCard(dataSection){
     var cards=Array.from(dataSection.children).filter(function(item){return item.classList&&item.classList.contains('card');});
@@ -246,6 +249,8 @@
     if(general)general.classList.add('gp-general-data-card');
     var anchor=Array.from(section.children).find(function(item){return item.classList&&item.classList.contains('topbar');})||section.firstElementChild;
     [cloud,universal,general].forEach(function(item){if(!item)return;if(anchor&&anchor.nextElementSibling!==item)anchor.insertAdjacentElement('afterend',item);anchor=item;});
+    var input=document.getElementById('universalJsonBox');if(input){if(!input.dataset.gpInitialized){input.value='';input.dataset.gpInitialized='1';}input.placeholder='JSON verisini buraya yapıştır';}
+    if(typeof window.renderDataLocalStatus==='function')window.renderDataLocalStatus();
   }
   function reportCopyBar(id,label,buttonLabel,handler){return '<div id="'+id+'" class="gp-report-copy"><div><small>ChatGPT Export</small><b>'+esc(label)+'</b></div><button class="btn sec" type="button" onclick="'+handler+'()">'+esc(buttonLabel)+'</button></div>';}
   function polishReports(){
@@ -288,13 +293,13 @@
   function weeklyReportText(){
     var data=dataRoot(),dates=selectedWeek(),workouts=(data.workouts||[]).filter(function(x){return dates.indexOf(x.date)>=0;}),stats=calcRows(workouts),activities=(data.appleWatch||[]).filter(function(x){return dates.indexOf(x.date)>=0&&(!window.SimurgWorkoutSource||!window.SimurgWorkoutSource.day(x.date).primaryPolar)&&(!window.SimurgWorkoutSource||window.SimurgWorkoutSource.validApple(x));}),polar=allPolar(data).filter(function(x){return dates.indexOf(x.date)>=0;}),recovery=recoveryRows(data).filter(function(x){return dates.indexOf(x.date)>=0;}),days=new Set(workouts.map(function(x){return x.date;}));
     var loads=polar.map(function(x){return x.trainingLoad;}).filter(function(v){return number(v)!=null;});
-    return ['SIMURG OS — Weekly Report',dates[0]+' → '+dates[dates.length-1],'','Completed gym days: '+days.size,'Total sets: '+Math.round(stats.sets||0),'Total reps: '+Math.round(stats.reps||0),'Total volume: '+Math.round(stats.vol||0)+' kg','Apple Watch Legacy fallback: '+activities.length,'Polar Workouts: '+polar.length,'Polar Workout loads: '+(loads.length?loads.join(', '):'—'),'Average HRV: '+average(recovery,'hrvMs')+' ms','Average RHR: '+average(recovery,'restingHr')+' bpm','Recovery records: '+recovery.length,'','Raw summary: gym_records='+workouts.length+', apple_legacy_records='+activities.length+', polar_workouts='+polar.length+', recovery_records='+recovery.length].join('\n');
+    return ['SIMURG OS — Weekly Report',dates[0]+' → '+dates[dates.length-1],'','Completed gym days: '+days.size,'Total sets: '+Math.round(stats.sets||0),'Total reps: '+Math.round(stats.reps||0),'Total volume: '+Math.round(stats.vol||0)+' kg','Apple Health fallback: '+activities.length,'Polar Workouts: '+polar.length,'Polar Workout loads: '+(loads.length?loads.join(', '):'—'),'Average HRV: '+average(recovery,'hrvMs')+' ms','Average RHR: '+average(recovery,'restingHr')+' bpm','Recovery records: '+recovery.length,'','Raw summary: gym_records='+workouts.length+', apple_legacy_records='+activities.length+', polar_workouts='+polar.length+', recovery_records='+recovery.length].join('\n');
   }
   function monthlyReportText(){
     var data=dataRoot(),month=selectedMonth(),workouts=(data.workouts||[]).filter(function(x){return String(x.date||'').slice(0,7)===month;}),stats=calcRows(workouts),activities=(data.appleWatch||[]).filter(function(x){return String(x.date||'').slice(0,7)===month&&(!window.SimurgWorkoutSource||!window.SimurgWorkoutSource.day(x.date).primaryPolar)&&(!window.SimurgWorkoutSource||window.SimurgWorkoutSource.validApple(x));}),polar=allPolar(data).filter(function(x){return String(x.date||'').slice(0,7)===month;}),recovery=recoveryRows(data).filter(function(x){return String(x.date||'').slice(0,7)===month;}),days=new Set(workouts.map(function(x){return x.date;})),daily={};
     workouts.forEach(function(row){daily[row.date]=(daily[row.date]||0)+(number(row.weight)||0)*(number(row.reps)||0)*(number(row.sets)||1);});
     var volumeTrend=Object.keys(daily).sort().map(function(date){return date+': '+Math.round(daily[date])+' kg';});var loads=polar.map(function(x){return x.trainingLoad;}).filter(function(v){return number(v)!=null;});
-    return ['SIMURG OS — Monthly Report','Month: '+month,'','Training days: '+days.size,'Completed gym days: '+days.size,'Total sets: '+Math.round(stats.sets||0),'Total reps: '+Math.round(stats.reps||0),'Total volume: '+Math.round(stats.vol||0)+' kg','Volume trend: '+(volumeTrend.length?volumeTrend.join(' | '):'—'),'Apple Watch Legacy fallback: '+activities.length,'Polar Workouts: '+polar.length,'Polar Workout loads: '+(loads.length?loads.join(', '):'—'),'Average HRV: '+average(recovery,'hrvMs')+' ms','Average RHR: '+average(recovery,'restingHr')+' bpm','Recovery records: '+recovery.length,'','Raw summary: gym_records='+workouts.length+', apple_legacy_records='+activities.length+', polar_workouts='+polar.length+', recovery_records='+recovery.length].join('\n');
+    return ['SIMURG OS — Monthly Report','Month: '+month,'','Training days: '+days.size,'Completed gym days: '+days.size,'Total sets: '+Math.round(stats.sets||0),'Total reps: '+Math.round(stats.reps||0),'Total volume: '+Math.round(stats.vol||0)+' kg','Volume trend: '+(volumeTrend.length?volumeTrend.join(' | '):'—'),'Apple Health fallback: '+activities.length,'Polar Workouts: '+polar.length,'Polar Workout loads: '+(loads.length?loads.join(', '):'—'),'Average HRV: '+average(recovery,'hrvMs')+' ms','Average RHR: '+average(recovery,'restingHr')+' bpm','Recovery records: '+recovery.length,'','Raw summary: gym_records='+workouts.length+', apple_legacy_records='+activities.length+', polar_workouts='+polar.length+', recovery_records='+recovery.length].join('\n');
   }
   async function copyText(value,message){
     try{await navigator.clipboard.writeText(value);}catch(e){var area=document.createElement('textarea');area.value=value;document.body.appendChild(area);area.select();document.execCommand('copy');area.remove();}

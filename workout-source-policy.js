@@ -36,7 +36,7 @@
     return score;
   }
   function bestPolar(workouts,gym){return workouts.slice().sort(function(a,b){return matchScore(b,gym)-matchScore(a,gym);})[0]||null;}
-  function sourceLabel(hasPolar,hasGym,hasApple){if(hasPolar&&hasGym)return 'Polar + Gym';if(hasPolar)return 'Polar';if(hasGym)return 'Gym';if(hasApple)return 'Apple Watch Legacy';return null;}
+  function sourceLabel(hasPolar,hasGym,hasApple){if(hasPolar&&hasGym)return 'Polar + Gym';if(hasPolar)return 'Polar';if(hasGym)return 'Gym';if(hasApple)return 'Apple Health';return null;}
   function zonesSeconds(zones){
     if(!zones||typeof zones!=='object')return 0;
     return Object.keys(zones).reduce(function(sum,key){return sum+durationMinutes(zones[key])*60;},0);

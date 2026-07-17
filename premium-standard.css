@@ -128,7 +128,7 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
 #workout :is(.group,.panel,.exerciseCard){background:linear-gradient(180deg,var(--hz-surface-2),var(--hz-field))!important;border-color:var(--hz-line)!important;box-shadow:none!important}
 #workout :is(.group,.panel){padding:12px!important;border-radius:17px!important}
 #polar :is(.polarDashboardV1,.polarRecoveryCardV1,.polarMetricCardV1,.polarStageCardV1,.polarActivityCardV1,.polarBridgeEmpty,.polarCoachSentenceV1){background:linear-gradient(180deg,rgba(6,27,43,.97),rgba(3,17,28,.99))!important;border-color:var(--gp-line)!important;box-shadow:none!important}
-#polar .polarDashboardV1>*:not(#polarAccessLinkCard){display:none!important}#polar .polarDashboardV1{display:block!important;max-width:480px!important}#polar #polarAccessLinkCard{display:block!important}#polar .polarAccessLinkCard>p{margin-bottom:0!important}
+#polar :is(.polarRecoveryV1,.polarRecoveryCardV1,.polarBridgeEmpty,.polarMetricGridV1,.polarMetricMiniV1,.polarStageCardV1,.polarActivityCardV1,.polarCoachSentenceV1){display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important}#polar .polarDashboardV1{display:block!important;max-width:480px!important;min-height:0!important;padding:0!important}#polar #polarAccessLinkCard{display:block!important}#polar .polarAccessLinkCard>p{margin-bottom:0!important}
 #simurgV8Sheet{background:linear-gradient(180deg,var(--hz-surface-2),var(--hz-field))!important;border:1px solid var(--hz-line)!important}
 #simurgV8Sheet .simurgV8Grid button{background:linear-gradient(180deg,var(--hz-surface),var(--hz-field))!important;border:1px solid var(--hz-line)!important;color:var(--hz-text)!important;box-shadow:none!important}
 
@@ -431,11 +431,11 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
     gap:8px!important;
     width:100%!important;
     margin:0 0 9px!important;
-    padding:2px 12px 8px 2px!important;
+    padding:2px 16px 8px!important;
     overflow-x:auto!important;
-    overflow-y:visible!important;
-    scroll-padding-inline:2px 12px!important;
-    scroll-snap-type:x proximity!important;
+    overflow-y:hidden!important;
+    scroll-padding-inline:16px!important;
+    scroll-snap-type:x mandatory!important;
     -webkit-overflow-scrolling:touch!important;
   }
   #workout.gp-logger-refined .dayBtn{
@@ -443,7 +443,7 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
     min-width:0!important;
     padding:11px 9px!important;
     border-radius:17px!important;
-    scroll-snap-align:start!important;
+    scroll-snap-align:center!important;
     overflow:visible!important;
   }
   #workout.gp-logger-refined .dayBtn .main{
@@ -464,7 +464,7 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
     min-width:0!important;
     padding:9px 6px!important;
     border-radius:15px!important;
-    scroll-snap-align:start!important;
+    scroll-snap-align:center!important;
     overflow:visible!important;
   }
   #workout.gp-logger-refined .dateBtn .d{
@@ -481,9 +481,9 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
   }
   #workout.gp-logger-refined :is(.dayBtn,.dateBtn).active{
     color:#f7fbff!important;
-    border-color:rgba(95,143,247,.66)!important;
-    background:linear-gradient(180deg,rgba(71,116,201,.30),rgba(17,36,67,.94))!important;
-    box-shadow:inset 0 -3px 0 #75a6ff,0 10px 24px rgba(28,75,150,.18)!important;
+    border-color:rgba(245,163,13,.56)!important;
+    background:linear-gradient(180deg,rgba(245,163,13,.16),var(--hz-field))!important;
+    box-shadow:inset 0 -3px 0 var(--hz-amber)!important;
   }
 
   #workout.gp-logger-refined #psLoggerHero{
@@ -525,9 +525,10 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
   }
   #workout.gp-logger-refined #psLoggerHero .psLoggerMetrics{
     display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
     gap:7px!important;
   }
+  #workout.gp-logger-refined #psLoggerHero .psLoggerMetric:nth-child(4){display:none!important}
   #workout.gp-logger-refined #psLoggerHero .psLoggerMetric{
     min-width:0!important;
     padding:9px!important;
@@ -561,7 +562,7 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
     padding:12px!important;
     overflow:visible!important;
     border-radius:20px!important;
-    border:1px solid rgba(128,169,232,.13)!important;
+    border:1px solid var(--hz-line)!important;
     background:linear-gradient(180deg,rgba(13,22,34,.98),rgba(6,10,17,.99))!important;
     box-shadow:0 14px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.03)!important;
   }
@@ -733,6 +734,8 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
   main>.section{position:absolute!important;inset:0!important;display:none!important;width:100%!important;height:100%!important;min-height:0!important;max-width:none!important;margin:0!important;padding:0!important;overflow:hidden!important;animation:none!important;transform:none!important;opacity:1!important}
   main>.section.active{display:block!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain!important;scroll-behavior:auto!important;padding:var(--simurgNativeTop) 12px var(--simurgNativeBottom)!important}
   main>.section.active::-webkit-scrollbar{display:none!important}
+  #simurgStandaloneHint{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important}
+  html[data-simurg-active-key="gym"] #simurgStandaloneHint{display:block!important;height:auto!important;min-height:0!important;margin:0!important;padding:12px 13px!important}
   #simurgAlertPanel{display:none;position:fixed;inset:0;z-index:2147483400;padding:22px 14px;align-items:flex-end;background:rgba(0,0,0,.72)}
   #simurgAlertPanel.open{display:flex!important}#simurgAlertPanel .psAlertSheet{width:min(100%,500px);max-height:72svh;margin:0 auto;padding:14px;border:1px solid var(--hf-line);border-radius:21px;background:#0d151d;overflow-y:auto}#simurgAlertPanel .psAlertHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}#simurgAlertPanel .psAlertItem{padding:11px;border:1px solid var(--hf-line-soft);border-radius:14px;background:#080e14}
   :is(#home.gp-home,#gym.gp-gym-refined,#workout.gp-logger-refined,#polar-workout,#polar,#coaching.section,#program.section,#weekly.section,#monthly.section,#data.section){
@@ -743,7 +746,9 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
     color:var(--hf-text)!important;background:linear-gradient(180deg,#070c12,#05090e 60%,#04070b)!important;
   }
   :is(#home.gp-home,#gym.gp-gym-refined,#workout.gp-logger-refined,#polar-workout,#polar,#coaching.section,#program.section,#weekly.section,#monthly.section,#data.section){
-    padding-bottom:calc(var(--simurgNativeBottom,90px) + 34px)!important;overflow-x:visible!important;
+    padding-bottom:calc(var(--simurgNativeNavH,64px) + env(safe-area-inset-bottom,0px) + 20px)!important;
+    scroll-padding-bottom:calc(var(--simurgNativeNavH,64px) + env(safe-area-inset-bottom,0px) + 20px)!important;
+    overflow-x:visible!important;
   }
   :is(#home.gp-home,#gym.gp-gym-refined,#workout.gp-logger-refined,#polar,#coaching.section,#program.section,#weekly.section,#monthly.section,#data.section) :is(.card,.panel,.group,.gp-card,.gymCard,.psLoggerHero,.psLoggerInsight,.polarAccessLinkCard,.polarRecoveryCardV1,.polarMetricMiniV1,.polarStageCardV1,.polarActivityCardV1){
     border-color:var(--hf-line)!important;background:linear-gradient(180deg,rgba(13,21,29,.99),rgba(8,13,19,.99))!important;
@@ -813,12 +818,18 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
   #gym.gp-gym-refined .topbar,#workout.gp-logger-refined .topbar,#coaching.section .topbar{margin:0 0 9px!important;padding:10px 11px!important;border:1px solid var(--hf-line)!important;border-radius:17px!important;background:#0a1118!important;box-shadow:none!important}
   :is(#gym.gp-gym-refined,#workout.gp-logger-refined,#coaching.section) .topbar h1{color:var(--hf-text)!important;font-size:20px!important;letter-spacing:-.4px!important}
   #gym.gp-gym-refined :is(.gymHero,.gymAddCard,.gymCard){margin-bottom:9px!important;border-color:var(--hf-line)!important;border-radius:17px!important;background:linear-gradient(180deg,#0d161f,#080e14)!important;box-shadow:none!important;overflow:visible!important}
+  #gym.gp-gym-refined :is(#todayProgramHelper,.todayProgramHelper){border-color:var(--hz-line)!important;background:linear-gradient(180deg,var(--hz-surface-2),var(--hz-field))!important;box-shadow:none!important}
+  #gym.gp-gym-refined .gymSmartAutoTarget{border-color:var(--hz-line)!important;background:var(--hz-field)!important;color:var(--hf-text)!important;box-shadow:none!important}
   #gym.gp-gym-refined .gymModeList{display:grid!important;gap:10px!important;overflow:visible!important}
   #gym.gp-gym-refined :is(.gymMetaInput input,.gymCoachBox select,.gymInputBox input){border-color:var(--hf-line)!important;background:var(--hf-field)!important;color:var(--hf-text)!important;box-shadow:none!important}
   #gym.gp-gym-refined .gymTargetBox{display:block!important;border-color:rgba(245,163,13,.22)!important;background:var(--hf-amber-soft)!important;color:#c5cbd1!important;overflow:visible!important}
   #gym.gp-gym-refined .gymMiniBtn.primary{border-color:rgba(245,163,13,.36)!important;background:var(--hf-amber-soft)!important;color:#ffc04a!important}
   #gym.gp-gym-refined .gymSetList,#gym.gp-gym-refined .gymHistoryPanel{overflow:visible!important}
+  #workout.gp-logger-refined .bottomStats{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;min-height:0!important;height:auto!important}
+  #workout.gp-logger-refined .bottomStats .stat{min-width:0!important;min-height:0!important;padding:9px 6px!important;font-size:8px!important;white-space:nowrap!important}
+  #workout.gp-logger-refined .bottomStats .stat b{font-size:15px!important;white-space:nowrap!important}
   #workout.gp-logger-refined :is(.psLoggerHero,.group,.panel,.exerciseCard,.activitySessionCard){border-color:var(--hf-line)!important;background:linear-gradient(180deg,#0d161f,#080e14)!important;box-shadow:none!important;overflow:visible!important}
+  #workout.gp-logger-refined .blueLine{background:var(--hf-amber)!important;box-shadow:none!important}
   #workout.gp-logger-refined :is(.dayBtn,.dateBtn).active{border-color:rgba(245,163,13,.35)!important;background:var(--hf-amber-soft)!important;color:#ffc04a!important}
   #workout.gp-logger-refined .psLoggerKicker,#workout.gp-logger-refined .gp-logger-exercises-title small{color:var(--hf-amber)!important}
   #workout.gp-logger-refined #workoutGroups{padding-bottom:18px!important;overflow:visible!important}
@@ -831,15 +842,16 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
   #polar-workout .pw-tab.active:after,#polar-workout .pw-date-chip.has-workout:after{background:var(--hf-cyan)!important;box-shadow:none!important}
   #polar-workout .pw-content,#polar-workout .pw-pane{overflow:visible!important}
 
-  #polar .polarDashboardV1{display:grid!important;gap:9px!important;width:100%!important;max-width:520px!important;margin:0 auto!important;overflow:visible!important}
-  #polar .polarDashboardV1>*{display:block!important;margin:0!important;overflow:visible!important}
-  #polar .polarDashboardV1>*:not(#polarAccessLinkCard){display:block!important}
+  #polar .polarDashboardV1{display:grid!important;gap:9px!important;width:100%!important;max-width:520px!important;min-height:0!important;margin:0 auto!important;padding:0!important;overflow:visible!important}
+  #polar .polarDashboardV1>*{margin:0!important;overflow:visible!important}
+  #polar :is(.polarRecoveryV1,.polarRecoveryCardV1,.polarBridgeEmpty,.polarMetricGridV1,.polarMetricMiniV1,.polarStageCardV1,.polarActivityCardV1,.polarCoachSentenceV1){display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important}
   #polar :is(.polarRecoveryV1,.polarRecoveryCardV1,.polarBridgeEmpty,.polarMetricMiniV1,.polarStageCardV1,.polarActivityCardV1,.polarCoachSentenceV1,.polarAccessLinkCard){border-color:var(--hf-line)!important;border-radius:17px!important;background:linear-gradient(180deg,#0d1821,#081018)!important;box-shadow:none!important;overflow:visible!important}
   #polar :is(.polarBridgeKickerV1,.polarAccessLinkHead small){color:var(--hf-cyan)!important}
 
   #coaching.section.active{min-height:0!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:calc(var(--simurgNativeBottom,90px) + 34px)!important}
   #coaching.section :is(#coachV11SmartFilter,#coachV8Premium,.polarBridgeCoachCard,.coachingGrid){margin-bottom:9px!important;overflow:visible!important}
   #coaching.section :is(.coachV11Hero,.coachV8Hero,.coachV11Item,.coachV8Card,.coachingGrid>.card,.polarBridgeCoachCard,.nextTargetPremiumItem){border-color:var(--hf-line)!important;border-radius:17px!important;background:linear-gradient(180deg,#0d161f,#080e14)!important;box-shadow:none!important;overflow:visible!important}
+  #coaching.section .coachPanel:after{background:var(--hf-amber)!important;box-shadow:none!important}
   #coaching.section :is(.coachV11Top small,.coachV8Kicker,.coachPremiumHead small){color:var(--hf-amber)!important}
   #coaching.section :is(.coachV11Pill,.coachV8Pill,.coachPremiumPill,.nextTargetBadge){border-color:rgba(245,163,13,.25)!important;background:var(--hf-amber-soft)!important;color:#ffc04a!important}
   #coaching.section .injuryRiskCard.riskModerate{border-color:rgba(245,163,13,.34)!important}#coaching.section .injuryRiskCard.riskHigh{border-color:rgba(216,95,104,.42)!important}
@@ -875,10 +887,11 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
   #monthlyReport .monthlyStandaloneText{margin-top:10px!important;padding-top:10px!important;border-top:1px solid var(--hf-line-soft)!important;color:#aeb6bf!important;font-size:9.5px!important;line-height:1.45!important}
   #monthlyReport .monthlyStandaloneGrid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin-top:10px!important}
   #monthlyReport .monthlyStandaloneItem{min-width:0!important;padding:10px!important;border:1px solid var(--hf-line-soft)!important;border-radius:14px!important;background:linear-gradient(180deg,#0a121a,#070d13)!important;overflow:visible!important}#monthlyReport .monthlyStandaloneItem small{display:block!important;color:#7f8a95!important;font-size:7px!important;letter-spacing:.7px!important;text-transform:uppercase!important;white-space:normal!important}#monthlyReport .monthlyStandaloneItem b{display:block!important;margin-top:5px!important;color:#edf0f3!important;font-size:14px!important;line-height:1.15!important;white-space:normal!important;overflow-wrap:break-word!important}
-  #monthlyReport .monthlyStandaloneGrid:after{content:"";grid-column:1/-1;height:42px;border:1px solid var(--hf-line-soft);border-radius:13px;background:linear-gradient(165deg,transparent 46%,rgba(245,163,13,.75) 48%,rgba(245,163,13,.75) 50%,transparent 52%),linear-gradient(15deg,transparent 42%,rgba(155,107,232,.45) 44%,rgba(155,107,232,.45) 46%,transparent 48%),#080f16}
+  #monthlyReport .monthlyStandaloneGrid:after{content:none!important;display:none!important}
   #monthlyReport .monthlyStandaloneCoach{margin-top:10px!important;padding:10px!important;border:1px solid rgba(245,163,13,.18)!important;border-radius:14px!important;background:rgba(245,163,13,.06)!important;color:#adb6bf!important;font-size:9.5px!important;line-height:1.45!important}
   #data.section :is(.card,.panel){margin-bottom:9px!important;padding:12px!important;border-color:var(--hf-line)!important;border-radius:17px!important;background:linear-gradient(180deg,#0d161f,#080e14)!important;box-shadow:none!important;overflow:visible!important}
   #data.section :is(.btn,button){border-color:rgba(245,163,13,.22)!important;background:rgba(245,163,13,.07)!important;color:#ffc04a!important;box-shadow:none!important}
+  :is(#home,#gym,#workout,#coaching,#program,#daily,#weekly,#monthly,#data) :focus-visible{outline:2px solid rgba(245,163,13,.55)!important;outline-offset:2px!important}
 
   /* Menu overlay and five-slot navigation. */
   #simurgV8Shade{background:rgba(2,5,8,.93)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;transition:none!important}
