@@ -2,28 +2,28 @@
 #polar .polarAccessLinkCard{
   margin:0 0 10px!important;
   padding:13px!important;
-  border:1px solid rgba(16,185,255,.20)!important;
+  border:1px solid rgba(48,185,223,.22)!important;
   border-radius:18px!important;
-  background:radial-gradient(circle at 100% 0%,rgba(16,185,255,.08),transparent 38%),linear-gradient(180deg,rgba(6,27,43,.98),rgba(3,17,28,.99))!important;
+  background:radial-gradient(circle at 100% 0%,rgba(48,185,223,.07),transparent 38%),linear-gradient(180deg,var(--hz-surface-2,#0d161e),var(--hz-field,#080e14))!important;
   box-shadow:0 12px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.025)!important;
-  color:#f7fbff!important;
+  color:var(--hz-text,#eef1f4)!important;
   overflow:hidden!important;
 }
 #polar .polarAccessLinkHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;min-width:0}
 #polar .polarAccessLinkHead>div{min-width:0}
-#polar .polarAccessLinkHead small{display:block;color:#10b9ff;font-size:7px;font-weight:950;letter-spacing:1px;line-height:1.2;margin:0 0 4px}
+#polar .polarAccessLinkHead small{display:block;color:var(--hz-cyan,#30b9df);font-size:7px;font-weight:950;letter-spacing:1px;line-height:1.2;margin:0 0 4px}
 #polar .polarAccessLinkHead h2{margin:0!important;color:#fff!important;font-size:16px!important;line-height:1.1!important;letter-spacing:-.25px!important}
 #polar .polarAccessLinkStatus{flex:0 0 auto;display:inline-flex;align-items:center;min-height:25px;padding:5px 8px;border-radius:999px;border:1px solid rgba(139,155,170,.22);background:rgba(139,155,170,.08);color:#aebdca;font-size:8px;font-weight:900;white-space:nowrap}
 #polar .polarAccessLinkStatus.connected{border-color:rgba(128,199,46,.30);background:rgba(128,199,46,.09);color:#a7dc5b}
 #polar .polarAccessLinkStatus.error{border-color:rgba(227,58,70,.30);background:rgba(227,58,70,.09);color:#ff98a2}
 #polar .polarAccessLinkCard>p{margin:9px 0 0!important;color:#aebdca!important;font-size:10px!important;line-height:1.45!important}
 #polar .polarAccessLinkDebug{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:10px}
-#polar .polarAccessLinkDebug>div{min-width:0;padding:7px 8px;border:1px solid rgba(88,173,231,.12);border-radius:10px;background:rgba(3,16,26,.58)}
+#polar .polarAccessLinkDebug>div{min-width:0;padding:7px 8px;border:1px solid var(--hz-line,rgba(166,180,194,.15));border-radius:10px;background:var(--hz-field,#080e14)}
 #polar .polarAccessLinkDebug>div.wide{grid-column:1/-1}
 #polar .polarAccessLinkDebug small{display:block;color:#8294a5;font-size:6.5px;text-transform:uppercase;letter-spacing:.45px;line-height:1.15}
 #polar .polarAccessLinkDebug b{display:block;margin-top:4px;color:#e7f6ff;font-size:8.5px;line-height:1.2;overflow-wrap:anywhere}
 #polar .polarAccessLinkActions{display:flex;gap:7px;margin-top:10px}
-#polar .polarAccessLinkActions button{min-height:34px;padding:8px 11px;border:1px solid rgba(16,185,255,.32);border-radius:11px;background:linear-gradient(180deg,rgba(14,73,104,.96),rgba(5,35,53,.98));color:#eafbff;font-size:9px;font-weight:900;cursor:pointer}
+#polar .polarAccessLinkActions button{min-height:34px;padding:8px 11px;border:1px solid rgba(48,185,223,.32);border-radius:11px;background:var(--hz-cyan-soft,rgba(48,185,223,.10));color:#bceefa;font-size:9px;font-weight:900;cursor:pointer}
 #polar .polarAccessLinkActions button.secondary{border-color:rgba(149,165,180,.20);background:rgba(255,255,255,.035);color:#b9c7d3}
 #polar .polarAccessLinkActions button:disabled{opacity:.55;cursor:default}
 #polar .polarAccessLinkNote{margin-top:8px;color:#7f94a7;font-size:8px;line-height:1.35;overflow-wrap:anywhere}

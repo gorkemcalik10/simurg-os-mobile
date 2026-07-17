@@ -87,7 +87,7 @@
     var heart=[activity.avgHR!=null?'Avg HR '+formatLoad(activity.avgHR):'',activity.maxHR!=null?'Max HR '+formatLoad(activity.maxHR):''].filter(Boolean).join(' · ');
     var footer=[activity.source==='Polar Bridge'?'Polar data':activity.source,zoneSummary(activity)].filter(Boolean).join(' · ');
     var tag=activity.polar?'button':'div',action=activity.polar?' type="button" onclick="simurgOpenPolarWorkoutFor(\''+esc(activity.date)+'\',\''+esc(activity.startTime||'')+'\')"':'';
-    return '<'+tag+' class="gp-card gp-activity gp-activity-detail '+(activity.polar?'tappable':'')+'"'+action+'><small class="gp-kicker">'+esc(kicker)+'</small><h3>'+esc(activity.name)+'</h3><p>'+esc(primary)+'</p>'+(heart?'<p>'+esc(heart)+'</p>':'')+'<span>'+esc(footer)+'</span></'+tag+'>';
+    return '<'+tag+' class="gp-card gp-activity gp-activity-detail '+(activity.polar?'tappable polar-source':'')+'"'+action+'><small class="gp-kicker">'+esc(kicker)+'</small><h3>'+esc(activity.name)+'</h3><p>'+esc(primary)+'</p>'+(heart?'<p>'+esc(heart)+'</p>':'')+'<span>'+esc(footer)+'</span></'+tag+'>';
   }
   function recoveryInterpretation(model){
     if(!model.hasRecoverySignals&&model.readiness==null)return 'Henüz toparlanma verisi yok.';
@@ -151,7 +151,7 @@
       return '<div class="gp-home-pane active gp-desktop-overview" data-home-pane="overview">'
         +'<section class="gp-desktop-prime gp-card '+decisionDesktop.tone+'"><div><small class="gp-kicker">READINESS PRIME</small><b>'+esc(scoreDesktop)+'</b><strong>'+esc(decisionDesktop.label)+'</strong></div><div><span>Confidence · '+esc(confidence)+'</span><p>'+esc(coachSentence(model))+'</p></div><button type="button" onclick="simurgOpenAlert()">Simurg Alert →</button></section>'
         +'<section class="gp-desktop-signals">'+ring('Recovery',model.readiness,recoveryRingColor(model.readiness),model.readiness==null&&model.hasRecoverySignals?'SIGNALS':'')+ring('Sleep',model.sleepScore,'#9b6be8')+ring('Load',model.load,loadRingColor(model.load))+'</section>'
-        +'<section class="gp-desktop-session-grid"><button type="button" class="gp-card gp-plan" onclick="desktopOpen(\'gym\')"><i>⌘</i><div><small class="gp-kicker">SEÇİLİ GÜN PLANI</small><h3>'+esc(planName(model))+'</h3><p>Programı koru; readiness ve load sinyallerine göre çalışma kalitesini yönet.</p></div><span>›</span></button>'+gymSessionCard(model)+activityHtmlDesktop+'</section>'
+        +'<section class="gp-desktop-session-grid"><button type="button" class="gp-card gp-plan" onclick="desktopOpen(\'program\')"><i>⌘</i><div><small class="gp-kicker">SEÇİLİ GÜN PLANI</small><h3>'+esc(planName(model))+'</h3><p>Programı koru; readiness ve load sinyallerine göre çalışma kalitesini yönet.</p></div><span>›</span></button>'+gymSessionCard(model)+activityHtmlDesktop+'</section>'
         +'<section class="gp-card gp-coach-flow"><small class="gp-kicker">KOÇUN BUGÜN SENİN İÇİN</small><div><i>◎</i><b>Ana Hedef</b><span>'+esc(planName(model))+' planında kaliteli tekrar ve tam hareket açıklığı.</span></div><div><i>◇</i><b>Dikkat</b><span>'+esc(recoveryInterpretation(model))+'</span></div><div class="opportunity"><i>↗</i><b>Fırsat</b><span>'+esc(loadInterpretation(model))+'</span></div></section>'
         +weeklyCard(model)+'</div>';}
     var activity=model.activity,decision=readinessDecision(model),score=model.readiness==null?'—':Math.round(model.readiness);

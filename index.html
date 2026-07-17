@@ -5,15 +5,15 @@
 <title>Simurg OS Cloud Sync</title>
 <style>
 :root{
-  --bg:#040810;--panel:#0c1724;--panel2:#101d2d;--line:#213247;--text:#f8fbff;--muted:#8fa1b7;
-  --blue:#2f84ff;--green:#23ce7a;--yellow:#ffbd3d;--purple:#8b5cf6;--red:#ff4d5f;
+  --bg:#04070a;--panel:#0a1118;--panel2:#0d161e;--line:rgba(166,180,194,.15);--text:#eef1f4;--muted:#8e99a5;
+  --blue:#f5a30d;--green:#67c486;--yellow:#f5a30d;--purple:#9b6be8;--red:#d85f68;
 }
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at 15% 0%,rgba(47,132,255,.18),transparent 28%),linear-gradient(140deg,#03060c,#07111d 55%,#03070d);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{margin:0;background:radial-gradient(circle at 15% 0%,rgba(245,163,13,.055),transparent 28%),linear-gradient(140deg,#030507,#070c11 55%,#030507);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 .app{display:grid;grid-template-columns:265px 1fr;min-height:100vh}
 aside{border-right:1px solid var(--line);background:linear-gradient(180deg,rgba(10,19,31,.96),rgba(5,10,18,.98));padding:26px 18px;position:sticky;top:0;height:100vh}
 .logo{display:flex;align-items:center;gap:12px}.mark{font-size:54px;font-weight:1000;color:var(--blue);text-shadow:0 0 30px rgba(47,132,255,.45)}.brand{font-size:30px;font-weight:950;letter-spacing:5px}.brand small{display:block;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:2px}
-.nav{display:flex;flex-direction:column;gap:9px;margin-top:34px}.nav button{display:flex;gap:12px;align-items:center;background:transparent;color:#dbe7f5;border:1px solid transparent;text-align:left;padding:13px;border-radius:12px;font-size:15px;cursor:pointer}.nav button.active,.nav button:hover{background:linear-gradient(90deg,#1454c9,#0d2b72);border-color:#2469df;color:white;box-shadow:0 10px 30px rgba(25,100,240,.25)}
+.nav{display:flex;flex-direction:column;gap:9px;margin-top:34px}.nav button{display:flex;gap:12px;align-items:center;background:transparent;color:#dbe7f5;border:1px solid transparent;text-align:left;padding:13px;border-radius:12px;font-size:15px;cursor:pointer}.nav button.active,.nav button:hover{background:linear-gradient(90deg,rgba(245,163,13,.16),rgba(245,163,13,.04));border-color:rgba(245,163,13,.38);color:#ffc04a;box-shadow:inset 3px 0 #f5a30d}
 .sidecard{position:absolute;left:18px;right:18px;bottom:28px;background:linear-gradient(180deg,#0d1a29,#08111d);border:1px solid var(--line);border-radius:16px;padding:17px}.sidecard .num{font-size:24px;color:var(--blue);font-weight:900;margin:3px 0}.sidecard p{margin:0;color:var(--muted);font-size:12px}
 main{padding:28px 30px 18px;max-width:1500px}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:18px}.title{display:flex;align-items:center;gap:14px}.titleIcon{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#144bbd,#091322);font-size:30px;box-shadow:0 0 30px rgba(47,132,255,.25)}h1{margin:0;font-size:30px}h2{margin:0 0 12px}h3{margin:0 0 10px}.sub{color:var(--muted);font-size:15px;margin-top:2px}
 .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.ctrl,.weekBtn{background:#07111e;border:1px solid var(--line);border-radius:10px;padding:12px 15px;color:white;cursor:pointer}.weekBtn:hover,.ctrl:hover{border-color:var(--blue)}
@@ -5948,15 +5948,15 @@ body{background:#050607!important;}
   <div class="v4ScoreStack">
     <div class="v4ScoreCard">
       <div class="v4Ring" id="homeReadinessRing"><strong id="homeReadinessScore">—</strong><em>RECOVERY</em></div>
-      <div class="v4ScoreInfo"><small>Recovery</small><h3>Hazırlık Skoru</h3><p>HRV, uyku ve dinlenik nabız birleşik sinyali.</p><span id="homeNightlyLabel">Orta-Yüksek</span></div>
+      <div class="v4ScoreInfo"><small>Recovery</small><h3>Hazırlık Skoru</h3><p>HRV, uyku ve dinlenik nabız birleşik sinyali.</p><span id="homeNightlyLabel">Veri bekleniyor</span></div>
     </div>
     <div class="v4ScoreCard">
       <div class="v4Ring sleep"><strong id="homeSleep">—</strong><em>SLEEP</em></div>
-      <div class="v4ScoreInfo"><small>Sleep</small><h3>Uyku Performansı</h3><p>Gece toparlanması ve uyku süresi.</p><span id="homeSleepLabel">İyi</span></div>
+      <div class="v4ScoreInfo"><small>Sleep</small><h3>Uyku Performansı</h3><p>Gece toparlanması ve uyku süresi.</p><span id="homeSleepLabel">Veri bekleniyor</span></div>
     </div>
     <div class="v4ScoreCard">
       <div class="v4Ring strain"><strong id="homeLoadPct">—</strong><em>LOAD</em></div>
-      <div class="v4ScoreInfo"><small>Strain</small><h3>Fiziksel Yük</h3><p>Bugünkü toplam yük ve antrenman toleransı.</p><span id="homeLoadStatus">Kontrollü</span></div>
+      <div class="v4ScoreInfo"><small>Strain</small><h3>Fiziksel Yük</h3><p>Bugünkü toplam yük ve antrenman toleransı.</p><span id="homeLoadStatus">Veri bekleniyor</span></div>
     </div>
   </div>
 
@@ -5993,7 +5993,7 @@ body{background:#050607!important;}
     <div class="metricCard purple"><small>UYKU EVRELERİ</small><div class="sleepStages" id="recSleepStages"></div></div>
   </div>
   <div class="trendPanel"><small>7 GÜNLÜK TREND</small><div id="polarTrendBars" class="polarTrendBars"></div></div>
-  <div class="coachInsight"><i>◎</i><p id="recoveryCoach">Toparlanma iyi. Bugün ana hareketlerde normal plan uygulanabilir; son setlerde aşırı zorlamaya gerek yok.</p></div>
+  <div class="coachInsight"><i>◎</i><p id="recoveryCoach">Seçili tarih için toparlanma verisi bekleniyor.</p></div>
 </section>
 
 <section id="workout" class="section">
@@ -7477,7 +7477,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=desktop-horizon-flow-v1-1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=horizon-color-system-unification-v1-1').catch(function(){});
   });
 }
 </script>
@@ -11672,8 +11672,8 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     document.body.insertAdjacentHTML('beforeend','<div id="simurgAlertPanel" onclick="if(event.target.id===\'simurgAlertPanel\')simurgCloseAlert()"><div class="psAlertSheet"><div class="psAlertHead"><b>Simurg Alert</b><button onclick="simurgCloseAlert()">×</button></div><div id="simurgAlertItems"></div></div></div>');
   }
   function alertItems(){
-    var rec=parseInt(getVal('homeReadinessScore','76'),10)||76;
-    var hrv=getVal('homeHrv','62'); var rhr=getVal('homeRhr','48'); var sleep=getVal('homeSleep','7s 12dk');
+    var rec=parseInt(getVal('homeReadinessScore','—'),10)||0;
+    var hrv=getVal('homeHrv','—'); var rhr=getVal('homeRhr','—'); var sleep=getVal('homeSleep','—');
     var arr=[];
     arr.push(['Günün kararı', rec>=75?'Planı koru. Ana hareketlerde normal kalite hedefiyle ilerle.':rec>=60?'Kontrollü ilerle. Failure yok, form kalitesi öncelik.':'Yükü azalt. Recovery düşük, hacmi ve yoğunluğu kırp.']);
     arr.push(['Recovery sinyali','Hazırlık '+rec+'/100 · HRV '+hrv+' · RHR '+rhr+'.']);
@@ -11688,22 +11688,22 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     home.dataset.premiumShell='1'; home.classList.add('simurgPremiumHome');
     home.innerHTML='\
       <div class="psHomeTop"><div class="psGreeting"><small>SIMURG OS · TODAY</small><h1>Good Morning,<br>Görkem</h1></div><button class="psAlertBtn" onclick="simurgOpenAlert()" aria-label="Simurg Alert">🔔</button></div>\
-      <div class="psRecoveryCard"><div class="psLabel">Recovery</div><div class="psRecoveryMain"><b id="homeReadinessScore">76</b><div class="psSpark"></div></div><div class="psRecoveryMain" style="margin:0"><span id="homeReadinessLabel">Excellent</span></div><div class="psTrack"><i id="homeRecoveryBar"></i></div></div>\
-      <div class="psMiniGrid"><div class="psMiniCard"><small>Sleep</small><b id="homeSleep">7s 12dk</b><span id="homeSleepLabel">İyi</span><div class="psMiniLine" style="background:linear-gradient(90deg,#8b5cf6,rgba(139,92,246,.15))"></div></div><div class="psMiniCard"><small>HRV</small><b id="homeHrv">62</b><span id="homeHrvLabel">Orta</span><div class="psMiniLine"></div></div><div class="psMiniCard"><small>RHR</small><b id="homeRhr">48</b><span>bpm</span><div class="psMiniLine" style="background:linear-gradient(90deg,#ef4444,rgba(239,68,68,.15))"></div></div></div>\
-      <div class="psTrainingCard"><div class="psTrainingTop"><div><div class="psLabel">Today</div><h2 id="psTodayTraining">Pull Strength</h2></div><span id="homeLoadStatus">Kontrollü</span></div><div class="psTrack"><i id="homeLoadBar"></i></div><button class="psStartBtn" onclick="simurgV8Go(\'gym\',\'gym\')">Start Workout</button></div>\
-      <div class="psCoachCard"><div class="psCoachHead"><b>Coach</b><span class="psLabel">SIMURG ALERT</span></div><p id="homeCoachNote">Dün iyi toparlandın. Bugün ana çalışmaya uygunsun; ilk çekiş hareketlerinde son seti zorlayabilirsin.</p></div>\
+      <div class="psRecoveryCard"><div class="psLabel">Recovery</div><div class="psRecoveryMain"><b id="homeReadinessScore">—</b><div class="psSpark"></div></div><div class="psRecoveryMain" style="margin:0"><span id="homeReadinessLabel">Veri bekleniyor</span></div><div class="psTrack"><i id="homeRecoveryBar"></i></div></div>\
+      <div class="psMiniGrid"><div class="psMiniCard"><small>Sleep</small><b id="homeSleep">—</b><span id="homeSleepLabel">Veri bekleniyor</span><div class="psMiniLine" style="background:linear-gradient(90deg,#8b5cf6,rgba(139,92,246,.15))"></div></div><div class="psMiniCard"><small>HRV</small><b id="homeHrv">—</b><span id="homeHrvLabel">Veri bekleniyor</span><div class="psMiniLine"></div></div><div class="psMiniCard"><small>RHR</small><b id="homeRhr">—</b><span>bpm</span><div class="psMiniLine" style="background:linear-gradient(90deg,#ef4444,rgba(239,68,68,.15))"></div></div></div>\
+      <div class="psTrainingCard"><div class="psTrainingTop"><div><div class="psLabel">Today</div><h2 id="psTodayTraining">Kayıt bulunmuyor</h2></div><span id="homeLoadStatus">Veri bekleniyor</span></div><div class="psTrack"><i id="homeLoadBar"></i></div><button class="psStartBtn" onclick="simurgV8Go(\'gym\',\'gym\')">Start Workout</button></div>\
+      <div class="psCoachCard"><div class="psCoachHead"><b>Coach</b><span class="psLabel">SIMURG ALERT</span></div><p id="homeCoachNote">Seçili tarih için koç verisi bekleniyor.</p></div>\
       <div class="psQuickGrid"><button onclick="simurgV8Go(\'recovery\',\'recovery\')"><small>Detail</small>Recovery →</button><button onclick="simurgV8Go(\'polar\',\'polar\')"><small>Source</small>Polar →</button></div>\
-      <div style="display:none"><span id="homeNightly">76</span><span id="homeNightlyLabel">İyi</span><span id="homeLoadPct">61%</span></div>';
+      <div style="display:none"><span id="homeNightly">—</span><span id="homeNightlyLabel">Veri bekleniyor</span><span id="homeLoadPct">—</span></div>';
     document.getElementById('psTodayTraining').textContent=getCurrentProgramLabel();
   }
   function ensurePolarSection(){
     if(document.getElementById('polar')) return;
     var main=document.querySelector('main'); if(!main) return;
-    main.insertAdjacentHTML('beforeend','<section id="polar" class="section simurgPolarShell"><div class="psPolarHero"><div class="psLabel">POLAR LOOP / FLOW</div><h1>Polar Merkezi</h1><p>Polar Loop Gen 2 geldikten sonra Polar Flow’dan alınabilecek recovery, uyku, HRV, RHR ve load verileri bu ekranda özetlenecek.</p></div><div class="psPolarGrid"><div class="psPolarCard"><small>Nightly Recharge</small><b id="polarShellNightly">'+esc(getVal('homeNightly','76'))+'</b><span>Polar Recovery</span></div><div class="psPolarCard"><small>HRV</small><b id="polarShellHrv">'+esc(getVal('homeHrv','62'))+'</b><span>Flow verisi</span></div><div class="psPolarCard"><small>Sleep</small><b id="polarShellSleep">'+esc(getVal('homeSleep','7s 12dk'))+'</b><span>Uyku özeti</span></div><div class="psPolarCard"><small>Training Load</small><b>Hazır</b><span>Polar import bekliyor</span></div></div><div class="psCoachCard" style="margin-top:12px"><div class="psCoachHead"><b>Polar Planı</b><span class="psLabel">V1</span></div><p>Şimdilik temiz veri merkezi. Cihaz geldikten sonra Polar Flow’da hangi metrikleri dışa aktarabildiğimizi görüp bu sekmeyi gerçek veriye göre güçlendireceğiz.</p></div></section>');
+    main.insertAdjacentHTML('beforeend','<section id="polar" class="section simurgPolarShell"><div class="psPolarHero"><div class="psLabel">POLAR LOOP / FLOW</div><h1>Polar Merkezi</h1><p>Polar Loop Gen 2 geldikten sonra Polar Flow’dan alınabilecek recovery, uyku, HRV, RHR ve load verileri bu ekranda özetlenecek.</p></div><div class="psPolarGrid"><div class="psPolarCard"><small>Nightly Recharge</small><b id="polarShellNightly">'+esc(getVal('homeNightly','—'))+'</b><span>Polar Recovery</span></div><div class="psPolarCard"><small>HRV</small><b id="polarShellHrv">'+esc(getVal('homeHrv','—'))+'</b><span>Flow verisi</span></div><div class="psPolarCard"><small>Sleep</small><b id="polarShellSleep">'+esc(getVal('homeSleep','—'))+'</b><span>Uyku özeti</span></div><div class="psPolarCard"><small>Training Load</small><b>—</b><span>Polar import bekliyor</span></div></div><div class="psCoachCard" style="margin-top:12px"><div class="psCoachHead"><b>Polar Planı</b><span class="psLabel">V1</span></div><p>Şimdilik temiz veri merkezi. Cihaz geldikten sonra Polar Flow’da hangi metrikleri dışa aktarabildiğimizi görüp bu sekmeyi gerçek veriye göre güçlendireceğiz.</p></div></section>');
   }
   function syncPremiumBars(){
-    try{var rec=parseInt(getVal('homeReadinessScore','76'),10)||76;var rb=document.getElementById('homeRecoveryBar');if(rb)rb.style.width=Math.max(5,Math.min(100,rec))+'%';}catch(e){}
-    try{var load=getVal('homeLoadPct','61%').replace('%','')||61;var lb=document.getElementById('homeLoadBar');if(lb)lb.style.width=Math.max(5,Math.min(100,parseInt(load,10)||61))+'%';}catch(e){}
+    try{var rec=parseInt(getVal('homeReadinessScore','0'),10)||0;var rb=document.getElementById('homeRecoveryBar');if(rb)rb.style.width=Math.max(0,Math.min(100,rec))+'%';}catch(e){}
+    try{var load=getVal('homeLoadPct','0').replace('%','')||0;var lb=document.getElementById('homeLoadBar');if(lb)lb.style.width=Math.max(0,Math.min(100,parseInt(load,10)||0))+'%';}catch(e){}
   }
   function install(){
     window.simurgV8Go=go; window.simurgV8OpenMenu=openMenu; window.simurgV8CloseMenu=closeMenu;
@@ -12720,7 +12720,7 @@ m Shell V4: Logger information architecture fix -->
   function isMobile(){return window.innerWidth<=860;}
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function text(id,fb){var el=document.getElementById(id);return el?el.textContent.trim():fb;}
-  function score(){var n=parseInt(text('homeReadinessScore','76'),10);return isNaN(n)?76:n;}
+  function score(){var n=parseInt(text('homeReadinessScore',''),10);return isNaN(n)?null:n;}
   function selected(){try{return window.selectedDate || new Date().toISOString().slice(0,10);}catch(e){return new Date().toISOString().slice(0,10);}}
   function day(){try{return typeof window.dayData==='function' ? (dayData(selected())||[]) : [];}catch(e){return [];}}
   function calcs(){try{return typeof window.calc==='function' ? calc(day()) : {sets:0,reps:0,vol:0};}catch(e){return {sets:0,reps:0,vol:0};}}
@@ -12734,6 +12734,7 @@ m Shell V4: Logger information architecture fix -->
   }
   function recommendation(){
     var rec=score(), c=calcs(), risk=lastPainRisk();
+    if(rec==null) return {tone:'',label:'Veri bekleniyor',title:'Kayıt bulunmuyor',msg:'Seçili tarih için recovery verisi bekleniyor.'};
     if(risk.pain>0) return {tone:'risk',label:'Risk kontrollü',title:'Pain sinyali var',msg:'Bugün ağrı girilen hareketlerde ekstra set ekleme. Form kalitesi ve hareket açıklığı öncelik.'};
     if(rec<55) return {tone:'risk',label:'Deload',title:'Yükü azalt',msg:'Recovery düşük. Ana planı %20-30 hacim kırparak uygula; failure yok.'};
     if(rec<70) return {tone:'warn',label:'Kontrollü',title:'Planı koru, agresifleşme',msg:'Hazırlık orta. Ana hareketlerde teknik setleri koru, RPE 8 üstüne çıkma.'};
@@ -12744,7 +12745,7 @@ m Shell V4: Logger information architecture fix -->
     var rec=score(), c=calcs(), a=activity(), risk=lastPainRisk(), reco=recommendation();
     var items=[];
     items.push({icon:'🎯',tone:reco.tone,title:'Bugünün kararı',body:reco.msg});
-    items.push({icon:'💠',tone:rec>=70?'good':rec>=55?'warn':'risk',title:'Recovery sinyali',body:'Hazırlık '+rec+'/100 · HRV '+text('homeHrv','-')+' · RHR '+text('homeRhr','-')+' · Sleep '+text('homeSleep','-')+'.'});
+    items.push({icon:'💠',tone:rec==null?'':rec>=70?'good':rec>=55?'warn':'risk',title:'Recovery sinyali',body:rec==null?'Seçili tarih için recovery verisi bekleniyor.':'Hazırlık '+rec+'/100 · HRV '+text('homeHrv','-')+' · RHR '+text('homeRhr','-')+' · Sleep '+text('homeSleep','-')+'.'});
     items.push({icon:'🏋️',tone:c.sets>=24?'warn':'',title:'Son seans yükü',body:(c.sets||0)+' set · '+fmt(c.vol)+' kg hacim · '+(c.reps||0)+' tekrar. Yük toleransını buna göre değerlendir.'});
     if(risk.pain>0 || risk.rpeHigh>0) items.push({icon:'⚠️',tone:'risk',title:'Risk / deload notu',body:'Pain kaydı: '+risk.pain+' · yüksek RPE seti: '+risk.rpeHigh+'. Bugün gereksiz yoğunluk ekleme.'});
     else items.push({icon:'🛡️',tone:'good',title:'Risk / deload notu',body:'Belirgin pain veya aşırı RPE sinyali yok. Yine de form kalitesi ana kriter.'});
@@ -12761,7 +12762,7 @@ m Shell V4: Logger information architecture fix -->
         panel=document.getElementById('simurgAlertPanel');
       }
       var d=alertData();
-      var html='<div class="psAlertScore" style="--score:'+Math.max(4,Math.min(100,d.rec))+'%"><div class="psAlertScoreRing"><b>'+d.rec+'</b></div><div class="psAlertDecision"><small>'+esc(d.reco.label)+'</small><b>'+esc(d.reco.title)+'</b><p>'+esc(d.reco.msg)+'</p></div></div>';
+      var html='<div class="psAlertScore" style="--score:'+(d.rec==null?0:Math.max(4,Math.min(100,d.rec)))+'%"><div class="psAlertScoreRing"><b>'+(d.rec==null?'—':d.rec)+'</b></div><div class="psAlertDecision"><small>'+esc(d.reco.label)+'</small><b>'+esc(d.reco.title)+'</b><p>'+esc(d.reco.msg)+'</p></div></div>';
       html+=d.items.map(function(x){return '<div class="psAlertItem '+esc(x.tone||'')+'"><i>'+esc(x.icon)+'</i><div><b>'+esc(x.title)+'</b><span>'+esc(x.body)+'</span></div></div>';}).join('');
       var box=document.getElementById('simurgAlertItems'); if(box) box.innerHTML=html;
       panel.classList.add('open');
@@ -12777,7 +12778,7 @@ m Shell V4: Logger information architecture fix -->
     var d=alertData(), c=calcs(), a=activity();
     var act=a?((a.name||'Activity')+' · '+(a.duration||'-')):'Activity verisi yok';
     var html='<div id="coachV8Premium">'
-      +'<div class="coachV8Hero"><div class="coachV8Top"><div><small class="coachV8Kicker">TODAY\'S RECOMMENDATION</small><h2>'+esc(d.reco.title)+'</h2></div><span class="coachV8Pill">'+esc(d.reco.label)+'</span></div><p class="coachV8Text">'+esc(d.reco.msg)+'</p><div class="coachV8MetricRow"><div class="coachV8Metric"><small>Recovery</small><b>'+d.rec+'</b></div><div class="coachV8Metric"><small>Sets</small><b>'+fmt(c.sets)+'</b></div><div class="coachV8Metric"><small>Volume</small><b>'+fmt(c.vol)+'</b></div></div></div>'
+      +'<div class="coachV8Hero"><div class="coachV8Top"><div><small class="coachV8Kicker">TODAY\'S RECOMMENDATION</small><h2>'+esc(d.reco.title)+'</h2></div><span class="coachV8Pill">'+esc(d.reco.label)+'</span></div><p class="coachV8Text">'+esc(d.reco.msg)+'</p><div class="coachV8MetricRow"><div class="coachV8Metric"><small>Recovery</small><b>'+(d.rec==null?'—':d.rec)+'</b></div><div class="coachV8Metric"><small>Sets</small><b>'+fmt(c.sets)+'</b></div><div class="coachV8Metric"><small>Volume</small><b>'+fmt(c.vol)+'</b></div></div></div>'
       +'<div class="coachV8Grid">'
       +'<div class="coachV8Card"><div class="coachV8CardHead"><b>Load & Recovery</b><span>balance</span></div><p>'+esc('Recovery '+d.rec+'/100. Son seans '+fmt(c.sets)+' set ve '+fmt(c.vol)+' kg hacim. Bugünkü yükleme kararını bu dengeye göre ver.')+'</p></div>'
       +'<div class="coachV8Card"><div class="coachV8CardHead"><b>Injury Risk</b><span>protection</span></div><p>'+esc(d.items[3] ? d.items[3].body : 'Belirgin risk sinyali yok. Form kalitesini koru.')+'</p></div>'
@@ -13150,7 +13151,7 @@ m Shell V4: Logger information architecture fix -->
 
   function smartTargetsHtml(rows){
     var by={}; rows.forEach(function(w){(by[w.exercise]=by[w.exercise]||[]).push(w);});
-    var items=Object.keys(by).slice(0,6).map(function(ex){var d=smartDecision(ex,by[ex],selDate()); return '<div class="nextTargetPremiumItem"><div><b>'+esc(ex)+'</b><span>'+esc(d.text)+'</span><span class="smartCoachTag '+(d.category.aggressive?'main':d.tone)+'">'+esc(d.category.label)+'</span></div><div class="nextTargetBadge">'+esc(d.label)+'</div></div>';}).join('');
+    var items=Object.keys(by).map(function(ex){var d=smartDecision(ex,by[ex],selDate()); return '<div class="nextTargetPremiumItem"><div><b>'+esc(ex)+'</b><span>'+esc(d.text)+'</span><span class="smartCoachTag '+(d.category.aggressive?'main':d.tone)+'">'+esc(d.category.label)+'</span></div><div class="nextTargetBadge">'+esc(d.label)+'</div></div>';}).join('');
     return '<div class="nextTargetsPremium">'+(items||'<div class="nextTargetPremiumItem"><div><b>Hedef bekleniyor</b><span>Hareket verisi geldikçe Smart Target oluşacak.</span></div><div class="nextTargetBadge">Pending</div></div>')+'</div>';
   }
   var oldCoach=window.renderCoachPanels;
@@ -15912,12 +15913,12 @@ m Shell V4: Logger information architecture fix -->
   }
 })();
 </script>
-<link rel="stylesheet" href="./polar-workout.css?v=9">
+<link rel="stylesheet" href="./polar-workout.css?v=10">
 <script src="./polar-workout.js?v=10"></script>
 <script src="./workout-source-policy.js?v=1"></script>
-<link rel="stylesheet" href="./premium-standard.css?v=24">
-<script src="./premium-standard.js?v=23"></script>
-<link rel="stylesheet" href="./polar-accesslink.css?v=3">
+<link rel="stylesheet" href="./premium-standard.css?v=25">
+<script src="./premium-standard.js?v=24"></script>
+<link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=4"></script>
-<link rel="stylesheet" href="./desktop-alignment.css?v=17">
-<script src="./desktop-alignment.js?v=19"></script>
+<link rel="stylesheet" href="./desktop-alignment.css?v=18">
+<script src="./desktop-alignment.js?v=20"></script>

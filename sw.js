@@ -1,17 +1,17 @@
-const SIMURG_CACHE = 'simurg-desktop-horizon-flow-v1-1';
+const SIMURG_CACHE = 'simurg-horizon-color-system-unification-v1-1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './polar-workout.css?v=9',
+  './polar-workout.css?v=10',
   './polar-workout.js?v=10',
   './workout-source-policy.js?v=1',
-  './premium-standard.css?v=24',
-  './premium-standard.js?v=23',
-  './polar-accesslink.css?v=3',
+  './premium-standard.css?v=25',
+  './premium-standard.js?v=24',
+  './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=4',
-  './desktop-alignment.css?v=17',
-  './desktop-alignment.js?v=19',
+  './desktop-alignment.css?v=18',
+  './desktop-alignment.js?v=20',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
