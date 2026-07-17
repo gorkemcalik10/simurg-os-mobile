@@ -1,17 +1,17 @@
-const SIMURG_CACHE = 'simurg-desktop-legacy-polar-data-v1-5';
+const SIMURG_CACHE = 'simurg-horizon-architecture-stabilization-v1-3';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './polar-workout.css?v=9',
-  './polar-workout.js?v=9',
+  './polar-workout.js?v=10',
   './workout-source-policy.js?v=1',
-  './premium-standard.css?v=11',
-  './premium-standard.js?v=12',
+  './premium-standard.css?v=24',
+  './premium-standard.js?v=22',
   './polar-accesslink.css?v=3',
   './polar-accesslink.js?v=4',
   './desktop-alignment.css?v=16',
-  './desktop-alignment.js?v=16',
+  './desktop-alignment.js?v=18',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
@@ -35,6 +35,16 @@ self.addEventListener('fetch', event => {
     return;
   }
   if (url.origin === location.origin) {
+    const localDev = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || /^192\.168\./.test(url.hostname);
+    const liveAsset = req.destination === 'script' || req.destination === 'style' || /\.(?:js|css|html)$/.test(url.pathname);
+    if (localDev && liveAsset) {
+      event.respondWith(fetch(req).then(res => {
+        const copy = res.clone();
+        caches.open(SIMURG_CACHE).then(cache => cache.put(req, copy));
+        return res;
+      }).catch(() => caches.match(req)));
+      return;
+    }
     event.respondWith(caches.match(req).then(cached => cached || fetch(req).then(res => {
       const copy = res.clone();
       caches.open(SIMURG_CACHE).then(cache => cache.put(req, copy));

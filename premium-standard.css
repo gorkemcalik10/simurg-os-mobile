@@ -702,6 +702,17 @@ main>.section:not(#polar-workout) :is(input,select,textarea):focus{outline:0!imp
 
 /* B Horizon Flow Mobile Final */
 @media(max-width:860px){
+  :root{--simurgNativeNavH:64px;--simurgNativeBottom:calc(var(--simurgNativeNavH) + 26px + env(safe-area-inset-bottom,0px));--simurgNativeTop:calc(12px + env(safe-area-inset-top,0px))}
+  html,body{width:100%!important;height:100%!important;min-height:100%!important;overflow:hidden!important;overscroll-behavior:none!important;scroll-behavior:auto!important;background:#060a0f!important}
+  body{position:fixed!important;inset:0!important;padding:0!important}
+  .app{display:block!important;width:100%!important;height:100svh!important;min-height:0!important;overflow:hidden!important;background:linear-gradient(180deg,#070c12,#05090e 60%,#04070b)!important}
+  .app>aside,.simurgMobileBottomNav,.simurgMobileSheet,.simurgMobileShade{display:none!important;visibility:hidden!important;pointer-events:none!important}
+  main{position:relative!important;width:100%!important;max-width:520px!important;height:100svh!important;min-height:0!important;margin:0 auto!important;padding:0!important;overflow:hidden!important}
+  main>.section{position:absolute!important;inset:0!important;display:none!important;width:100%!important;height:100%!important;min-height:0!important;max-width:none!important;margin:0!important;padding:0!important;overflow:hidden!important;animation:none!important;transform:none!important;opacity:1!important}
+  main>.section.active{display:block!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain!important;scroll-behavior:auto!important;padding:var(--simurgNativeTop) 12px var(--simurgNativeBottom)!important}
+  main>.section.active::-webkit-scrollbar{display:none!important}
+  #simurgAlertPanel{display:none;position:fixed;inset:0;z-index:2147483400;padding:22px 14px;align-items:flex-end;background:rgba(0,0,0,.72)}
+  #simurgAlertPanel.open{display:flex!important}#simurgAlertPanel .psAlertSheet{width:min(100%,500px);max-height:72svh;margin:0 auto;padding:14px;border:1px solid var(--hf-line);border-radius:21px;background:#0d151d;overflow-y:auto}#simurgAlertPanel .psAlertHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}#simurgAlertPanel .psAlertItem{padding:11px;border:1px solid var(--hf-line-soft);border-radius:14px;background:#080e14}
   :is(#home.gp-home,#gym.gp-gym-refined,#workout.gp-logger-refined,#polar-workout,#polar,#coaching.section,#program.section,#weekly.section,#monthly.section,#data.section){
     --hf-bg:#060a0f;--hf-surface:#0b1219;--hf-surface-2:#0e171f;--hf-field:#080e14;
     --hf-line:rgba(151,171,190,.15);--hf-line-soft:rgba(151,171,190,.09);
