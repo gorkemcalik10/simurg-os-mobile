@@ -262,7 +262,7 @@
   function load(workout){return loadProCard(workout)+loadImpactCard(workout)+(workout.rpe==null?'':rpeCard(workout))+coachNoteCard(workout);}
   function emptyState(global){return '<div class="pw-empty compact"><div class="pw-empty-mark">⌁</div><h2>'+(global?'Henüz Polar workout yok.':'Bu tarihte Polar workout yok.')+'</h2><p>'+(global?'Polar Flow senkronizasyonunu çalıştır.':'Polar Flow’u senkronize et veya başka bir tarih seç.')+'</p></div>';}
   function sectionHtml(){
-    return '<div class="pw-shell"><header class="pw-header"><div class="pw-head-row"><button class="pw-head-icon" type="button" onclick="simurgV8Go(\'polar\',\'polar\')" aria-label="Back to Polar">‹</button><div class="pw-head-copy"><span class="pw-brand">SIMURG OS</span><h1>Polar Workout</h1><div id="pwSubtitle" class="pw-subtitle">Polar Flow workout detail</div><div id="pwSource" class="pw-source"><i></i>Polar Flow</div></div><button class="pw-head-icon" type="button" onclick="polarWorkoutExport()" aria-label="Export Polar workout">⇧</button></div></header><div id="pwDateNavigator"></div><div class="pw-tabs" role="tablist">'+tabs.map(function(tab){return '<button id="pwTab-'+tab+'" class="pw-tab '+(tab===currentTab?'active':'')+'" type="button" role="tab" onclick="polarWorkoutSetTab(\''+tab+'\')">'+tab.toUpperCase()+'</button>';}).join('')+'</div><div id="pwWorkoutSelector"></div><div id="pwContent" class="pw-content"></div></div>';
+    return '<div class="pw-shell"><header class="pw-header"><div class="pw-head-row"><button class="pw-head-icon" type="button" onclick="simurgClosePolarWorkout()" aria-label="Back to Polar">‹</button><div class="pw-head-copy"><span class="pw-brand">SIMURG OS</span><h1>Polar Workout</h1><div id="pwSubtitle" class="pw-subtitle">Polar Flow workout detail</div><div id="pwSource" class="pw-source"><i></i>Polar Flow</div></div><button class="pw-head-icon" type="button" onclick="polarWorkoutExport()" aria-label="Export Polar workout">⇧</button></div></header><div id="pwDateNavigator"></div><div class="pw-tabs" role="tablist">'+tabs.map(function(tab){return '<button id="pwTab-'+tab+'" class="pw-tab '+(tab===currentTab?'active':'')+'" type="button" role="tab" onclick="polarWorkoutSetTab(\''+tab+'\')">'+tab.toUpperCase()+'</button>';}).join('')+'</div><div id="pwWorkoutSelector"></div><div id="pwContent" class="pw-content"></div></div>';
   }
   function ensureSection(){
     var section=document.getElementById('polar-workout');
@@ -292,21 +292,15 @@
     var renderers={overview:overview,heart:heart,zones:zones,load:load};
     var next=renderers[currentTab](workout);if(content.innerHTML!==next)content.innerHTML=next;
   }
-  function ensureNavigation(){
-    var desktop=document.querySelector('aside .nav');
-    if(desktop&&!desktop.querySelector('[data-polar-workout-nav]')){
-      var desktopButton=document.createElement('button');desktopButton.dataset.polarWorkoutNav='1';desktopButton.innerHTML='⌁ Polar Workout';desktopButton.onclick=function(){window.simurgOpenPolarWorkout(desktopButton);};desktop.appendChild(desktopButton);
-    }
-  }
   function markPolarWorkoutActive(){
     var section=document.getElementById('polar-workout');
     var screen=document.body.getAttribute('data-simurg-active-screen');
     if(!section||(!section.classList.contains('active')&&screen!=='polarWorkout'&&screen!=='polar-workout')) return;
     document.querySelectorAll('#simurgV8Nav button[data-key]').forEach(function(item){
-      var active=item.dataset.key==='polarWorkout';item.classList.toggle('active',active);item.setAttribute('aria-pressed',active?'true':'false');
+      var active=item.dataset.key==='polar';item.classList.toggle('active',active);item.setAttribute('aria-pressed',active?'true':'false');
     });
     document.body.setAttribute('data-simurg-active-screen','polar-workout');
-    document.documentElement.setAttribute('data-simurg-active-key','polarWorkout');
+    document.documentElement.setAttribute('data-simurg-active-key','polar');
   }
   function activatePolarWorkout(){
     var section=ensureSection();if(!section) return;
@@ -314,30 +308,14 @@
     section.classList.add('active');
     document.getElementById('simurgV8Shade')?.classList.remove('open');
     document.getElementById('simurgV8Sheet')?.classList.remove('open');
-    document.querySelectorAll('#simurgV8Nav button[data-key]').forEach(function(item){item.classList.toggle('active',item.dataset.key==='polarWorkout');});
+    document.querySelectorAll('#simurgV8Nav button[data-key]').forEach(function(item){item.classList.toggle('active',item.dataset.key==='polar');});
     document.body.setAttribute('data-simurg-active-screen','polar-workout');
-    document.documentElement.setAttribute('data-simurg-active-key','polarWorkout');
-    window.__simurgCurrentMobileKey='polarWorkout';
-    window.__simurgStableNavKey='polarWorkout';
+    document.documentElement.setAttribute('data-simurg-active-key','polar');
+    window.__simurgCurrentMobileKey='polar';
+    window.__simurgStableNavKey='polar';
     render();
     markPolarWorkoutActive();
-    requestAnimationFrame(markPolarWorkoutActive);
     section.scrollTop=0;
-  }
-  function wrapGo(){
-    var old=window.simurgV8Go;
-    if(typeof old!=='function'||old.__polarWorkout) return;
-    window.simurgV8Go=function(id,key){
-      if(id==='polar-workout'){
-        activatePolarWorkout();
-        return;
-      }
-      ensureSection();
-      var result=old.apply(this,arguments);
-      setTimeout(ensureNavigation,0);
-      return result;
-    };
-    window.simurgV8Go.__polarWorkout=true;
   }
   function wrapUniversalImport(){
     var old=window.universalImport;
@@ -377,8 +355,8 @@
   window.polarWorkoutSetTab=function(tab){if(tabs.indexOf(tab)<0||tab===currentTab)return;currentTab=tab;render();markPolarWorkoutActive();var section=document.getElementById('polar-workout');if(section)section.scrollTop=0;};
   window.simurgOpenPolarWorkout=function(button){
     activatePolarWorkout();
-    if(button){document.querySelectorAll('aside .nav button').forEach(function(item){item.classList.toggle('active',item===button);});}
   };
+  window.simurgClosePolarWorkout=function(){window.simurgV8Go('polar','polar');};
   window.simurgOpenPolarWorkoutFor=function(date,startTime){selectedDate=String(date||todayDate());selectedWorkoutKey=String(startTime||'');currentTab='overview';activatePolarWorkout();};
   window.polarWorkoutExport=function(){
     var workout=latest();if(!workout){return;}
@@ -387,10 +365,7 @@
   };
 
   ready(function(){
-    ensureStore();ensureSection();ensureNavigation();wrapGo();wrapUniversalImport();render();
+    ensureStore();ensureSection();wrapUniversalImport();render();
     var importCopy=document.querySelector('.universalImportCard .sub');if(importCopy) importCopy.textContent='Tek veri giriş noktası: Polar Flow workout, Apple Watch, workout, daily ve weekly JSON verilerini otomatik tanır.';
-    var observer=new MutationObserver(ensureNavigation);
-    observer.observe(document.body,{childList:true});
-    setTimeout(function(){ensureNavigation();wrapGo();wrapUniversalImport();},500);
   });
 })();

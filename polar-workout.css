@@ -18,21 +18,14 @@
   color:var(--pw-text);
   overflow-x:hidden;
 }
-body[data-simurg-active-screen="polarWorkout"] #polar-workout,
 body[data-simurg-active-screen="polar-workout"] #polar-workout{display:block!important}
-html[data-simurg-active-key="polarWorkout"] #simurgV8Nav button[data-key="polarWorkout"],
-body[data-simurg-active-screen="polarWorkout"] #simurgV8Nav button[data-key="polarWorkout"]{
-  background:#f3f7fb!important;color:#05070b!important;border-color:#f3f7fb!important;font-weight:1000!important
-}
 #polar-workout *{min-width:0}
 .pw-shell{
   position:relative;
   width:100%;
   overflow:hidden;
   border-radius:30px;
-  background:
-    radial-gradient(circle at 50% -10%,rgba(48,185,223,.08),transparent 29%),
-    linear-gradient(180deg,var(--pw-card) 0%,var(--pw-bg) 48%,#020406 100%);
+  background:linear-gradient(180deg,var(--pw-card) 0%,var(--pw-bg) 48%,#020406 100%);
   border:1px solid var(--pw-line);
   box-shadow:0 28px 78px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.035);
 }
@@ -59,15 +52,13 @@ body[data-simurg-active-screen="polarWorkout"] #simurgV8Nav button[data-key="pol
 .pw-tab.active{color:#fff}
 .pw-tab.active:after{content:"";position:absolute;left:6px;right:6px;bottom:-1px;height:2px;border-radius:999px;background:var(--pw-cyan);box-shadow:0 0 12px rgba(16,185,255,.8)}
 .pw-content{padding:10px}
-.pw-workout-picker{display:flex;gap:6px;padding:8px 10px 0;overflow-x:auto;scrollbar-width:none}.pw-workout-picker::-webkit-scrollbar{display:none}.pw-workout-picker button{flex:0 0 auto;max-width:190px;padding:8px 10px;border:1px solid rgba(88,173,231,.14);border-radius:11px;background:rgba(3,16,26,.76);color:#9fb0c1;text-align:left}.pw-workout-picker button.active{border-color:rgba(16,185,255,.42);background:rgba(16,185,255,.10);color:#f5fbff}.pw-workout-picker b{display:block;font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pw-workout-picker span{display:block;margin-top:3px;font-size:8px;color:#7f94a7}
+.pw-workout-picker{display:flex;gap:6px;padding:8px 10px 0;overflow-x:auto;scrollbar-width:none}.pw-workout-picker::-webkit-scrollbar{display:none}.pw-workout-picker button{flex:0 0 auto;max-width:190px;padding:8px 10px;border:1px solid var(--pw-line);border-radius:11px;background:var(--pw-card-deep);color:#9fb0c1;text-align:left}.pw-workout-picker button.active{border-color:rgba(16,185,255,.42);background:rgba(16,185,255,.10);color:#f5fbff}.pw-workout-picker b{display:block;font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pw-workout-picker span{display:block;margin-top:3px;font-size:8px;color:#7f94a7}
 .pw-pane{display:none;animation:pw-in .18s ease}
 .pw-pane.active{display:block}
 @keyframes pw-in{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:none}}
 .pw-card{
   border:1px solid var(--pw-line);border-radius:17px;padding:14px;margin:0 0 9px;
-  background:
-    radial-gradient(circle at 100% 0%,rgba(16,185,255,.065),transparent 34%),
-    linear-gradient(180deg,var(--pw-card),var(--pw-card-deep));
+  background:linear-gradient(180deg,var(--pw-card),var(--pw-card-deep));
   box-shadow:0 15px 36px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.025);
   overflow:hidden;
 }
@@ -83,7 +74,7 @@ body[data-simurg-active-screen="polarWorkout"] #simurgV8Nav button[data-key="pol
 }
 .pw-load-inner{
   width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;
-  background:radial-gradient(circle at 50% 35%,#0a1d2d,#03101a 72%);border:1px solid rgba(160,206,234,.24);
+  background:var(--pw-card-deep);border:1px solid var(--pw-line);
   box-shadow:inset 0 0 19px rgba(0,0,0,.55);
 }
 .pw-load-inner small{color:#9aabbd;font-size:8px;letter-spacing:.7px;font-weight:800}
@@ -156,10 +147,6 @@ body[data-simurg-active-screen="polarWorkout"] #simurgV8Nav button[data-key="pol
   #polar-workout .pw-content,#polar-workout .pw-pane{overflow:visible!important;touch-action:pan-y!important;contain:none!important;transform:none!important;will-change:auto!important}
   #polar-workout .pw-card{box-shadow:0 9px 24px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.025)}
   #polar-workout .pw-header{padding-top:13px}
-  #simurgV8Nav{grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:2px!important;left:7px!important;right:7px!important;padding:5px!important}
-  #simurgV8Nav button{font-size:8px!important;line-height:1.02!important;padding:3px 0!important;overflow:hidden!important}
-  #simurgV8Nav button i{font-size:13px!important;margin-bottom:3px!important}
-  #simurgV8Nav button[data-key="polarWorkout"]{letter-spacing:-.18px!important}
 }
 @media(min-width:861px){
   #polar-workout{padding-bottom:30px}
@@ -183,5 +170,4 @@ body[data-simurg-active-screen="polarWorkout"] #simurgV8Nav button[data-key="pol
   .pw-hero-grid{grid-template-columns:108px 1fr;gap:7px}.pw-load-ring{width:102px;height:102px}.pw-load-inner b{font-size:36px}
   .pw-metric{padding:5px 4px}.pw-metric b{font-size:15px}
   .pw-zone-row{grid-template-columns:20px 49px 1fr 39px 27px;gap:5px;font-size:9.5px}
-  #simurgV8Nav button{font-size:7.4px!important}
 }
