@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-horizon-color-system-unification-v1-1';
+const SIMURG_CACHE = 'simurg-horizon-color-system-unification-v1-2';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -6,11 +6,11 @@ const CORE_ASSETS = [
   './polar-workout.css?v=10',
   './polar-workout.js?v=10',
   './workout-source-policy.js?v=1',
-  './premium-standard.css?v=25',
+  './premium-standard.css?v=26',
   './premium-standard.js?v=24',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=4',
-  './desktop-alignment.css?v=18',
+  './desktop-alignment.css?v=19',
   './desktop-alignment.js?v=20',
   './icons/icon-192.png',
   './icons/icon-512.png'
