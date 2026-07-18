@@ -5901,17 +5901,17 @@ body{background:#050607!important;}
 <div class="app"><aside>
 <div class="logo simurgBrandPolish"><div class="mark">🕊️</div><div class="brandWrap"><div class="brand"><span class="brandMain">SIMURG</span><span class="brandOs">OS</span></div><small>Yüksel. Kaydet. Yeniden İnşa Et.</small></div></div>
 <div class="nav">
-<button class="active" onclick="show('home',this)">🏠 Ana Sayfa</button>
-<button onclick="show('recovery',this)">💠 Toparlanma</button>
-<button onclick="show('workout',this)">🏋️ Workout Logger</button>
-<button onclick="show('gym',this)">📱 Gym Mode</button>
-<button onclick="show('daily',this)">📝 Daily Summary</button>
-<button onclick="show('weekly',this)">📅 Weekly Summary</button>
-<button onclick="show('program',this)">🧭 Program Intelligence</button>
-<button onclick="show('monthly',this)">🗓️ Monthly Review</button>
-<button onclick="show('coaching',this)">🧠 Coaching</button>
-<button onclick="show('reports',this)">📈 Progress & Analytics</button>
-<button onclick="show('data',this)">💾 Data Center</button>
+<button class="active" onclick="window.innerWidth<=860?simurgV8Go('home','home'):show('home',this)">🏠 Ana Sayfa</button>
+<button onclick="window.innerWidth<=860?simurgV8Go('recovery','home'):show('recovery',this)">💠 Toparlanma</button>
+<button onclick="window.innerWidth<=860?simurgV8Go('workout','logger'):show('workout',this)">🏋️ Workout Logger</button>
+<button onclick="window.innerWidth<=860?simurgV8Go('gym','gym'):show('gym',this)">📱 Gym Mode</button>
+<button onclick="window.innerWidth<=860?simurgV8Go('daily','menu'):show('daily',this)">📝 Daily Summary</button>
+<button onclick="window.innerWidth<=860?simurgV8Go('weekly','menu'):show('weekly',this)">📅 Weekly Summary</button>
+<button onclick="window.innerWidth<=860?simurgV8Go('program','menu'):show('program',this)">🧭 Program Intelligence</button>
+<button onclick="window.innerWidth<=860?simurgV8Go('monthly','menu'):show('monthly',this)">🗓️ Monthly Review</button>
+<button onclick="window.innerWidth<=860?simurgV8Go('coaching','menu'):show('coaching',this)">🧠 Coaching</button>
+<button onclick="window.innerWidth<=860?simurgV8Go('reports','menu'):show('reports',this)">📈 Progress & Analytics</button>
+<button onclick="window.innerWidth<=860?simurgV8Go('data','menu'):show('data',this)">💾 Data Center</button>
 </div>
 <div class="sidecard quoteCard">
   <p>MOTİVASYON</p>
@@ -5944,7 +5944,7 @@ body{background:#050607!important;}
     </div>
     <h2>Bugünün Kararı</h2>
     <p id="homeCoachNote">Seçili tarih için toparlanma verisi bekleniyor.</p>
-    <button onclick="show('recovery',document.querySelectorAll('.nav button')[1])">Recovery Detayını Aç →</button>
+    <button onclick="window.innerWidth<=860?simurgV8Go('recovery','home'):show('recovery',document.querySelectorAll('.nav button')[1])">Recovery Detayını Aç →</button>
   </div>
 
   <div class="v4ScoreStack">
@@ -5979,8 +5979,8 @@ body{background:#050607!important;}
   </div>
 
   <div class="v4Actions">
-    <button class="v4Mini" onclick="show('workout',document.querySelectorAll('.nav button')[2])"><small>SESSION</small><b>Logger</b><span>Seansı kaydet →</span></button>
-    <button class="v4Mini" onclick="show('data',document.querySelectorAll('.nav button')[10])"><small>IMPORT</small><b>Polar JSON</b><span>Recovery ekle →</span></button>
+    <button class="v4Mini" onclick="window.innerWidth<=860?simurgV8Go('workout','logger'):show('workout',document.querySelectorAll('.nav button')[2])"><small>SESSION</small><b>Logger</b><span>Seansı kaydet →</span></button>
+    <button class="v4Mini" onclick="window.innerWidth<=860?simurgV8Go('data','menu'):show('data',document.querySelectorAll('.nav button')[10])"><small>IMPORT</small><b>Polar JSON</b><span>Recovery ekle →</span></button>
   </div>
 </section>
 
@@ -6047,7 +6047,7 @@ body{background:#050607!important;}
       <b id="gymDayTitle">-</b>
       <span id="gymDayMeta">-</span>
     </div>
-    <button class="btn gymImportJsonBtn" onclick="show('data',[...document.querySelectorAll('.nav button')].find(b=>b.textContent.includes('Data Center')))">Import JSON</button>
+    <button class="btn gymImportJsonBtn" onclick="window.innerWidth<=860?simurgV8Go('data','menu'):show('data',[...document.querySelectorAll('.nav button')].find(b=>b.textContent.includes('Data Center')))">Import JSON</button>
   </div>
   <div id="gymModeList" class="gymModeList"></div>
 </section>
@@ -6147,7 +6147,7 @@ body{background:#050607!important;}
   <h2>Polar Toparlanma İçe Aktarımı</h2>
   <div class="sub">Polar Loop Gen 2 için uyku, HRV, dinlenik nabız, Nightly Recharge ve aktivite yükünü Simurg coaching motoruna bağlar.</div>
   <div class="polarImportTabs"><button class="active">Polar</button><button>Apple Watch</button><button>Elle</button></div>
-  <div class="actions"><button class="btn polarSampleBtn" onclick="fillPolarSample()">Örnek Polar JSON</button><button class="btn sec" onclick="show('home',document.querySelectorAll('.nav button')[0])">Ana Ekrana Dön</button></div>
+  <div class="actions"><button class="btn polarSampleBtn" onclick="fillPolarSample()">Örnek Polar JSON</button><button class="btn sec" onclick="window.innerWidth<=860?simurgV8Go('home','home'):show('home',document.querySelectorAll('.nav button')[0])">Ana Ekrana Dön</button></div>
   <div class="mapGrid"><div>Uyku Skoru → <b>Uyku Skoru</b></div><div>HRV → <b>Hazırlık Motoru</b></div><div>Dinlenik HR → <b>Toparlanma</b></div><div>Gece Toparlanması → <b>Koçluk</b></div><div>Aktivite Yükü → <b>Yük & Yorgunluk</b></div><div>Öznel → <b>Günlük Kontrol</b></div></div>
 </div>
 
@@ -6215,7 +6215,7 @@ let target=document.getElementById(id);
 if(target) target.classList.add('active');
 document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
 if(btn) btn.classList.add('active');
-window.scrollTo({top:0,behavior:'smooth'});
+if(window.innerWidth>860) window.scrollTo({top:0,behavior:'smooth'});
 render();
 }
 function changeWeek(n){weekStart=addDays(weekStart,n);selectedDate=addDays(selectedDate,n);weekStart=mondayOf(selectedDate);render()}
@@ -6796,28 +6796,32 @@ function activitySummaryFromRows(date, rows){
   return {rows, types, primary, name, emoji, duration, active, total, distance, dist, avgHR, maxHR, rpe};
 }
 function renderSingleActivityCard(date, a){
-  let stats=[
-    ['Süre',a.duration||'-'],
-    ['Aktif kcal',a.active?a.active+' kcal':'-'],
-    ['Toplam kcal',a.total?a.total+' kcal':'-'],
-    ['Mesafe',a.dist||'-'],
-    ['Ort. nabız',a.avgHR?a.avgHR+' v/dk':'-'],
-    ['Maks nabız',a.maxHR?a.maxHR+' v/dk':'-'],
-    ['RPE',a.rpe||'-']
-  ];
-  if(a.rows.length>1) stats.push(['Kayıt',a.rows.length+' segment']);
-  return `<div class="activitySessionCard">
+  if(!a) return '';
+  const usable=value=>value!==null&&value!==undefined&&value!==''&&value!=='-'&&!Number.isNaN(value);
+  let stats=[];
+  if(usable(a.duration))stats.push(['Süre',a.duration]);
+  if(Number(a.active)>0)stats.push(['Aktif kcal',a.active+' kcal']);
+  if(Number(a.total)>0)stats.push(['Toplam kcal',a.total+' kcal']);
+  if(usable(a.dist)&&Number(a.distance)>0)stats.push(['Mesafe',a.dist]);
+  if(Number(a.avgHR)>0)stats.push(['Ort. nabız',a.avgHR+' v/dk']);
+  if(Number(a.maxHR)>0)stats.push(['Maks nabız',a.maxHR+' v/dk']);
+  if(Number(a.rpe)>0)stats.push(['RPE',a.rpe]);
+  if(a.rows&&a.rows.length>1)stats.push(['Kayıt',a.rows.length+' segment']);
+  const type=a.primary||'Other';
+  const sourceLabel=a.sourceLabel||'Apple Health';
+  const note=DATA&&DATA.activityNotes&&DATA.activityNotes[String(date)+'::'+String(type)]||'';
+  const safeType=JSON.stringify(type),safeDate=JSON.stringify(date);
+  const actions=a.isPolar?`<div class="activityPill">${escapeAttr(sourceLabel)}</div>`:`<div class="activityPill">${escapeAttr(sourceLabel)}</div><button class="activityNoteBtn" onclick='setActivityQuickNote(${safeDate},${safeType});return false;'>Not</button><button class="activityDeleteBtn" onclick='deleteActivityCard(${safeDate},${safeType});return false;'>Sil</button>`;
+  return `<div class="simurg-activity-card" data-activity-type="${escapeAttr(type)}">
     <div class="activitySessionTop">
       <div class="activitySessionTitle">
-        <div class="activityIcon">${a.emoji}</div>
-        <div><small>ACTIVITY SESSION</small><b>${escapeAttr(a.name)}</b><span>${trDate(date)} · Workout Logger aktivitesi</span></div>
+        <div class="activityIcon">${a.emoji||'⌁'}</div>
+        <div><small>AKTİVİTE OTURUMU</small><b>${escapeAttr(a.name||'Aktivite')}</b><span>${trDate(date)} · ${escapeAttr(sourceLabel)}</span></div>
       </div>
-      <div class="activityTopActions">
-        <div class="activityPill">${a.rows.length>1?'Combined':'Apple Watch'} Load</div>
-        <button class="activityDeleteBtn" onclick='deleteActivityCard(${JSON.stringify(date)},${JSON.stringify(a.primary||"Other")})'>Sil</button>
-      </div>
+      <div class="activityTopActions">${actions}</div>
     </div>
     <div class="activityStatsGrid">${stats.map(([k,v])=>`<div class="activityStatBox"><small>${k}</small><b>${escapeAttr(v)}</b></div>`).join('')}</div>
+    ${note?`<div class="activityQuickNoteBox"><b>Kısa Not:</b> ${escapeAttr(note)}</div>`:''}
   </div>`;
 }
 function renderActivitySessionCard(date){
@@ -7007,7 +7011,7 @@ dates.forEach(date=>{
     let exCount=Object.keys(c.exs).length;
     let exMini=Object.keys(c.exs).map(ex=>`<em>${ex}</em>`).join('');
     let activityLine=hasActivity?`<span>${source&&source.primaryPolar?'Workout Source':'Extra Activity'}: ${activity.emoji} ${escapeAttr(activity.name)} • ${activity.duration||'-'} • ${activity.active||0} kcal • ${escapeAttr(source&&source.source||'Apple Health')}</span>`:'';
-    cards.push(`<div class="dailyMiniCard dailyGymCard" onclick="selectedDate='${date}';show('workout',document.querySelector('.nav button'));render()">
+    cards.push(`<div class="dailyMiniCard dailyGymCard" onclick="selectedDate='${date}';weekStart=mondayOf(selectedDate);window.innerWidth<=860?simurgV8Go('workout','logger'):(show('workout',document.querySelector('.nav button')),render())">
       <div class="dailyMiniTop">
         <div>
           <b>${trDate(date)}</b>
@@ -7033,7 +7037,7 @@ dates.forEach(date=>{
     let loadLabel=activity.active>=450?'High Load':(activity.active>=220?'Moderate Load':'Light Load');
     let activityRole=(String(activity.primary||'').toLowerCase().includes('walk')||String(activity.primary||'').toLowerCase().includes('mobility')||String(activity.primary||'').toLowerCase().includes('yoga'))?'Recovery / Movement':'Conditioning / Activity Load';
     let segmentText=activity.rows.length>1?` • ${activity.rows.length} kayıt`:'';
-    cards.push(`<div class="dailyMiniCard dailyActivityCard" onclick="selectedDate='${date}';show('workout',document.querySelector('.nav button'));render()">
+    cards.push(`<div class="dailyMiniCard dailyActivityCard" onclick="selectedDate='${date}';weekStart=mondayOf(selectedDate);window.innerWidth<=860?simurgV8Go('workout','logger'):(show('workout',document.querySelector('.nav button')),render())">
       <div class="dailyMiniTop">
         <div>
           <b>${trDate(date)}</b>
@@ -7449,6 +7453,11 @@ render()
 
   function activateTarget(id, btn){
     if(!id) return;
+    if(window.innerWidth<=860 && typeof window.simurgV8Go==='function'){
+      const key=id==='workout'?'logger':id==='home'||id==='recovery'?'home':id==='gym'?'gym':id==='polar'?'polar':'menu';
+      window.simurgV8Go(id,key);
+      return;
+    }
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     const target = document.getElementById(id);
     if(target) target.classList.add('active');
@@ -7484,7 +7493,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=data-integrity-localization-v1-4').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=runtime-navigation-scroll-hotfix-v1-1').catch(function(){});
   });
 }
 </script>
@@ -7987,16 +7996,6 @@ async function checkCloudStatus() {
     return {label,cls,role,score};
   }
   window.classifyActivityIntensity=classifyActivityIntensity;
-  window.renderActivitySessionCard=function(date){
-    let a=activitySummaryForDate(date);
-    if(!a) return '';
-    const intensity=classifyActivityIntensity(a);
-    let stats=[
-      ['Süre',a.duration||'-'],['Aktif kcal',a.active?a.active+' kcal':'-'],['Toplam kcal',a.total?a.total+' kcal':'-'],['Mesafe',a.dist||'-'],['Yoğunluk',intensity.label],['Ort. nabız',a.avgHR?a.avgHR+' v/dk':'-'],['Maks nabız',a.maxHR?a.maxHR+' v/dk':'-'],['RPE',a.rpe||'-']
-    ];
-    if(a.rows.length>1) stats.push(['Kayıt',a.rows.length+' segment']);
-    return `<div class="activitySessionCard ${intensity.cls}"><div class="activitySessionTop"><div class="activitySessionTitle"><div class="activityIcon">${a.emoji}</div><div><small>ACTIVITY SESSION</small><b>${esc(a.name)}</b><span>${trDate(date)} · ${intensity.role}</span></div></div><div class="activityPill activityIntensityPill ${intensity.cls}">${intensity.label}</div></div><div class="activityStatsGrid">${stats.map(([k,v])=>`<div class="activityStatBox"><small>${k}</small><b>${esc(v)}</b></div>`).join('')}</div></div>`;
-  };
   window.renderDailyReport=function(){
     let dates=[...new Set([...(DATA.workouts||[]).map(w=>w.date),...(DATA.appleWatch||[]).map(w=>w.date)])].filter(Boolean).sort((a,b)=>parseDate(b)-parseDate(a));
     if(!dates.length){dailyReport.innerHTML='<div class="card"><h2>Daily Summary</h2><div class="reportText">Henüz antrenman veya aktivite verisi yok.</div></div>';return;}
@@ -8007,11 +8006,11 @@ async function checkCloudStatus() {
       if(hasGym){
         let topPart=Object.entries(c.parts).sort((a,b)=>b[1]-a[1])[0]||['-',0], best=items.slice().sort((a,b)=>b.weight-a.weight)[0], exCount=Object.keys(c.exs).length, exMini=Object.keys(c.exs).map(ex=>`<em>${ex}</em>`).join('');
         let activityLine=hasActivity?`<span>Extra Activity: ${activity.emoji} ${esc(activity.name)} • ${activity.duration||'-'} • ${activity.active||0} kcal • ${intensity.label}</span>`:'';
-        cards.push(`<div class="dailyMiniCard dailyGymCard" onclick="selectedDate='${date}';show('workout',document.querySelector('.nav button'));render()"><div class="dailyMiniTop"><div><b>${trDate(date)}</b><span>${items[0]?.day||dayName(date)} · Gym Training</span></div><strong>${c.sets} set</strong></div><div class="dailyMiniReadiness"><span>Readiness ${readiness.score}/100</span><span>${readiness.status}</span></div><div class="dailyMiniStats"><span>${c.reps} reps</span><span>${Math.round(c.vol).toLocaleString('tr-TR')} kg</span><span>${exCount} exercises</span><span>${topPart[0]}</span></div><div class="dailyMiniExercises">${exMini}</div><div class="dailyMiniFooter"><span>Best: ${best?best.exercise+' '+best.weight+'kg':'-'}</span>${activityLine}</div></div>`);
+        cards.push(`<div class="dailyMiniCard dailyGymCard" onclick="selectedDate='${date}';weekStart=mondayOf(selectedDate);window.innerWidth<=860?simurgV8Go('workout','logger'):(show('workout',document.querySelector('.nav button')),render())"><div class="dailyMiniTop"><div><b>${trDate(date)}</b><span>${items[0]?.day||dayName(date)} · Gym Training</span></div><strong>${c.sets} set</strong></div><div class="dailyMiniReadiness"><span>Readiness ${readiness.score}/100</span><span>${readiness.status}</span></div><div class="dailyMiniStats"><span>${c.reps} reps</span><span>${Math.round(c.vol).toLocaleString('tr-TR')} kg</span><span>${exCount} exercises</span><span>${topPart[0]}</span></div><div class="dailyMiniExercises">${exMini}</div><div class="dailyMiniFooter"><span>Best: ${best?best.exercise+' '+best.weight+'kg':'-'}</span>${activityLine}</div></div>`);
       }
       if(hasActivity && !hasGym){
         let segmentText=activity.rows.length>1?` • ${activity.rows.length} kayıt`:'';
-        cards.push(`<div class="dailyMiniCard dailyActivityCard ${intensity.cls}" onclick="selectedDate='${date}';show('workout',document.querySelector('.nav button'));render()"><div class="dailyMiniTop"><div><b>${trDate(date)}</b><span>${dayName(date)} · Activity Day</span></div><strong>${intensity.label}</strong></div><div class="dailyActivityTypeLine"><div class="emoji">${activity.emoji}</div><div><b>${esc(activity.name)}</b><span>${intensity.role}${segmentText}</span></div></div><div class="dailyMiniStats"><span>${activity.duration||'-'}</span><span>${activity.active?activity.active+' kcal':'-'}</span><span>${activity.dist||'-'}</span><span>${activity.avgHR?activity.avgHR+' bpm':'-'}</span></div><div class="dailyActivityNote">Gym hacmine eklenmez; readiness, recovery ve günlük fiziksel yük hesabına dahil edilir.</div></div>`);
+        cards.push(`<div class="dailyMiniCard dailyActivityCard ${intensity.cls}" onclick="selectedDate='${date}';weekStart=mondayOf(selectedDate);window.innerWidth<=860?simurgV8Go('workout','logger'):(show('workout',document.querySelector('.nav button')),render())"><div class="dailyMiniTop"><div><b>${trDate(date)}</b><span>${dayName(date)} · Activity Day</span></div><strong>${intensity.label}</strong></div><div class="dailyActivityTypeLine"><div class="emoji">${activity.emoji}</div><div><b>${esc(activity.name)}</b><span>${intensity.role}${segmentText}</span></div></div><div class="dailyMiniStats"><span>${activity.duration||'-'}</span><span>${activity.active?activity.active+' kcal':'-'}</span><span>${activity.dist||'-'}</span><span>${activity.avgHR?activity.avgHR+' bpm':'-'}</span></div><div class="dailyActivityNote">Gym hacmine eklenmez; readiness, recovery ve günlük fiziksel yük hesabına dahil edilir.</div></div>`);
       }
     });
     dailyReport.innerHTML=`<div class="dailyMiniGrid">`+cards.join('')+`</div>`;
@@ -8210,7 +8209,7 @@ async function checkCloudStatus() {
       const summary=activitySummaryFromRows(date, grouped[type]);
       if(!summary) return '';
       if(window.innerWidth<=900)summary.sourceLabel='Apple Health';
-      return renderSingleActivityCard(date, summary).replace('activitySessionCard"', 'activitySessionCard" data-activity-type="'+String(type).replace(/"/g,'&quot;')+'"');
+      return renderSingleActivityCard(date,summary);
     }).join('');
   };
   window.__simurgActivitySeparateCardsV2=true;
@@ -8348,39 +8347,6 @@ async function checkCloudStatus() {
     if(clean) DATA.activityNotes[key]=clean; else delete DATA.activityNotes[key];
     save();
     return false;
-  };
-
-  // Replace activity card renderer so Quick Note appears on Workout Logger activity cards.
-  window.renderSingleActivityCard=function(date,a){
-    if(!a) return '';
-    const stats=[
-      ['Süre', a.duration||'-'],
-      ['Aktif', (a.active||0)+' kcal'],
-      ['Toplam', (a.total||0)+' kcal'],
-      ['Avg HR', a.avgHR? a.avgHR+' bpm':'-'],
-      ['Max HR', a.maxHR? a.maxHR+' bpm':'-'],
-      ['RPE', a.rpe||'-']
-    ];
-    if(a.distance) stats.push(['Mesafe', a.dist||a.distance+' m']);
-    if(a.rows&&a.rows.length>1) stats.push(['Kayıt',a.rows.length+' segment']);
-    const type=a.primary||'Other';
-    const note=getActivityNote(date,type);
-    const safeType=JSON.stringify(type);
-    const safeDate=JSON.stringify(date);
-    const noteHtml=note?`<div class="activityQuickNoteBox"><b>Quick Note:</b> ${escapeAttr(note)}</div>`:'';
-    const sourceLabel=a.sourceLabel||'Apple Health';
-    const actions=a.isPolar?`<div class="activityPill">${escapeAttr(sourceLabel)}</div>`:`<div class="activityPill">${escapeAttr(sourceLabel)}</div><button class="activityNoteBtn" onclick='setActivityQuickNote(${safeDate},${safeType});return false;'>Not</button><button class="activityDeleteBtn" onclick='deleteActivityCard(${safeDate},${safeType});return false;'>Sil</button>`;
-    return `<div class="activitySessionCard" data-activity-type="${escapeAttr(type)}">
-      <div class="activitySessionTop">
-        <div class="activitySessionTitle">
-          <div class="activityIcon">${a.emoji}</div>
-          <div><small>ACTIVITY SESSION</small><b>${escapeAttr(a.name)}</b><span>${trDate(date)} · ${escapeAttr(sourceLabel)}</span></div>
-        </div>
-        <div class="activityTopActions">${actions}</div>
-      </div>
-      <div class="activityStatsGrid">${stats.map(([k,v])=>`<div class="activityStatBox"><small>${k}</small><b>${escapeAttr(v)}</b></div>`).join('')}</div>
-      ${noteHtml}
-    </div>`;
   };
 
   function cloudSummaryHtml(prefix, cloudUpdated){
@@ -9890,7 +9856,7 @@ textarea,input,select{
     const t=safeToday();
     const active=String(window.selectedDate||selectedDate)===t;
     const shownProgram=window.SimurgLabels?window.SimurgLabels.sentence(programFor(t)):programFor(t);
-    helper.innerHTML=`<div><small>${active?'Bugünün Programı':'Bugün'}</small><b>${shownProgram}</b><span>${safeTr(t)} • Gym modu bugünün tarihine göre hazır.</span></div><button class="btn sec" onclick="goToday();show('gym',document.querySelector('.nav button:nth-child(2)'))">Bugünün Programına Git</button>`;
+    helper.innerHTML=`<div><small>${active?'Bugünün Programı':'Bugün'}</small><b>${shownProgram}</b><span>${safeTr(t)} • Gym modu bugünün tarihine göre hazır.</span></div><button class="btn sec" onclick="window.innerWidth<=860?(selectedDate=todayStr(),weekStart=mondayOf(selectedDate),simurgV8Go('gym','gym')):(goToday(),show('gym',document.querySelector('.nav button:nth-child(2)')))">Bugünün Programına Git</button>`;
   }
 
   function applyRestDayCard(){
@@ -9916,7 +9882,7 @@ textarea,input,select{
   window.goToLastImportedDate=function(){
     const d=localStorage.getItem('simurg_last_imported_date')||'';
     if(!d) return;
-    selectedDate=d; weekStart=safeMonday(d); render(); show('workout',document.querySelector('.nav button'));
+    selectedDate=d; weekStart=safeMonday(d); if(window.innerWidth<=860)simurgV8Go('workout','logger');else{render();show('workout',document.querySelector('.nav button'));}
   };
   function showImportDate(d){
     if(!d) return;
@@ -10827,19 +10793,41 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   function ready(fn){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();}
   var activeKey='home';
   function premiumRefresh(id){if(window.SimurgPremium&&typeof window.SimurgPremium.refreshScreen==='function')window.SimurgPremium.refreshScreen(id);}
+  function refreshTarget(id){
+    if(id==='gym'&&typeof window.renderGymMode==='function')window.renderGymMode();
+    else if(id==='workout'){
+      if(typeof window.renderProgramDays==='function')window.renderProgramDays();
+      if(typeof window.renderWeekStrip==='function')window.renderWeekStrip();
+      if(typeof window.renderWorkout==='function')window.renderWorkout();
+    }
+    else if(id==='daily'&&typeof window.renderDailyReport==='function')window.renderDailyReport();
+    else if(id==='weekly'&&typeof window.renderWeeklyReport==='function')window.renderWeeklyReport();
+    else if((id==='program'||id==='monthly'||id==='reports')&&typeof window.renderReports==='function')window.renderReports();
+    else if(id==='coaching'){
+      if(typeof window.renderCoachPanels==='function')window.renderCoachPanels();
+      if(typeof window.renderReadinessPanel==='function')window.renderReadinessPanel();
+      if(typeof window.renderInjuryRiskPanel==='function')window.renderInjuryRiskPanel();
+      if(typeof window.renderPhoenixReport==='function')window.renderPhoenixReport();
+    }
+    premiumRefresh(id);
+  }
   function go(id,key){
+    closeMenu();
     var polarDetail=document.getElementById('polar-workout');
     if(polarDetail) polarDetail.classList.remove('active');
     var stableKey=key||id;
+    document.querySelectorAll('.section.active').forEach(function(section){section.classList.remove('active');});
+    var target=document.getElementById(id);
+    if(target)target.classList.add('active');
     document.body.setAttribute('data-simurg-active-screen',id);
     document.documentElement.setAttribute('data-simurg-active-key',stableKey);
     window.__simurgCurrentMobileKey=stableKey;
     window.__simurgStableNavKey=stableKey;
-    closeMenu();
-    if(typeof window.show==='function') window.show(id,null);
-    else {document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id)?.classList.add('active');window.scrollTo(0,0);}
-    activeKey=stableKey;setActive(stableKey);premiumRefresh(id);
-    var section=document.getElementById(id);if(section)section.scrollTop=0;
+    activeKey=stableKey;
+    setActive(stableKey);
+    refreshTarget(id);
+    target=document.getElementById(id);
+    if(target)target.scrollTop=0;
   }
   function setActive(key){
     document.querySelectorAll('#simurgV8Nav button').forEach(b=>b.classList.toggle('active',b.dataset.key===key));
@@ -15953,8 +15941,8 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./polar-workout.css?v=11">
 <script src="./polar-workout.js?v=12"></script>
 <script src="./workout-source-policy.js?v=2"></script>
-<link rel="stylesheet" href="./premium-standard.css?v=30">
-<script src="./premium-standard.js?v=31"></script>
+<link rel="stylesheet" href="./premium-standard.css?v=31">
+<script src="./premium-standard.js?v=32"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=5"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=23">

@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-data-integrity-localization-v1-4';
+const SIMURG_CACHE = 'simurg-runtime-navigation-scroll-hotfix-v1-1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -6,8 +6,8 @@ const CORE_ASSETS = [
   './polar-workout.css?v=11',
   './polar-workout.js?v=12',
   './workout-source-policy.js?v=2',
-  './premium-standard.css?v=30',
-  './premium-standard.js?v=31',
+  './premium-standard.css?v=31',
+  './premium-standard.js?v=32',
   './simurg-signal-model.js?v=4',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=5',
