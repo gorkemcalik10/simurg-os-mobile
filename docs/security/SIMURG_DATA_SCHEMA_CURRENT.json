@@ -1,0 +1,424 @@
+{
+  "generatedAt": "2026-07-18T00:00:00+03:00",
+  "schemaStatus": {
+    "topLevelSchemaVersion": null,
+    "validationLibrary": null,
+    "migrationRunner": null,
+    "primaryPersistence": "localStorage key atlas_summary_reports",
+    "cloudPersistence": "The full DATA object is embedded in simurg_data.payload.data under the fixed id main.",
+    "backup": "JSON export serializes the full DATA object; general JSON restore replaces DATA wholesale.",
+    "notes": "Fields are created lazily by different modules. Shape descriptions below reflect current code, not an enforced contract."
+  },
+  "stores": [
+    {
+      "name": "workouts",
+      "shape": "Array<WorkoutRow>",
+      "recordShape": {
+        "date": "YYYY-MM-DD string",
+        "day": "string",
+        "exercise": "string",
+        "bodyPart": "string",
+        "sets": "number, usually 1",
+        "reps": "number",
+        "weight": "number",
+        "notes": "string",
+        "rpe": "optional number|string",
+        "form": "optional string",
+        "pain": "optional string",
+        "startTime": "optional string",
+        "duration": "optional string|number"
+      },
+      "createdAt": [
+        "index.html INITIAL",
+        "general restore/cloud pull when supplied"
+      ],
+      "mutatedAt": [
+        "Gym save/edit/add/delete/clear functions in index.html",
+        "Workout Logger edit/add/delete functions in index.html",
+        "importWorkoutArray in index.html"
+      ],
+      "persistedAt": [
+        "save()/simurgPersistData -> localStorage",
+        "Push To Cloud -> full DATA payload",
+        "JSON backup export"
+      ],
+      "stableRecordIds": false,
+      "schemaVersioned": false,
+      "duplicateRisk": "high",
+      "duplicateBehavior": "Workout import uses a composite comparison of date, exercise, startTime, sets, reps and weight. Manual additions and general restore have no global uniqueness constraint.",
+      "modelWarning": "Current seed and Gym editor use one row per individual set with sets=1. Some aggregators count rows as sets; SimurgSignalModel and workout-source-policy multiply reps/volume by row.sets. An imported row with sets>1 is therefore treated differently across calculations."
+    },
+    {
+      "name": "metrics",
+      "shape": "Array<{date, weight, waist, notes}>",
+      "createdAt": [
+        "index.html INITIAL"
+      ],
+      "mutatedAt": [
+        "addMetric in index.html",
+        "general restore/cloud pull"
+      ],
+      "persistedAt": [
+        "save -> localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": false,
+      "schemaVersioned": false,
+      "duplicateRisk": "high; repeated dates are appended without deduplication"
+    },
+    {
+      "name": "nutrition",
+      "shape": "Array<{date, protein, water, note}>",
+      "createdAt": [
+        "index.html INITIAL"
+      ],
+      "mutatedAt": [
+        "addNutrition in index.html",
+        "general restore/cloud pull"
+      ],
+      "persistedAt": [
+        "save -> localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": false,
+      "schemaVersioned": false,
+      "duplicateRisk": "high; repeated dates are appended without deduplication"
+    },
+    {
+      "name": "recovery",
+      "shape": "Array<{date, sleep, energy, note, ...legacyFields}>",
+      "createdAt": [
+        "index.html INITIAL"
+      ],
+      "mutatedAt": [
+        "addRecovery in index.html",
+        "general restore/cloud pull"
+      ],
+      "persistedAt": [
+        "save -> localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": false,
+      "schemaVersioned": false,
+      "duplicateRisk": "high; repeated dates are appended without deduplication",
+      "notes": "SimurgSignalModel uses this as a fallback behind Polar Nightly Recharge and recoveryEntries."
+    },
+    {
+      "name": "appleWatch",
+      "shape": "Array<PhysicalActivityRecord>",
+      "recordShape": {
+        "date": "string",
+        "type": "Apple Watch Workout",
+        "activityType": "string",
+        "startTime": "optional string",
+        "duration": "string|number",
+        "distance": "number",
+        "activeCal": "number",
+        "totalCal": "number",
+        "avgHR": "number",
+        "maxHR": "number",
+        "rpe": "number|string",
+        "notes": "string"
+      },
+      "createdAt": [
+        "lazy initialization during pull/import",
+        "general restore"
+      ],
+      "mutatedAt": [
+        "importAppleWatch/universalImport",
+        "activity delete UI",
+        "general restore/cloud pull"
+      ],
+      "persistedAt": [
+        "save -> localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": false,
+      "schemaVersioned": false,
+      "duplicateRisk": "medium; current importer compares date, startTime and duration, but missing time/duration can collapse distinct records or permit semantically duplicated aliases"
+    },
+    {
+      "name": "dailyNotes",
+      "shape": "Array<{date, coachNote?, readiness?, energy?, ...importedFields}>",
+      "createdAt": [
+        "lazy initialization during pull/import"
+      ],
+      "mutatedAt": [
+        "universalImport daily branch",
+        "general restore/cloud pull"
+      ],
+      "persistedAt": [
+        "save -> localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": false,
+      "schemaVersioned": false,
+      "duplicateRisk": "high; daily records are appended with no date uniqueness rule"
+    },
+    {
+      "name": "weeklyNotes",
+      "shape": "Array<{weeklyReport?, phoenixReport?, ...importedFields}>",
+      "createdAt": [
+        "lazy initialization during pull/import"
+      ],
+      "mutatedAt": [
+        "universalImport weekly branch",
+        "general restore/cloud pull"
+      ],
+      "persistedAt": [
+        "save -> localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": false,
+      "schemaVersioned": false,
+      "duplicateRisk": "high; no week key or uniqueness rule is enforced"
+    },
+    {
+      "name": "customGymPrograms",
+      "shape": "Object<dateOrProgramKey, {overrides: Object<exerciseName, {name, bodyPart, setCount}>, extras: Array<{id, name, bodyPart, setCount, custom}>}>",
+      "createdAt": [
+        "lazy initialization in Gym code and pull/import defaults"
+      ],
+      "mutatedAt": [
+        "upsertGymProgramMeta/addGymExercise/deleteGymExercise in index.html"
+      ],
+      "persistedAt": [
+        "save -> localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": "partial; extras receive timestamp-derived IDs, overrides are keyed by mutable exercise name",
+      "schemaVersioned": false,
+      "duplicateRisk": "medium"
+    },
+    {
+      "name": "programNames",
+      "shape": "Object<dayName, string>",
+      "createdAt": [
+        "lazy initialization in program-name editor and pull/import defaults"
+      ],
+      "mutatedAt": [
+        "saveProgramNameEdit/resetProgramNameEdit in index.html"
+      ],
+      "persistedAt": [
+        "save -> localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": "not applicable; values are keyed by day name",
+      "schemaVersioned": false,
+      "duplicateRisk": "low, but arbitrary imported keys/values are accepted"
+    },
+    {
+      "name": "polarWorkouts",
+      "shape": "{daily: Object<YYYY-MM-DD, Array<PolarWorkout>|PolarWorkout>, latest: PolarWorkout|null}",
+      "recordShape": {
+        "type": "polar_flow_workout",
+        "source": "Polar Flow",
+        "polarExerciseId": "string",
+        "device": "string",
+        "deviceId": "optional identifier",
+        "activityType": "string",
+        "workoutType": "string",
+        "date": "YYYY-MM-DD",
+        "day": "string",
+        "startTime": "string",
+        "duration": "string",
+        "durationMinutes": "number",
+        "activeCal": "number|null",
+        "totalCal": "number|null",
+        "avgHR": "number|null",
+        "minHR": "number|null",
+        "maxHR": "number|null",
+        "rpe": "number|null",
+        "trainingLoad": "number|null",
+        "cardioLoad": "number|null",
+        "zones": "zone1..zone5 durations",
+        "zoneSummary": "classified and unclassified durations",
+        "fuel": "nullable percentages",
+        "raw": "sanitized raw Polar response"
+      },
+      "createdAt": [
+        "polar-accesslink.js ensureStores",
+        "polar-workout.js ensureStore"
+      ],
+      "mutatedAt": [
+        "polar-accesslink.js mergeSync",
+        "polar-workout.js manual Polar import"
+      ],
+      "persistedAt": [
+        "simurgPersistData/save -> localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": "partial; polarExerciseId exists, but frontend deduplicates primarily by date plus startTime",
+      "schemaVersioned": false,
+      "duplicateRisk": "medium; missing/equal startTime can merge distinct sessions, while changed startTime can duplicate the same Polar exercise"
+    },
+    {
+      "name": "polarActivity",
+      "shape": "{daily: Object<YYYY-MM-DD, PolarActivity>, latest: PolarActivity|null}",
+      "recordShape": {
+        "date": "YYYY-MM-DD",
+        "source": "Polar Flow",
+        "polarActivityId": "string",
+        "activeDuration": "string",
+        "inactiveDuration": "string",
+        "dailyActivity": "number|null",
+        "activeCalories": "number|null",
+        "totalCalories": "number|null",
+        "steps": "number|null",
+        "distanceFromSteps": "number|null",
+        "inactivityAlertCount": "number|null",
+        "raw": "sanitized raw Polar response"
+      },
+      "createdAt": [
+        "polar-accesslink.js ensureStores"
+      ],
+      "mutatedAt": [
+        "polar-accesslink.js mergeSync, keyed by date"
+      ],
+      "persistedAt": [
+        "localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": "polarActivityId is retained, but daily storage is keyed by date",
+      "schemaVersioned": false,
+      "duplicateRisk": "low for one daily summary; same-date updates overwrite/merge"
+    },
+    {
+      "name": "polarProfile",
+      "shape": "{latest: PolarProfile|null}",
+      "recordShape": {
+        "source": "Polar Flow",
+        "weight": "number|null",
+        "height": "number|null",
+        "birthday": "value|null",
+        "gender": "value|null",
+        "maximumHeartRate": "number|null",
+        "restingHeartRate": "number|null",
+        "aerobicThreshold": "number|null",
+        "anaerobicThreshold": "number|null",
+        "vo2Max": "number|null",
+        "sleepGoal": "number|null",
+        "raw": "sanitized raw Polar response"
+      },
+      "createdAt": [
+        "polar-accesslink.js ensureStores"
+      ],
+      "mutatedAt": [
+        "polar-accesslink.js mergeSync merges into latest"
+      ],
+      "persistedAt": [
+        "localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": false,
+      "schemaVersioned": false,
+      "duplicateRisk": "not applicable; latest snapshot only"
+    },
+    {
+      "name": "polarSleep",
+      "shape": "{daily: Object<YYYY-MM-DD, PolarSleep>, latest: PolarSleep|null, lastSyncAt: string|null, lastError: string|null}",
+      "createdAt": [
+        "polar-accesslink.js ensureStores"
+      ],
+      "mutatedAt": [
+        "polar-accesslink.js mergeDailyStore"
+      ],
+      "persistedAt": [
+        "localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": "date key only",
+      "schemaVersioned": false,
+      "duplicateRisk": "low; same date merges/overwrites",
+      "recordFields": "date, source, start/end, duration, sleep score, continuity, cycles, interruptions, deep/light/REM/awake stages, sleep goal/charge, sanitized raw payload"
+    },
+    {
+      "name": "polarNightlyRecharge",
+      "shape": "{daily: Object<YYYY-MM-DD, PolarNightlyRecharge>, latest, lastSyncAt, lastError}",
+      "createdAt": [
+        "polar-accesslink.js ensureStores"
+      ],
+      "mutatedAt": [
+        "polar-accesslink.js mergeDailyStore"
+      ],
+      "persistedAt": [
+        "localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": "date key only",
+      "schemaVersioned": false,
+      "duplicateRisk": "low; same date merges/overwrites",
+      "recordFields": "date, source, nightly HR, beat-to-beat, HRV, breathing rate, recharge/ANS status, sample collections, sanitized raw payload"
+    },
+    {
+      "name": "polarContinuousHr",
+      "shape": "{daily: Object<YYYY-MM-DD, PolarContinuousHr>, latest, lastSyncAt, lastError}",
+      "createdAt": [
+        "polar-accesslink.js ensureStores"
+      ],
+      "mutatedAt": [
+        "polar-accesslink.js mergeDailyStore"
+      ],
+      "persistedAt": [
+        "localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": "date key only; samples have no explicit IDs",
+      "schemaVersioned": false,
+      "duplicateRisk": "low at day level, undefined at sample level",
+      "recordFields": "date, source, samples[{sampleTime, heartRate}], sampleCount, average/min/max HR, sanitized raw payload"
+    },
+    {
+      "name": "polarCardioLoad",
+      "shape": "{daily: Object<YYYY-MM-DD, PolarCardioLoad>, latest, lastSyncAt, lastError}",
+      "createdAt": [
+        "polar-accesslink.js ensureStores"
+      ],
+      "mutatedAt": [
+        "polar-accesslink.js mergeDailyStore"
+      ],
+      "persistedAt": [
+        "localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": "date key only",
+      "schemaVersioned": false,
+      "duplicateRisk": "low; same date merges/overwrites",
+      "recordFields": "date, source, cardio load/status, strain, tolerance, ratio, level, sanitized raw payload"
+    },
+    {
+      "name": "polarConnection",
+      "shape": "{connected, status, lastSyncAt, lastError, source, polarUserId?, connectedAt?, tokenExpiresAt?, lastCounts?, lastStatuses?, lastCategoryErrors?}",
+      "createdAt": [
+        "polar-accesslink.js ensureStores"
+      ],
+      "mutatedAt": [
+        "polar-accesslink.js updateLocalConnection",
+        "connect/sync/disconnect flows"
+      ],
+      "persistedAt": [
+        "localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": "contains a Polar user identifier but no Simurg user/device ownership ID",
+      "schemaVersioned": false,
+      "duplicateRisk": "not applicable; singleton state",
+      "securityNote": "Access and refresh tokens are not stored here; they remain encrypted in server-side Polar tables."
+    }
+  ],
+  "additionalLazyStores": [
+    {
+      "name": "activityNotes",
+      "shape": "Object<date::activityType, string>",
+      "stableRecordIds": "composite mutable string key"
+    },
+    {
+      "name": "autoNextTargets",
+      "shape": "Object<exerciseOrContextKey, targetData>",
+      "stableRecordIds": false
+    },
+    {
+      "name": "recoveryEntries",
+      "shape": "Object<YYYY-MM-DD, recoveryData>",
+      "stableRecordIds": "date key only"
+    },
+    {
+      "name": "_meta",
+      "shape": "Object containing build/update metadata",
+      "stableRecordIds": "not applicable",
+      "notes": "This is build metadata, not an enforced DATA schema version."
+    }
+  ],
+  "crossCuttingRisks": [
+    "No authenticated owner or user_id is represented in DATA.",
+    "No top-level schema_version or migration pipeline exists.",
+    "Most records lack stable immutable IDs.",
+    "General restore and cloud pull replace DATA without schema validation.",
+    "Full-object writes increase conflict and accidental data-loss impact.",
+    "The workouts sets field is interpreted inconsistently between row-count and multiplier calculations."
+  ]
+}

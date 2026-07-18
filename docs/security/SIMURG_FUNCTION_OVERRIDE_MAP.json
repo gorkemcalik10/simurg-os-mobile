@@ -1,0 +1,510 @@
+{
+  "generatedAt": "2026-07-18T00:00:00+03:00",
+  "runtimeLoadOrder": [
+    "simurg-signal-model.js (head script)",
+    "active inline scripts in index.html, excluding all data-runtime-disabled template ranges",
+    "polar-workout.js",
+    "workout-source-policy.js",
+    "premium-standard.js",
+    "polar-accesslink.js",
+    "desktop-alignment.js"
+  ],
+  "scopeNotes": [
+    "Definitions inside data-runtime-disabled template elements are archive text and do not execute.",
+    "script.js, all_scripts.js and script_*.js are tracked legacy/aggregate artifacts but are not referenced by the current index.html load list.",
+    "loadOrder is relative within the runtime chain; wrapper definitions retain and call the prior function unless noted."
+  ],
+  "functions": [
+    {
+      "functionName": "calculateReadiness",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 6876,
+          "loadOrder": 10,
+          "likelyActive": false,
+          "notes": "Base legacy calculation using activityLoadForDate, Gym, RPE, pain and recent load."
+        },
+        {
+          "file": "workout-source-policy.js",
+          "approximateLine": 64,
+          "loadOrder": 200,
+          "likelyActive": true,
+          "notes": "Replaces the global function and uses Polar-first SimurgWorkoutSource metrics. Behavior differs from the base calculation. SimurgReadiness.resolve may be preferred by many renderers, creating an additional parallel decision path."
+        }
+      ],
+      "risk": "P1: callers may receive different scores depending on whether they use calculateReadiness or SimurgReadiness.resolve."
+    },
+    {
+      "functionName": "calculateInjuryRisk",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 6921,
+          "loadOrder": 11,
+          "likelyActive": true,
+          "notes": "Single active global definition, but it consumes calculateReadiness/activityLoadForDate that are replaced later by workout-source-policy.js."
+        }
+      ],
+      "risk": "P1: stable function body has runtime-dependent inputs because its dependencies are overridden later."
+    },
+    {
+      "functionName": "renderCoachPanels",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 7334,
+          "loadOrder": 20,
+          "likelyActive": false,
+          "notes": "Base English-heavy renderer."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 7643,
+          "loadOrder": 21,
+          "likelyActive": false,
+          "notes": "Premium visual override."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 7892,
+          "loadOrder": 22,
+          "likelyActive": true,
+          "notes": "Later activity-aware coaching override; likely active current renderer."
+        }
+      ],
+      "risk": "P2/P1: three implementations make fixes and security escaping inconsistent; later reassignment silently replaces earlier behavior."
+    },
+    {
+      "functionName": "renderPhoenixReport",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 7374,
+          "loadOrder": 23,
+          "likelyActive": false,
+          "notes": "Base weekly coach summary."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 7680,
+          "loadOrder": 24,
+          "likelyActive": false,
+          "notes": "Premium visual override."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 7918,
+          "loadOrder": 25,
+          "likelyActive": true,
+          "notes": "Activity-aware override; likely active current renderer."
+        }
+      ],
+      "risk": "P2: duplicated report logic and inconsistent assumptions about source data and output escaping."
+    },
+    {
+      "functionName": "normalizeActivityType",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 6683,
+          "loadOrder": 30,
+          "likelyActive": false,
+          "notes": "Small fixed alias list with raw fallback."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 7756,
+          "loadOrder": 31,
+          "likelyActive": true,
+          "notes": "Expanded alias resolver and title-cased fallback."
+        }
+      ],
+      "risk": "P2: normalization output differs by definition; historical callers may have captured older behavior."
+    },
+    {
+      "functionName": "normalizeWatchRecord",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 6697,
+          "loadOrder": 32,
+          "likelyActive": false,
+          "notes": "Mutates input object and maps a narrow field set."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 7794,
+          "loadOrder": 33,
+          "likelyActive": true,
+          "notes": "Clones input and accepts a wider set of Apple Health/Watch aliases."
+        }
+      ],
+      "risk": "P1/P2: mutation and accepted fields differ; deduplication and downstream calculations can vary."
+    },
+    {
+      "functionName": "activityLoadForDate",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 6860,
+          "loadOrder": 34,
+          "likelyActive": false,
+          "notes": "Legacy Apple Watch/Gym aggregation."
+        },
+        {
+          "file": "workout-source-policy.js",
+          "approximateLine": 63,
+          "loadOrder": 201,
+          "likelyActive": true,
+          "notes": "Reassigned to SimurgWorkoutSource.metrics, adding Polar-first source policy and different load semantics."
+        }
+      ],
+      "risk": "P1: a core global changes return semantics after inline renderers are defined."
+    },
+    {
+      "functionName": "durationMinutes",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 6675,
+          "loadOrder": 35,
+          "likelyActive": true,
+          "notes": "Global parser interprets a two-part value as minutes:seconds."
+        },
+        {
+          "file": "workout-source-policy.js",
+          "approximateLine": 8,
+          "loadOrder": 202,
+          "likelyActive": true,
+          "notes": "Module-local parser interprets a two-part value as hours:minutes and is exported as SimurgWorkoutSource.durationMinutes, not as the global."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 15369,
+          "loadOrder": 180,
+          "likelyActive": true,
+          "notes": "Module-local legacy Polar Bridge parser for sleep duration; does not replace the global."
+        }
+      ],
+      "risk": "P1: the same string can produce materially different durations depending on call path."
+    },
+    {
+      "functionName": "renderDailyReport",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 6992,
+          "loadOrder": 40,
+          "likelyActive": false,
+          "notes": "Base daily report."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 7999,
+          "loadOrder": 41,
+          "likelyActive": true,
+          "notes": "Activity-aware daily card renderer; later definition replaces the base."
+        }
+      ],
+      "risk": "P1/P2: duplicate renderer plus unsafe raw exercise/date interpolation in the likely-active path."
+    },
+    {
+      "functionName": "renderWeeklyReport",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 7064,
+          "loadOrder": 50,
+          "likelyActive": false,
+          "notes": "Base weekly renderer."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 8018,
+          "loadOrder": 51,
+          "likelyActive": false,
+          "notes": "Activity-aware weekly renderer; becomes the base of the wrapper chain."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 8522,
+          "loadOrder": 52,
+          "likelyActive": false,
+          "notes": "Wrapper adds a coach recommendation asynchronously."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 8769,
+          "loadOrder": 53,
+          "likelyActive": false,
+          "notes": "Wrapper adds premium weekly recommendation."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 9190,
+          "loadOrder": 54,
+          "likelyActive": false,
+          "notes": "Wrapper adds Program Intelligence output."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 9289,
+          "loadOrder": 55,
+          "likelyActive": false,
+          "notes": "Wrapper removes monthly content from weekly output."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 9591,
+          "loadOrder": 56,
+          "likelyActive": true,
+          "notes": "Outermost active wrapper; invokes the entire earlier chain then applies Program Intelligence cleanup."
+        }
+      ],
+      "risk": "P1/P2: a six-layer wrapper chain with timers makes final DOM state order-dependent and difficult to secure or test."
+    },
+    {
+      "functionName": "save",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 7426,
+          "loadOrder": 60,
+          "likelyActive": false,
+          "notes": "Base full-object localStorage save and render. simurgPersistData dynamically calls the final global save."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 8322,
+          "loadOrder": 61,
+          "likelyActive": true,
+          "notes": "Replaces save, marks local-update metadata, writes the complete DATA object, invalidates signal caches, renders and refreshes local status."
+        }
+      ],
+      "risk": "P1: full-object persistence has no schema/revision validation; many unrelated mutation paths depend on one global side effect."
+    },
+    {
+      "functionName": "universalImport",
+      "definitions": [
+        {
+          "file": "index.html",
+          "approximateLine": 7298,
+          "loadOrder": 70,
+          "likelyActive": false,
+          "notes": "Base dispatcher for workout, Apple Watch, daily and weekly JSON."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 7822,
+          "loadOrder": 71,
+          "likelyActive": false,
+          "notes": "Expanded alias/segment handling replaces the base."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 9009,
+          "loadOrder": 72,
+          "likelyActive": false,
+          "notes": "Undo snapshot wrapper around the prior function."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 9903,
+          "loadOrder": 73,
+          "likelyActive": false,
+          "notes": "Imported-date UI wrapper around the prior chain."
+        },
+        {
+          "file": "index.html",
+          "approximateLine": 10435,
+          "loadOrder": 74,
+          "likelyActive": false,
+          "notes": "Legacy Polar Recovery dispatcher before falling through to prior wrappers."
+        },
+        {
+          "file": "polar-workout.js",
+          "approximateLine": 325,
+          "loadOrder": 191,
+          "likelyActive": true,
+          "notes": "Outermost active wrapper recognizes Polar Flow workout JSON, otherwise invokes the full prior chain."
+        }
+      ],
+      "risk": "P0/P1: imported data passes through multiple independently maintained dispatchers without a single schema gate; wrapper order controls behavior."
+    }
+  ],
+  "nonRuntimeDuplicates": {
+    "files": [
+      "script.js",
+      "all_scripts.js",
+      "script_1.js",
+      "script_5.js",
+      "script_6.js",
+      "script_12.js",
+      "script_13.js",
+      "script_15.js",
+      "script_16.js",
+      "script_17.js",
+      "script_19.js",
+      "script_23.js"
+    ],
+    "notes": "These tracked files contain additional copies/wrappers, but current index.html does not load them. They remain a maintenance and accidental-reintroduction risk, not current runtime overrides."
+  },
+  "trackedDefinitionInventory": {
+    "notes": "Exhaustive text-level inventory for the prioritized names in tracked HTML/JS. Entries in unreferenced script artifacts and index.html data-runtime-disabled template ranges are not executed. Assignments such as activityLoadForDate=metrics are represented in the detailed runtime section even when they are not syntactically named function expressions.",
+    "calculateReadiness": [
+      "all_scripts.js:702",
+      "index.html:6876",
+      "script.js:1194",
+      "script_1.js:697",
+      "workout-source-policy.js:64"
+    ],
+    "calculateInjuryRisk": [
+      "all_scripts.js:746",
+      "index.html:6921",
+      "script.js:1238",
+      "script_1.js:741"
+    ],
+    "renderCoachPanels": [
+      "all_scripts.js:1153",
+      "all_scripts.js:1453",
+      "all_scripts.js:1701",
+      "index.html:7334",
+      "index.html:7643",
+      "index.html:7892",
+      "index.html:13183 (disabled template archive)",
+      "script.js:1645",
+      "script.js:1948",
+      "script.js:2197",
+      "script_1.js:1148",
+      "script_5.js:30",
+      "script_6.js:166"
+    ],
+    "renderPhoenixReport": [
+      "all_scripts.js:1193",
+      "all_scripts.js:1490",
+      "all_scripts.js:1727",
+      "index.html:7374",
+      "index.html:7680",
+      "index.html:7918",
+      "script.js:1685",
+      "script.js:1985",
+      "script.js:2223",
+      "script_1.js:1188",
+      "script_5.js:67",
+      "script_6.js:192"
+    ],
+    "normalizeActivityType": [
+      "all_scripts.js:513",
+      "all_scripts.js:1566",
+      "index.html:6683",
+      "index.html:7756",
+      "index.html:13068 (disabled template archive)",
+      "script.js:1005",
+      "script.js:2062",
+      "script_1.js:508",
+      "script_6.js:31"
+    ],
+    "normalizeWatchRecord": [
+      "all_scripts.js:527",
+      "all_scripts.js:1603",
+      "index.html:6697",
+      "index.html:7794",
+      "script.js:1019",
+      "script.js:2099",
+      "script_1.js:522",
+      "script_6.js:68"
+    ],
+    "activityLoadForDate": [
+      "all_scripts.js:686",
+      "index.html:6860",
+      "script.js:1178",
+      "script_1.js:681",
+      "workout-source-policy.js:63 (assignment to metrics)"
+    ],
+    "durationMinutes": [
+      "all_scripts.js:505",
+      "index.html:6675",
+      "index.html:15369 (active Polar Bridge module-local definition)",
+      "script.js:997",
+      "script_1.js:500",
+      "workout-source-policy.js:8"
+    ],
+    "renderWeeklyReport": [
+      "all_scripts.js:884",
+      "all_scripts.js:1837",
+      "all_scripts.js:2337",
+      "all_scripts.js:2446",
+      "all_scripts.js:2758",
+      "all_scripts.js:2828",
+      "all_scripts.js:2913",
+      "index.html:7064",
+      "index.html:8018",
+      "index.html:8522",
+      "index.html:8769",
+      "index.html:9190",
+      "index.html:9289",
+      "index.html:9591",
+      "script.js:1376",
+      "script.js:2333",
+      "script.js:2858",
+      "script.js:3105",
+      "script.js:3521",
+      "script.js:3619",
+      "script.js:3921",
+      "script_1.js:879",
+      "script_12.js:81",
+      "script_13.js:103",
+      "script_15.js:243",
+      "script_16.js:64",
+      "script_17.js:81",
+      "script_6.js:302"
+    ],
+    "renderDailyReport": [
+      "all_scripts.js:815",
+      "all_scripts.js:1818",
+      "index.html:6992",
+      "index.html:7999",
+      "script.js:1307",
+      "script.js:2314",
+      "script_1.js:810",
+      "script_6.js:283"
+    ],
+    "save": [
+      "all_scripts.js:1245",
+      "all_scripts.js:2123",
+      "all_scripts.js:3563",
+      "index.html:7426",
+      "index.html:8322",
+      "script.js:1737",
+      "script.js:2625",
+      "script.js:4811",
+      "script_1.js:1240",
+      "script_10.js:54",
+      "script_23.js:129"
+    ],
+    "universalImport": [
+      "all_scripts.js:1117",
+      "all_scripts.js:1631",
+      "all_scripts.js:2581",
+      "all_scripts.js:3195",
+      "all_scripts.js:3551",
+      "index.html:7298",
+      "index.html:7822",
+      "index.html:9009",
+      "index.html:9903",
+      "index.html:10435",
+      "polar-workout.js:325",
+      "script.js:1609",
+      "script.js:2127",
+      "script.js:3344",
+      "script.js:4242",
+      "script.js:4799",
+      "script_1.js:1112",
+      "script_15.js:66",
+      "script_19.js:155",
+      "script_23.js:117",
+      "script_6.js:96"
+    ]
+  }
+}

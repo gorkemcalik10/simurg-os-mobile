@@ -6170,7 +6170,7 @@ body{background:#050607!important;}
 <div class="modal" id="editModal"><div class="modalbox"><div class="modalTop"><h2 id="modalTitle">Düzenle</h2><button class="btn sec" onclick="closeModal()">Kapat</button></div><div id="modalBody"></div><div class="actions"><button class="btn" onclick="saveEdit()">Kaydet</button><button class="btn danger" onclick="deleteEditing()">Sil</button></div></div></div>
 <div class="modal programNameModal" id="programNameModal"><div class="modalbox"><div class="modalTop"><h2>Program İsmini Düzenle</h2><button class="btn sec" onclick="closeProgramNameModal()">Kapat</button></div><div id="programNameBody"></div><div class="actions"><button class="btn" onclick="saveProgramNameEdit()">Kaydet</button><button class="btn sec" onclick="resetProgramNameEdit()">Varsayılana Dön</button></div></div></div>
 <script>
-const INITIAL={"workouts": [{"date": "2026-06-22", "day": "Monday", "exercise": "Incline DB Press", "sets": 1, "reps": 10, "weight": 17.5, "bodyPart": "Chest", "notes": "Set 1"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Incline DB Press", "sets": 1, "reps": 8, "weight": 20, "bodyPart": "Chest", "notes": "Set 2"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Incline DB Press", "sets": 1, "reps": 8, "weight": 20, "bodyPart": "Chest", "notes": "Set 3"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Incline DB Press", "sets": 1, "reps": 8, "weight": 22.5, "bodyPart": "Chest", "notes": "Set 4"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Flat DB Press", "sets": 1, "reps": 10, "weight": 22.5, "bodyPart": "Chest", "notes": "Set 1"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Flat DB Press", "sets": 1, "reps": 8, "weight": 25, "bodyPart": "Chest", "notes": "Set 2"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Flat DB Press", "sets": 1, "reps": 8, "weight": 25, "bodyPart": "Chest", "notes": "Set 3"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Prone Y Raise", "sets": 1, "reps": 12, "weight": 2.5, "bodyPart": "Scapula", "notes": "Set 1"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Prone Y Raise", "sets": 1, "reps": 12, "weight": 2.5, "bodyPart": "Scapula", "notes": "Set 2"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Lateral Raise", "sets": 1, "reps": 12, "weight": 7.5, "bodyPart": "Side Delt", "notes": "Set 1"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Lateral Raise", "sets": 1, "reps": 12, "weight": 7.5, "bodyPart": "Side Delt", "notes": "Set 2"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Lateral Raise", "sets": 1, "reps": 12, "weight": 5, "bodyPart": "Side Delt", "notes": "Set 3"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Cable Fly", "sets": 1, "reps": 12, "weight": 7.5, "bodyPart": "Chest", "notes": "İlk 2 set single zorunlu"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Cable Fly", "sets": 1, "reps": 12, "weight": 10, "bodyPart": "Chest", "notes": "İlk 2 set single zorunlu"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Cable Fly", "sets": 1, "reps": 12, "weight": 10, "bodyPart": "Chest", "notes": "İlk 2 set single zorunlu"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Cable Fly", "sets": 1, "reps": 10, "weight": 10, "bodyPart": "Chest", "notes": "İlk 2 set single zorunlu"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Rope Pushdown", "sets": 1, "reps": 12, "weight": 15, "bodyPart": "Triceps", "notes": "Set 1"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Rope Pushdown", "sets": 1, "reps": 10, "weight": 15, "bodyPart": "Triceps", "notes": "Set 2"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Rope Pushdown", "sets": 1, "reps": 12, "weight": 12.5, "bodyPart": "Triceps", "notes": "Set 3"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Reverse Grip Pushdown", "sets": 1, "reps": 12, "weight": 15, "bodyPart": "Triceps", "notes": "Set 1"}, {"date": "2026-06-22", "day": "Monday", "exercise": "Reverse Grip Pushdown", "sets": 1, "reps": 12, "weight": 15, "bodyPart": "Triceps", "notes": "Set 2"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Bench Supported DB Row", "sets": 1, "reps": 8, "weight": 17.5, "bodyPart": "Back", "notes": "Set 1"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Bench Supported DB Row", "sets": 1, "reps": 8, "weight": 17.5, "bodyPart": "Back", "notes": "Set 2"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Bench Supported DB Row", "sets": 1, "reps": 8, "weight": 17.5, "bodyPart": "Back", "notes": "Set 3"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Bench Supported DB Row", "sets": 1, "reps": 8, "weight": 17.5, "bodyPart": "Back", "notes": "Set 4"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Single Arm Lat Pulldown", "sets": 1, "reps": 8, "weight": 17.5, "bodyPart": "Back", "notes": "Set 1"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Single Arm Lat Pulldown", "sets": 1, "reps": 8, "weight": 17.5, "bodyPart": "Back", "notes": "Set 2"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Single Arm Lat Pulldown", "sets": 1, "reps": 8, "weight": 21, "bodyPart": "Back", "notes": "Set 3"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Single Arm Lat Pulldown", "sets": 1, "reps": 8, "weight": 21, "bodyPart": "Back", "notes": "Set 4"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Single Arm Cable Row", "sets": 1, "reps": 8, "weight": 21, "bodyPart": "Back", "notes": "Set 1"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Single Arm Cable Row", "sets": 1, "reps": 8, "weight": 21, "bodyPart": "Back", "notes": "Set 2"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Single Arm Cable Row", "sets": 1, "reps": 8, "weight": 21, "bodyPart": "Back", "notes": "Set 3"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Rear Delt Cable Fly", "sets": 1, "reps": 15, "weight": 2.5, "bodyPart": "Rear Delt", "notes": "Set 1"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Rear Delt Cable Fly", "sets": 1, "reps": 15, "weight": 2.5, "bodyPart": "Rear Delt", "notes": "Set 2"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Rear Delt Cable Fly", "sets": 1, "reps": 15, "weight": 2.5, "bodyPart": "Rear Delt", "notes": "Set 3"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Face Pull", "sets": 1, "reps": 15, "weight": 15, "bodyPart": "Rear Delt", "notes": "Set 1"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Face Pull", "sets": 1, "reps": 15, "weight": 15, "bodyPart": "Rear Delt", "notes": "Set 2"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Incline DB Curl", "sets": 1, "reps": 10, "weight": 10, "bodyPart": "Biceps", "notes": "Set 1"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Incline DB Curl", "sets": 1, "reps": 8, "weight": 10, "bodyPart": "Biceps", "notes": "Set 2"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Incline DB Curl", "sets": 1, "reps": 10, "weight": 7.5, "bodyPart": "Biceps", "notes": "Set 3"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Reverse Cable Curl", "sets": 1, "reps": 10, "weight": 15, "bodyPart": "Biceps", "notes": "Set 1"}, {"date": "2026-06-23", "day": "Tuesday", "exercise": "Reverse Cable Curl", "sets": 1, "reps": 10, "weight": 12.5, "bodyPart": "Biceps", "notes": "Set 2"}], "metrics": [], "nutrition": [], "recovery": []};
+const INITIAL={"schemaVersion":1,"workouts":[],"metrics":[],"nutrition":[],"recovery":[],"appleWatch":[],"dailyNotes":[],"weeklyNotes":[],"customGymPrograms":{},"programNames":{},"polarWorkouts":{"daily":{},"latest":null},"polarActivity":{"daily":{},"latest":null},"polarProfile":{"latest":null},"polarSleep":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarNightlyRecharge":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarContinuousHr":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarCardioLoad":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarConnection":{"connected":false,"status":"disconnected","lastSyncAt":null,"lastError":null,"source":"Polar AccessLink"}};
 let DATA=JSON.parse(localStorage.getItem('atlas_summary_reports')||JSON.stringify(INITIAL));
 if(!DATA.appleWatch) DATA.appleWatch=[];
 if(!DATA.dailyNotes) DATA.dailyNotes=[];
@@ -7493,7 +7493,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=runtime-navigation-scroll-hotfix-v1-1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=privacy-phase-1-1').catch(function(){});
   });
 }
 </script>
@@ -10428,7 +10428,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   };
   window.fillPolarSample=function(){
     const box=document.getElementById('universalJsonBox'); if(!box) return;
-    box.value=JSON.stringify({importType:'polar_recovery',source:'polar_loop_gen2',date:selectedDate,sleepDurationMinutes:432,sleepScore:78,nightlyRecharge:76,hrvMs:62,restingHr:48,activityLoad:61,energy:72,notes:'Polar Loop sabah recovery girişi'},null,2);
+    box.value=JSON.stringify({type:'polar_recovery',importType:'polar_recovery',source:'synthetic_test_fixture',fixture:true,synthetic:true,date:'2099-01-01',device:'Synthetic Polar Device',sleepDurationMinutes:480,sleepScore:70,nightlyRecharge:65,hrvMs:50,restingHr:60,activityLoad:40,energy:70,notes:'SYNTHETIC TEST DATA — NOT USER DATA'},null,2);
     box.scrollIntoView({behavior:'smooth',block:'center'});
   };
   const prevUniversal=window.universalImport;
@@ -15590,46 +15590,21 @@ m Shell V4: Logger information architecture fix -->
 	  }
 		  function samplePayload(){
 		    return {
-		      date:'2026-07-09',
-		      source:'polar_flow_apple_health_shortcut',
-		      device:'Polar Loop Gen 2',
-		      sleepMinutes:432,
-		      sleepDurationText:'7h 12m',
-		      sleepScore:88,
-		      nightlyRecharge:76,
-		      sleepCharge:82,
-		      ansCharge:71,
-		      hrvMs:62,
-		      restingHr:48,
-		      sleepHr:52,
-		      respiratoryRate:14.2,
-		      steps:8200,
-		      activeEnergy:420,
-		      totalEnergy:2460,
-		      activityLoad:'moderate',
-		      cardioLoad:55,
-		      workouts:[
-		        {
-		          type:'Badminton',
-		          duration:'32:39',
-		          activeEnergy:143,
-		          avgHr:112,
-		          maxHr:125,
-		          rpe:5
-		        }
-		      ],
-		      sleepStages:{
-		        deepMinutes:95,
-		        remMinutes:86,
-		        lightMinutes:238,
-		        awakeMinutes:13
-		      },
-		      readinessNotes:[
-		        'Sleep duration is good.',
-		        'HRV is within normal range.',
-		        'Resting HR is controlled.',
-		        'Moderate extra activity load detected.'
-		      ]
+		      type:'polar_recovery',
+		      importType:'polar_recovery',
+		      source:'synthetic_test_fixture',
+		      fixture:true,
+		      synthetic:true,
+		      date:'2099-01-01',
+		      device:'Synthetic Polar Device',
+		      sleepDurationMinutes:480,
+		      sleepScore:70,
+		      nightlyRecharge:65,
+		      hrvMs:50,
+		      restingHr:60,
+		      activityLoad:40,
+		      energy:70,
+		      notes:'SYNTHETIC TEST DATA — NOT USER DATA'
 		    };
 		  }
 	  function samplePayloadText(){return JSON.stringify(samplePayload(),null,2);}
@@ -15659,8 +15634,8 @@ m Shell V4: Logger information architecture fix -->
 	      +'<div class="polarBridgeStatusBox"><small>Receiver</small><b>simurgReceivePolarBridge(payload)</b></div>'
 	      +'<div class="polarBridgeStatusBox"><small>Stored In</small><b>simurgData.polarBridge.daily</b></div>'
 	      +'</div>'
-	      +'<pre class="polarBridgeCode"><code>'+esc(samplePayloadText())+'</code></pre>'
-	      +'<textarea id="polarBridgeTestPayload" class="jsonBox polarBridgeTestBox" aria-label="Polar Bridge test payload">'+esc(samplePayloadText())+'</textarea>'
+	      +'<pre class="polarBridgeCode"><code>SYNTHETIC TEST FIXTURE — Test Payload Kaydet ile açıkça çalıştırılır.</code></pre>'
+	      +'<textarea id="polarBridgeTestPayload" class="jsonBox polarBridgeTestBox" aria-label="Polar Bridge test payload" placeholder="Sentetik fixture yalnızca Test Payload Kaydet tıklanınca uygulanır"></textarea>'
 	      +'<div class="actions polarBridgeActions"><button class="btn" onclick="simurgSavePolarBridgeTestPayload()">Test Payload Kaydet</button><button class="btn sec" onclick="simurgOpenPolarBridgeTab()">Polar Sekmesini Aç</button></div>'
 	      +'<div id="polarBridgeTestStatus" class="polarBridgeTestStatus" aria-live="polite"></div>';
 	  }

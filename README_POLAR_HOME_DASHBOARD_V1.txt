@@ -14,15 +14,19 @@ Added:
 
 Example Polar Recovery JSON:
 {
+  "type": "polar_recovery",
   "importType": "polar_recovery",
-  "source": "polar_loop_gen2",
-  "date": "2026-07-12",
-  "sleepDurationMinutes": 432,
-  "sleepScore": 78,
-  "nightlyRecharge": 76,
-  "hrvMs": 62,
-  "restingHr": 48,
-  "activityLoad": 61,
-  "energy": 72,
-  "notes": "Polar Loop sabah recovery girişi"
+  "source": "synthetic_test_fixture",
+  "fixture": true,
+  "synthetic": true,
+  "date": "2099-01-01",
+  "device": "Synthetic Polar Device",
+  "sleepDurationMinutes": 480,
+  "sleepScore": 70,
+  "nightlyRecharge": 65,
+  "hrvMs": 50,
+  "restingHr": 60,
+  "activityLoad": 40,
+  "energy": 70,
+  "notes": "SYNTHETIC TEST DATA — NOT USER DATA"
 }

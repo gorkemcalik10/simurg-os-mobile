@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-runtime-navigation-scroll-hotfix-v1-1';
+const SIMURG_CACHE = 'simurg-privacy-phase-1-1';
 const CORE_ASSETS = [
   './',
   './index.html',

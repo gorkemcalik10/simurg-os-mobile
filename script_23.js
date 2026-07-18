@@ -108,9 +108,10 @@
     };
     selectedDate=parsed.date; weekStart=mondayOf(selectedDate);
   };
+  /* SYNTHETIC TEST FIXTURE — NOT USER DATA — NOT LOADED AT RUNTIME */
   window.fillPolarSample=function(){
     const box=document.getElementById('universalJsonBox'); if(!box) return;
-    box.value=JSON.stringify({importType:'polar_recovery',source:'polar_loop_gen2',date:selectedDate,sleepDurationMinutes:432,sleepScore:78,nightlyRecharge:76,hrvMs:62,restingHr:48,activityLoad:61,energy:72,notes:'Polar Loop sabah recovery girişi'},null,2);
+    box.value=JSON.stringify({type:'polar_recovery',importType:'polar_recovery',source:'synthetic_test_fixture',fixture:true,synthetic:true,date:'2099-01-01',device:'Synthetic Polar Device',sleepDurationMinutes:480,sleepScore:70,nightlyRecharge:65,hrvMs:50,restingHr:60,activityLoad:40,energy:70,notes:'SYNTHETIC TEST DATA — NOT USER DATA'},null,2);
     box.scrollIntoView({behavior:'smooth',block:'center'});
   };
   const prevUniversal=window.universalImport;

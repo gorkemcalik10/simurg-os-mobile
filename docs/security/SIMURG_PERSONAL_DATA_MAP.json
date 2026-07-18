@@ -1,0 +1,124 @@
+{
+  "generatedAt": "2026-07-18T00:00:00+03:00",
+  "scope": "Tracked working tree and repository history reachable from the current branch; values are intentionally redacted.",
+  "files": [
+    {
+      "path": "index.html",
+      "risk": "critical",
+      "dataTypes": [
+        "workout dates",
+        "exercise names",
+        "weights",
+        "repetitions",
+        "body-part classifications",
+        "workout notes"
+      ],
+      "approximateRecordCount": 42,
+      "loadedAtRuntime": true,
+      "notes": "INITIAL contains 42 set-level rows across 2 dates and 14 exercises. When atlas_summary_reports is absent, the live application loads this dataset. It appears consistent with real training history rather than a clearly labelled synthetic fixture. Redacted example: Incline DB Press — [weight redacted] x [reps redacted]."
+    },
+    {
+      "path": "script.js",
+      "risk": "high",
+      "dataTypes": [
+        "workout dates",
+        "exercise names",
+        "weights",
+        "repetitions",
+        "body-part classifications",
+        "workout notes"
+      ],
+      "approximateRecordCount": 42,
+      "loadedAtRuntime": false,
+      "notes": "Tracked public duplicate of the embedded INITIAL dataset. It is not referenced by the current index.html script load list, but remains publicly downloadable and is present in history."
+    },
+    {
+      "path": "all_scripts.js",
+      "risk": "high",
+      "dataTypes": [
+        "workout dates",
+        "exercise names",
+        "weights",
+        "repetitions",
+        "body-part classifications",
+        "workout notes"
+      ],
+      "approximateRecordCount": 42,
+      "loadedAtRuntime": false,
+      "notes": "Tracked public aggregate artifact containing the same embedded INITIAL dataset. Not referenced by the current runtime entry page."
+    },
+    {
+      "path": "script_1.js",
+      "risk": "high",
+      "dataTypes": [
+        "workout dates",
+        "exercise names",
+        "weights",
+        "repetitions",
+        "body-part classifications",
+        "workout notes"
+      ],
+      "approximateRecordCount": 42,
+      "loadedAtRuntime": false,
+      "notes": "Tracked public legacy artifact containing the same embedded INITIAL dataset. Not referenced by the current runtime entry page."
+    },
+    {
+      "path": "Git history: index.html, script.js, all_scripts.js, script_1.js",
+      "risk": "critical",
+      "dataTypes": [
+        "historical workout records",
+        "workout dates",
+        "training measurements",
+        "notes"
+      ],
+      "approximateRecordCount": 42,
+      "loadedAtRuntime": false,
+      "notes": "The exposed set rows occur in many historical revisions (approximately 39 revisions across the four files). Removing current copies does not remove prior blobs from public Git history or forks. History remediation requires a separately approved incident-response decision."
+    },
+    {
+      "path": "Git history: coach-logic-v3.js (removed file)",
+      "risk": "medium",
+      "dataTypes": [
+        "workout and health-related derived fields",
+        "date-like values"
+      ],
+      "approximateRecordCount": 0,
+      "loadedAtRuntime": false,
+      "notes": "A removed legacy file exists in several historical revisions and contains health/workout terminology. This audit did not classify any complete raw health payload in it; retain it in the history-remediation review scope."
+    },
+    {
+      "path": "tests/*.test.js and tests/fixtures/*.json",
+      "risk": "low",
+      "dataTypes": [
+        "synthetic workout dates",
+        "synthetic activity metrics"
+      ],
+      "approximateRecordCount": 20,
+      "loadedAtRuntime": false,
+      "notes": "Test-only values appear deliberately synthetic and are not loaded by index.html. Keep fixtures explicitly labelled synthetic."
+    },
+    {
+      "path": "README.md",
+      "risk": "low",
+      "dataTypes": [
+        "example workout metadata"
+      ],
+      "approximateRecordCount": 1,
+      "loadedAtRuntime": false,
+      "notes": "Documentation example only; no complete personal record was confirmed."
+    }
+  ],
+  "notFoundInTrackedCurrentFiles": [
+    "Polar access token",
+    "Polar refresh token",
+    "Supabase service-role key",
+    "Polar OAuth client secret",
+    "complete current raw Polar health payload",
+    "precise location history"
+  ],
+  "interpretation": {
+    "publishableSupabaseKey": "A browser publishable key is present as expected for a client application. Its visibility is not by itself a secret exposure.",
+    "currentRuntimeStorage": "Additional real data may exist only in browser localStorage or the live Supabase project; it is not inspectable from the repository alone.",
+    "history": "Current-branch deletion alone is insufficient to retract public historical blobs."
+  }
+}
