@@ -37,7 +37,7 @@ Each authenticated user has at most one current payload row. The browser derives
 
 The browser continues to contain only the Supabase project URL and publishable/anon key. It must never contain a service-role key, database password, OAuth client secret, or any server secret.
 
-The proposed SQL is in `supabase/migrations/002_simurg_user_data_auth.sql`. It creates only the new table, its revision trigger, grants and RLS policies. It does not touch `public.simurg_data` or row `main`.
+The proposed SQL is in `supabase/migrations/002_simurg_user_data_auth.sql`. It creates only the new table, its revision trigger, grants and RLS policies. It does not touch `public.simurg_data` or row `main`. The migration is transactional and intentionally fails before table creation when `public.simurg_user_data` already exists; an operator must inspect any existing schema manually instead of allowing the migration to accept it silently. The complete SQL must be reviewed again before execution.
 
 ## 3. Minimal authentication flow
 
@@ -48,6 +48,8 @@ Use a pinned version of the official `@supabase/supabase-js` browser client in t
 - `persistSession: true`;
 - `autoRefreshToken: true`;
 - `detectSessionInUrl: false` because Phase 2 uses email/password only.
+
+Supabase **Anonymous Sign-Ins must remain disabled** in the dashboard. This is distinct from the unauthenticated database `anon` role. As defense in depth, the new table also has a restrictive RLS policy that denies authenticated JWTs where `is_anonymous` is true, missing, or invalid.
 
 Required UI states:
 
@@ -70,7 +72,7 @@ Tokens must be managed by the Supabase client, never printed, copied into `DATA`
 
 ## 4. RLS and grants model
 
-`public.simurg_user_data` has RLS and FORCE RLS enabled. `anon` receives no table privilege. `authenticated` receives only SELECT, INSERT, UPDATE and DELETE, each constrained by a dedicated policy:
+`public.simurg_user_data` has RLS and FORCE RLS enabled. `PUBLIC` and `anon` receive no table privilege. `authenticated` receives only SELECT, INSERT, UPDATE and DELETE. Four permissive own-row policies enforce ownership, while one restrictive `FOR ALL` policy requires a permanent authenticated user. PostgreSQL combines the applicable permissive ownership policy with the restrictive permanent-user policy using AND semantics.
 
 | Operation | Policy condition |
 |---|---|
@@ -81,7 +83,9 @@ Tokens must be managed by the Supabase client, never printed, copied into `DATA`
 
 The client still includes a `user_id` field when inserting a new row because it is the primary key, but the value must come from `session.user.id`, and RLS independently rejects a different value.
 
-No policy is created for `anon`. No broad `USING (true)` policy is permitted. No service-role credential is used by the browser.
+The restrictive policy accepts only `is_anonymous = false`. A missing claim becomes denied, and an invalid boolean claim errors rather than granting access. No policy is created for `anon`. No broad `USING (true)` policy is permitted. No service-role credential is used by the browser.
+
+The table also requires the root `payload` value to be a JSON object. Arrays, strings, numbers and JSON null are rejected before storage.
 
 ## 5. Revision and conflict model
 
@@ -179,17 +183,19 @@ These are instructions for a later authorized change; none were performed in Pha
 
 1. Open the intended Supabase project and confirm it is not production before initial testing.
 2. In **Authentication → Providers → Email**, enable email/password only; do not enable social providers.
-3. Decide whether email confirmation is required and configure the approved Site URL/redirect allowlist for the deployed Simurg origin and explicit local development origins.
-4. Review **Authentication → Rate Limits**, password requirements, email templates and CAPTCHA options.
-5. Create two isolated test users (A and B) with no personal payload.
-6. Open **SQL Editor**, paste the reviewed `002_simurg_user_data_auth.sql`, inspect it again, and execute it only after approval.
-7. In **Database → Tables**, confirm `simurg_user_data` has the four expected columns, UUID primary/foreign key, revision check and update trigger.
-8. In **Database → Policies**, confirm RLS and FORCE RLS are enabled and exactly four authenticated owner policies exist.
-9. In **Database → Roles/Privileges**, confirm `anon` has no privilege and `authenticated` has only SELECT/INSERT/UPDATE/DELETE subject to RLS.
-10. Use user A, user B and anon test sessions to execute the checklist in `SIMURG_CLOUD_AUTH_TEST_CHECKLIST.md`.
-11. Confirm `public.simurg_data`, its `main` row, and all existing cloud data are unchanged.
-12. Review logs for policy errors without logging JWTs or payload contents.
-13. Do not deploy the client until the RLS isolation and revision-conflict tests pass.
+3. In **Authentication → Providers**, confirm **Anonymous Sign-Ins are disabled** and leave them disabled.
+4. Decide whether email confirmation is required and configure the approved Site URL/redirect allowlist for the deployed Simurg origin and explicit local development origins.
+5. Review **Authentication → Rate Limits**, password requirements, email templates and CAPTCHA options.
+6. Create two isolated permanent email/password test users (A and B) with no personal payload.
+7. Before execution, confirm `public.simurg_user_data` does not already exist. If it exists, stop and inspect it manually; do not edit the guard or force the migration through.
+8. Open **SQL Editor**, paste the reviewed `002_simurg_user_data_auth.sql`, inspect the entire transaction again, and execute it only after approval.
+9. In **Database → Tables**, confirm `simurg_user_data` has the four expected columns, UUID primary/foreign key, JSON-object and revision checks, and revision trigger.
+10. In **Database → Policies**, confirm RLS and FORCE RLS are enabled, with four permissive authenticated owner policies plus one restrictive permanent-user policy.
+11. In **Database → Roles/Privileges**, confirm `PUBLIC`/`anon` have no privilege and `authenticated` has only SELECT/INSERT/UPDATE/DELETE subject to RLS.
+12. Use permanent user A, permanent user B, an Anonymous Sign-In test JWT in an isolated verification setup, and the unauthenticated anon role to execute the checklist in `SIMURG_CLOUD_AUTH_TEST_CHECKLIST.md`.
+13. Confirm `public.simurg_data`, its `main` row, and all existing cloud data are unchanged.
+14. Review logs for policy errors without logging JWTs or payload contents.
+15. Do not deploy the client until the RLS isolation and revision-conflict tests pass.
 
 ## 10. Completion criteria for Phase 2B
 

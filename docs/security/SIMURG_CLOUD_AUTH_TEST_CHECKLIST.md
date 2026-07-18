@@ -7,6 +7,9 @@ Use only synthetic data and a non-production Supabase project until a production
 ## Test prerequisites
 
 - [ ] SQL migration has been reviewed but is applied only to an authorized test project.
+- [ ] Review the complete SQL immediately before execution; do not execute an unreviewed copy.
+- [ ] Confirm `public.simurg_user_data` does not already exist. If it exists, verify the migration fails intentionally and inspect the table manually.
+- [ ] Confirm Supabase Anonymous Sign-Ins are disabled in the dashboard and remain disabled.
 - [ ] Two test users exist: user A and user B.
 - [ ] Browser DevTools logging does not expose access tokens, refresh tokens, passwords or payload contents.
 - [ ] A synthetic local JSON backup exists before testing.
@@ -104,15 +107,32 @@ Use only synthetic data and a non-production Supabase project until a production
 
 ## 11. RLS and credential checks
 
-- [ ] Every policy uses `auth.uid() = user_id` and targets `authenticated`.
+- [ ] All four permissive own-row policies use `auth.uid() = user_id` and target `authenticated`.
+- [ ] One restrictive `FOR ALL` policy requires `is_anonymous = false` for both `USING` and `WITH CHECK`.
+- [ ] An authenticated Anonymous Sign-In JWT with `is_anonymous=true` is denied for SELECT, INSERT, UPDATE and DELETE.
+- [ ] Missing or malformed `is_anonymous` never grants access.
 - [ ] RLS and FORCE RLS are enabled.
-- [ ] `anon` has no table privilege.
+- [ ] `PUBLIC` and the unauthenticated `anon` role have no table privilege.
 - [ ] Browser source contains only the redacted-in-docs publishable key type; no service-role secret is introduced.
 - [ ] Network requests use the authenticated user's access token and never log it.
 - [ ] Payload responses never include another user's row.
 
+## 12. Migration hardening checks
+
+- [ ] The SQL is enclosed by one top-level `BEGIN;` and `COMMIT;` transaction.
+- [ ] Force a harmless failure in a disposable copy/test project and confirm no partial table, function, trigger, grant or policy remains.
+- [ ] `CREATE TABLE IF NOT EXISTS` is absent.
+- [ ] The preflight guard raises a clear exception when `simurg_user_data` already exists.
+- [ ] Table inspection confirms user ID primary/foreign key, revision constraint and JSON-object payload constraint.
+- [ ] Array, string, number and JSON-null payload roots are rejected; an object root is accepted.
+- [ ] Revision N→N+2, repeated N and revision reduction are rejected.
+- [ ] First INSERT is stored at revision 1 and `updated_at` is assigned server-side.
+- [ ] Policy inspection reports four PERMISSIVE own-row policies and one RESTRICTIVE permanent-user policy.
+- [ ] Legacy `public.simurg_data` and row `main` metadata remain unchanged.
+
 ## Exit criteria
 
 - [ ] All signed-out, user A, user B, conflict, persistence and legacy-preservation tests pass.
+- [ ] Permanent email/password access succeeds while Anonymous Sign-In and unauthenticated anon access are denied.
 - [ ] No real user data was used in testing.
 - [ ] No production SQL, deployment, cloud write or legacy-row mutation occurred without separate approval.
