@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-privacy-phase-1-1';
+const SIMURG_CACHE = 'simurg-cloud-auth-phase-2b-1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -11,6 +11,7 @@ const CORE_ASSETS = [
   './simurg-signal-model.js?v=4',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=5',
+  './simurg-cloud-auth.js?v=1',
   './desktop-alignment.css?v=23',
   './desktop-alignment.js?v=25',
   './icons/icon-192.png',

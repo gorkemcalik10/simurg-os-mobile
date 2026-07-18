@@ -7,6 +7,7 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 const index = read('index.html');
 const premium = read('premium-standard.js');
 const desktop = read('desktop-alignment.js');
+const cloudAuth = read('simurg-cloud-auth.js');
 const sw = read('sw.js');
 
 function run(name, fn) {
@@ -30,7 +31,7 @@ run('service worker registration and cache share one build label', () => {
 });
 
 run('index asset versions match CORE_ASSETS', () => {
-  for (const file of ['simurg-signal-model.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js']) {
+  for (const file of ['simurg-signal-model.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js']) {
     const escaped = file.replace('.', '\\.');
     const indexVersion = index.match(new RegExp(`${escaped}\\?v=([^"']+)`));
     const swVersion = sw.match(new RegExp(`${escaped}\\?v=([^"']+)`));
@@ -46,10 +47,10 @@ run('general render does not invalidate shared aggregates', () => {
   assert.doesNotMatch(renderBody[1], /SimurgPremium\.dataChanged|SimurgSignalModel\.invalidate/);
 });
 
-run('real mutations invalidate while cloud push does not', () => {
+run('real mutations invalidate while secure cloud push does not', () => {
   assert.match(index, /window\.save=function\(\)\{[^]*?SimurgSignalModel\.invalidate\('local-save'\)/);
-  assert.match(index, /window\.pullFromCloud=async function\(\)\{[^]*?SimurgSignalModel\.invalidate\('cloud-pull'\)/);
-  const pushBody = index.match(/window\.pushToCloud=async function\(\)\{([^]*?)\n\s*\};/);
+  assert.match(cloudAuth, /function persistPulledData\(value\)\{[^]*?localStorage\.setItem\(LOCAL_DATA_KEY/);
+  const pushBody = cloudAuth.match(/async function pushUserData\(\)\{([^]*?)\n\s*\}/);
   assert.ok(pushBody);
   assert.doesNotMatch(pushBody[1], /SimurgSignalModel\.invalidate/);
 });

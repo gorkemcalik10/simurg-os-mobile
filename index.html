@@ -1429,6 +1429,50 @@ aside{
   border-color:rgba(255,107,107,.30);
   background:rgba(255,107,107,.06);
 }
+.syncStatus.conflict{
+  color:#ffcf70;
+  border-color:rgba(245,163,13,.34);
+  background:rgba(245,163,13,.08);
+}
+.cloudSyncCard [hidden]{display:none!important}
+.cloudAuthPanel{
+  display:grid;
+  gap:10px;
+  margin:14px 0;
+  padding:12px;
+  border:1px solid var(--hz-line,var(--line));
+  border-radius:14px;
+  background:var(--hz-field,var(--panel));
+}
+.cloudAuthStateRow,.cloudSignedInRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-width:0;
+}
+.cloudAuthStateRow small,.cloudRevisionStatus{color:var(--hz-muted,#9aa7b8);font-size:12px}
+.cloudAuthStateRow b,.cloudSignedInRow b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cloudAuthForm{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px}
+.cloudAuthForm input{
+  min-width:0;
+  width:100%;
+  border:1px solid var(--hz-line,var(--line));
+  border-radius:11px;
+  background:var(--hz-surface,#111820);
+  color:var(--hz-text,#f5f7fa);
+  padding:10px 11px;
+}
+.cloudAuthForm input:focus-visible,.cloudSyncCard button:focus-visible{
+  outline:2px solid var(--hz-amber,#f5a30d);
+  outline-offset:2px;
+  box-shadow:0 0 0 4px rgba(245,163,13,.18);
+}
+.cloudSyncCard button:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+@media(max-width:680px){
+  .cloudAuthForm{grid-template-columns:1fr}
+  .cloudAuthStateRow,.cloudSignedInRow{align-items:flex-start;flex-direction:column}
+}
 
 
 /* Coach Layer v1 */
@@ -5931,7 +5975,7 @@ body{background:#050607!important;}
       <h1>Merhaba, Görkem</h1>
       <p>Polar verinle bugünün antrenman kararı.</p>
     </div>
-    <button class="v4Sync" onclick="checkCloudStatus&&checkCloudStatus()">↻</button>
+    <button class="v4Sync" onclick="window.checkUserCloudStatus&&window.checkUserCloudStatus()">↻</button>
   </div>
 
   <div class="v4Tabs" id="polarWeekRow"></div>
@@ -6117,17 +6161,31 @@ body{background:#050607!important;}
 
 <div class="card cloudSyncCard">
   <h2>Bulut Senkronizasyonu</h2>
-  <div class="sub">Telefon ve Mac arasında veriyi Supabase üzerinden eşitle. Telefonda veri girince Buluta Gönder, Mac'te Buluttan Al işlemini kullan.</div>
+  <div class="sub">Oturum açtıktan sonra veriyi kendi güvenli kullanıcı kaydınla açık komutla eşitle. Giriş yapmak otomatik gönderme veya alma başlatmaz.</div>
+  <div class="cloudAuthPanel">
+    <div class="cloudAuthStateRow"><small>HESAP DURUMU</small><b id="cloudAuthState">Başlatılıyor</b></div>
+    <div id="cloudAuthSignedOut">
+      <div class="cloudAuthForm">
+        <input id="cloudAuthEmail" type="email" inputmode="email" autocomplete="username" aria-label="E-posta" placeholder="E-posta">
+        <input id="cloudAuthPassword" type="password" autocomplete="current-password" aria-label="Parola" placeholder="Parola">
+        <button id="cloudSignInBtn" class="btn" type="button" disabled>Giriş Yap</button>
+      </div>
+    </div>
+    <div id="cloudAuthSignedIn" hidden>
+      <div class="cloudSignedInRow"><b id="cloudSignedInLabel">Oturum açık</b><button id="cloudSignOutBtn" class="btn sec" type="button" disabled>Çıkış Yap</button></div>
+    </div>
+    <div id="cloudRevisionStatus" class="cloudRevisionStatus">Bulut revizyonu: -</div>
+  </div>
   <div class="syncInfoGrid">
-    <div class="syncInfoBox"><b>Buluta Gönder</b><span>Bu cihazdaki güncel veriyi buluta gönderir. Telefonunda yeni kayıt varsa önce bunu kullan.</span></div>
-    <div class="syncInfoBox"><b>Buluttan Al</b><span>Buluttaki veriyi bu cihaza çeker. Mac veya diğer cihazda güncel veriyi almak için kullan.</span></div>
+    <div class="syncInfoBox"><b>Buluta Gönder</b><span>İlk kaydı oluşturur veya yalnızca beklenen revizyon hâlâ güncelse gönderir.</span></div>
+    <div class="syncInfoBox"><b>Buluttan Al</b><span>Onaydan sonra yerel JSON yedeğini indirir ve kullanıcıya ait bulut kaydını alır.</span></div>
   </div>
   <div class="actions">
-    <button class="btn" onclick="pushToCloud()">Buluta Gönder</button>
-    <button class="btn sec" onclick="pullFromCloud()">Buluttan Al</button>
-    <button class="btn sec" onclick="checkCloudStatus()">Bulutu Kontrol Et</button>
+    <button id="cloudPushBtn" class="btn" type="button" disabled>Buluta Gönder</button>
+    <button id="cloudPullBtn" class="btn sec" type="button" disabled>Buluttan Al</button>
+    <button id="cloudCheckBtn" class="btn sec" type="button" disabled>Bulutu Kontrol Et</button>
   </div>
-  <div id="cloudSyncStatus" class="syncStatus">Bulut durumu: hazır.</div>
+  <div id="cloudSyncStatus" class="syncStatus" data-state="initializing">Başlatılıyor…</div>
 </div>
 
 <div class="card localStatusCard">
@@ -7493,7 +7551,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=privacy-phase-1-1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=cloud-auth-phase-2b-1').catch(function(){});
   });
 }
 </script>
@@ -7502,112 +7560,6 @@ if ('serviceWorker' in navigator) {
 <script>
 const SIMURG_SUPABASE_URL = "https://kgbajrrfwcsbdbbuvhww.supabase.co";
 const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
-const SIMURG_SYNC_ID = "main";
-
-function setCloudStatus(message, type) {
-  const el = document.getElementById('cloudSyncStatus');
-  if (!el) return;
-  el.classList.remove('ok','err');
-  if (type) el.classList.add(type);
-  el.textContent = message;
-}
-
-function simurgCloudHeaders(extra) {
-  return Object.assign({
-    "apikey": SIMURG_SUPABASE_KEY,
-    "Authorization": "Bearer " + SIMURG_SUPABASE_KEY,
-    "Content-Type": "application/json"
-  }, extra || {});
-}
-
-async function pushToCloud() {
-  try {
-    if (!confirm("Bu cihazdaki mevcut Simurg OS verisi buluta gönderilecek ve cloud ana kayıt güncellenecek. Devam edelim mi?")) {
-      setCloudStatus("Push cancelled.", "");
-      return;
-    }
-    setCloudStatus("Pushing local data to cloud...", "");
-    const payload = {
-      data: DATA,
-      pushedAt: new Date().toISOString(),
-      version: "simurg-os-sync-v1"
-    };
-    const res = await fetch(SIMURG_SUPABASE_URL + "/rest/v1/simurg_data?on_conflict=id", {
-      method: "POST",
-      headers: simurgCloudHeaders({
-        "Prefer": "resolution=merge-duplicates,return=representation"
-      }),
-      body: JSON.stringify({
-        id: SIMURG_SYNC_ID,
-        payload: payload,
-        updated_at: new Date().toISOString()
-      })
-    });
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(res.status + " " + txt);
-    }
-    setCloudStatus("Cloud sync complete: local data pushed successfully.", "ok");
-  } catch (err) {
-    setCloudStatus("Push failed: " + err.message, "err");
-  }
-}
-
-async function pullFromCloud() {
-  try {
-    setCloudStatus("Pulling data from cloud...", "");
-    const res = await fetch(SIMURG_SUPABASE_URL + "/rest/v1/simurg_data?id=eq." + encodeURIComponent(SIMURG_SYNC_ID) + "&select=payload,updated_at", {
-      method: "GET",
-      headers: simurgCloudHeaders()
-    });
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(res.status + " " + txt);
-    }
-    const rows = await res.json();
-    if (!rows.length || !rows[0].payload || !rows[0].payload.data) {
-      setCloudStatus("Cloud has no Simurg OS data yet. Push from one device first.", "err");
-      return;
-    }
-    if (!confirm("Pull From Cloud bu cihazdaki mevcut local veriyi buluttaki kayıtla güncelleyecek. Devam edelim mi?")) {
-      setCloudStatus("Pull cancelled.", "");
-      return;
-    }
-    DATA = rows[0].payload.data;
-    localStorage.setItem('atlas_summary_reports', JSON.stringify(DATA));
-    if (!DATA.appleWatch) DATA.appleWatch = [];
-    if (!DATA.dailyNotes) DATA.dailyNotes = [];
-    if (!DATA.weeklyNotes) DATA.weeklyNotes = [];
-    if (!DATA.customGymPrograms) DATA.customGymPrograms = {};
-    if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('cloud-pull');
-    render();
-    setCloudStatus("Cloud data pulled successfully. Last update: " + (rows[0].updated_at || "-"), "ok");
-  } catch (err) {
-    setCloudStatus("Pull failed: " + err.message, "err");
-  }
-}
-
-async function checkCloudStatus() {
-  try {
-    setCloudStatus("Checking cloud...", "");
-    const res = await fetch(SIMURG_SUPABASE_URL + "/rest/v1/simurg_data?id=eq." + encodeURIComponent(SIMURG_SYNC_ID) + "&select=updated_at", {
-      method: "GET",
-      headers: simurgCloudHeaders()
-    });
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(res.status + " " + txt);
-    }
-    const rows = await res.json();
-    if (!rows.length) {
-      setCloudStatus("Cloud is reachable, but no data exists yet. Push first.", "ok");
-    } else {
-      setCloudStatus("Cloud is reachable. Last cloud update: " + rows[0].updated_at, "ok");
-    }
-  } catch (err) {
-    setCloudStatus("Cloud check failed: " + err.message, "err");
-  }
-}
 </script>
 
 
@@ -8348,67 +8300,6 @@ async function checkCloudStatus() {
     save();
     return false;
   };
-
-  function cloudSummaryHtml(prefix, cloudUpdated){
-    const c=dataCounts();
-    const update=cloudUpdated?` | Cloud: ${fmtDateTime(cloudUpdated)}`:'';
-    return `${prefix} | Workout Days: ${c.workoutDays} | Activities: ${c.activities} | Watch Entries: ${c.appleWatch}${update}`;
-  }
-
-  if(typeof SIMURG_SUPABASE_URL!=='undefined' && typeof simurgCloudHeaders==='function'){
-    window.pushToCloud=async function(){
-      try{
-        if(!confirm('Bu cihazdaki mevcut Simurg OS verisi buluta gönderilecek ve cloud ana kayıt güncellenecek. Devam edelim mi?')){
-          setCloudStatus('Push cancelled.','');
-          return;
-        }
-        markLocalUpdate();
-        localStorage.setItem('atlas_summary_reports',JSON.stringify(DATA));
-        setCloudStatus('Pushing local data to cloud...','');
-        const now=new Date().toISOString();
-        const payload={data:DATA,pushedAt:now,version:'simurg-os-final-pre-netlify-polish-v1'};
-        const res=await fetch(SIMURG_SUPABASE_URL + '/rest/v1/simurg_data?on_conflict=id',{
-          method:'POST',
-          headers:simurgCloudHeaders({'Prefer':'resolution=merge-duplicates,return=representation'}),
-          body:JSON.stringify({id:SIMURG_SYNC_ID,payload:payload,updated_at:now})
-        });
-        if(!res.ok){const txt=await res.text();throw new Error(res.status+' '+txt)}
-        setCloudStatus(cloudSummaryHtml('Cloud sync complete: local data pushed successfully.',now),'ok');
-        renderDataLocalStatus();
-      }catch(err){setCloudStatus('Push failed: '+err.message,'err')}
-    };
-
-    window.pullFromCloud=async function(){
-      try{
-        setCloudStatus('Pulling data from cloud...','');
-        const res=await fetch(SIMURG_SUPABASE_URL + '/rest/v1/simurg_data?id=eq.' + encodeURIComponent(SIMURG_SYNC_ID) + '&select=payload,updated_at',{
-          method:'GET',headers:simurgCloudHeaders()
-        });
-        if(!res.ok){const txt=await res.text();throw new Error(res.status+' '+txt)}
-        const rows=await res.json();
-        if(!rows.length || !rows[0].payload || !rows[0].payload.data){
-          setCloudStatus('Cloud has no Simurg OS data yet. Push from one device first.','err');
-          return;
-        }
-        if(!confirm('Pull From Cloud bu cihazdaki mevcut local veriyi buluttaki kayıtla güncelleyecek. Devam edelim mi?')){
-          setCloudStatus('Pull cancelled.','');
-          return;
-        }
-        DATA=rows[0].payload.data;
-        if(!DATA.appleWatch) DATA.appleWatch=[];
-        if(!DATA.dailyNotes) DATA.dailyNotes=[];
-        if(!DATA.weeklyNotes) DATA.weeklyNotes=[];
-        if(!DATA.customGymPrograms) DATA.customGymPrograms={};
-        if(!DATA.programNames) DATA.programNames={};
-        if(!DATA.activityNotes) DATA.activityNotes={};
-        markLocalUpdate();
-        localStorage.setItem('atlas_summary_reports',JSON.stringify(DATA));
-        if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('cloud-pull');
-        render();
-        setCloudStatus(cloudSummaryHtml('Cloud data pulled successfully.',rows[0].updated_at||''),'ok');
-      }catch(err){setCloudStatus('Pull failed: '+err.message,'err')}
-    };
-  }
 
   ensureMeta();
   setTimeout(()=>{try{renderDataLocalStatus();}catch(e){}},60);
@@ -15922,3 +15813,5 @@ m Shell V4: Logger information architecture fix -->
 <script src="./polar-accesslink.js?v=5"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=23">
 <script src="./desktop-alignment.js?v=25"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
+<script src="./simurg-cloud-auth.js?v=1" defer></script>

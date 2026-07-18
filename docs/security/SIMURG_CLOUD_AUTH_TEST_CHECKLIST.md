@@ -1,6 +1,6 @@
 # Simurg OS Cloud Auth Test Checklist
 
-Status: Phase 2A plan only
+Status: Phase 2B implementation and manual verification checklist
 
 Use only synthetic data and a non-production Supabase project until a production change is separately authorized.
 
@@ -136,3 +136,58 @@ Use only synthetic data and a non-production Supabase project until a production
 - [ ] Permanent email/password access succeeds while Anonymous Sign-In and unauthenticated anon access are denied.
 - [ ] No real user data was used in testing.
 - [ ] No production SQL, deployment, cloud write or legacy-row mutation occurred without separate approval.
+
+## 13. Exact Phase 2B local manual test sequence
+
+Use a local server, a synthetic local DATA backup and the existing permanent email/password test account. Do not use real personal records for conflict testing.
+
+1. **Baseline and local data fingerprint**
+   - Open DevTools Application → Local Storage.
+   - Record a value-minimizing hash/count summary of `atlas_summary_reports`; do not copy its contents into logs.
+   - Record the visible Polar workout count and one Gym/Logger count for later comparison.
+2. **Signed-out mode**
+   - Ensure the Supabase session is signed out, then reload.
+   - Open Data Center and confirm status is **Oturum kapalı**.
+   - Confirm Check, Push and Pull are disabled and no `simurg_user_data` request occurs automatically.
+3. **Invalid login**
+   - Enter a deliberately invalid test password and press **Giriş Yap** once.
+   - Confirm a safe text error appears, the password field clears, controls stay disabled and local DATA fingerprint is unchanged.
+4. **Valid login**
+   - Sign in with the permanent email/password test user.
+   - Confirm only a masked email is displayed; no UUID, password, access token or JWT appears in UI/console.
+   - Confirm login itself sends no SELECT/INSERT/UPDATE for `simurg_user_data` and does not change local DATA.
+5. **Session persistence**
+   - Refresh the page.
+   - Confirm the session restores to **Oturum açık** and cloud controls enable only after initialization.
+   - Confirm refresh performs no automatic Check, Push or Pull.
+6. **No cloud row**
+   - With an account that has no row, press **Bulutu Kontrol Et**.
+   - Confirm the query selects only `revision,updated_at`, the UI says **Bulutta henüz veri yok**, and no revision base is stored.
+7. **First Push**
+   - Press **Buluta Gönder**, cancel the first confirmation, and confirm no row is created.
+   - Repeat and confirm. Verify exactly one authenticated user row is created and returned at revision 1.
+   - Confirm user-scoped `simurg_cloud_meta:<user-id>` contains only revision/time fields and no payload/token/email.
+8. **Pull with backup**
+   - Make a small synthetic local-only change.
+   - Press **Buluttan Al**, cancel once, and verify local DATA remains unchanged.
+   - Repeat and confirm. Verify a timestamped `simurg-local-before-cloud-pull-*.json` file downloads before local replacement.
+   - Confirm the returned revision becomes the local base and no automatic Push follows.
+9. **Second Push**
+   - Make another small synthetic local change and press **Buluta Gönder**.
+   - Confirm the request filters by authenticated `user_id` and expected revision, sends expected revision + 1, and returns exactly one row.
+10. **Two-profile revision conflict**
+    - Open browser profiles A1 and A2, sign into the same test account, and Pull the same revision in both.
+    - Change synthetic data in A1 and Push successfully.
+    - Change synthetic data in stale A2 and Push.
+    - Confirm A2 shows: **“Buluttaki veri başka bir cihazda güncellenmiş. Önce Buluttan Al veya yerel yedek oluştur.”**
+    - Confirm A2 metadata is not advanced, A2 local DATA remains available, and cloud data from A1 is unchanged.
+11. **Sign-out safety**
+    - Press **Çıkış Yap** and reload.
+    - Confirm controls are disabled, account-specific cloud metadata is cleared, and `atlas_summary_reports` fingerprint remains unchanged.
+12. **Polar and Gym/Logger preservation**
+    - Reopen Polar, Gym and Logger.
+    - Confirm the previously recorded counts and records remain present after sign-in/sign-out.
+    - Confirm no Polar AccessLink/OAuth request or Gym/Logger mutation was triggered by Auth actions.
+13. **Legacy endpoint check**
+    - Search Network requests for `simurg_data`, `id=eq.main` and `SIMURG_SYNC_ID`.
+    - Confirm no active request addresses the legacy table/row; only authenticated `simurg_user_data` requests are present after explicit actions.
