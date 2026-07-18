@@ -89,7 +89,7 @@
     (Array.isArray(records)?records:[]).forEach(function(record){if(record&&record.date)store.daily[record.date]=Object.assign({},store.daily[record.date]||{},record);});
     store.latest=newestDaily(store.daily)||store.latest||null;
     store.lastSyncAt=lastSyncAt||store.lastSyncAt||null;
-    store.lastError=error||(status==='forbidden'?'Unavailable for this Polar account.':status==='error'?'Polar endpoint returned an error.':null);
+    store.lastError=error||(status==='forbidden'?'Bu Polar hesabında kullanılamıyor.':status==='error'?'Polar uç noktası hata döndürdü.':null);
   }
   function mergeSync(payload){
     var data=ensureStores();if(!data)return;
@@ -118,10 +118,10 @@
   }
   function categoryValue(key,counts,statuses){
     var status=statuses&&statuses[key];
-    if(key==='profile')return status==='forbidden'?'unavailable':status==='error'?'error':Number(counts.profile||0)>0?'available':'missing';
-    if(status==='forbidden')return 'unavailable';
-    if(status==='no_data')return 'no data';
-    if(status==='error')return 'error';
+    if(key==='profile')return status==='forbidden'?'kullanılamıyor':status==='error'?'hata':Number(counts.profile||0)>0?'mevcut':'eksik';
+    if(status==='forbidden')return 'kullanılamıyor';
+    if(status==='no_data')return 'veri yok';
+    if(status==='error')return 'hata';
     return String(Number(counts[key]||0));
   }
   function cardHtml(){
@@ -130,11 +130,11 @@
     var statusText=state.busy?'İşleniyor':connected?'Bağlandı':status==='error'?'Hata':'Bağlı değil';
     var message=state.message||(connected?'Polar AccessLink manuel senkronizasyonu hazır.':'Polar hesabını bağlayarak egzersiz ve aktivite verilerini API üzerinden çek.');
     var error=state.errorMessage||connection.lastError||connection.errorMessage||'';
-    return '<div class="polarAccessLinkHead"><div><small>POLAR ACCESSLINK · V2</small><h2>Polar Flow Connection</h2></div><span class="polarAccessLinkStatus '+esc(status)+'">'+esc(statusText)+'</span></div>'+
+    return '<div class="polarAccessLinkHead"><div><small>POLAR ACCESSLINK · V2</small><h2>Polar Flow Bağlantısı</h2></div><span class="polarAccessLinkStatus '+esc(status)+'">'+esc(statusText)+'</span></div>'+
       '<p>'+esc(message)+'</p>'+
-      (connected?'<div class="polarAccessLinkDebug"><div class="wide"><small>Last sync</small><b>'+esc(formatDateTime(state.lastSyncAt||connection.lastSyncAt))+'</b></div><div><small>Workout</small><b>'+esc(categoryValue('workouts',counts,statuses))+'</b></div><div><small>Activity</small><b>'+esc(categoryValue('activity',counts,statuses))+'</b></div><div><small>Profile</small><b>'+esc(categoryValue('profile',counts,statuses))+'</b></div><div><small>Sleep</small><b>'+esc(categoryValue('sleep',counts,statuses))+'</b></div><div><small>Nightly Recharge</small><b>'+esc(categoryValue('nightlyRecharge',counts,statuses))+'</b></div><div><small>Continuous HR</small><b>'+esc(categoryValue('continuousHr',counts,statuses))+'</b></div><div><small>Cardio Load</small><b>'+esc(categoryValue('cardioLoad',counts,statuses))+'</b></div></div>':'')+
+      (connected?'<div class="polarAccessLinkDebug"><div class="wide"><small>Son senkronizasyon</small><b>'+esc(formatDateTime(state.lastSyncAt||connection.lastSyncAt))+'</b></div><div><small>Antrenman</small><b>'+esc(categoryValue('workouts',counts,statuses))+'</b></div><div><small>Aktivite</small><b>'+esc(categoryValue('activity',counts,statuses))+'</b></div><div><small>Profil</small><b>'+esc(categoryValue('profile',counts,statuses))+'</b></div><div><small>Uyku</small><b>'+esc(categoryValue('sleep',counts,statuses))+'</b></div><div><small>Gece Toparlanması</small><b>'+esc(categoryValue('nightlyRecharge',counts,statuses))+'</b></div><div><small>Sürekli HR</small><b>'+esc(categoryValue('continuousHr',counts,statuses))+'</b></div><div><small>Kardiyo Yükü</small><b>'+esc(categoryValue('cardioLoad',counts,statuses))+'</b></div></div>':'')+
       '<div class="polarAccessLinkActions">'+(connected?'<button type="button" onclick="simurgPolarSyncNow()" '+(state.busy?'disabled':'')+'>Şimdi Senkronize Et</button><button class="secondary" type="button" onclick="simurgPolarDisconnect()" '+(state.busy?'disabled':'')+'>Bağlantıyı Kes</button>':'<button type="button" onclick="simurgPolarConnect()" '+(state.busy?'disabled':'')+'>Polar Hesabını Bağla</button>')+'</div>'+
-      '<div class="polarAccessLinkNote '+(error?'error':'')+'" aria-live="polite">'+esc(error||'Polar AccessLink aktif veri kaynağı · Workout, activity, sleep, recovery ve load')+'</div>';
+      '<div class="polarAccessLinkNote '+(error?'error':'')+'" aria-live="polite">'+esc(error||'Polar AccessLink aktif veri kaynağı · Antrenman, aktivite, uyku, toparlanma ve yük')+'</div>';
   }
   function renderCard(){
     var section=document.getElementById('polar');if(!section)return;var dashboard=section.querySelector('.polarDashboardV1')||section;
@@ -158,7 +158,7 @@
   };
   window.simurgPolarSyncNow=async function(){
     if(state.busy)return;state.busy=true;state.errorMessage='';state.message='Polar Flow verileri senkronize ediliyor.';renderCard();
-    try{var payload=await request('polar-sync','POST',{});mergeSync(payload);var counts=payload.counts||{};state.message='Senkron tamamlandı: '+Number(counts.workouts||0)+' workout, '+Number(counts.activity!=null?counts.activity:counts.activities||0)+' activity, '+Number(counts.sleep||0)+' sleep.';state.errorMessage=(payload.warnings||[]).join(' ');}
+    try{var payload=await request('polar-sync','POST',{});mergeSync(payload);var counts=payload.counts||{};state.message='Senkron tamamlandı: '+Number(counts.workouts||0)+' antrenman, '+Number(counts.activity!=null?counts.activity:counts.activities||0)+' aktivite, '+Number(counts.sleep||0)+' uyku kaydı.';state.errorMessage=(payload.warnings||[]).join(' ');}
     catch(error){state.errorMessage=error.message;state.message='Polar senkronizasyonu tamamlanamadı.';}
     state.busy=false;renderCard();
   };

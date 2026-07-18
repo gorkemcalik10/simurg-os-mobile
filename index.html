@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Simurg OS Cloud Sync</title>
+<script src="./simurg-signal-model.js?v=4"></script>
 <style>
 :root{
   --bg:#04070a;--panel:#0a1118;--panel2:#0d161e;--line:rgba(166,180,194,.15);--text:#eef1f4;--muted:#8e99a5;
@@ -5898,7 +5899,7 @@ body{background:#050607!important;}
 <div id="simurgStandaloneHint" class="simurgStandaloneHint"><button type="button" onclick="this.parentElement.style.display='none';localStorage.setItem('simurg_install_hint_closed','1')">Tamam</button><b>App Mode hazır.</b><br>iPhone’da Paylaş → Ana Ekrana Ekle ile Simurg OS’u uygulama gibi açabilirsin.</div>
 
 <div class="app"><aside>
-<div class="logo simurgBrandPolish"><div class="mark">🕊️</div><div class="brandWrap"><div class="brand"><span class="brandMain">SIMURG</span><span class="brandOs">OS</span></div><small>Rise. Log. Rebuild.</small></div></div>
+<div class="logo simurgBrandPolish"><div class="mark">🕊️</div><div class="brandWrap"><div class="brand"><span class="brandMain">SIMURG</span><span class="brandOs">OS</span></div><small>Yüksel. Kaydet. Yeniden İnşa Et.</small></div></div>
 <div class="nav">
 <button class="active" onclick="show('home',this)">🏠 Ana Sayfa</button>
 <button onclick="show('recovery',this)">💠 Toparlanma</button>
@@ -5913,8 +5914,8 @@ body{background:#050607!important;}
 <button onclick="show('data',this)">💾 Data Center</button>
 </div>
 <div class="sidecard quoteCard">
-  <p>MOTIVATION</p>
-  <div class="quoteText">“A journey of a thousand miles begins with a single step.”</div>
+  <p>MOTİVASYON</p>
+  <div class="quoteText">“Bin millik yolculuk tek bir adımla başlar.”</div>
   <div class="quoteAuthor">— Lao Tzu</div>
   <div id="sideVolume" style="display:none">0 kg</div>
   <div id="sideSets" style="display:none">0 set</div>
@@ -6031,18 +6032,18 @@ body{background:#050607!important;}
       <div class="titleIcon">📱</div>
       <div>
         <h1>🏋️ Gym Mode</h1>
-        <div class="sub">Fast logging view for the selected training day.</div>
+        <div class="sub">Seçili antrenman günü için hızlı kayıt görünümü.</div>
       </div>
     </div>
     <div class="controls">
-      <button class="weekBtn" onclick="changeWeek(-1)">← Previous Day</button>
+      <button class="weekBtn" onclick="changeWeek(-1)">← Önceki Gün</button>
       <div class="ctrl" id="gymDateLabel">Today</div>
-      <button class="weekBtn" onclick="changeWeek(1)">Next Day →</button>
+      <button class="weekBtn" onclick="changeWeek(1)">Sonraki Gün →</button>
     </div>
   </div>
   <div class="gymHero">
     <div>
-      <small>ACTIVE SESSION</small>
+      <small>AKTİF OTURUM</small>
       <b id="gymDayTitle">-</b>
       <span id="gymDayMeta">-</span>
     </div>
@@ -6054,7 +6055,7 @@ body{background:#050607!important;}
 <section id="daily" class="section"><div class="topbar"><div class="title"><div class="titleIcon">📝</div><div><h1>Daily Summary</h1><div class="sub">Compact training log.</div></div></div></div><div id="dailyReport"></div></section>
 <section id="weekly" class="section"><div class="topbar"><div class="title"><div class="titleIcon">📅</div><div><h1>Haftalık Özet</h1><div class="sub">Seçili haftanın otomatik raporu</div></div></div></div><div id="weeklyReport"></div></section>
 <section id="program" class="section"><div class="topbar"><div class="title"><div class="titleIcon">🧭</div><div><h1>Program Intelligence</h1><div class="sub">Haftalık yük, toparlanma borcu ve gelecek hafta stratejisi</div></div></div></div><div id="programReport"></div></section>
-<section id="monthly" class="section"><div class="topbar"><div class="title"><div class="titleIcon">🗓️</div><div><h1>Monthly Review</h1><div class="sub">Seçili ayın gym, activity ve recovery blok özeti</div></div></div></div><div id="monthlyReport"></div></section>
+<section id="monthly" class="section"><div class="topbar"><div class="title"><div class="titleIcon">🗓️</div><div><h1>Aylık Değerlendirme</h1><div class="sub">Seçili ayın Gym, aktivite ve toparlanma blok özeti</div></div></div></div><div id="monthlyReport"></div></section>
 <section id="reports" class="section">
   <div class="topbar"><div class="title"><div class="titleIcon">📈</div><div><h1>Progress & Analytics</h1><div class="sub">Kompakt hacim, yük ve en iyi set özeti.</div></div></div></div>
   <div class="analyticsHero" id="analyticsHero"></div>
@@ -6073,89 +6074,89 @@ body{background:#050607!important;}
     <div class="title">
       <div class="titleIcon">🧠</div>
       <div>
-        <h1>Coaching</h1>
-        <div class="sub">Coach Verdict, Next Session Target ve Phoenix Report tek merkezde.</div>
+        <h1>Koçluk</h1>
+        <div class="sub">Koç Kararı, Sonraki Seans Hedefi ve Phoenix Raporu tek merkezde.</div>
       </div>
     </div>
   </div>
 
   <div class="reportGrid coachingGrid">
     <div class="card coachPanel">
-      <h2>Coach Verdict</h2>
+      <h2>Koç Kararı</h2>
       <div id="coachVerdict" class="coachText">Veri bekleniyor.</div>
     </div>
 
     <div class="card targetPanel">
-      <h2>Next Session Target</h2>
+      <h2>Sonraki Seans Hedefi</h2>
       <div id="nextTargets" class="targetList">Bugünün antrenmanı işlenince hedefler burada oluşur.</div>
     </div>
 
     <div class="card readinessCard">
-      <h2>Readiness & Activity</h2>
+      <h2>Hazırlık ve Aktivite</h2>
       <div id="readinessPanel" class="coachText">Polar / Gym verisi bekleniyor.</div>
     </div>
 
     <div class="card injuryRiskCard">
-      <h2>Injury Risk & Deload</h2>
+      <h2>Sakatlık Riski ve Deload</h2>
       <div id="injuryRiskPanel" class="coachText">RPE / Form / Pain ve aktivite verisi bekleniyor.</div>
     </div>
 
     <div class="card phoenixReportCard">
-      <h2>Phoenix Report</h2>
+      <h2>Phoenix Raporu</h2>
       <div id="phoenixReport" class="coachText">Haftalık veri işlendikçe rapor oluşur.</div>
     </div>
 
     <div class="card progressMotivationCard">
-      <h2>Progress Motivation</h2>
+      <h2>Gelişim Motivasyonu</h2>
       <div id="progressMotivation" class="coachText">PR ve gelişim verisi biriktikçe motivasyon raporu oluşur.</div>
     </div>
   </div>
 </section>
 
-<section id="data" class="section"><div class="topbar"><h1>Data Center</h1></div>
+<section id="data" class="section"><div class="topbar"><h1>Veri Merkezi</h1></div>
 
 <div class="card cloudSyncCard">
-  <h2>Cloud Sync</h2>
-  <div class="sub">Telefon ve Mac arasında veriyi Supabase üzerinden eşitle. Telefonda veri girince Push, Mac'te Pull yap.</div>
+  <h2>Bulut Senkronizasyonu</h2>
+  <div class="sub">Telefon ve Mac arasında veriyi Supabase üzerinden eşitle. Telefonda veri girince Buluta Gönder, Mac'te Buluttan Al işlemini kullan.</div>
   <div class="syncInfoGrid">
-    <div class="syncInfoBox"><b>Push To Cloud</b><span>Bu cihazdaki güncel veriyi buluta gönderir. Telefonunda yeni kayıt varsa önce bunu kullan.</span></div>
-    <div class="syncInfoBox"><b>Pull From Cloud</b><span>Buluttaki veriyi bu cihaza çeker. Mac veya diğer cihazda güncel veriyi almak için kullan.</span></div>
+    <div class="syncInfoBox"><b>Buluta Gönder</b><span>Bu cihazdaki güncel veriyi buluta gönderir. Telefonunda yeni kayıt varsa önce bunu kullan.</span></div>
+    <div class="syncInfoBox"><b>Buluttan Al</b><span>Buluttaki veriyi bu cihaza çeker. Mac veya diğer cihazda güncel veriyi almak için kullan.</span></div>
   </div>
   <div class="actions">
-    <button class="btn" onclick="pushToCloud()">Push To Cloud</button>
-    <button class="btn sec" onclick="pullFromCloud()">Pull From Cloud</button>
-    <button class="btn sec" onclick="checkCloudStatus()">Check Cloud</button>
+    <button class="btn" onclick="pushToCloud()">Buluta Gönder</button>
+    <button class="btn sec" onclick="pullFromCloud()">Buluttan Al</button>
+    <button class="btn sec" onclick="checkCloudStatus()">Bulutu Kontrol Et</button>
   </div>
-  <div id="cloudSyncStatus" class="syncStatus">Cloud status: ready.</div>
+  <div id="cloudSyncStatus" class="syncStatus">Bulut durumu: hazır.</div>
 </div>
 
 <div class="card localStatusCard">
-  <h2>Local Data Status</h2>
+  <h2>Yerel Veri Durumu</h2>
   <div class="sub">Bu cihazdaki yerel kayıtların ve son senkronizasyon durumunun özeti.</div>
   <div id="localDataStatus" class="localStatusGrid">
-    <div class="localStatusBox"><small>Last Local Update</small><b>-</b></div>
-    <div class="localStatusBox"><small>Total Workout Days</small><b>-</b></div>
-    <div class="localStatusBox"><small>Total Activities</small><b>-</b></div>
-    <div class="localStatusBox"><small>Apple Watch Entries</small><b>-</b></div>
+    <div class="localStatusBox"><small>Son Yerel Güncelleme</small><b>-</b></div>
+    <div class="localStatusBox"><small>Toplam Antrenman Günü</small><b>-</b></div>
+    <div class="localStatusBox"><small>Toplam Aktivite</small><b>-</b></div>
+    <div class="localStatusBox"><small>Apple Watch Kaydı</small><b>-</b></div>
   </div>
 </div>
 
 
 
 <div class="polarImportHelper">
-  <h2>Polar Recovery Import</h2>
+  <h2>Polar Toparlanma İçe Aktarımı</h2>
   <div class="sub">Polar Loop Gen 2 için uyku, HRV, dinlenik nabız, Nightly Recharge ve aktivite yükünü Simurg coaching motoruna bağlar.</div>
-  <div class="polarImportTabs"><button class="active">Polar</button><button>Apple Watch</button><button>Manual</button></div>
+  <div class="polarImportTabs"><button class="active">Polar</button><button>Apple Watch</button><button>Elle</button></div>
   <div class="actions"><button class="btn polarSampleBtn" onclick="fillPolarSample()">Örnek Polar JSON</button><button class="btn sec" onclick="show('home',document.querySelectorAll('.nav button')[0])">Ana Ekrana Dön</button></div>
-  <div class="mapGrid"><div>Sleep Score → <b>Uyku Skoru</b></div><div>HRV → <b>Hazırlık Motoru</b></div><div>Resting HR → <b>Recovery</b></div><div>Nightly Recharge → <b>Coaching</b></div><div>Activity Load → <b>Yük & Yorgunluk</b></div><div>Subjective → <b>Check-in</b></div></div>
+  <div class="mapGrid"><div>Uyku Skoru → <b>Uyku Skoru</b></div><div>HRV → <b>Hazırlık Motoru</b></div><div>Dinlenik HR → <b>Toparlanma</b></div><div>Gece Toparlanması → <b>Koçluk</b></div><div>Aktivite Yükü → <b>Yük & Yorgunluk</b></div><div>Öznel → <b>Günlük Kontrol</b></div></div>
 </div>
 
 <div class="card universalImportCard">
-  <h2>Universal Import</h2>
-  <div class="sub">Tek veri giriş noktası. Workout, Apple Watch ve activity JSON verilerini otomatik tanır; doğru kategoriye ekler.</div>
+  <h2>Evrensel İçe Aktarım</h2>
+  <div class="sub">Tek veri giriş noktası. Antrenman, Apple Watch ve aktivite JSON verilerini otomatik tanır; doğru kategoriye ekler.</div>
   <textarea id="universalJsonBox" class="jsonBox" placeholder="JSON verisini buraya yapıştır"></textarea>
   <div class="actions">
-    <button class="btn" onclick="universalImport()">Universal Import</button>
+    <button class="btn" onclick="universalImport()">Evrensel İçe Aktarım</button>
     <button class="btn sec" onclick="universalJsonBox.value=''">Temizle</button>
   </div>
 </div>
@@ -6163,7 +6164,7 @@ body{background:#050607!important;}
 
 <!-- Legacy dedicated Workout / Apple Watch import cards intentionally hidden. Universal Import is the single entry point. -->
 <textarea id="workoutJsonBox" style="display:none"></textarea><textarea id="watchJsonBox" style="display:none"></textarea>
-<div class="card"><h2>Genel veri</h2><div class="actions"><button class="btn" onclick="exportJSON()">JSON Yedekle</button><button class="btn" onclick="exportCSV()">CSV Export</button><button class="btn sec" onclick="document.getElementById('importFile').click()">JSON Import</button><input type="file" id="importFile" style="display:none" onchange="importJSON(event)"></div></div>
+<div class="card"><h2>Genel veri</h2><div class="actions"><button class="btn" onclick="exportJSON()">JSON Yedekle</button><button class="btn" onclick="exportCSV()">CSV Dışa Aktar</button><button class="btn sec" onclick="document.getElementById('importFile').click()">JSON İçe Aktar</button><input type="file" id="importFile" style="display:none" onchange="importJSON(event)"></div></div>
 <div class="versionBadgeCard"><div><b>Simurg OS WHOOP Mobile V8</b><span>Stable Mode Ready · Universal Import Only · Quick Notes · Cloud Summary</span></div><div class="versionBadgePill">Stable Mode Ready</div></div></section>
 </main></div>
 <div class="modal" id="editModal"><div class="modalbox"><div class="modalTop"><h2 id="modalTitle">Düzenle</h2><button class="btn sec" onclick="closeModal()">Kapat</button></div><div id="modalBody"></div><div class="actions"><button class="btn" onclick="saveEdit()">Kaydet</button><button class="btn danger" onclick="deleteEditing()">Sil</button></div></div></div>
@@ -6219,7 +6220,7 @@ render();
 }
 function changeWeek(n){weekStart=addDays(weekStart,n);selectedDate=addDays(selectedDate,n);weekStart=mondayOf(selectedDate);render()}
 function selectDay(day){let idx=program.findIndex(p=>p[0]===day);if(idx<0)return;selectedDate=addDays(weekStart,idx);render()}
-function render(){renderProgramDays();renderWeekStrip();renderWorkout();renderGymMode();renderReports();renderDailyReport();renderWeeklyReport();renderWatchPanel();renderCoachPanels();renderReadinessPanel();renderInjuryRiskPanel();renderPhoenixReport();renderSide();if(window.SimurgPremium&&typeof window.SimurgPremium.dataChanged==='function')window.SimurgPremium.dataChanged();if(window.SimurgDesktop&&typeof window.SimurgDesktop.dataChanged==='function')window.SimurgDesktop.dataChanged()}
+function render(){renderProgramDays();renderWeekStrip();renderWorkout();renderGymMode();renderReports();renderDailyReport();renderWeeklyReport();renderWatchPanel();renderCoachPanels();renderReadinessPanel();renderInjuryRiskPanel();renderPhoenixReport();renderSide();if(window.SimurgPremium&&typeof window.SimurgPremium.refreshAll==='function')window.SimurgPremium.refreshAll();if(window.SimurgDesktop&&typeof window.SimurgDesktop.dataChanged==='function')window.SimurgDesktop.dataChanged()}
 window.__simurgBaseRender=render;
 function dayData(date){return DATA.workouts.filter(w=>w.date===date)}
 function weekDates(){weekStart=mondayOf(weekStart);return [0,1,2,3,4,5,6].map(i=>addDays(weekStart,i))}
@@ -6228,20 +6229,23 @@ function renderProgramDays(){
   dayProgram.innerHTML=program.map(([d,defaultType],i)=>{
     let date=addDays(weekStart,i);
     let type=getProgramType(d);
+    let displayDay=window.SimurgLabels?window.SimurgLabels.ui(d):d;
+    let displayType=window.SimurgLabels?window.SimurgLabels.ui(type):type;
     let off=(type||'').toLowerCase().includes('off')?'offDay':'';
     let watch=watchRowsForDate(date);
     let activity=watch.length?activitySummaryForDate(date):null;
     let badge=activity?`<div class="activityDayBadge" title="${escapeAttr(activity.fullLabel)}">${activity.emoji} ${activity.shortLabel}</div>`:'';
-    return `<button class="dayBtn ${date===selectedDate?'active':''} ${off}" onclick="selectDay('${d}')"><span class="renameDayBtn" title="Program adını düzenle" onclick="event.stopPropagation();openProgramNameEdit('${d}')">✎</span><div class="main">${d}</div><div class="type">${type}</div>${badge}</button>`
+    return `<button class="dayBtn ${date===selectedDate?'active':''} ${off}" onclick="selectDay('${d}')"><span class="renameDayBtn" title="Program adını düzenle" onclick="event.stopPropagation();openProgramNameEdit('${d}')">✎</span><div class="main" data-day="${d}">${displayDay}</div><div class="type">${displayType}</div>${badge}</button>`
   }).join('')
 }
 function renderWeekStrip(){
   let end=addDays(weekStart,6);
-  weekLabel.textContent=`${trDate(weekStart)} - ${trDate(end)}`;
+  weekLabel.textContent=`${weekStart.slice(8,10)}.${weekStart.slice(5,7)} — ${end.slice(8,10)}.${end.slice(5,7)} ${end.slice(0,4)}`;
   weekStrip.innerHTML=weekDates().map(d=>{
     let activity=watchRowsForDate(d).length?activitySummaryForDate(d):null;
     let dot=activity?`<div class="activityDot" title="${escapeAttr(activity.fullLabel)}">${activity.emoji}</div>`:'';
-    return `<button class="dateBtn ${d===selectedDate?'active':''}" onclick="selectedDate='${d}';render()"><div class="d">${trDate(d)}</div><div class="day">${dayName(d)}</div>${dot}</button>`
+    let displayDay=window.SimurgLabels?window.SimurgLabels.ui(dayName(d)):dayName(d);
+    return `<button class="dateBtn ${d===selectedDate?'active':''}" onclick="selectedDate='${d}';render()"><div class="d">${trDate(d)}</div><div class="day">${displayDay}</div>${dot}</button>`
   }).join('')
 }
 function renderWorkout(){
@@ -6613,14 +6617,14 @@ function renderGymMode(){
   let items=dayData(selectedDate);
   let c=calc(items);
   if(label) label.textContent=trDate(selectedDate);
-  if(title) title.textContent=template.name;
-  if(meta) meta.textContent=`${trDate(selectedDate)} • ${c.sets} saved set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg volume`;
+  if(title) title.textContent=window.SimurgLabels?window.SimurgLabels.sentence(template.name):template.name;
+  if(meta) meta.textContent=`${trDate(selectedDate)} • ${c.sets} kayıtlı set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg hacim`;
   const addCard=`<div class="gymAddCard">
-    <div><b>Programı düzenle</b><span>Hareket adını değiştir, body part/set planını düzenle veya bu güne ekstra hareket ekle.</span></div>
+    <div><b>Programı düzenle</b><span>Hareket adını değiştir, vücut bölgesi/set planını düzenle veya bu güne ekstra hareket ekle.</span></div>
     <button class="btn" onclick="addGymExercise()">+ Hareket Ekle</button>
   </div>`;
   if(!gymItems.length){
-    list.innerHTML=addCard+'<div class="gymEmpty">Bugün Off Day. İstersen + Hareket Ekle ile recovery, mobilite, core veya ekstra pump girebilirsin.</div>';
+    list.innerHTML=addCard+'<div class="gymEmpty">Bugün dinlenme günü. İstersen + Hareket Ekle ile toparlanma, mobilite, merkez bölge veya ekstra pump çalışması girebilirsin.</div>';
     return;
   }
   list.innerHTML=addCard+gymItems.map(item=>{
@@ -6643,7 +6647,7 @@ function renderGymMode(){
             <label class="gymMetaInput"><small>Body Part</small><input class="gymExerciseBody" value="${gymSafe(bodyPart)}" placeholder="Chest / Back"></label>
             <label class="gymMetaInput"><small>Planned Set</small><input class="gymExerciseSets" inputmode="numeric" value="${gymSafe(setCount)}"></label>
           </div>
-          <div class="gymProgramNote">${item.custom?'Custom exercise':'Template exercise'} • Save sonrası Cloud Sync datasına dahil olur.</div>
+          <div class="gymProgramNote">${item.custom?'Özel egzersiz':'Şablon egzersizi'} • Kaydetme sonrası bulut senkronizasyonu verisine dahil olur.</div>
         </div>
         <div class="gymBadge ${item.custom?'custom':''}">${savedCount?savedCount+' saved':setCount+' set'}</div>
       </div>
@@ -6885,7 +6889,7 @@ function calculateReadiness(date){
   if(prev.loadScore>620){score-=8;reasons.push('dünkü toplam yük yüksek');}
   score=Math.round(clampNum(score,20,100));
   let status=score>=80?'Ready':score>=65?'Controlled':score>=50?'Caution':'Recovery';
-  let advice='Bugün plan uygulanabilir. Ana hedef temiz form ve kontrollü progression.';
+  let advice='Bugün plan uygulanabilir. Ana hedef temiz form ve kontrollü ilerleme.';
   if(status==='Controlled') advice='Bugün kontrollü yüklen. Failure yerine 1-2 tekrar rezerv bırak.';
   if(status==='Caution') advice='Bugün yük artırma. Teknik, tempo ve eklem güvenliğini önceliklendir.';
   if(status==='Recovery') advice='Bugün ağır yüklenme önerilmez. Recovery, yüzme/yürüyüş veya düşük yoğunluk daha mantıklı.';
@@ -6895,17 +6899,17 @@ function calculateReadiness(date){
 function renderReadinessHtml(date){
   let r=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):calculateReadiness(date);
   let t=r.today;
-  let typeText=t.source||(t.types.length?t.types.join(' + '):'Workout verisi yok');
+  let typeText=t.source||(t.types.length?t.types.join(' + '):'Antrenman verisi yok');
   let reasonText=r.reasons.length?r.reasons.slice(0,3).join(', '):'olumsuz sinyal yok';
   let bg=`conic-gradient(#23ce7a 0 ${r.score}%, #172033 ${r.score}% 100%)`;
-  return `<div class="readinessScoreBox"><div class="readinessCircle" style="background:${bg}">${r.score}</div><div class="readinessMeta"><b>${r.status}</b><br>${r.advice}<div class="readinessPills"><span class="readinessPill activityTag">${typeText}</span><span class="readinessPill">Load: ${t.level}</span><span class="readinessPill">${Math.round(t.minutes)} dk</span><span class="readinessPill">${t.active} aktif kcal</span><span class="readinessPill">${t.avgHR||'-'} bpm</span></div><div class="activityLoadCard"><b>Etkenler:</b> ${reasonText}</div></div></div>`;
+  return `<div class="readinessScoreBox"><div class="readinessCircle" style="background:${bg}">${r.score}</div><div class="readinessMeta"><b>${window.SimurgLabels?window.SimurgLabels.ui(r.status):r.status}</b><br>${window.SimurgLabels?window.SimurgLabels.sentence(r.advice):r.advice}<div class="readinessPills"><span class="readinessPill activityTag">${typeText}</span><span class="readinessPill">Yük: ${window.SimurgLabels?window.SimurgLabels.ui(t.level):t.level}</span><span class="readinessPill">${Math.round(t.minutes)} dk</span><span class="readinessPill">${t.active} aktif kcal</span><span class="readinessPill">${t.avgHR||'-'} bpm</span></div><div class="activityLoadCard"><b>Etkenler:</b> ${reasonText}</div></div></div>`;
 }
 function renderReadinessPanel(){
   let el=document.getElementById('readinessPanel');
   if(!el) return;
   let source=window.SimurgWorkoutSource&&window.SimurgWorkoutSource.day?window.SimurgWorkoutSource.day(selectedDate):null;
   let has=dayData(selectedDate).length || watchRowsForDate(selectedDate).length || (source&&source.primaryPolar);
-  if(!has){el.innerHTML='Bu gün için Polar veya Gym workout verisi yok.';return;}
+  if(!has){el.innerHTML='Bu gün için Polar veya Gym antrenmanı verisi yok.';return;}
   el.innerHTML=renderReadinessHtml(selectedDate);
 }
 
@@ -6938,7 +6942,7 @@ function calculateInjuryRisk(date){
   let level='Low';
   if(score>=70) level='High';
   else if(score>=40) level='Moderate';
-  let deload='Deload gerekmez. Temiz form ve kontrollü progression yeterli.';
+  let deload='Yük azaltma gerekmez. Temiz form ve kontrollü ilerleme yeterli.';
   if(level==='Moderate') deload='Bugün yük artırma. Failure yerine 1-2 tekrar rezerv bırak; ağrı olan hareketlerde set azalt.';
   if(level==='High') deload='Deload / koruma önerilir: ana hareketlerde yük artırma, setleri yaklaşık %20-30 azalt, ağrı varsa pressing veya çekiş varyasyonunu değiştir.';
   if(coach.painWarning) deload='Pain Warning var: ağrılı hareketi zorlamadan değiştir veya çıkar. Bugün hedef performans değil, eklem güvenliği.';
@@ -6955,14 +6959,15 @@ function renderInjuryRiskHtml(date){
   let r=calculateInjuryRisk(date);
   let cls=r.level==='High'?'high':(r.level==='Moderate'?'moderate':(r.readiness.status==='Recovery'?'recovery':''));
   let signalText=r.signals.length?r.signals.slice(0,4).join(', '):'belirgin risk sinyali yok';
+  let shownLevel=window.SimurgLabels?window.SimurgLabels.ui(r.level):r.level;
   let pills=[
-    `<span class="injuryRiskPill ${r.level==='High'?'danger':(r.level==='Moderate'?'warn':'')}">Risk: ${r.level}</span>`,
-    `<span class="injuryRiskPill">Readiness ${r.readiness.score}/100</span>`,
+    `<span class="injuryRiskPill ${r.level==='High'?'danger':(r.level==='Moderate'?'warn':'')}">Risk: ${shownLevel}</span>`,
+    `<span class="injuryRiskPill">Hazırlık ${r.readiness.score}/100</span>`,
     `<span class="injuryRiskPill">RPE ${r.today.coach.avgRpe||'-'}</span>`,
-    `<span class="injuryRiskPill">${r.today.gym.sets} gym set</span>`,
-    `<span class="injuryRiskPill">${r.today.level} load</span>`
+    `<span class="injuryRiskPill">${r.today.gym.sets} Gym seti</span>`,
+    `<span class="injuryRiskPill">${window.SimurgLabels?window.SimurgLabels.ui(r.today.level):r.today.level} yük</span>`
   ].join('');
-  return `<div class="injuryRiskBox"><div class="injuryRiskBadge ${cls}">${r.level}<br>${r.score}/100</div><div class="injuryRiskMeta"><b>Koruma kararı:</b> ${r.deload}<div class="injuryRiskPills">${pills}</div><div class="deloadBox"><b>Risk sinyalleri:</b> ${signalText}</div></div></div>`;
+  return `<div class="injuryRiskBox"><div class="injuryRiskBadge ${cls}">${shownLevel}<br>${r.score}/100</div><div class="injuryRiskMeta"><b>Koruma kararı:</b> ${window.SimurgLabels?window.SimurgLabels.sentence(r.deload):r.deload}<div class="injuryRiskPills">${pills}</div><div class="deloadBox"><b>Risk sinyalleri:</b> ${signalText}</div></div></div>`;
 }
 function renderInjuryRiskPanel(){
   let el=document.getElementById('injuryRiskPanel');
@@ -6993,7 +6998,7 @@ dates.forEach(date=>{
   let source=policy?policy.day(date):null;
   let physical=source&&source.primary;
   let activity=source&&source.primaryPolar?{name:activityDisplayName(physical.workoutType||physical.activityType||'Polar Workout'),primary:physical.workoutType||physical.activityType||'Polar Workout',emoji:'⌁',duration:physical.duration||'-',active:Number(physical.activeCal||physical.calories)||0,avgHR:Number(physical.avgHR)||0,dist:physical.distance||'-',rows:[physical],source:source.source}:activitySummaryForDate(date);
-  let readiness=calculateReadiness(date);
+  let readiness=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):calculateReadiness(date);
   let hasGym=items.length>0;
   let hasActivity=!!activity;
   if(hasGym){
@@ -7053,11 +7058,12 @@ dates.forEach(date=>{
 dailyReport.innerHTML=`<div class="dailyMiniGrid">`+cards.join('')+`</div>`;
 }
 function renderWeeklyReport(){
-  let items=weekDates().flatMap(d=>dayData(d)), c=calc(items);
-  let completed=weekDates().filter(d=>dayData(d).length).length;
+  let dates=weekDates(),shared=window.SimurgSignalModel&&dates.length?window.SimurgSignalModel.week(dates[0]):null;
+  let items=shared?shared.rows:dates.flatMap(d=>dayData(d)), c=shared?{sets:shared.sets,reps:shared.reps,vol:shared.volume,parts:calc(items).parts}:calc(items);
+  let completed=shared?shared.workoutDays:dates.filter(d=>dayData(d).length).length;
   let topPart=Object.entries(c.parts).sort((a,b)=>b[1]-a[1])[0]||['-',0];
-  let maxDay=Math.max(1,...weekDates().map(d=>calc(dayData(d)).sets));
-  let days=weekDates().map(d=>{
+  let maxDay=Math.max(1,...dates.map(d=>calc(dayData(d)).sets));
+  let days=dates.map(d=>{
     let cc=calc(dayData(d));
     let pct=Math.min(100,Math.round((cc.sets/maxDay)*100));
     let label=program.find(p=>p[0]===dayName(d))?.[1]||dayName(d);
@@ -7074,7 +7080,7 @@ function renderWeeklyReport(){
         <div class="weeklyMetricBox"><small>Tekrar</small><b>${c.reps}</b></div>
         <div class="weeklyMetricBox"><small>Hacim</small><b>${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div>
       </div>
-      <div class="weeklyInsight"><b>Odak:</b> ${topPart[0]} (${topPart[1]} set). <b>Ortalama:</b> ${avgSets} set/gün. ${verdict}</div>
+      <div class="weeklyInsight"><b>Odak:</b> ${topPart[0]} (${topPart[1]} set). <b>Ortalama:</b> ${avgSets} set/gün. ${verdict}${shared?` <b>Aktivite:</b> ${shared.activityDays} gün · ${Math.round(shared.activityMinutes)} dk.`:''}</div>
     </div>
     <div class="weeklyPremiumCard">
       <div class="weeklyPremiumHead"><div><small>Day Distribution</small><b>Gün Gün Dağılım</b></div><div class="weeklyPremiumPill">${topPart[0]}</div></div>
@@ -7199,7 +7205,7 @@ function renderProgressMotivation(){
   let weekEvents=events.filter(e=>dates.includes(e.date));
   if(weekEvents.length){
     let top=weekEvents.slice(0,3).map(e=>`<div><span class="highlight">${e.type}</span> • <b>${e.exercise}</b><br><small>${e.text} • ${trDate(e.date)}</small></div>`).join('');
-    el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Gelişim sinyali var.</b><span>Bu hafta ${weekEvents.length} PR/gelişim yakalandı. Risk düşük/orta kaldığı sürece kontrollü progression devam edebilir.</span></div><div class="progressPremiumScore">${weekEvents.length} PR</div></div><div class="progressPremiumList">${top}</div></div>`;
+    el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Gelişim sinyali var.</b><span>Bu hafta ${weekEvents.length} PR/gelişim yakalandı. Risk düşük/orta kaldığı sürece kontrollü ilerleme devam edebilir.</span></div><div class="progressPremiumScore">${weekEvents.length} PR</div></div><div class="progressPremiumList">${top}</div></div>`;
   }else if(events.length){
     let last=events[0];
     el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Bu hafta sakin ilerleme.</b><span>Yeni PR yok; bu kötü değil. Form, ağrı kontrolü ve düzenli veri daha önemli.</span></div><div class="progressPremiumScore">STABLE</div></div><div class="progressPremiumList"><div>Son PR: <b>${last.exercise}</b><br><small>${last.type} • ${last.text} • ${trDate(last.date)}</small></div></div></div>`;
@@ -7274,7 +7280,7 @@ function normalizeWorkoutRow(w){
 }
 function importWorkoutArray(arr){
   if(!Array.isArray(arr)||!arr.length) throw new Error('workout array boş');
-  arr.forEach(w=>DATA.workouts.push(normalizeWorkoutRow(w)));
+  arr.forEach(w=>{let row=normalizeWorkoutRow(w),duplicate=DATA.workouts.some(x=>x&&x.date===row.date&&x.exercise===row.exercise&&String(x.startTime||'')===String(row.startTime||'')&&Number(x.sets||1)===Number(row.sets||1)&&Number(x.reps||0)===Number(row.reps||0)&&Number(x.weight||0)===Number(row.weight||0));if(!duplicate)DATA.workouts.push(row);});
   selectedDate=arr[0].date;
   weekStart=mondayOf(selectedDate);
 }
@@ -7345,7 +7351,7 @@ function renderCoachPanels(){
   let note=daily&&daily.coachNote?` ${daily.coachNote}`:'';
   let advice='Hacim kontrollü. Sonraki seansta tekrar kalitesi ve form standardını koru.';
   if(c.sets<14) advice='Hacim düşük. Enerjin iyiyse ana harekette 1-2 kaliteli set eklenebilir.';
-  if(c.sets>24) advice='Hacim yüksek. Sonraki seansta recovery ve form kalitesi öncelik olmalı.';
+  if(c.sets>24) advice='Hacim yüksek. Sonraki seansta toparlanma ve form kalitesi öncelik olmalı.';
   el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>${trDate(selectedDate)} karar özeti</b></div><div class="coachPremiumPill">${level}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Hacim</small><b>${c.sets} set</b></div><div class="coachPremiumStat"><small>Readiness</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${injury.level}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${advice} ${readiness.advice} ${injury.deload}${note}</div></div>`;
   let byEx={};
   rows.forEach(r=>{
@@ -7413,7 +7419,7 @@ function resetProgramNameEdit(){
   closeProgramNameModal();
   save();
 }
-function save(){localStorage.setItem('atlas_summary_reports',JSON.stringify(DATA));render()}
+function save(){localStorage.setItem('atlas_summary_reports',JSON.stringify(DATA));if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('local-save');render()}
 window.simurgGetData=function(){return DATA};
 window.simurgPersistData=function(){save();return DATA};
 function clearManual(){['exercise','sets','reps','weight'].forEach(id=>document.getElementById(id).value='')}
@@ -7478,7 +7484,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=critical-stability-ui-fixes-v1-1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=data-integrity-localization-v1-4').catch(function(){});
   });
 }
 </script>
@@ -7564,6 +7570,7 @@ async function pullFromCloud() {
     if (!DATA.dailyNotes) DATA.dailyNotes = [];
     if (!DATA.weeklyNotes) DATA.weeklyNotes = [];
     if (!DATA.customGymPrograms) DATA.customGymPrograms = {};
+    if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('cloud-pull');
     render();
     setCloudStatus("Cloud data pulled successfully. Last update: " + (rows[0].updated_at || "-"), "ok");
   } catch (err) {
@@ -7602,7 +7609,7 @@ async function checkCloudStatus() {
   function shortTypeList(types){return (types&&types.length)?types.slice(0,2).join(' + '):'No activity';}
 
   window.renderReadinessHtml=function(date){
-    let r=calculateReadiness(date);
+    let r=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):calculateReadiness(date);
     let t=r.today;
     let typeText=shortTypeList(t.types);
     let reasonText=r.reasons.length?r.reasons.slice(0,3).join(', '):'olumsuz sinyal yok';
@@ -7631,7 +7638,7 @@ async function checkCloudStatus() {
     let rows=dayData(selectedDate);
     let c=calc(rows);
     let daily=(DATA.dailyNotes||[]).filter(r=>r.date===selectedDate).slice(-1)[0];
-    let readiness=calculateReadiness(selectedDate);
+    let readiness=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(selectedDate):calculateReadiness(selectedDate);
     let injury=calculateInjuryRisk(selectedDate);
     if(!rows.length){
       if(readiness.today.watch.length){
@@ -7682,18 +7689,17 @@ async function checkCloudStatus() {
   window.renderProgressMotivation=function(){
     let el=document.getElementById('progressMotivation');
     if(!el) return;
-    let data=calculatePRBoard();
-    let events=data.events||[];
-    let dates=weekDates();
-    let weekEvents=events.filter(e=>dates.includes(e.date));
+    let shared=window.SimurgSignalModel?window.SimurgSignalModel.week(weekStart):null;
+    let history=shared&&shared.prs?shared.prs.history:[];
+    let weekEvents=shared&&shared.prs?shared.prs.newEvents:[];
     if(weekEvents.length){
-      let top=weekEvents.slice(0,2).map(e=>`<div><span class="highlight">${e.type}</span> • <b>${e.exercise}</b><br><small>${e.text} • ${trDate(e.date)}</small></div>`).join('');
-      el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Gelişim sinyali var.</b><span>Bu hafta ${weekEvents.length} PR/gelişim yakalandı. Risk düşük/orta kaldığı sürece kontrollü progression devam.</span></div><div class="progressPremiumScore">${weekEvents.length} PR</div></div><div class="progressPremiumList">${top}</div></div>`;
-    }else if(events.length){
-      let last=events[0];
-      el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Bu hafta sakin ilerleme.</b><span>Yeni PR yok; form, ağrı kontrolü ve düzenli veri öncelikli.</span></div><div class="progressPremiumScore">STABLE</div></div><div class="progressPremiumList"><div>Son PR: <b>${last.exercise}</b><br><small>${last.type} • ${last.text} • ${trDate(last.date)}</small></div></div></div>`;
+      let top=weekEvents.slice(0,2).map(e=>`<div><span class="highlight">${e.types.join(' + ')} PR</span> • <b>${e.exercise}</b><br><small>${e.weight} kg • ${Math.round(e.volume).toLocaleString('tr-TR')} kg hacim • ${trDate(e.date)}</small></div>`).join('');
+      el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Gelişim sinyali var.</b><span>Bu hafta ${weekEvents.length} doğrulanmış yeni PR var. Risk düşük veya orta kaldığı sürece kontrollü ilerleme devam eder.</span></div><div class="progressPremiumScore">${weekEvents.length} PR</div></div><div class="progressPremiumList">${top}</div></div>`;
+    }else if(history.length){
+      let last=history[history.length-1];
+      el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Bu hafta sakin ilerleme.</b><span>Yeni PR yok; form, ağrı kontrolü ve düzenli veri öncelikli.</span></div><div class="progressPremiumScore">DENGELİ</div></div><div class="progressPremiumList"><div>Son PR: <b>${last.exercise}</b><br><small>${last.types.join(' + ')} PR • ${last.weight} kg • ${trDate(last.date)}</small></div></div></div>`;
     }else{
-      el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Veri birikiyor.</b><span>Aynı hareketlerde birkaç seans oluştuktan sonra PR takibi anlamlı hale gelecek.</span></div><div class="progressPremiumScore">BUILD</div></div></div>`;
+      el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Veri birikiyor.</b><span>Aynı hareketlerde birkaç seans oluştuktan sonra PR takibi anlamlı hale gelecek.</span></div><div class="progressPremiumScore">BİRİKİYOR</div></div></div>`;
     }
   };
 
@@ -7795,11 +7801,11 @@ async function checkCloudStatus() {
     let base={...rec};
     let segments=Array.isArray(rec.segments)?rec.segments:null;
     if(segments && segments.length){
-      segments.forEach(seg=>DATA.appleWatch.push(normalizeWatchRecord({...base,...seg,date:seg.date||base.date,activityType:seg.activityType||base.activityType||base.activity})));
+      segments.forEach(seg=>{let row=normalizeWatchRecord({...base,...seg,date:seg.date||base.date,activityType:seg.activityType||base.activityType||base.activity});let duplicate=DATA.appleWatch.some(x=>x&&x.date===row.date&&String(x.startTime||'')===String(row.startTime||'')&&String(x.duration||'')===String(row.duration||''));if(!duplicate)DATA.appleWatch.push(row);});
       selectedDate=base.date;
     }else{
       rec=normalizeWatchRecord(rec);
-      DATA.appleWatch.push(rec);
+      let duplicate=DATA.appleWatch.some(x=>x&&x.date===rec.date&&String(x.startTime||'')===String(rec.startTime||'')&&String(x.duration||'')===String(rec.duration||''));if(!duplicate)DATA.appleWatch.push(rec);
       selectedDate=rec.date;
     }
     weekStart=mondayOf(selectedDate);
@@ -7878,36 +7884,36 @@ async function checkCloudStatus() {
     let el=document.getElementById('coachVerdict');
     let tg=document.getElementById('nextTargets');
     if(!el || !tg) return;
-    let rows=dayData(selectedDate), c=calc(rows), readiness=calculateReadiness(selectedDate), injury=calculateInjuryRisk(selectedDate);
+    let rows=dayData(selectedDate), c=calc(rows), readiness=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(selectedDate):calculateReadiness(selectedDate), injury=calculateInjuryRisk(selectedDate);
     let hasPhysical=!!readiness.today.primary;
     if(!rows.length && !hasPhysical){
-      el.innerHTML='<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>Veri bekleniyor</b></div><div class="coachPremiumPill">Pending</div></div><div class="coachPremiumMessage"><b>Karar:</b> Bugün için antrenman veya aktivite verisi yok. Veri girilince koç kararı oluşacak.</div></div>';
-      tg.innerHTML='<div class="nextTargetsPremium"><div class="nextTargetPremiumItem"><div><b>Hedef bekleniyor</b><span>İlk kayıt sonrası sonraki seans hedefleri oluşacak.</span></div><div class="nextTargetBadge">Pending</div></div></div>';return;
+      el.innerHTML='<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Koç Kararı</small><b>Veri bekleniyor</b></div><div class="coachPremiumPill">Bekleniyor</div></div><div class="coachPremiumMessage"><b>Karar:</b> Bugün için antrenman veya aktivite verisi yok. Veri girilince koç kararı oluşacak.</div></div>';
+      tg.innerHTML='<div class="nextTargetsPremium"><div class="nextTargetPremiumItem"><div><b>Hedef bekleniyor</b><span>İlk kayıt sonrası sonraki seans hedefleri oluşacak.</span></div><div class="nextTargetBadge">Bekleniyor</div></div></div>';return;
     }
     let reasons=topReasons(readiness,injury);
     let decision=injury.level==='High'?'Koruma öncelikli.':(injury.level==='Moderate'?'Kontrollü yüklen.':(readiness.status==='Recovery'?'Recovery odaklı ilerle.':'Plan uygulanabilir.'));
     let recommendation=injury.level==='High'?injury.deload:(injury.level==='Moderate'?'Bugün yük artırma; 1-2 tekrar rezerv bırak.':readiness.advice);
-    let activityText=readiness.today.source||(readiness.today.types.length?readiness.today.types.join(' + '):(rows.length?'Gym':'No activity'));
-    el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>${trDate(selectedDate)} karar özeti</b></div><div class="coachPremiumPill">${readiness.status}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Aktivite</small><b>${activityText}</b></div><div class="coachPremiumStat"><small>Readiness</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${injury.level}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${decision}<br><b>Neden:</b> ${reasons.length?reasons.join(' · '):'belirgin olumsuz sinyal yok'}.<br><b>Öneri:</b> ${recommendation}</div></div>`;
+    let activityText=readiness.today.source||(readiness.today.types.length?readiness.today.types.join(' + '):(rows.length?'Gym':'Aktivite yok'));
+    el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Koç Kararı</small><b>${trDate(selectedDate)} karar özeti</b></div><div class="coachPremiumPill">${window.SimurgLabels?window.SimurgLabels.ui(readiness.status):readiness.status}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Aktivite</small><b>${activityText}</b></div><div class="coachPremiumStat"><small>Hazırlık</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${window.SimurgLabels?window.SimurgLabels.ui(injury.level):injury.level}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${decision}<br><b>Neden:</b> ${reasons.length?reasons.join(' · '):'belirgin olumsuz sinyal yok'}.<br><b>Öneri:</b> ${recommendation}</div></div>`;
     if(!rows.length){
-      tg.innerHTML='<div class="nextTargetsPremium"><div class="nextTargetPremiumItem"><div><b>Gym hedefi yok</b><span>Bugün aktivite yükü recovery/kondisyon olarak işlendi. Sonraki gym gününde readiness ve risk skorunu baz al.</span></div><div class="nextTargetBadge">Activity</div></div></div>';return;
+      tg.innerHTML='<div class="nextTargetsPremium"><div class="nextTargetPremiumItem"><div><b>Gym hedefi yok</b><span>Bugün aktivite yükü toparlanma/kondisyon olarak işlendi. Sonraki Gym gününde hazırlık ve risk skorunu baz al.</span></div><div class="nextTargetBadge">Aktivite</div></div></div>';return;
     }
     let byEx={}; rows.forEach(r=>{(byEx[r.exercise]=byEx[r.exercise]||[]).push(r);});
     let items=Object.entries(byEx).slice(0,4).map(([ex,sets])=>{
       let maxW=Math.max(...sets.map(s=>n(s.weight))); let reps=sets.map(s=>n(s.reps)); let avgReps=Math.round(reps.reduce((a,b)=>a+b,0)/Math.max(1,reps.length));
       let target=injury.level==='High'?'Yük artırma; form ve ağrı kontrolü.':(avgReps>=10?`Aynı kiloda kaliteyi koru; iyi hissedersen küçük artış dene.`:`${maxW} kg civarı, hedef tekrar: ${avgReps+1}.`);
-      return `<div class="nextTargetPremiumItem"><div><b>${ex}</b><span>${target}</span></div><div class="nextTargetBadge">Next</div></div>`;
+      return `<div class="nextTargetPremiumItem"><div><b>${ex}</b><span>${target}</span></div><div class="nextTargetBadge">Sonraki</div></div>`;
     }).join('');
     tg.innerHTML=`<div class="nextTargetsPremium">${items}</div>`;
   };
   window.renderPhoenixReport=function(){
     let el=document.getElementById('phoenixReport'); if(!el) return;
     let dates=weekDates(); let rows=DATA.workouts.filter(w=>dates.includes(w.date)); let sessions=window.SimurgWorkoutSource?dates.map(function(d){return window.SimurgWorkoutSource.metrics(d);}).filter(function(x){return x.primary||x.gym.sets;}):[];
-    if(!rows.length && !sessions.length){el.innerHTML='<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Report</small><b>Hafta bekleniyor</b></div><div class="coachPremiumPill">No Data</div></div><div class="coachPremiumMessage">Bu hafta için veri yok. İlk kayıt geldiğinde haftalık yük, aktivite ve toparlanma yorumu oluşacak.</div></div>';return;}
+    if(!rows.length && !sessions.length){el.innerHTML='<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Raporu</small><b>Hafta bekleniyor</b></div><div class="coachPremiumPill">Veri Yok</div></div><div class="coachPremiumMessage">Bu hafta için veri yok. İlk kayıt geldiğinde haftalık yük, aktivite ve toparlanma yorumu oluşacak.</div></div>';return;}
     let c=calc(rows); let completed=[...new Set([...rows.map(r=>r.date),...sessions.map(r=>r.session.date)])].length; let active=sessions.reduce((a,r)=>a+n(r.active),0); let minutes=Math.round(sessions.reduce((a,r)=>a+n(r.minutes),0));
     let groups={}; rows.forEach(r=>groups[r.bodyPart]=(groups[r.bodyPart]||0)+(n(r.sets)||1)); let top=Object.entries(groups).sort((a,b)=>b[1]-a[1])[0];
     let verdict=c.sets>24?'Hacim yüksek; recovery sinyallerini takip et.':(active>350?'Aktivite yükü belirgin; sonraki gym gününde kontrollü başla.':'Hafta yönetilebilir görünüyor.');
-    el.innerHTML=`<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Report</small><b>Haftalık koç özeti</b></div><div class="coachPremiumPill">${completed}/7 gün</div></div><div class="phoenixPremiumRows"><div class="phoenixPremiumRow"><span>Gym yükü</span><b>${c.sets} set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div><div class="phoenixPremiumRow"><span>Aktivite</span><b>${minutes} dk • ${active} kcal</b></div><div class="phoenixPremiumRow"><span>Ana odak</span><b>${top?top[0]+' • '+top[1]+' set':'Aktivite / Recovery'}</b></div></div><div class="coachPremiumMessage"><b>Simurg yorumu:</b> ${verdict}</div></div>`;
+    el.innerHTML=`<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Raporu</small><b>Haftalık koç özeti</b></div><div class="coachPremiumPill">${completed}/7 gün</div></div><div class="phoenixPremiumRows"><div class="phoenixPremiumRow"><span>Gym yükü</span><b>${c.sets} set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div><div class="phoenixPremiumRow"><span>Aktivite</span><b>${minutes} dk • ${active} kcal</b></div><div class="phoenixPremiumRow"><span>Ana odak</span><b>${top?top[0]+' • '+top[1]+' set':'Aktivite / Toparlanma'}</b></div></div><div class="coachPremiumMessage"><b>Simurg yorumu:</b> ${verdict}</div></div>`;
   };
   // Polish Data Center labels after render without changing data flow
   function polishDataCenter(){
@@ -7996,7 +8002,7 @@ async function checkCloudStatus() {
     if(!dates.length){dailyReport.innerHTML='<div class="card"><h2>Daily Summary</h2><div class="reportText">Henüz antrenman veya aktivite verisi yok.</div></div>';return;}
     let cards=[];
     dates.forEach(date=>{
-      let items=dayData(date), c=calc(items), activity=activitySummaryForDate(date), readiness=calculateReadiness(date);
+      let items=dayData(date), c=calc(items), activity=activitySummaryForDate(date), readiness=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):calculateReadiness(date);
       let hasGym=items.length>0, hasActivity=!!activity, intensity=hasActivity?classifyActivityIntensity(activity):null;
       if(hasGym){
         let topPart=Object.entries(c.parts).sort((a,b)=>b[1]-a[1])[0]||['-',0], best=items.slice().sort((a,b)=>b.weight-a.weight)[0], exCount=Object.keys(c.exs).length, exMini=Object.keys(c.exs).map(ex=>`<em>${ex}</em>`).join('');
@@ -8011,17 +8017,17 @@ async function checkCloudStatus() {
     dailyReport.innerHTML=`<div class="dailyMiniGrid">`+cards.join('')+`</div>`;
   };
   window.renderWeeklyReport=function(){
-    let dates=weekDates(), items=dates.flatMap(d=>dayData(d)), c=calc(items), watch=(DATA.appleWatch||[]).filter(r=>dates.includes(r.date)).map(normalizeWatchRecord);
-    let completed=[...new Set([...items.map(w=>w.date),...watch.map(w=>w.date)])].length, gymDays=[...new Set(items.map(w=>w.date))].length, activityDays=[...new Set(watch.map(w=>w.date))].length;
-    let active=watch.reduce((a,r)=>a+n(r.activeCal),0), minutes=Math.round(watch.reduce((a,r)=>a+durationMinutes(r.duration),0));
+    let dates=weekDates(), shared=window.SimurgSignalModel&&dates.length?window.SimurgSignalModel.week(dates[0]):null, items=shared?shared.rows:dates.flatMap(d=>dayData(d)), c=shared?{sets:shared.sets,reps:shared.reps,vol:shared.volume,parts:calc(items).parts}:calc(items), watch=shared?shared.physicalSessions:(DATA.appleWatch||[]).filter(r=>dates.includes(r.date)).map(normalizeWatchRecord);
+    let completed=shared?shared.workoutDays:[...new Set([...items.map(w=>w.date),...watch.map(w=>w.date)])].length, gymDays=shared?shared.gymDays:[...new Set(items.map(w=>w.date))].length, activityDays=shared?shared.activityDays:[...new Set(watch.map(w=>w.date))].length;
+    let active=shared?shared.activeCalories:watch.reduce((a,r)=>a+n(r.activeCal),0), minutes=Math.round(shared?shared.activityMinutes:watch.reduce((a,r)=>a+durationMinutes(r.duration),0));
     let topPart=Object.entries(c.parts).sort((a,b)=>b[1]-a[1])[0]||['-',0], maxDay=Math.max(1,...dates.map(d=>calc(dayData(d)).sets));
-    let loadScore=c.sets*12+active+minutes*2, loadLevel=loadScore>=760?'High':loadScore>=360?'Moderate':(loadScore>0?'Low':'No Load'), loadCls=loadLevel==='High'?'high':(loadLevel==='Moderate'?'moderate':'');
-    let recoveryNeed=loadLevel==='High'?'Yüksek':(loadLevel==='Moderate'?'Normal':'Düşük');
-    let loadAdvice=loadLevel==='High'?'Bu hafta toplam yük belirgin. Sonraki seansta failure yerine kontrollü tempo ve ağrı takibi öncelikli olsun.':(loadLevel==='Moderate'?'Haftalık yük yönetilebilir. Aynı ritmi koru; RPE 8+ birikirse yük artırma.':'Hafta hafif/temiz gidiyor. Veri gelmeye devam ettikçe koç yorumu güçlenecek.');
-    let days=dates.map(d=>{let cc=calc(dayData(d)), act=activitySummaryForDate(d), pct=Math.min(100,Math.round((cc.sets/maxDay)*100)), label=getProgramType(dayName(d))||dayName(d), actText=act?` • ${act.emoji} ${act.duration||''}`:''; return `<div class="weeklyDayItem"><b>${trDate(d)}</b><div class="weeklyDayBar"><div class="weeklyDayFill" style="width:${pct}%"></div></div><span>${cc.sets} set • ${Math.round(cc.vol).toLocaleString('tr-TR')} kg • ${label}${actText}</span></div>`;}).join('');
+    let loadScore=c.sets*12+active+minutes*2, loadLevel=loadScore>=760?'Yüksek':loadScore>=360?'Orta':(loadScore>0?'Düşük':'Yük Yok'), loadCls=loadLevel==='Yüksek'?'high':(loadLevel==='Orta'?'moderate':'');
+    let recoveryNeed=loadLevel==='Yüksek'?'Yüksek':(loadLevel==='Orta'?'Normal':'Düşük');
+    let loadAdvice=loadLevel==='Yüksek'?'Bu hafta toplam yük belirgin. Sonraki seansta tükeniş yerine kontrollü tempo ve ağrı takibi öncelikli olsun.':(loadLevel==='Orta'?'Haftalık yük yönetilebilir. Aynı ritmi koru; RPE 8+ birikirse yük artırma.':'Hafta hafif ve temiz gidiyor. Veri gelmeye devam ettikçe koç yorumu güçlenecek.');
+    let days=dates.map(d=>{let cc=calc(dayData(d)), act=activitySummaryForDate(d), pct=Math.min(100,Math.round((cc.sets/maxDay)*100)), label=getProgramType(dayName(d))||dayName(d), actText=act?` • ${act.emoji} ${act.duration||''}`:'';if(window.SimurgLabels)label=window.SimurgLabels.ui(label); return `<div class="weeklyDayItem"><b>${trDate(d)}</b><div class="weeklyDayBar"><div class="weeklyDayFill" style="width:${pct}%"></div></div><span>${cc.sets} set • ${Math.round(cc.vol).toLocaleString('tr-TR')} kg • ${label}${actText}</span></div>`;}).join('');
     let avgSets=gymDays?Math.round(c.sets/gymDays):0;
-    let verdict=c.sets===0?'Gym verisi yok; varsa aktivite yükü recovery hesabına dahil edilir.':(c.sets<14?'Hafif gym haftası. Toparlanma veya giriş haftası gibi duruyor.':(c.sets<=28?'Dengeli ve yönetilebilir gym haftası.':'Yüksek hacimli gym haftası. Recovery ve ağrı sinyallerini takip et.'));
-    weeklyReport.innerHTML=`<div class="weeklyPremiumGrid"><div class="weeklyPremiumCard weeklyLoadStatusCard ${loadCls}"><div class="weeklyPremiumHead"><div><small>Weekly Load Status</small><b>Genel yük ve recovery</b></div><div class="weeklyPremiumPill">${loadLevel}</div></div><div class="weeklyLoadMiniGrid"><div class="weeklyLoadMiniBox"><small>Gym</small><b>${gymDays} gün</b></div><div class="weeklyLoadMiniBox"><small>Activity</small><b>${activityDays} gün</b></div><div class="weeklyLoadMiniBox"><small>Watch</small><b>${minutes} dk</b></div><div class="weeklyLoadMiniBox"><small>Recovery</small><b>${recoveryNeed}</b></div></div><div class="weeklyLoadVerdict"><b>Koç notu:</b> ${loadAdvice}</div></div><div class="weeklyPremiumCard"><div class="weeklyPremiumHead"><div><small>Weekly Load</small><b>${trDate(weekStart)} - ${trDate(addDays(weekStart,6))}</b></div><div class="weeklyPremiumPill">${completed}/7 gün</div></div><div class="weeklyMetricGrid"><div class="weeklyMetricBox"><small>Set</small><b>${c.sets}</b></div><div class="weeklyMetricBox"><small>Tekrar</small><b>${c.reps}</b></div><div class="weeklyMetricBox"><small>Hacim</small><b>${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div></div><div class="weeklyInsight"><b>Odak:</b> ${topPart[0]} (${topPart[1]} set). <b>Ortalama:</b> ${avgSets} set/gym günü. ${verdict}</div></div><div class="weeklyPremiumCard"><div class="weeklyPremiumHead"><div><small>Day Distribution</small><b>Gün Gün Dağılım</b></div><div class="weeklyPremiumPill">${topPart[0]}</div></div><div class="weeklyDayList">${days}</div></div></div>`;
+    let verdict=c.sets===0?'Gym verisi yok; varsa aktivite yükü toparlanma hesabına dahil edilir.':(c.sets<14?'Hafif Gym haftası. Toparlanma veya giriş haftası gibi duruyor.':(c.sets<=28?'Dengeli ve yönetilebilir Gym haftası.':'Yüksek hacimli Gym haftası. Toparlanma ve ağrı sinyallerini takip et.'));
+    weeklyReport.innerHTML=`<div class="weeklyPremiumGrid"><div class="weeklyPremiumCard weeklyLoadStatusCard ${loadCls}"><div class="weeklyPremiumHead"><div><small>Haftalık Yük Durumu</small><b>Genel yük ve toparlanma</b></div><div class="weeklyPremiumPill">${loadLevel}</div></div><div class="weeklyLoadMiniGrid"><div class="weeklyLoadMiniBox"><small>Gym</small><b>${gymDays} gün</b></div><div class="weeklyLoadMiniBox"><small>Aktivite</small><b>${activityDays} gün</b></div><div class="weeklyLoadMiniBox"><small>Aktivite Süresi</small><b>${minutes} dk</b></div><div class="weeklyLoadMiniBox"><small>Toparlanma</small><b>${recoveryNeed}</b></div></div><div class="weeklyLoadVerdict"><b>Koç notu:</b> ${loadAdvice}</div></div><div class="weeklyPremiumCard"><div class="weeklyPremiumHead"><div><small>Haftalık Yük</small><b>${trDate(weekStart)} - ${trDate(addDays(weekStart,6))}</b></div><div class="weeklyPremiumPill">${completed}/7 gün</div></div><div class="weeklyMetricGrid"><div class="weeklyMetricBox"><small>Set</small><b>${c.sets}</b></div><div class="weeklyMetricBox"><small>Tekrar</small><b>${c.reps}</b></div><div class="weeklyMetricBox"><small>Hacim</small><b>${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div></div><div class="weeklyInsight"><b>Odak:</b> ${topPart[0]} (${topPart[1]} set). <b>Ortalama:</b> ${avgSets} set/Gym günü. ${verdict}</div></div><div class="weeklyPremiumCard"><div class="weeklyPremiumHead"><div><small>Gün Dağılımı</small><b>Gün Gün Dağılım</b></div><div class="weeklyPremiumPill">${topPart[0]}</div></div><div class="weeklyDayList">${days}</div></div></div>`;
   };
   const previousRender=window.render;
   if(typeof previousRender==='function'){
@@ -8305,18 +8311,19 @@ async function checkCloudStatus() {
     const last=(DATA._meta&&DATA._meta.lastLocalUpdate)||DATA.lastSyncAt||(DATA.polarConnection&&DATA.polarConnection.lastSyncAt)||'';
     const lastLabel=last?fmtDateTime(last):(c.workoutDays||c.activities||c.appleWatch?'Kayıt mevcut':'Henüz kayıt yok');
     el.innerHTML=`
-      <div class="localStatusBox"><small>Last Local Update</small><b>${lastLabel}</b></div>
-      <div class="localStatusBox"><small>Total Workout Days</small><b>${c.workoutDays}</b></div>
-      <div class="localStatusBox"><small>Total Activities</small><b>${c.activities}</b></div>
-      <div class="localStatusBox"><small>Apple Watch Entries</small><b>${c.appleWatch}</b></div>
-      <div class="localStatusBox"><small>Quick Notes</small><b>${c.notes}</b></div>
-      <div class="localStatusBox"><small>Current Build</small><b>${BUILD_NAME}</b></div>`;
+      <div class="localStatusBox"><small>Son Yerel Güncelleme</small><b>${lastLabel}</b></div>
+      <div class="localStatusBox"><small>Toplam Antrenman Günü</small><b>${c.workoutDays}</b></div>
+      <div class="localStatusBox"><small>Toplam Aktivite</small><b>${c.activities}</b></div>
+      <div class="localStatusBox"><small>Apple Watch Kaydı</small><b>${c.appleWatch}</b></div>
+      <div class="localStatusBox"><small>Hızlı Notlar</small><b>${c.notes}</b></div>
+      <div class="localStatusBox"><small>Mevcut Sürüm</small><b>${BUILD_NAME}</b></div>`;
   };
 
   const oldSave=window.save;
   window.save=function(){
     markLocalUpdate();
     try{localStorage.setItem('atlas_summary_reports',JSON.stringify(DATA));}catch(e){}
+    if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('local-save');
     if(typeof render==='function') render();
     renderDataLocalStatus();
   };
@@ -8430,6 +8437,7 @@ async function checkCloudStatus() {
         if(!DATA.activityNotes) DATA.activityNotes={};
         markLocalUpdate();
         localStorage.setItem('atlas_summary_reports',JSON.stringify(DATA));
+        if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('cloud-pull');
         render();
         setCloudStatus(cloudSummaryHtml('Cloud data pulled successfully.',rows[0].updated_at||''),'ok');
       }catch(err){setCloudStatus('Pull failed: '+err.message,'err')}
@@ -9013,6 +9021,7 @@ async function checkCloudStatus() {
       if(snap.meta&&snap.meta.selectedDate) selectedDate=snap.meta.selectedDate;
       localStorage.setItem('atlas_summary_reports',JSON.stringify(DATA));
       localStorage.removeItem(SNAP_KEY);
+      if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('undo-import');
       if(typeof render==='function') render();
       setUndoStatus('Son import geri alındı.');
       alert('Son import geri alındı.');
@@ -9022,7 +9031,7 @@ async function checkCloudStatus() {
     const card=document.querySelector('.universalImportCard'); if(!card) return;
     const actions=card.querySelector('.actions'); if(!actions) return;
     if(!document.getElementById('undoLastImportBtn')){
-      actions.insertAdjacentHTML('beforeend',`<button id="undoLastImportBtn" class="btn sec undoImportBtn" onclick="undoLastImport()">Undo Last Import</button><div id="undoImportMiniStatus" class="undoImportMiniStatus"></div>`);
+      actions.insertAdjacentHTML('beforeend',`<button id="undoLastImportBtn" class="btn sec undoImportBtn" onclick="undoLastImport()">Son İçe Aktarımı Geri Al</button><div id="undoImportMiniStatus" class="undoImportMiniStatus"></div>`);
     }
     const raw=localStorage.getItem(SNAP_KEY);
     if(raw){
@@ -9098,6 +9107,8 @@ async function checkCloudStatus() {
   function currentWeekDays(){return typeof weekDates==='function'?weekDates():[];}
   function weekStats(){
     const days=currentWeekDays();
+    const shared=window.SimurgSignalModel&&days.length?window.SimurgSignalModel.week(days[0]):null;
+    if(shared)return {days,workouts:shared.rows,c:{sets:shared.sets,reps:shared.reps,vol:shared.volume,parts:typeof calc==='function'?calc(shared.rows).parts:{}},acts:shared.physicalSessions,actMinutes:shared.activityMinutes,activeCal:shared.activeCalories,avgRpe:shared.avgRpe||0,pain:shared.painCount,gymDays:shared.gymDays,actDays:shared.activityDays};
     const workouts=days.flatMap(d=>typeof dayData==='function'?dayData(d):[]);
     const c=typeof calc==='function'?calc(workouts):{sets:0,reps:0,vol:0,parts:{}};
     const acts=((typeof DATA!=='undefined'&&DATA.appleWatch)||[]).filter(a=>days.includes(a.date));
@@ -9141,6 +9152,8 @@ async function checkCloudStatus() {
   function monthlyStats(){
     const base=(window.selectedDate||new Date().toISOString().slice(0,10));
     const ym=String(base).slice(0,7);
+    const shared=window.SimurgSignalModel?window.SimurgSignalModel.month(ym):null;
+    if(shared){const c=typeof calc==='function'?calc(shared.rows):{parts:{}},exCount={};shared.rows.forEach(w=>{const ex=w.exercise||'Bilinmiyor';exCount[ex]=(exCount[ex]||0)+1;});const topEx=Object.entries(exCount).sort((a,b)=>b[1]-a[1])[0]||['-',0],topPart=Object.entries(c.parts||{}).sort((a,b)=>b[1]-a[1])[0]||['-',0];return {ym,days:shared.gymDays,actDays:shared.activityDays,sets:shared.sets,vol:Math.round(shared.volume),topEx:topEx[0],topPart:topPart[0],pain:shared.painCount,minutes:Math.round(shared.activityMinutes),verdict:shared.painCount?'Ay içinde ağrı sinyali var. Gelecek blokta yükten önce hareket kalitesi takip edilmeli.':shared.gymDays>=8?'Ay düzenli ve temiz ilerliyor. Ana hedef: sürdürülebilir ilerleme.':'Veri biriktikçe aylık değerlendirme daha anlamlı olacak.'};}
     const workouts=((typeof DATA!=='undefined'&&DATA.workouts)||[]).filter(w=>String(w.date||'').startsWith(ym));
     const acts=((typeof DATA!=='undefined'&&DATA.appleWatch)||[]).filter(a=>String(a.date||'').startsWith(ym));
     const days=new Set(workouts.map(w=>w.date));
@@ -9257,28 +9270,29 @@ async function checkCloudStatus() {
   function monthlyStatsStandalone(){
     const base=(window.selectedDate||new Date().toISOString().slice(0,10));
     const ym=String(base).slice(0,7);
-    const workouts=((typeof DATA!=='undefined'&&DATA.workouts)||[]).filter(w=>String(w.date||'').startsWith(ym));
-    const acts=((typeof DATA!=='undefined'&&DATA.appleWatch)||[]).filter(a=>String(a.date||'').startsWith(ym));
-    const gymDays=new Set(workouts.map(w=>w.date));
-    const actDays=new Set(acts.map(a=>a.date));
-    const sets=workouts.length;
-    const reps=workouts.reduce((s,w)=>s+(+w.reps||0),0);
-    const vol=Math.round(workouts.reduce((s,w)=>s+((+w.weight||0)*(+w.reps||0)),0));
+    const shared=window.SimurgSignalModel?window.SimurgSignalModel.month(ym):null;
+    const workouts=shared?shared.rows:((typeof DATA!=='undefined'&&DATA.workouts)||[]).filter(w=>String(w.date||'').startsWith(ym));
+    const acts=shared?shared.physicalSessions:((typeof DATA!=='undefined'&&DATA.appleWatch)||[]).filter(a=>String(a.date||'').startsWith(ym));
+    const gymDays={size:shared?shared.gymDays:new Set(workouts.map(w=>w.date)).size};
+    const actDays={size:shared?shared.activityDays:new Set(acts.map(a=>a.date)).size};
+    const sets=shared?shared.sets:workouts.length;
+    const reps=shared?shared.reps:workouts.reduce((s,w)=>s+(+w.reps||0),0);
+    const vol=Math.round(shared?shared.volume:workouts.reduce((s,w)=>s+((+w.weight||0)*(+w.reps||0)),0));
     const exCount={}, partCount={};
     workouts.forEach(w=>{const ex=w.exercise||'Unknown'; exCount[ex]=(exCount[ex]||0)+1; const bp=w.bodyPart||(typeof part==='function'?part(w.exercise):'Other'); partCount[bp]=(partCount[bp]||0)+1;});
     const topEx=Object.entries(exCount).sort((a,b)=>b[1]-a[1])[0]||['-',0];
     const topPart=Object.entries(partCount).sort((a,b)=>b[1]-a[1])[0]||['-',0];
-    const pain=workouts.filter(w=>String(w.pain||'None')!=='None').length;
-    const minutes=Math.round(acts.reduce((s,a)=>s+durMin(a.duration),0));
-    const activeCal=Math.round(acts.reduce((s,a)=>s+(+a.activeCal||+a.active||0),0));
+    const pain=shared?shared.painCount:workouts.filter(w=>String(w.pain||'None')!=='None').length;
+    const minutes=Math.round(shared?shared.activityMinutes:acts.reduce((s,a)=>s+durMin(a.duration),0));
+    const activeCal=Math.round(shared?shared.activeCalories:acts.reduce((s,a)=>s+(+a.activeCal||+a.active||0),0));
     const avgRpeVals=workouts.concat(acts).map(x=>+x.rpe||0).filter(Boolean);
-    const avgRpe=avgRpeVals.length?(avgRpeVals.reduce((a,b)=>a+b,0)/avgRpeVals.length):0;
+    const avgRpe=shared&&shared.avgRpe!=null?shared.avgRpe:(avgRpeVals.length?(avgRpeVals.reduce((a,b)=>a+b,0)/avgRpeVals.length):0);
     let verdict='Veri biriktikçe aylık değerlendirme daha anlamlı olacak.';
     let coach='Bu ay için temel hedef: kayıt düzenini koru, ağrı sinyalini düşük tut ve progresyonu küçük adımlarla yönet.';
     if(gymDays.size>=8 && !pain && avgRpe<=8){verdict='Ay düzenli ve sürdürülebilir ilerliyor.'; coach='Bir sonraki blokta ana hareketlerde küçük tekrar artışı veya kontrollü kilo artışı denenebilir.';}
-    else if(pain){verdict='Ay içinde pain sinyali var.'; coach='Gelecek blokta öncelik yük artışı değil; form kalitesi, ağrı takibi ve gerekirse deload olmalı.';}
-    else if(gymDays.size<4 && acts.length){verdict='Gym hacmi düşük, activity tarafı daha baskın.'; coach='Bir sonraki ayda gym günlerini daha düzenli sabitlemek program kalitesini artırır.';}
-    else if(minutes>240 && gymDays.size>=6){verdict='Gym ve activity yükü birlikte anlamlı seviyede.'; coach='Recovery debt birikmemesi için zor günlerden sonra daha kontrollü seans planla.';}
+    else if(pain){verdict='Ay içinde ağrı sinyali var.'; coach='Gelecek blokta öncelik yük artışı değil; form kalitesi, ağrı takibi ve gerekirse deload olmalı.';}
+    else if(gymDays.size<4 && acts.length){verdict='Gym hacmi düşük, aktivite tarafı daha baskın.'; coach='Bir sonraki ayda Gym günlerini daha düzenli sabitlemek program kalitesini artırır.';}
+    else if(minutes>240 && gymDays.size>=6){verdict='Gym ve aktivite yükü birlikte anlamlı seviyede.'; coach='Toparlanma borcu birikmemesi için zor günlerden sonra daha kontrollü seans planla.';}
     return {ym,gymDays:gymDays.size,actDays:actDays.size,sets,reps,vol,topEx:topEx[0],topPart:topPart[0],pain,minutes,activeCal,avgRpe,verdict,coach};
   }
   window.renderMonthlyReviewPanel=function(){
@@ -9287,19 +9301,19 @@ async function checkCloudStatus() {
     const m=monthlyStatsStandalone();
     const score=Math.max(0,Math.min(100, Math.round(62 + Math.min(m.gymDays,12)*2 + Math.min(m.actDays,8) - m.pain*7 - (m.avgRpe>8?8:0))));
     wrap.innerHTML=`<div class="monthlyStandaloneHero">
-      <div class="monthlyStandaloneHead"><div><small>Monthly Review</small><b>${esc2(m.ym)} blok özeti</b></div><div class="monthlyStandaloneScore"><strong>${score}</strong><span>Quality</span></div></div>
+      <div class="monthlyStandaloneHead"><div><small>Aylık Değerlendirme</small><b>${esc2(m.ym)} blok özeti</b></div><div class="monthlyStandaloneScore"><strong>${score}</strong><span>Kalite</span></div></div>
       <div class="monthlyStandaloneText">${esc2(m.verdict)}</div>
       <div class="monthlyStandaloneGrid">
-        <div class="monthlyStandaloneItem"><small>Gym Days</small><b>${m.gymDays}</b></div>
-        <div class="monthlyStandaloneItem"><small>Activity Days</small><b>${m.actDays}</b></div>
-        <div class="monthlyStandaloneItem"><small>Total Sets</small><b>${m.sets}</b></div>
-        <div class="monthlyStandaloneItem"><small>Volume</small><b>${m.vol.toLocaleString('tr-TR')} kg</b></div>
-        <div class="monthlyStandaloneItem"><small>Top Exercise</small><b>${esc2(m.topEx)}</b></div>
-        <div class="monthlyStandaloneItem"><small>Top Focus</small><b>${esc2(m.topPart)}</b></div>
-        <div class="monthlyStandaloneItem"><small>Activity Time</small><b>${m.minutes} dk</b></div>
-        <div class="monthlyStandaloneItem"><small>Pain Flags</small><b>${m.pain}</b></div>
+        <div class="monthlyStandaloneItem"><small>Gym Günleri</small><b>${m.gymDays}</b></div>
+        <div class="monthlyStandaloneItem"><small>Aktivite Günleri</small><b>${m.actDays}</b></div>
+        <div class="monthlyStandaloneItem"><small>Toplam Set</small><b>${m.sets}</b></div>
+        <div class="monthlyStandaloneItem"><small>Hacim</small><b>${m.vol.toLocaleString('tr-TR')} kg</b></div>
+        <div class="monthlyStandaloneItem"><small>Öne Çıkan Egzersiz</small><b>${esc2(m.topEx)}</b></div>
+        <div class="monthlyStandaloneItem"><small>Ana Odak</small><b>${esc2(m.topPart)}</b></div>
+        <div class="monthlyStandaloneItem"><small>Aktivite Süresi</small><b>${m.minutes} dk</b></div>
+        <div class="monthlyStandaloneItem"><small>Ağrı Sinyalleri</small><b>${m.pain}</b></div>
       </div>
-      <div class="monthlyStandaloneCoach"><b>Coach note:</b> ${esc2(m.coach)}</div>
+      <div class="monthlyStandaloneCoach"><b>Koç notu:</b> ${esc2(m.coach)}</div>
     </div>`;
   };
   function cleanupWeeklyMonthly(){document.querySelectorAll('#weeklyReport .monthlyReviewCard').forEach(x=>x.remove());}
@@ -9714,6 +9728,8 @@ textarea,input,select{
   };
   function weekStats(){
     const ds=typeof weekDates==='function'?weekDates():[];
+    const shared=window.SimurgSignalModel&&ds.length?window.SimurgSignalModel.week(ds[0]):null;
+    if(shared){const c={sets:shared.sets,reps:shared.reps,vol:shared.volume,parts:typeof calc==='function'?calc(shared.rows).parts:{}},topPart=Object.entries(c.parts||{}).sort((a,b)=>b[1]-a[1])[0]||['Veri Birikiyor',0];let recovery='Düşük';if(shared.painCount||Number(shared.avgRpe)>=8.5||shared.activityMinutes>150||shared.sets>28)recovery='Yüksek';else if(Number(shared.avgRpe)>=7.5||shared.activityMinutes>90||shared.sets>22)recovery='Orta';return {ds,ws:shared.rows,c,acts:shared.physicalSessions,actMinutes:shared.activityMinutes,activeCal:shared.activeCalories,avgRpe:shared.avgRpe==null?'-':shared.avgRpe.toFixed(1),pain:shared.painCount,gymDays:shared.gymDays,actDays:shared.activityDays,topPart,recovery,quality:Math.max(0,100-shared.painCount*22-shared.badFormCount*18),next:shared.painCount||shared.badFormCount?'Yükü artırma; form ve ağrısız uygulamayı koru.':'Kalite korunursa kontrollü küçük artış uygula.'};}
     const ws=ds.flatMap(d=>typeof dayData==='function'?dayData(d):workouts().filter(w=>w.date===d));
     const c=typeof calc==='function'?calc(ws):{sets:ws.reduce((s,w)=>s+n(w.sets),0),reps:ws.reduce((s,w)=>s+n(w.reps),0),vol:ws.reduce((s,w)=>s+n(w.weight)*n(w.reps)*Math.max(1,n(w.sets)||1),0),parts:{}};
     const acts=activities().filter(a=>ds.includes(a.date));
@@ -9858,7 +9874,7 @@ textarea,input,select{
     const todayDay=safeDay(t);
     document.querySelectorAll('.dayBtn').forEach(btn=>{
       const main=btn.querySelector('.main');
-      const isToday=main && main.textContent.trim()===todayDay && String(window.weekStart||weekStart)===safeMonday(t);
+      const isToday=main && (main.dataset.day||main.textContent.trim())===todayDay && String(window.weekStart||weekStart)===safeMonday(t);
       btn.classList.toggle('today',!!isToday);
     });
   }
@@ -9873,15 +9889,16 @@ textarea,input,select{
     }
     const t=safeToday();
     const active=String(window.selectedDate||selectedDate)===t;
-    helper.innerHTML=`<div><small>${active?'Bugünün Programı':'Bugün'}</small><b>${programFor(t)}</b><span>${safeTr(t)} • Gym Mode bugünün tarihine göre hazır.</span></div><button class="btn sec" onclick="goToday();show('gym',document.querySelector('.nav button:nth-child(2)'))">Bugünün Programına Git</button>`;
+    const shownProgram=window.SimurgLabels?window.SimurgLabels.sentence(programFor(t)):programFor(t);
+    helper.innerHTML=`<div><small>${active?'Bugünün Programı':'Bugün'}</small><b>${shownProgram}</b><span>${safeTr(t)} • Gym modu bugünün tarihine göre hazır.</span></div><button class="btn sec" onclick="goToday();show('gym',document.querySelector('.nav button:nth-child(2)'))">Bugünün Programına Git</button>`;
   }
 
   function applyRestDayCard(){
     const wg=document.getElementById('workoutGroups'); if(!wg) return;
     const d=String(window.selectedDate||selectedDate);
     if(hasGym(d) || hasWatch(d)) return;
-    const type=programFor(d);
-    wg.innerHTML=`<div class="restDayCard"><small>Rest Day</small><b>${safeTr(d)}</b><span>${type}. Bu gün için gym veya activity kaydı yok. Eğer aktif recovery, yürüyüş, yüzme ya da ek antrenman yaptıysan Universal Import ile ekleyebilirsin.</span></div>`;
+    const type=programFor(d),shownType=window.SimurgLabels?window.SimurgLabels.sentence(type):type;
+    wg.innerHTML=`<div class="restDayCard"><small>DİNLENME GÜNÜ</small><b>${safeTr(d)}</b><span>${shownType}. Bu gün için Gym veya aktivite kaydı yok. Aktif toparlanma, yürüyüş, yüzme ya da ek antrenman yaptıysan Evrensel İçe Aktarım ile ekleyebilirsin.</span></div>`;
   }
 
   function updateBuildLabel(){
@@ -10060,6 +10077,7 @@ textarea,input,select{
       else text=`${wt%1?wt.toFixed(1):wt}kg x ${rp+1} hedefle.`;
     }
     if(saved&&saved.text&&!cur) text=saved.text;
+    if(window.SimurgSignalModel&&typeof window.SimurgSignalModel.safeTarget==='function') text=window.SimurgSignalModel.safeTarget(ex,rowsForExercise(ex),text);
     return {text, saved};
   }
   function updateStoredTarget(ex,date){
@@ -10130,7 +10148,7 @@ textarea,input,select{
     const m=monthlyBestProgress();
     const label=m.best?`${m.best.diff>=0?'+':''}${m.best.diff.toFixed(1)}%`:'Data'; const cls=m.best&&m.best.diff>0?'good':'warn';
     const text=m.best?`Ayın en iyi gelişen hareketi ${m.best.ex}. En iyi set: ${fmtSet(m.best.best)}. Bu hareket için progresyon kalitesi yüksekse gelecek ay mikro artış mantıklı.`:'Bu ay için en iyi gelişen hareketi hesaplamak adına daha fazla kayıt gerekiyor.';
-    const html=`<div class="monthlyBestProgressCard"><div class="monthlyBestProgressHead"><div><small>Best Progress Movement</small><b>${esc(m.best?m.best.ex:'Data Building')}</b></div><div class="monthlyBestProgressPill ${cls}">${esc(label)}</div></div><div class="monthlyBestProgressText">${esc(text)}</div><div class="monthlyBestProgressStats"><div class="monthlyBestProgressStat"><small>Best Set</small><b>${esc(m.best?fmtSet(m.best.best):'-')}</b></div><div class="monthlyBestProgressStat"><small>Stable Movement</small><b>${esc(m.stable?m.stable.ex:'-')}</b></div><div class="monthlyBestProgressStat"><small>Attention</small><b>${esc(m.attention?m.attention.ex:'No pain flag')}</b></div></div></div>`;
+    const html=`<div class="monthlyBestProgressCard"><div class="monthlyBestProgressHead"><div><small>En İyi Gelişen Hareket</small><b>${esc(m.best?m.best.ex:'Veri Birikiyor')}</b></div><div class="monthlyBestProgressPill ${cls}">${esc(label==='Data'?'Veri':label)}</div></div><div class="monthlyBestProgressText">${esc(text)}</div><div class="monthlyBestProgressStats"><div class="monthlyBestProgressStat"><small>En İyi Set</small><b>${esc(m.best?fmtSet(m.best.best):'-')}</b></div><div class="monthlyBestProgressStat"><small>Dengeli Hareket</small><b>${esc(m.stable?m.stable.ex:'-')}</b></div><div class="monthlyBestProgressStat"><small>Dikkat</small><b>${esc(m.attention?m.attention.ex:'Ağrı sinyali yok')}</b></div></div></div>`;
     wrap.insertAdjacentHTML('beforeend',html);
   }
   function updateBuild(){try{const b=document.querySelector('.versionBadgeCard b'); if(b)b.textContent=BUILD; const s=document.querySelector('.versionBadgeCard span'); if(s)s.textContent='Smart Progression · Readiness Badges · Auto Next Targets · Week Compare · Best Progress';}catch(e){}}
@@ -10831,7 +10849,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   window.simurgV8Go=go; window.simurgV8OpenMenu=openMenu; window.simurgV8CloseMenu=closeMenu;
   ready(function(){
     if(!document.getElementById('simurgV8Nav')){
-      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Simurg OS modülleri</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Coaching</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('program','menu')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go('weekly','menu')"><i>📈</i><span><b>Weekly</b><small>Haftalık yük ve performans</small></span></button><button onclick="simurgV8Go('monthly','menu')"><i>🗓️</i><span><b>Monthly</b><small>Aylık gelişim görünümü</small></span></button><button onclick="simurgV8Go('data','menu')"><i>💾</i><span><b>Data Center</b><small>Cloud Sync, backup ve veri yönetimi</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobile navigation"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Logger</button><button data-key="polar" onclick="simurgV8Go('polar','polar')"><i>⌚</i>Polar</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
+      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Simurg OS modülleri</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('program','menu')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go('weekly','menu')"><i>📈</i><span><b>Haftalık</b><small>Haftalık yük ve performans</small></span></button><button onclick="simurgV8Go('monthly','menu')"><i>🗓️</i><span><b>Aylık</b><small>Aylık gelişim görünümü</small></span></button><button onclick="simurgV8Go('data','menu')"><i>💾</i><span><b>Veri Merkezi</b><small>Bulut senkronizasyonu, yedekleme ve veri yönetimi</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Günlük</button><button data-key="polar" onclick="simurgV8Go('polar','polar')"><i>⌚</i>Polar</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
     }
   });
 })();
@@ -11684,7 +11702,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     var shade=document.getElementById('simurgV8Shade'); if(!shade){document.body.insertAdjacentHTML('beforeend','<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div>');}
     var sheet=document.getElementById('simurgV8Sheet'); if(!sheet){document.body.insertAdjacentHTML('beforeend','<div id="simurgV8Sheet"></div>'); sheet=document.getElementById('simurgV8Sheet');}
     sheet.innerHTML='<div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Simurg OS modülleri</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i><span><b>Coaching</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go(\'program\',\'menu\')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go(\'weekly\',\'menu\')"><i>📈</i><span><b>Weekly</b><small>Haftalık yük ve performans</small></span></button><button onclick="simurgV8Go(\'monthly\',\'menu\')"><i>🗓️</i><span><b>Monthly</b><small>Aylık gelişim görünümü</small></span></button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>💾</i><span><b>Data Center</b><small>Cloud Sync, backup ve veri yönetimi</small></span></button></div>';
-    document.body.insertAdjacentHTML('beforeend','<nav id="simurgV8Nav" aria-label="Simurg premium mobile navigation"><button data-key="home" class="active" onclick="simurgV8Go(\'home\',\'home\')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go(\'gym\',\'gym\')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go(\'workout\',\'logger\')"><i>📋</i>Logger</button><button data-key="polar" onclick="simurgV8Go(\'polar\',\'polar\')"><i>⌚</i>Polar</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>');
+    document.body.insertAdjacentHTML('beforeend','<nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go(\'home\',\'home\')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go(\'gym\',\'gym\')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go(\'workout\',\'logger\')"><i>📋</i>Günlük</button><button data-key="polar" onclick="simurgV8Go(\'polar\',\'polar\')"><i>⌚</i>Polar</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>');
   }
   function ensureAlertPanel(){
     if(document.getElementById('simurgAlertPanel')) return;
@@ -12609,7 +12627,7 @@ m Shell V4: Logger information architecture fix -->
     if(!nav) return;
     var hasPolar=nav.querySelector('[data-key="polar"]');
     if(!hasPolar){
-      nav.innerHTML='<button data-key="home"><i>🏠</i>Ana</button><button data-key="gym"><i>🏋️</i>Gym</button><button data-key="logger"><i>📋</i>Logger</button><button data-key="polar"><i>⌚</i>Polar</button><button data-key="menu"><i>☰</i>Menü</button>';
+      nav.innerHTML='<button data-key="home"><i>🏠</i>Ana</button><button data-key="gym"><i>🏋️</i>Gym</button><button data-key="logger"><i>📋</i>Günlük</button><button data-key="polar"><i>⌚</i>Polar</button><button data-key="menu"><i>☰</i>Menü</button>';
     }
     nav.querySelectorAll('button').forEach(function(btn){
       if(btn.__simurgV5V6Bound) return; btn.__simurgV5V6Bound=true;
@@ -15749,7 +15767,7 @@ m Shell V4: Logger information architecture fix -->
 		    return '<div class="polarCoachSentenceV1"><b>Readiness explanation</b>'+esc(signalMeaning(entry))+'</div>';
 		  }
 		  function polarWorkoutAccessHtml(){
-		    return '<button type="button" class="polarWorkoutAccessV1" onclick="simurgOpenPolarWorkout()"><span><small>POLAR FLOW</small><b>Workout / Antrenmanlar</b><em>Geçmiş antrenmanlar ve detaylı workout görünümü</em></span><i>›</i></button>';
+		    return '<button type="button" class="polarWorkoutAccessV1" onclick="simurgOpenPolarWorkout()"><span><small>POLAR FLOW</small><b>Polar Antrenmanları</b><em>Geçmiş antrenmanlar ve ayrıntılı görünüm</em></span><i>›</i></button>';
 		  }
 		  function stagesHtml(entry){
 		    var stages=entry&&entry.sleepStages;
@@ -15933,11 +15951,11 @@ m Shell V4: Logger information architecture fix -->
 })();
 </script>
 <link rel="stylesheet" href="./polar-workout.css?v=11">
-<script src="./polar-workout.js?v=11"></script>
+<script src="./polar-workout.js?v=12"></script>
 <script src="./workout-source-policy.js?v=2"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=30">
-<script src="./premium-standard.js?v=27"></script>
+<script src="./premium-standard.js?v=31"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
-<script src="./polar-accesslink.js?v=4"></script>
+<script src="./polar-accesslink.js?v=5"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=23">
-<script src="./desktop-alignment.js?v=21"></script>
+<script src="./desktop-alignment.js?v=25"></script>
