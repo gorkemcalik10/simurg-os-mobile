@@ -6250,6 +6250,7 @@ let editingProgramDay=null;
 function getProgramType(day){return (DATA.programNames&&DATA.programNames[day])||defaultProgramNames[day]||'Off Day'}
 function getProgramLabelForDate(date){let day=dayName(date);return `${day} ${getProgramType(day)}`}
 function escapeAttr(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\"','&quot;').replaceAll("'",'&#39;')}
+function safeDataIndex(v){let n=Number(v);return Number.isInteger(n)&&n>=0?n:null}
 const bodyMap={"incline db press":"Chest","flat db press":"Chest","cable fly":"Chest","bench supported db row":"Back","hammer strength high row":"Back","chest supported row":"Back","single arm lat pulldown":"Back","single arm cable row":"Back","rear delt cable fly":"Rear Delt","face pull":"Rear Delt","prone y raise":"Scapula","lateral raise":"Side Delt","rope pushdown":"Triceps","reverse grip pushdown":"Triceps","incline db curl":"Biceps","cable curl":"Biceps","reverse cable curl":"Biceps","rope pushdown / incline db curl superset":"Arms"};
 const colors={"Back":"#2f84ff","Chest":"#2f84ff","Rear Delt":"#8b5cf6","Biceps":"#23ce7a","Triceps":"#ffbd3d","Side Delt":"#23ce7a","Scapula":"#8b5cf6","Shoulder Stability":"#8b5cf6","Shoulders":"#23ce7a","Arms":"#ffbd3d"};
 function parseDate(s){let [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
@@ -6292,8 +6293,8 @@ function renderProgramDays(){
     let off=(type||'').toLowerCase().includes('off')?'offDay':'';
     let watch=watchRowsForDate(date);
     let activity=watch.length?activitySummaryForDate(date):null;
-    let badge=activity?`<div class="activityDayBadge" title="${escapeAttr(activity.fullLabel)}">${activity.emoji} ${activity.shortLabel}</div>`:'';
-    return `<button class="dayBtn ${date===selectedDate?'active':''} ${off}" onclick="selectDay('${d}')"><span class="renameDayBtn" title="Program adını düzenle" onclick="event.stopPropagation();openProgramNameEdit('${d}')">✎</span><div class="main" data-day="${d}">${displayDay}</div><div class="type">${displayType}</div>${badge}</button>`
+    let badge=activity?`<div class="activityDayBadge" title="${escapeAttr(activity.fullLabel)}">${escapeAttr(activity.emoji)} ${escapeAttr(activity.shortLabel)}</div>`:'';
+    return `<button class="dayBtn ${date===selectedDate?'active':''} ${off}" onclick="selectDay('${d}')"><span class="renameDayBtn" title="Program adını düzenle" onclick="event.stopPropagation();openProgramNameEdit('${d}')">✎</span><div class="main" data-day="${d}">${escapeAttr(displayDay)}</div><div class="type">${escapeAttr(displayType)}</div>${badge}</button>`
   }).join('')
 }
 function renderWeekStrip(){
@@ -6318,7 +6319,7 @@ function renderWorkout(){
     const workoutHtml=Object.entries(groups).map(([body,items])=>{
       let exs={};items.forEach(w=>{if(!exs[w.exercise])exs[w.exercise]=[];exs[w.exercise].push(w)});
       let cc=calc(items);
-      return `<div class="group"><div class="groupHead"><div><span class="groupTitle">${body.toUpperCase()}</span><span class="groupMeta">• ${cc.sets} SET • ${Math.round(cc.vol).toLocaleString('tr-TR')} KG</span></div><div class="groupPill">${cc.sets} SET</div></div><div class="exerciseGrid">${Object.entries(exs).map(([ex,sets])=>exCard(ex,sets)).join('')}</div></div>`
+      return `<div class="group"><div class="groupHead"><div><span class="groupTitle">${escapeAttr(String(body).toUpperCase())}</span><span class="groupMeta">• ${cc.sets} SET • ${Math.round(cc.vol).toLocaleString('tr-TR')} KG</span></div><div class="groupPill">${cc.sets} SET</div></div><div class="exerciseGrid">${Object.entries(exs).map(([ex,sets])=>exCard(ex,sets)).join('')}</div></div>`
     }).join('');
     workoutGroups.innerHTML=workoutHtml + activityHtml;
   }
@@ -6327,7 +6328,25 @@ function renderWorkout(){
   totalVolumeBottom.textContent=Math.round(c.vol).toLocaleString('tr-TR');
   renderRight(groups)
 }
-function exCard(ex,sets){return `<div class="exerciseCard"><div class="exTop"><div class="exName" onclick="openEditExercise('${ex.replaceAll("'","\'")}')">${ex}</div><button class="menuBtn" onclick="openEditExercise('${ex.replaceAll("'","\'")}')">⋮</button></div><table class="setTable"><thead><tr><th>SET</th><th>TEKRAR</th><th>KİLO</th></tr></thead><tbody>${sets.map((s,i)=>`<tr onclick="openEditSet(${DATA.workouts.indexOf(s)})"><td>${i+1}</td><td>${s.reps}</td><td>${s.weight}</td></tr>`).join('')}</tbody></table><div class="addSet" onclick="addSetToExercise('${ex.replaceAll("'","\'")}')">+ Set Ekle</div><div class="blueLine"></div></div>`}
+function exCard(ex,sets){
+  let firstIndex=sets.length?DATA.workouts.indexOf(sets[0]):-1;
+  return `<div class="exerciseCard"><div class="exTop"><div class="exName" role="button" tabindex="0" data-workout-action="edit-exercise" data-workout-index="${firstIndex}">${escapeAttr(ex)}</div><button class="menuBtn" type="button" data-workout-action="edit-exercise" data-workout-index="${firstIndex}">⋮</button></div><table class="setTable"><thead><tr><th>SET</th><th>TEKRAR</th><th>KİLO</th></tr></thead><tbody>${sets.map((s,i)=>{let idx=DATA.workouts.indexOf(s);return `<tr tabindex="0" data-workout-action="edit-set" data-workout-index="${idx}"><td>${i+1}</td><td>${escapeAttr(s.reps)}</td><td>${escapeAttr(s.weight)}</td></tr>`}).join('')}</tbody></table><button class="addSet" type="button" data-workout-action="add-set" data-workout-index="${firstIndex}">+ Set Ekle</button><div class="blueLine"></div></div>`
+}
+function handleWorkoutAction(target){
+  let actionNode=target&&target.closest?target.closest('[data-workout-action]'):null;
+  if(!actionNode)return;
+  let idx=safeDataIndex(actionNode.dataset.workoutIndex);
+  let row=idx==null?null:(DATA.workouts||[])[idx];
+  if(!row)return;
+  if(actionNode.dataset.workoutAction==='edit-exercise')openEditExercise(String(row.exercise||''));
+  else if(actionNode.dataset.workoutAction==='edit-set')openEditSet(idx);
+  else if(actionNode.dataset.workoutAction==='add-set')addSetToExercise(String(row.exercise||''));
+}
+const workoutActionRoot=document.getElementById('workoutGroups');
+if(workoutActionRoot){
+  workoutActionRoot.addEventListener('click',event=>handleWorkoutAction(event.target));
+  workoutActionRoot.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){let node=event.target.closest('[data-workout-action]');if(node){event.preventDefault();handleWorkoutAction(node)}}});
+}
 
 function volumeLevel(sets){
   if(!sets) return 'empty';
@@ -6363,7 +6382,7 @@ legend.innerHTML=entries.map(([b,v],i)=>{
   let pct=Math.round(v/all*100);
   let kg=Math.round(v).toLocaleString('tr-TR');
   let setCount=(groups[b]||[]).length;
-  return `<div class="leg" data-tip="${b}: ${pct}% • ${kg} kg • ${setCount} set"><span><span class="dot" style="background:${palette[i%palette.length]}"></span>${b}</span><span>${pct}%</span></div>`
+  return `<div class="leg" data-tip="${escapeAttr(b)}: ${pct}% • ${kg} kg • ${setCount} set"><span><span class="dot" style="background:${palette[i%palette.length]}"></span>${escapeAttr(b)}</span><span>${pct}%</span></div>`
 }).join('')||'<span class="sub">Veri yok</span>';
 
 trendBars.innerHTML=weekDates().map(d=>{
@@ -6374,7 +6393,7 @@ return `<div class="bar tooltipItem ${level}" data-tip="${trDate(d)} • ${Math.
 }).join('');
 
 let topBody=entries[0]||['-',0];
-perfSummary.innerHTML=`<div class="summaryRow"><span>🏆 En Yüksek Hacim</span><b>${Math.round(topBody[1]).toLocaleString('tr-TR')} KG (${topBody[0]})</b></div><div class="summaryRow"><span>🏋️ En Çok Set</span><b>${Object.values(groups).reduce((m,a)=>Math.max(m,a.length),0)} SET</b></div><div class="summaryRow"><span>📊 Toplam Hacim</span><b>${Math.round(Object.values(totals).reduce((a,b)=>a+b,0)).toLocaleString('tr-TR')} KG</b></div>`
+perfSummary.innerHTML=`<div class="summaryRow"><span>🏆 En Yüksek Hacim</span><b>${Math.round(topBody[1]).toLocaleString('tr-TR')} KG (${escapeAttr(topBody[0])})</b></div><div class="summaryRow"><span>🏋️ En Çok Set</span><b>${Object.values(groups).reduce((m,a)=>Math.max(m,a.length),0)} SET</b></div><div class="summaryRow"><span>📊 Toplam Hacim</span><b>${Math.round(Object.values(totals).reduce((a,b)=>a+b,0)).toLocaleString('tr-TR')} KG</b></div>`
 }
 
 function gymTemplateForDate(date){
@@ -6868,13 +6887,12 @@ function renderSingleActivityCard(date, a){
   const type=a.primary||'Other';
   const sourceLabel=a.sourceLabel||'Apple Health';
   const note=DATA&&DATA.activityNotes&&DATA.activityNotes[String(date)+'::'+String(type)]||'';
-  const safeType=JSON.stringify(type),safeDate=JSON.stringify(date);
-  const actions=a.isPolar?`<div class="activityPill">${escapeAttr(sourceLabel)}</div>`:`<div class="activityPill">${escapeAttr(sourceLabel)}</div><button class="activityNoteBtn" onclick='setActivityQuickNote(${safeDate},${safeType});return false;'>Not</button><button class="activityDeleteBtn" onclick='deleteActivityCard(${safeDate},${safeType});return false;'>Sil</button>`;
+  const actions=a.isPolar?`<div class="activityPill">${escapeAttr(sourceLabel)}</div>`:`<div class="activityPill">${escapeAttr(sourceLabel)}</div><button class="activityNoteBtn" type="button" data-activity-action="note" data-activity-date="${escapeAttr(date)}" data-activity-type="${escapeAttr(type)}">Not</button><button class="activityDeleteBtn" type="button" data-activity-action="delete" data-activity-date="${escapeAttr(date)}" data-activity-type="${escapeAttr(type)}">Sil</button>`;
   return `<div class="simurg-activity-card" data-activity-type="${escapeAttr(type)}">
     <div class="activitySessionTop">
       <div class="activitySessionTitle">
-        <div class="activityIcon">${a.emoji||'⌁'}</div>
-        <div><small>AKTİVİTE OTURUMU</small><b>${escapeAttr(a.name||'Aktivite')}</b><span>${trDate(date)} · ${escapeAttr(sourceLabel)}</span></div>
+        <div class="activityIcon">${escapeAttr(a.emoji||'⌁')}</div>
+        <div><small>AKTİVİTE OTURUMU</small><b>${escapeAttr(a.name||'Aktivite')}</b><span>${escapeAttr(trDate(date))} · ${escapeAttr(sourceLabel)}</span></div>
       </div>
       <div class="activityTopActions">${actions}</div>
     </div>
@@ -6964,7 +6982,7 @@ function renderReadinessHtml(date){
   let typeText=t.source||(t.types.length?t.types.join(' + '):'Antrenman verisi yok');
   let reasonText=r.reasons.length?r.reasons.slice(0,3).join(', '):'olumsuz sinyal yok';
   let bg=`conic-gradient(#23ce7a 0 ${r.score}%, #172033 ${r.score}% 100%)`;
-  return `<div class="readinessScoreBox"><div class="readinessCircle" style="background:${bg}">${r.score}</div><div class="readinessMeta"><b>${window.SimurgLabels?window.SimurgLabels.ui(r.status):r.status}</b><br>${window.SimurgLabels?window.SimurgLabels.sentence(r.advice):r.advice}<div class="readinessPills"><span class="readinessPill activityTag">${typeText}</span><span class="readinessPill">Yük: ${window.SimurgLabels?window.SimurgLabels.ui(t.level):t.level}</span><span class="readinessPill">${Math.round(t.minutes)} dk</span><span class="readinessPill">${t.active} aktif kcal</span><span class="readinessPill">${t.avgHR||'-'} bpm</span></div><div class="activityLoadCard"><b>Etkenler:</b> ${reasonText}</div></div></div>`;
+  return `<div class="readinessScoreBox"><div class="readinessCircle" style="background:${bg}">${r.score}</div><div class="readinessMeta"><b>${escapeAttr(window.SimurgLabels?window.SimurgLabels.ui(r.status):r.status)}</b><br>${escapeAttr(window.SimurgLabels?window.SimurgLabels.sentence(r.advice):r.advice)}<div class="readinessPills"><span class="readinessPill activityTag">${escapeAttr(typeText)}</span><span class="readinessPill">Yük: ${escapeAttr(window.SimurgLabels?window.SimurgLabels.ui(t.level):t.level)}</span><span class="readinessPill">${Math.round(t.minutes)} dk</span><span class="readinessPill">${escapeAttr(t.active)} aktif kcal</span><span class="readinessPill">${escapeAttr(t.avgHR||'-')} bpm</span></div><div class="activityLoadCard"><b>Etkenler:</b> ${escapeAttr(reasonText)}</div></div></div>`;
 }
 function renderReadinessPanel(){
   let el=document.getElementById('readinessPanel');
@@ -7023,13 +7041,13 @@ function renderInjuryRiskHtml(date){
   let signalText=r.signals.length?r.signals.slice(0,4).join(', '):'belirgin risk sinyali yok';
   let shownLevel=window.SimurgLabels?window.SimurgLabels.ui(r.level):r.level;
   let pills=[
-    `<span class="injuryRiskPill ${r.level==='High'?'danger':(r.level==='Moderate'?'warn':'')}">Risk: ${shownLevel}</span>`,
+    `<span class="injuryRiskPill ${r.level==='High'?'danger':(r.level==='Moderate'?'warn':'')}">Risk: ${escapeAttr(shownLevel)}</span>`,
     `<span class="injuryRiskPill">Hazırlık ${r.readiness.score}/100</span>`,
     `<span class="injuryRiskPill">RPE ${r.today.coach.avgRpe||'-'}</span>`,
     `<span class="injuryRiskPill">${r.today.gym.sets} Gym seti</span>`,
-    `<span class="injuryRiskPill">${window.SimurgLabels?window.SimurgLabels.ui(r.today.level):r.today.level} yük</span>`
+    `<span class="injuryRiskPill">${escapeAttr(window.SimurgLabels?window.SimurgLabels.ui(r.today.level):r.today.level)} yük</span>`
   ].join('');
-  return `<div class="injuryRiskBox"><div class="injuryRiskBadge ${cls}">${shownLevel}<br>${r.score}/100</div><div class="injuryRiskMeta"><b>Koruma kararı:</b> ${window.SimurgLabels?window.SimurgLabels.sentence(r.deload):r.deload}<div class="injuryRiskPills">${pills}</div><div class="deloadBox"><b>Risk sinyalleri:</b> ${signalText}</div></div></div>`;
+  return `<div class="injuryRiskBox"><div class="injuryRiskBadge ${cls}">${escapeAttr(shownLevel)}<br>${r.score}/100</div><div class="injuryRiskMeta"><b>Koruma kararı:</b> ${escapeAttr(window.SimurgLabels?window.SimurgLabels.sentence(r.deload):r.deload)}<div class="injuryRiskPills">${pills}</div><div class="deloadBox"><b>Risk sinyalleri:</b> ${escapeAttr(signalText)}</div></div></div>`;
 }
 function renderInjuryRiskPanel(){
   let el=document.getElementById('injuryRiskPanel');
@@ -7067,26 +7085,26 @@ dates.forEach(date=>{
     let topPart=Object.entries(c.parts).sort((a,b)=>b[1]-a[1])[0]||['-',0];
     let best=items.slice().sort((a,b)=>b.weight-a.weight)[0];
     let exCount=Object.keys(c.exs).length;
-    let exMini=Object.keys(c.exs).map(ex=>`<em>${ex}</em>`).join('');
-    let activityLine=hasActivity?`<span>${source&&source.primaryPolar?'Workout Source':'Extra Activity'}: ${activity.emoji} ${escapeAttr(activity.name)} • ${activity.duration||'-'} • ${activity.active||0} kcal • ${escapeAttr(source&&source.source||'Apple Health')}</span>`:'';
-    cards.push(`<div class="dailyMiniCard dailyGymCard" onclick="selectedDate='${date}';weekStart=mondayOf(selectedDate);window.innerWidth<=860?simurgV8Go('workout','logger'):(show('workout',document.querySelector('.nav button')),render())">
+    let exMini=Object.keys(c.exs).map(ex=>`<em>${escapeAttr(ex)}</em>`).join('');
+    let activityLine=hasActivity?`<span>${source&&source.primaryPolar?'Workout Source':'Extra Activity'}: ${escapeAttr(activity.emoji)} ${escapeAttr(activity.name)} • ${escapeAttr(activity.duration||'-')} • ${escapeAttr(activity.active||0)} kcal • ${escapeAttr(source&&source.source||'Apple Health')}</span>`:'';
+    cards.push(`<div class="dailyMiniCard dailyGymCard" role="button" tabindex="0" data-report-date="${escapeAttr(date)}">
       <div class="dailyMiniTop">
         <div>
           <b>${trDate(date)}</b>
-          <span>${items[0]?.day||dayName(date)} · Gym Training</span>
+          <span>${escapeAttr(items[0]?.day||dayName(date))} · Gym Training</span>
         </div>
         <strong>${c.sets} set</strong>
       </div>
-      <div class="dailyMiniReadiness"><span>Readiness ${readiness.score}/100</span><span>${readiness.status}</span></div>
+      <div class="dailyMiniReadiness"><span>Readiness ${readiness.score}/100</span><span>${escapeAttr(readiness.status)}</span></div>
       <div class="dailyMiniStats">
         <span>${c.reps} reps</span>
         <span>${Math.round(c.vol).toLocaleString('tr-TR')} kg</span>
         <span>${exCount} exercises</span>
-        <span>${topPart[0]}</span>
+        <span>${escapeAttr(topPart[0])}</span>
       </div>
       <div class="dailyMiniExercises">${exMini}</div>
       <div class="dailyMiniFooter">
-        <span>Best: ${best?best.exercise+' '+best.weight+'kg':'-'}</span>
+        <span>Best: ${escapeAttr(best?best.exercise+' '+best.weight+'kg':'-')}</span>
         ${activityLine}
       </div>
     </div>`);
@@ -7095,23 +7113,23 @@ dates.forEach(date=>{
     let loadLabel=activity.active>=450?'High Load':(activity.active>=220?'Moderate Load':'Light Load');
     let activityRole=(String(activity.primary||'').toLowerCase().includes('walk')||String(activity.primary||'').toLowerCase().includes('mobility')||String(activity.primary||'').toLowerCase().includes('yoga'))?'Recovery / Movement':'Conditioning / Activity Load';
     let segmentText=activity.rows.length>1?` • ${activity.rows.length} kayıt`:'';
-    cards.push(`<div class="dailyMiniCard dailyActivityCard" onclick="selectedDate='${date}';weekStart=mondayOf(selectedDate);window.innerWidth<=860?simurgV8Go('workout','logger'):(show('workout',document.querySelector('.nav button')),render())">
+    cards.push(`<div class="dailyMiniCard dailyActivityCard" role="button" tabindex="0" data-report-date="${escapeAttr(date)}">
       <div class="dailyMiniTop">
         <div>
           <b>${trDate(date)}</b>
-          <span>${dayName(date)} · Activity Day</span>
+          <span>${escapeAttr(dayName(date))} · Activity Day</span>
         </div>
         <strong>${escapeAttr(source&&source.source||'Apple Health')}</strong>
       </div>
       <div class="dailyActivityTypeLine">
-        <div class="emoji">${activity.emoji}</div>
-        <div><b>${escapeAttr(activity.name)}</b><span>${activityRole}${segmentText}</span></div>
+        <div class="emoji">${escapeAttr(activity.emoji)}</div>
+        <div><b>${escapeAttr(activity.name)}</b><span>${escapeAttr(activityRole+segmentText)}</span></div>
       </div>
       <div class="dailyMiniStats">
-        <span>${activity.duration||'-'}</span>
-        <span>${activity.active?activity.active+' kcal':'-'}</span>
-        <span>${activity.dist||'-'}</span>
-        <span>${activity.avgHR?activity.avgHR+' bpm':'-'}</span>
+        <span>${escapeAttr(activity.duration||'-')}</span>
+        <span>${escapeAttr(activity.active?activity.active+' kcal':'-')}</span>
+        <span>${escapeAttr(activity.dist||'-')}</span>
+        <span>${escapeAttr(activity.avgHR?activity.avgHR+' bpm':'-')}</span>
       </div>
       <div class="dailyActivityNote">Gym hacmine eklenmez; readiness, recovery ve günlük fiziksel yük hesabına dahil edilir.</div>
     </div>`);
@@ -7130,7 +7148,7 @@ function renderWeeklyReport(){
     let pct=Math.min(100,Math.round((cc.sets/maxDay)*100));
     let label=program.find(p=>p[0]===dayName(d))?.[1]||dayName(d);
     label=getProgramType(dayName(d))||label;
-    return `<div class="weeklyDayItem"><b>${trDate(d)}</b><div class="weeklyDayBar"><div class="weeklyDayFill" style="width:${pct}%"></div></div><span>${cc.sets} set • ${Math.round(cc.vol).toLocaleString('tr-TR')} kg • ${label}</span></div>`;
+    return `<div class="weeklyDayItem"><b>${trDate(d)}</b><div class="weeklyDayBar"><div class="weeklyDayFill" style="width:${pct}%"></div></div><span>${cc.sets} set • ${Math.round(cc.vol).toLocaleString('tr-TR')} kg • ${escapeAttr(label)}</span></div>`;
   }).join('');
   let avgSets=completed?Math.round(c.sets/completed):0;
   let verdict=c.sets===0?'Veri bekleniyor.':(c.sets<14?'Hafif hafta. Toparlanma veya giriş haftası gibi duruyor.':(c.sets<=28?'Dengeli ve yönetilebilir bir hafta.':'Yüksek hacimli hafta. Recovery ve ağrı sinyallerini takip et.'));
@@ -7142,10 +7160,10 @@ function renderWeeklyReport(){
         <div class="weeklyMetricBox"><small>Tekrar</small><b>${c.reps}</b></div>
         <div class="weeklyMetricBox"><small>Hacim</small><b>${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div>
       </div>
-      <div class="weeklyInsight"><b>Odak:</b> ${topPart[0]} (${topPart[1]} set). <b>Ortalama:</b> ${avgSets} set/gün. ${verdict}${shared?` <b>Aktivite:</b> ${shared.activityDays} gün · ${Math.round(shared.activityMinutes)} dk.`:''}</div>
+      <div class="weeklyInsight"><b>Odak:</b> ${escapeAttr(topPart[0])} (${topPart[1]} set). <b>Ortalama:</b> ${avgSets} set/gün. ${escapeAttr(verdict)}${shared?` <b>Aktivite:</b> ${shared.activityDays} gün · ${Math.round(shared.activityMinutes)} dk.`:''}</div>
     </div>
     <div class="weeklyPremiumCard">
-      <div class="weeklyPremiumHead"><div><small>Day Distribution</small><b>Gün Gün Dağılım</b></div><div class="weeklyPremiumPill">${topPart[0]}</div></div>
+      <div class="weeklyPremiumHead"><div><small>Day Distribution</small><b>Gün Gün Dağılım</b></div><div class="weeklyPremiumPill">${escapeAttr(topPart[0])}</div></div>
       <div class="weeklyDayList">${days}</div>
     </div>
   </div>`;
@@ -7266,11 +7284,11 @@ function renderProgressMotivation(){
   let dates=weekDates();
   let weekEvents=events.filter(e=>dates.includes(e.date));
   if(weekEvents.length){
-    let top=weekEvents.slice(0,3).map(e=>`<div><span class="highlight">${e.type}</span> • <b>${e.exercise}</b><br><small>${e.text} • ${trDate(e.date)}</small></div>`).join('');
+    let top=weekEvents.slice(0,3).map(e=>`<div><span class="highlight">${escapeAttr(e.type)}</span> • <b>${escapeAttr(e.exercise)}</b><br><small>${escapeAttr(e.text)} • ${trDate(e.date)}</small></div>`).join('');
     el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Gelişim sinyali var.</b><span>Bu hafta ${weekEvents.length} PR/gelişim yakalandı. Risk düşük/orta kaldığı sürece kontrollü ilerleme devam edebilir.</span></div><div class="progressPremiumScore">${weekEvents.length} PR</div></div><div class="progressPremiumList">${top}</div></div>`;
   }else if(events.length){
     let last=events[0];
-    el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Bu hafta sakin ilerleme.</b><span>Yeni PR yok; bu kötü değil. Form, ağrı kontrolü ve düzenli veri daha önemli.</span></div><div class="progressPremiumScore">STABLE</div></div><div class="progressPremiumList"><div>Son PR: <b>${last.exercise}</b><br><small>${last.type} • ${last.text} • ${trDate(last.date)}</small></div></div></div>`;
+    el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Bu hafta sakin ilerleme.</b><span>Yeni PR yok; bu kötü değil. Form, ağrı kontrolü ve düzenli veri daha önemli.</span></div><div class="progressPremiumScore">STABLE</div></div><div class="progressPremiumList"><div>Son PR: <b>${escapeAttr(last.exercise)}</b><br><small>${escapeAttr(last.type)} • ${escapeAttr(last.text)} • ${trDate(last.date)}</small></div></div></div>`;
   }else{
     el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Veri birikiyor.</b><span>Aynı hareketlerde birkaç seans oluştuktan sonra PR takibi anlamlı hale gelecek.</span></div><div class="progressPremiumScore">BUILD</div></div></div>`;
   }
@@ -7300,14 +7318,14 @@ function renderReports(){
   if(hero){
     hero.innerHTML=`
       <div class="analyticsHeroCard"><small>Training Load</small><b>${Math.round(totals.volume).toLocaleString('tr-TR')} kg</b><span>Toplam hacim • ${totals.sets} set / ${totals.reps} tekrar</span></div>
-      <div class="analyticsHeroCard"><small>Top Focus</small><b>${topPart[0]}</b><span>${topPart[1]} set ile en yoğun bölge</span></div>
+      <div class="analyticsHeroCard"><small>Top Focus</small><b>${escapeAttr(topPart[0])}</b><span>${topPart[1]} set ile en yoğun bölge</span></div>
       <div class="analyticsHeroCard"><small>Latest Log</small><b>${latestDate==='-'?'-':trDate(latestDate)}</b><span>${bestEntries.length} hareket için best set kaydı</span></div>`;
   }
 
   let maxVol=volumeEntries.length?Math.max(...volumeEntries.map(x=>x[1])):1;
   volumeCards.innerHTML=volumeEntries.slice(0,8).map(([k,v])=>{
     let pct=Math.max(8,Math.round((v/maxVol)*100));
-    return `<div class="volumeMiniCard"><div class="volumeMiniTop"><b>${k}</b><span>${v} set</span></div><div><div class="volumeBarTrack"><div class="volumeBarFill" style="width:${pct}%"></div></div><div class="volumeMiniMeta"><span>Haftalık/kümülatif yük</span><span>${pct}%</span></div></div></div>`;
+    return `<div class="volumeMiniCard"><div class="volumeMiniTop"><b>${escapeAttr(k)}</b><span>${v} set</span></div><div><div class="volumeBarTrack"><div class="volumeBarFill" style="width:${pct}%"></div></div><div class="volumeMiniMeta"><span>Haftalık/kümülatif yük</span><span>${pct}%</span></div></div></div>`;
   }).join('') || `<div class="volumeMiniCard"><div class="volumeMiniTop"><b>Veri bekleniyor</b><span>0 set</span></div><div class="volumeMiniMeta"><span>Antrenman girildiğinde hacim özeti oluşacak.</span></div></div>`;
 
   let pill=document.getElementById('bestWeightsPill');
@@ -7315,10 +7333,10 @@ function renderReports(){
   let topBest=bestEntries.slice(0,12);
   bestRows.innerHTML=topBest.map(([ex,b])=>`
     <div class="bestWeightItem">
-      <div class="bestWeightItemTop"><b>${ex}</b><span>${b.weight} kg</span></div>
+      <div class="bestWeightItemTop"><b>${escapeAttr(ex)}</b><span>${escapeAttr(b.weight)} kg</span></div>
       <div class="bestWeightMeta">
-        <div><small>Reps</small><strong>${b.reps}</strong></div>
-        <div><small>Part</small><strong>${b.bodyPart||'-'}</strong></div>
+        <div><small>Reps</small><strong>${escapeAttr(b.reps)}</strong></div>
+        <div><small>Part</small><strong>${escapeAttr(b.bodyPart||'-')}</strong></div>
         <div><small>Date</small><strong>${b.date?trDate(b.date):'-'}</strong></div>
       </div>
     </div>`).join('') || `<div class="bestWeightItem"><div class="bestWeightItemTop"><b>Veri bekleniyor</b><span>-</span></div><div class="bestWeightMeta"><div><small>Reps</small><strong>-</strong></div><div><small>Part</small><strong>-</strong></div><div><small>Date</small><strong>-</strong></div></div></div>`;
@@ -7401,7 +7419,7 @@ function renderCoachPanels(){
   let injury=calculateInjuryRisk(selectedDate);
   if(!rows.length){
     if(readiness.today.watch.length){
-      el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>Aktivite günü</b></div><div class="coachPremiumPill">${readiness.status}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Aktivite</small><b>${readiness.today.types.join(' + ')}</b></div><div class="coachPremiumStat"><small>Readiness</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${injury.level}</b></div></div><div class="coachPremiumMessage">${Math.round(readiness.today.minutes)} dk, ${readiness.today.active} aktif kcal. ${readiness.advice} ${injury.deload}</div></div>`;
+      el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>Aktivite günü</b></div><div class="coachPremiumPill">${escapeAttr(readiness.status)}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Aktivite</small><b>${escapeAttr(readiness.today.types.join(' + '))}</b></div><div class="coachPremiumStat"><small>Readiness</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${escapeAttr(injury.level)}</b></div></div><div class="coachPremiumMessage">${Math.round(readiness.today.minutes)} dk, ${escapeAttr(readiness.today.active)} aktif kcal. ${escapeAttr(readiness.advice)} ${escapeAttr(injury.deload)}</div></div>`;
       tg.innerHTML='<div class="nextTargetsPremium"><div class="nextTargetPremiumItem"><div><b>Gym hedefi yok</b><span>Bugün aktivite recovery/kondisyon yükü olarak kaydedildi.</span></div><div class="nextTargetBadge">Activity</div></div></div>';
     }else{
       el.innerHTML='<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>Veri bekleniyor</b></div><div class="coachPremiumPill">Ready</div></div><div class="coachPremiumMessage">Bu gün için antrenman veya aktivite verisi yok. Veri girildiğinde koç kararı burada oluşur.</div></div>';
@@ -7414,7 +7432,7 @@ function renderCoachPanels(){
   let advice='Hacim kontrollü. Sonraki seansta tekrar kalitesi ve form standardını koru.';
   if(c.sets<14) advice='Hacim düşük. Enerjin iyiyse ana harekette 1-2 kaliteli set eklenebilir.';
   if(c.sets>24) advice='Hacim yüksek. Sonraki seansta toparlanma ve form kalitesi öncelik olmalı.';
-  el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>${trDate(selectedDate)} karar özeti</b></div><div class="coachPremiumPill">${level}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Hacim</small><b>${c.sets} set</b></div><div class="coachPremiumStat"><small>Readiness</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${injury.level}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${advice} ${readiness.advice} ${injury.deload}${note}</div></div>`;
+  el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>${trDate(selectedDate)} karar özeti</b></div><div class="coachPremiumPill">${escapeAttr(level)}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Hacim</small><b>${c.sets} set</b></div><div class="coachPremiumStat"><small>Readiness</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${escapeAttr(injury.level)}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${escapeAttr(advice)} ${escapeAttr(readiness.advice)} ${escapeAttr(injury.deload)}${escapeAttr(note)}</div></div>`;
   let byEx={};
   rows.forEach(r=>{
     if(!byEx[r.exercise]) byEx[r.exercise]=[];
@@ -7425,7 +7443,7 @@ function renderCoachPanels(){
     let reps=sets.map(s=>Number(s.reps)||0);
     let avgReps=Math.round(reps.reduce((a,b)=>a+b,0)/Math.max(1,reps.length));
     let target=avgReps>=10?`Ağırlığı koru veya küçük artış dene: ${maxW} kg+`:`Ağırlığı koru, hedef tekrar: ${avgReps+1}`;
-    return `<div class="nextTargetPremiumItem"><div><b>${ex}</b><span>${target}</span></div><div class="nextTargetBadge">Next</div></div>`;
+    return `<div class="nextTargetPremiumItem"><div><b>${escapeAttr(ex)}</b><span>${escapeAttr(target)}</span></div><div class="nextTargetBadge">Next</div></div>`;
   }).join('');
   tg.innerHTML=`<div class="nextTargetsPremium">${items||'<div class="nextTargetPremiumItem"><div><b>Hedef bekleniyor</b><span>Set verisi arttıkça hedefler netleşecek.</span></div><div class="nextTargetBadge">Pending</div></div>'}</div>`;
 }
@@ -7444,12 +7462,12 @@ function renderPhoenixReport(){
   let top=Object.entries(groups).sort((a,b)=>b[1]-a[1])[0];
   let completed=dates.filter(d=>dayData(d).length).length;
   let verdict=c.sets>=45&&c.sets<=90?'Haftalık hacim güçlü ama yönetilebilir görünüyor.':'Haftalık yükü veri arttıkça daha net dengeleyeceğiz.';
-  el.innerHTML=`<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Report</small><b>Haftalık koç özeti</b></div><div class="coachPremiumPill">${completed}/7 gün</div></div><div class="phoenixPremiumRows"><div class="phoenixPremiumRow"><span>Toplam yük</span><b>${c.sets} set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div><div class="phoenixPremiumRow"><span>Ana odak</span><b>${top?top[0]+' • '+top[1]+' set':'-'}</b></div><div class="phoenixPremiumRow"><span>Hafta aralığı</span><b>${trDate(weekStart)} - ${trDate(addDays(weekStart,6))}</b></div></div><div class="coachPremiumMessage"><b>Simurg yorumu:</b> ${verdict}</div></div>`;
+  el.innerHTML=`<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Report</small><b>Haftalık koç özeti</b></div><div class="coachPremiumPill">${completed}/7 gün</div></div><div class="phoenixPremiumRows"><div class="phoenixPremiumRow"><span>Toplam yük</span><b>${c.sets} set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div><div class="phoenixPremiumRow"><span>Ana odak</span><b>${escapeAttr(top?top[0]+' • '+top[1]+' set':'-')}</b></div><div class="phoenixPremiumRow"><span>Hafta aralığı</span><b>${trDate(weekStart)} - ${trDate(addDays(weekStart,6))}</b></div></div><div class="coachPremiumMessage"><b>Simurg yorumu:</b> ${escapeAttr(verdict)}</div></div>`;
 }
 
 function renderSide(){let c=calc(DATA.workouts);sideSets.textContent=c.sets+' set';sideReps.textContent=c.reps+' tekrar';sideVolume.textContent=Math.round(c.vol).toLocaleString('tr-TR')+' kg'}
-function openEditExercise(ex){editIndexes=DATA.workouts.map((w,i)=>w.exercise===ex&&w.date===selectedDate?i:null).filter(i=>i!==null);let first=DATA.workouts[editIndexes[0]];modalTitle.textContent=ex+' düzenle';modalBody.innerHTML=`<input id="editExerciseName" value="${first.exercise}"><select id="editBodyPart"><option>${first.bodyPart}</option><option>Chest</option><option>Back</option><option>Rear Delt</option><option>Biceps</option><option>Triceps</option><option>Side Delt</option><option>Scapula</option></select>`+editIndexes.map((idx,i)=>{let s=DATA.workouts[idx];return `<div class="form5"><input value="Set ${i+1}" disabled><input value="${s.notes}" id="note_${idx}"><input value="1" disabled><input id="reps_${idx}" value="${s.reps}"><input id="weight_${idx}" value="${s.weight}"></div>`}).join('');editModal.classList.add('active')}
-function openEditSet(idx){editIndexes=[idx];let s=DATA.workouts[idx];modalTitle.textContent=s.exercise+' set düzenle';modalBody.innerHTML=`<input id="editExerciseName" value="${s.exercise}"><select id="editBodyPart"><option>${s.bodyPart}</option><option>Chest</option><option>Back</option><option>Rear Delt</option><option>Biceps</option><option>Triceps</option><option>Side Delt</option><option>Scapula</option></select><input id="reps_${idx}" value="${s.reps}" placeholder="Tekrar"><input id="weight_${idx}" value="${s.weight}" placeholder="Kilo"><input id="note_${idx}" value="${s.notes}" placeholder="Not">`;editModal.classList.add('active')}
+function openEditExercise(ex){editIndexes=DATA.workouts.map((w,i)=>w.exercise===ex&&w.date===selectedDate?i:null).filter(i=>i!==null);let first=DATA.workouts[editIndexes[0]];if(!first)return;modalTitle.textContent=ex+' düzenle';modalBody.innerHTML=`<input id="editExerciseName" value="${escapeAttr(first.exercise)}"><select id="editBodyPart"><option>${escapeAttr(first.bodyPart)}</option><option>Chest</option><option>Back</option><option>Rear Delt</option><option>Biceps</option><option>Triceps</option><option>Side Delt</option><option>Scapula</option></select>`+editIndexes.map((idx,i)=>{let s=DATA.workouts[idx];return `<div class="form5"><input value="Set ${i+1}" disabled><input value="${escapeAttr(s.notes)}" id="note_${idx}"><input value="1" disabled><input id="reps_${idx}" value="${escapeAttr(s.reps)}"><input id="weight_${idx}" value="${escapeAttr(s.weight)}"></div>`}).join('');editModal.classList.add('active')}
+function openEditSet(idx){idx=safeDataIndex(idx);let s=idx==null?null:DATA.workouts[idx];if(!s)return;editIndexes=[idx];modalTitle.textContent=String(s.exercise||'')+' set düzenle';modalBody.innerHTML=`<input id="editExerciseName" value="${escapeAttr(s.exercise)}"><select id="editBodyPart"><option>${escapeAttr(s.bodyPart)}</option><option>Chest</option><option>Back</option><option>Rear Delt</option><option>Biceps</option><option>Triceps</option><option>Side Delt</option><option>Scapula</option></select><input id="reps_${idx}" value="${escapeAttr(s.reps)}" placeholder="Tekrar"><input id="weight_${idx}" value="${escapeAttr(s.weight)}" placeholder="Kilo"><input id="note_${idx}" value="${escapeAttr(s.notes)}" placeholder="Not">`;editModal.classList.add('active')}
 function saveEdit(){let name=document.getElementById('editExerciseName').value, body=document.getElementById('editBodyPart').value;editIndexes.forEach(idx=>{DATA.workouts[idx].exercise=name;DATA.workouts[idx].bodyPart=body;DATA.workouts[idx].reps=Number(document.getElementById('reps_'+idx).value)||0;DATA.workouts[idx].weight=Number(String(document.getElementById('weight_'+idx).value).replace(',','.'))||0;DATA.workouts[idx].notes=document.getElementById('note_'+idx)?.value||''});closeModal();save()}
 function deleteEditing(){editIndexes.sort((a,b)=>b-a).forEach(i=>DATA.workouts.splice(i,1));closeModal();save()}
 function closeModal(){editModal.classList.remove('active')}
@@ -7551,7 +7569,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=cloud-auth-phase-2b-1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=security-xss-hardening-1').catch(function(){});
   });
 }
 </script>
@@ -7575,7 +7593,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     let typeText=shortTypeList(t.types);
     let reasonText=r.reasons.length?r.reasons.slice(0,3).join(', '):'olumsuz sinyal yok';
     let bg=`conic-gradient(#23ce7a 0 ${r.score}%, #172033 ${r.score}% 100%)`;
-    return `<div class="readinessScoreBox"><div class="readinessCircle" style="background:${bg}">${r.score}</div><div class="readinessMeta"><b>${r.status}</b><span>${r.advice}</span><div class="readinessPills"><span class="readinessPill activityTag">${typeText}</span><span class="readinessPill">${t.level} load</span><span class="readinessPill">${Math.round(t.minutes)} dk</span><span class="readinessPill">${t.active} kcal</span><span class="readinessPill">${t.avgHR||'-'} bpm</span></div><div class="activityLoadCard"><b>Etkenler:</b> ${reasonText}</div></div></div>`;
+    return `<div class="readinessScoreBox"><div class="readinessCircle" style="background:${bg}">${r.score}</div><div class="readinessMeta"><b>${escapeAttr(r.status)}</b><span>${escapeAttr(r.advice)}</span><div class="readinessPills"><span class="readinessPill activityTag">${escapeAttr(typeText)}</span><span class="readinessPill">${escapeAttr(t.level)} load</span><span class="readinessPill">${Math.round(t.minutes)} dk</span><span class="readinessPill">${escapeAttr(t.active)} kcal</span><span class="readinessPill">${escapeAttr(t.avgHR||'-')} bpm</span></div><div class="activityLoadCard"><b>Etkenler:</b> ${escapeAttr(reasonText)}</div></div></div>`;
   };
 
   window.renderInjuryRiskHtml=function(date){
@@ -7583,13 +7601,13 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     let cls=r.level==='High'?'high':(r.level==='Moderate'?'moderate':(r.readiness.status==='Recovery'?'recovery':''));
     let signalText=r.signals.length?r.signals.slice(0,3).join(', '):'belirgin risk sinyali yok';
     let pills=[
-      `<span class="injuryRiskPill ${r.level==='High'?'danger':(r.level==='Moderate'?'warn':'')}">Risk ${r.level}</span>`,
+      `<span class="injuryRiskPill ${r.level==='High'?'danger':(r.level==='Moderate'?'warn':'')}">Risk ${escapeAttr(r.level)}</span>`,
       `<span class="injuryRiskPill">Readiness ${r.readiness.score}</span>`,
       `<span class="injuryRiskPill">RPE ${r.today.coach.avgRpe||'-'}</span>`,
       `<span class="injuryRiskPill">${r.today.gym.sets} set</span>`,
-      `<span class="injuryRiskPill">${r.today.level}</span>`
+      `<span class="injuryRiskPill">${escapeAttr(r.today.level)}</span>`
     ].join('');
-    return `<div class="injuryRiskBox"><div class="injuryRiskBadge ${cls}">${r.level}<br>${r.score}/100</div><div class="injuryRiskMeta"><b>Koruma kararı</b><span>${r.deload}</span><div class="injuryRiskPills">${pills}</div><div class="deloadBox"><b>Risk sinyalleri:</b> ${signalText}</div></div></div>`;
+    return `<div class="injuryRiskBox"><div class="injuryRiskBadge ${cls}">${escapeAttr(r.level)}<br>${r.score}/100</div><div class="injuryRiskMeta"><b>Koruma kararı</b><span>${escapeAttr(r.deload)}</span><div class="injuryRiskPills">${pills}</div><div class="deloadBox"><b>Risk sinyalleri:</b> ${escapeAttr(signalText)}</div></div></div>`;
   };
 
   window.renderCoachPanels=function(){
@@ -7603,7 +7621,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     let injury=calculateInjuryRisk(selectedDate);
     if(!rows.length){
       if(readiness.today.watch.length){
-        el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>Aktivite günü</b></div><div class="coachPremiumPill">${readiness.status}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Aktivite</small><b>${shortTypeList(readiness.today.types)}</b></div><div class="coachPremiumStat"><small>Readiness</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${injury.level}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${Math.round(readiness.today.minutes)} dk aktivite, ${readiness.today.active} aktif kcal. ${readiness.advice}</div></div>`;
+        el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>Aktivite günü</b></div><div class="coachPremiumPill">${escapeAttr(readiness.status)}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Aktivite</small><b>${escapeAttr(shortTypeList(readiness.today.types))}</b></div><div class="coachPremiumStat"><small>Readiness</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${escapeAttr(injury.level)}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${Math.round(readiness.today.minutes)} dk aktivite, ${escapeAttr(readiness.today.active)} aktif kcal. ${escapeAttr(readiness.advice)}</div></div>`;
         tg.innerHTML='<div class="nextTargetsPremium"><div class="nextTargetPremiumItem"><div><b>Gym hedefi yok</b><span>Bugün recovery/kondisyon yükü olarak işlendi. Sonraki gym gününde readiness skoruna göre başla.</span></div><div class="nextTargetBadge">Activity</div></div></div>';
       }else{
         el.innerHTML='<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>Veri bekleniyor</b></div><div class="coachPremiumPill">Ready</div></div><div class="coachPremiumMessage">Bu gün için antrenman veya aktivite verisi yok. Veri girildiğinde koç kararı burada oluşur.</div></div>';
@@ -7616,7 +7634,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     let advice='Hacim kontrollü. Form standardını koru; progression aceleye gelmesin.';
     if(c.sets<14) advice='Hacim düşük. Enerjin iyiyse ana harekette 1-2 kaliteli set eklenebilir.';
     if(c.sets>24) advice='Hacim yüksek. Sonraki seansta recovery ve teknik kalite öncelik olmalı.';
-    el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>${trDate(selectedDate)} karar özeti</b></div><div class="coachPremiumPill">${level}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Hacim</small><b>${c.sets} set</b></div><div class="coachPremiumStat"><small>Readiness</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${injury.level}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${advice} ${readiness.advice} ${injury.deload}${note}</div></div>`;
+    el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Coach Verdict</small><b>${trDate(selectedDate)} karar özeti</b></div><div class="coachPremiumPill">${escapeAttr(level)}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Hacim</small><b>${c.sets} set</b></div><div class="coachPremiumStat"><small>Readiness</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${escapeAttr(injury.level)}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${escapeAttr(advice)} ${escapeAttr(readiness.advice)} ${escapeAttr(injury.deload)}${escapeAttr(note)}</div></div>`;
     let byEx={};
     rows.forEach(r=>{ if(!byEx[r.exercise]) byEx[r.exercise]=[]; byEx[r.exercise].push(r); });
     let items=Object.entries(byEx).slice(0,4).map(([ex,sets])=>{
@@ -7624,7 +7642,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
       let reps=sets.map(s=>Number(s.reps)||0);
       let avgReps=Math.round(reps.reduce((a,b)=>a+b,0)/Math.max(1,reps.length));
       let target=avgReps>=10?`Kilo sabit; iyi hissedersen küçük artış dene.`:`Aynı kiloda hedef tekrar: ${avgReps+1}.`;
-      return `<div class="nextTargetPremiumItem"><div><b>${ex}</b><span>${maxW?maxW+' kg · ':''}${target}</span></div><div class="nextTargetBadge">Next</div></div>`;
+      return `<div class="nextTargetPremiumItem"><div><b>${escapeAttr(ex)}</b><span>${maxW?maxW+' kg · ':''}${escapeAttr(target)}</span></div><div class="nextTargetBadge">Next</div></div>`;
     }).join('');
     tg.innerHTML=`<div class="nextTargetsPremium">${items||'<div class="nextTargetPremiumItem"><div><b>Hedef bekleniyor</b><span>Set verisi arttıkça hedefler netleşecek.</span></div><div class="nextTargetBadge">Pending</div></div>'}</div>`;
   };
@@ -7644,7 +7662,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     let top=Object.entries(groups).sort((a,b)=>b[1]-a[1])[0];
     let completed=dates.filter(d=>dayData(d).length || watchRowsForDate(d).length).length;
     let verdict=c.sets>=45&&c.sets<=90?'Haftalık hacim güçlü ama yönetilebilir görünüyor.':'Haftalık yük veri arttıkça daha net dengelenecek.';
-    el.innerHTML=`<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Report</small><b>Haftalık koç özeti</b></div><div class="coachPremiumPill">${completed}/7 gün</div></div><div class="phoenixPremiumRows"><div class="phoenixPremiumRow"><span>Toplam yük</span><b>${c.sets} set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div><div class="phoenixPremiumRow"><span>Ana odak</span><b>${top?top[0]+' • '+top[1]+' set':'-'}</b></div><div class="phoenixPremiumRow"><span>Hafta</span><b>${trDate(weekStart)} - ${trDate(addDays(weekStart,6))}</b></div></div><div class="coachPremiumMessage"><b>Simurg yorumu:</b> ${verdict}</div></div>`;
+    el.innerHTML=`<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Report</small><b>Haftalık koç özeti</b></div><div class="coachPremiumPill">${completed}/7 gün</div></div><div class="phoenixPremiumRows"><div class="phoenixPremiumRow"><span>Toplam yük</span><b>${c.sets} set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div><div class="phoenixPremiumRow"><span>Ana odak</span><b>${escapeAttr(top?top[0]+' • '+top[1]+' set':'-')}</b></div><div class="phoenixPremiumRow"><span>Hafta</span><b>${trDate(weekStart)} - ${trDate(addDays(weekStart,6))}</b></div></div><div class="coachPremiumMessage"><b>Simurg yorumu:</b> ${escapeAttr(verdict)}</div></div>`;
   };
 
   window.renderProgressMotivation=function(){
@@ -7654,11 +7672,11 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     let history=shared&&shared.prs?shared.prs.history:[];
     let weekEvents=shared&&shared.prs?shared.prs.newEvents:[];
     if(weekEvents.length){
-      let top=weekEvents.slice(0,2).map(e=>`<div><span class="highlight">${e.types.join(' + ')} PR</span> • <b>${e.exercise}</b><br><small>${e.weight} kg • ${Math.round(e.volume).toLocaleString('tr-TR')} kg hacim • ${trDate(e.date)}</small></div>`).join('');
+      let top=weekEvents.slice(0,2).map(e=>`<div><span class="highlight">${escapeAttr(e.types.join(' + '))} PR</span> • <b>${escapeAttr(e.exercise)}</b><br><small>${escapeAttr(e.weight)} kg • ${Math.round(e.volume).toLocaleString('tr-TR')} kg hacim • ${trDate(e.date)}</small></div>`).join('');
       el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Gelişim sinyali var.</b><span>Bu hafta ${weekEvents.length} doğrulanmış yeni PR var. Risk düşük veya orta kaldığı sürece kontrollü ilerleme devam eder.</span></div><div class="progressPremiumScore">${weekEvents.length} PR</div></div><div class="progressPremiumList">${top}</div></div>`;
     }else if(history.length){
       let last=history[history.length-1];
-      el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Bu hafta sakin ilerleme.</b><span>Yeni PR yok; form, ağrı kontrolü ve düzenli veri öncelikli.</span></div><div class="progressPremiumScore">DENGELİ</div></div><div class="progressPremiumList"><div>Son PR: <b>${last.exercise}</b><br><small>${last.types.join(' + ')} PR • ${last.weight} kg • ${trDate(last.date)}</small></div></div></div>`;
+      el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Bu hafta sakin ilerleme.</b><span>Yeni PR yok; form, ağrı kontrolü ve düzenli veri öncelikli.</span></div><div class="progressPremiumScore">DENGELİ</div></div><div class="progressPremiumList"><div>Son PR: <b>${escapeAttr(last.exercise)}</b><br><small>${escapeAttr(last.types.join(' + '))} PR • ${escapeAttr(last.weight)} kg • ${trDate(last.date)}</small></div></div></div>`;
     }else{
       el.innerHTML=`<div class="progressPremium"><div class="progressPremiumHead"><div><b>Veri birikiyor.</b><span>Aynı hareketlerde birkaç seans oluştuktan sonra PR takibi anlamlı hale gelecek.</span></div><div class="progressPremiumScore">BİRİKİYOR</div></div></div>`;
     }
@@ -7855,7 +7873,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     let decision=injury.level==='High'?'Koruma öncelikli.':(injury.level==='Moderate'?'Kontrollü yüklen.':(readiness.status==='Recovery'?'Recovery odaklı ilerle.':'Plan uygulanabilir.'));
     let recommendation=injury.level==='High'?injury.deload:(injury.level==='Moderate'?'Bugün yük artırma; 1-2 tekrar rezerv bırak.':readiness.advice);
     let activityText=readiness.today.source||(readiness.today.types.length?readiness.today.types.join(' + '):(rows.length?'Gym':'Aktivite yok'));
-    el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Koç Kararı</small><b>${trDate(selectedDate)} karar özeti</b></div><div class="coachPremiumPill">${window.SimurgLabels?window.SimurgLabels.ui(readiness.status):readiness.status}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Aktivite</small><b>${activityText}</b></div><div class="coachPremiumStat"><small>Hazırlık</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${window.SimurgLabels?window.SimurgLabels.ui(injury.level):injury.level}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${decision}<br><b>Neden:</b> ${reasons.length?reasons.join(' · '):'belirgin olumsuz sinyal yok'}.<br><b>Öneri:</b> ${recommendation}</div></div>`;
+    el.innerHTML=`<div class="coachPremiumBox"><div class="coachPremiumHead"><div><small>Koç Kararı</small><b>${trDate(selectedDate)} karar özeti</b></div><div class="coachPremiumPill">${escapeAttr(window.SimurgLabels?window.SimurgLabels.ui(readiness.status):readiness.status)}</div></div><div class="coachPremiumStats"><div class="coachPremiumStat"><small>Aktivite</small><b>${escapeAttr(activityText)}</b></div><div class="coachPremiumStat"><small>Hazırlık</small><b>${readiness.score}/100</b></div><div class="coachPremiumStat"><small>Risk</small><b>${escapeAttr(window.SimurgLabels?window.SimurgLabels.ui(injury.level):injury.level)}</b></div></div><div class="coachPremiumMessage"><b>Karar:</b> ${escapeAttr(decision)}<br><b>Neden:</b> ${escapeAttr(reasons.length?reasons.join(' · '):'belirgin olumsuz sinyal yok')}.<br><b>Öneri:</b> ${escapeAttr(recommendation)}</div></div>`;
     if(!rows.length){
       tg.innerHTML='<div class="nextTargetsPremium"><div class="nextTargetPremiumItem"><div><b>Gym hedefi yok</b><span>Bugün aktivite yükü toparlanma/kondisyon olarak işlendi. Sonraki Gym gününde hazırlık ve risk skorunu baz al.</span></div><div class="nextTargetBadge">Aktivite</div></div></div>';return;
     }
@@ -7863,7 +7881,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     let items=Object.entries(byEx).slice(0,4).map(([ex,sets])=>{
       let maxW=Math.max(...sets.map(s=>n(s.weight))); let reps=sets.map(s=>n(s.reps)); let avgReps=Math.round(reps.reduce((a,b)=>a+b,0)/Math.max(1,reps.length));
       let target=injury.level==='High'?'Yük artırma; form ve ağrı kontrolü.':(avgReps>=10?`Aynı kiloda kaliteyi koru; iyi hissedersen küçük artış dene.`:`${maxW} kg civarı, hedef tekrar: ${avgReps+1}.`);
-      return `<div class="nextTargetPremiumItem"><div><b>${ex}</b><span>${target}</span></div><div class="nextTargetBadge">Sonraki</div></div>`;
+      return `<div class="nextTargetPremiumItem"><div><b>${escapeAttr(ex)}</b><span>${escapeAttr(target)}</span></div><div class="nextTargetBadge">Sonraki</div></div>`;
     }).join('');
     tg.innerHTML=`<div class="nextTargetsPremium">${items}</div>`;
   };
@@ -7874,7 +7892,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     let c=calc(rows); let completed=[...new Set([...rows.map(r=>r.date),...sessions.map(r=>r.session.date)])].length; let active=sessions.reduce((a,r)=>a+n(r.active),0); let minutes=Math.round(sessions.reduce((a,r)=>a+n(r.minutes),0));
     let groups={}; rows.forEach(r=>groups[r.bodyPart]=(groups[r.bodyPart]||0)+(n(r.sets)||1)); let top=Object.entries(groups).sort((a,b)=>b[1]-a[1])[0];
     let verdict=c.sets>24?'Hacim yüksek; recovery sinyallerini takip et.':(active>350?'Aktivite yükü belirgin; sonraki gym gününde kontrollü başla.':'Hafta yönetilebilir görünüyor.');
-    el.innerHTML=`<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Raporu</small><b>Haftalık koç özeti</b></div><div class="coachPremiumPill">${completed}/7 gün</div></div><div class="phoenixPremiumRows"><div class="phoenixPremiumRow"><span>Gym yükü</span><b>${c.sets} set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div><div class="phoenixPremiumRow"><span>Aktivite</span><b>${minutes} dk • ${active} kcal</b></div><div class="phoenixPremiumRow"><span>Ana odak</span><b>${top?top[0]+' • '+top[1]+' set':'Aktivite / Toparlanma'}</b></div></div><div class="coachPremiumMessage"><b>Simurg yorumu:</b> ${verdict}</div></div>`;
+    el.innerHTML=`<div class="phoenixPremiumBox"><div class="coachPremiumHead"><div><small>Phoenix Raporu</small><b>Haftalık koç özeti</b></div><div class="coachPremiumPill">${completed}/7 gün</div></div><div class="phoenixPremiumRows"><div class="phoenixPremiumRow"><span>Gym yükü</span><b>${c.sets} set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div><div class="phoenixPremiumRow"><span>Aktivite</span><b>${minutes} dk • ${active} kcal</b></div><div class="phoenixPremiumRow"><span>Ana odak</span><b>${escapeAttr(top?top[0]+' • '+top[1]+' set':'Aktivite / Toparlanma')}</b></div></div><div class="coachPremiumMessage"><b>Simurg yorumu:</b> ${escapeAttr(verdict)}</div></div>`;
   };
   // Polish Data Center labels after render without changing data flow
   function polishDataCenter(){
@@ -7948,6 +7966,19 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     return {label,cls,role,score};
   }
   window.classifyActivityIntensity=classifyActivityIntensity;
+  function openReportDate(value){
+    const date=String(value||'');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+    selectedDate=date;
+    weekStart=mondayOf(selectedDate);
+    if(window.innerWidth<=860)simurgV8Go('workout','logger');
+    else{show('workout',document.querySelector('.nav button'));render();}
+  }
+  const reportRoot=document.getElementById('dailyReport');
+  if(reportRoot){
+    reportRoot.addEventListener('click',event=>{const card=event.target.closest('[data-report-date]');if(card)openReportDate(card.dataset.reportDate)});
+    reportRoot.addEventListener('keydown',event=>{const card=event.target.closest('[data-report-date]');if(card&&(event.key==='Enter'||event.key===' ')){event.preventDefault();openReportDate(card.dataset.reportDate)}});
+  }
   window.renderDailyReport=function(){
     let dates=[...new Set([...(DATA.workouts||[]).map(w=>w.date),...(DATA.appleWatch||[]).map(w=>w.date)])].filter(Boolean).sort((a,b)=>parseDate(b)-parseDate(a));
     if(!dates.length){dailyReport.innerHTML='<div class="card"><h2>Daily Summary</h2><div class="reportText">Henüz antrenman veya aktivite verisi yok.</div></div>';return;}
@@ -7956,13 +7987,13 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
       let items=dayData(date), c=calc(items), activity=activitySummaryForDate(date), readiness=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):calculateReadiness(date);
       let hasGym=items.length>0, hasActivity=!!activity, intensity=hasActivity?classifyActivityIntensity(activity):null;
       if(hasGym){
-        let topPart=Object.entries(c.parts).sort((a,b)=>b[1]-a[1])[0]||['-',0], best=items.slice().sort((a,b)=>b.weight-a.weight)[0], exCount=Object.keys(c.exs).length, exMini=Object.keys(c.exs).map(ex=>`<em>${ex}</em>`).join('');
-        let activityLine=hasActivity?`<span>Extra Activity: ${activity.emoji} ${esc(activity.name)} • ${activity.duration||'-'} • ${activity.active||0} kcal • ${intensity.label}</span>`:'';
-        cards.push(`<div class="dailyMiniCard dailyGymCard" onclick="selectedDate='${date}';weekStart=mondayOf(selectedDate);window.innerWidth<=860?simurgV8Go('workout','logger'):(show('workout',document.querySelector('.nav button')),render())"><div class="dailyMiniTop"><div><b>${trDate(date)}</b><span>${items[0]?.day||dayName(date)} · Gym Training</span></div><strong>${c.sets} set</strong></div><div class="dailyMiniReadiness"><span>Readiness ${readiness.score}/100</span><span>${readiness.status}</span></div><div class="dailyMiniStats"><span>${c.reps} reps</span><span>${Math.round(c.vol).toLocaleString('tr-TR')} kg</span><span>${exCount} exercises</span><span>${topPart[0]}</span></div><div class="dailyMiniExercises">${exMini}</div><div class="dailyMiniFooter"><span>Best: ${best?best.exercise+' '+best.weight+'kg':'-'}</span>${activityLine}</div></div>`);
+        let topPart=Object.entries(c.parts).sort((a,b)=>b[1]-a[1])[0]||['-',0], best=items.slice().sort((a,b)=>b.weight-a.weight)[0], exCount=Object.keys(c.exs).length, exMini=Object.keys(c.exs).map(ex=>`<em>${esc(ex)}</em>`).join('');
+        let activityLine=hasActivity?`<span>Extra Activity: ${esc(activity.emoji)} ${esc(activity.name)} • ${esc(activity.duration||'-')} • ${escapeAttr(activity.active||0)} kcal • ${esc(intensity.label)}</span>`:'';
+        cards.push(`<div class="dailyMiniCard dailyGymCard" role="button" tabindex="0" data-report-date="${escapeAttr(date)}"><div class="dailyMiniTop"><div><b>${escapeAttr(trDate(date))}</b><span>${escapeAttr(items[0]?.day||dayName(date))} · Gym Training</span></div><strong>${c.sets} set</strong></div><div class="dailyMiniReadiness"><span>Readiness ${readiness.score}/100</span><span>${escapeAttr(readiness.status)}</span></div><div class="dailyMiniStats"><span>${c.reps} reps</span><span>${Math.round(c.vol).toLocaleString('tr-TR')} kg</span><span>${exCount} exercises</span><span>${escapeAttr(topPart[0])}</span></div><div class="dailyMiniExercises">${exMini}</div><div class="dailyMiniFooter"><span>Best: ${escapeAttr(best?best.exercise+' '+best.weight+'kg':'-')}</span>${activityLine}</div></div>`);
       }
       if(hasActivity && !hasGym){
         let segmentText=activity.rows.length>1?` • ${activity.rows.length} kayıt`:'';
-        cards.push(`<div class="dailyMiniCard dailyActivityCard ${intensity.cls}" onclick="selectedDate='${date}';weekStart=mondayOf(selectedDate);window.innerWidth<=860?simurgV8Go('workout','logger'):(show('workout',document.querySelector('.nav button')),render())"><div class="dailyMiniTop"><div><b>${trDate(date)}</b><span>${dayName(date)} · Activity Day</span></div><strong>${intensity.label}</strong></div><div class="dailyActivityTypeLine"><div class="emoji">${activity.emoji}</div><div><b>${esc(activity.name)}</b><span>${intensity.role}${segmentText}</span></div></div><div class="dailyMiniStats"><span>${activity.duration||'-'}</span><span>${activity.active?activity.active+' kcal':'-'}</span><span>${activity.dist||'-'}</span><span>${activity.avgHR?activity.avgHR+' bpm':'-'}</span></div><div class="dailyActivityNote">Gym hacmine eklenmez; readiness, recovery ve günlük fiziksel yük hesabına dahil edilir.</div></div>`);
+        cards.push(`<div class="dailyMiniCard dailyActivityCard ${intensity.cls}" role="button" tabindex="0" data-report-date="${escapeAttr(date)}"><div class="dailyMiniTop"><div><b>${escapeAttr(trDate(date))}</b><span>${escapeAttr(dayName(date))} · Activity Day</span></div><strong>${escapeAttr(intensity.label)}</strong></div><div class="dailyActivityTypeLine"><div class="emoji">${escapeAttr(activity.emoji)}</div><div><b>${esc(activity.name)}</b><span>${escapeAttr(intensity.role+segmentText)}</span></div></div><div class="dailyMiniStats"><span>${escapeAttr(activity.duration||'-')}</span><span>${escapeAttr(activity.active?activity.active+' kcal':'-')}</span><span>${escapeAttr(activity.dist||'-')}</span><span>${escapeAttr(activity.avgHR?activity.avgHR+' bpm':'-')}</span></div><div class="dailyActivityNote">Gym hacmine eklenmez; readiness, recovery ve günlük fiziksel yük hesabına dahil edilir.</div></div>`);
       }
     });
     dailyReport.innerHTML=`<div class="dailyMiniGrid">`+cards.join('')+`</div>`;
@@ -7975,10 +8006,10 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     let loadScore=c.sets*12+active+minutes*2, loadLevel=loadScore>=760?'Yüksek':loadScore>=360?'Orta':(loadScore>0?'Düşük':'Yük Yok'), loadCls=loadLevel==='Yüksek'?'high':(loadLevel==='Orta'?'moderate':'');
     let recoveryNeed=loadLevel==='Yüksek'?'Yüksek':(loadLevel==='Orta'?'Normal':'Düşük');
     let loadAdvice=loadLevel==='Yüksek'?'Bu hafta toplam yük belirgin. Sonraki seansta tükeniş yerine kontrollü tempo ve ağrı takibi öncelikli olsun.':(loadLevel==='Orta'?'Haftalık yük yönetilebilir. Aynı ritmi koru; RPE 8+ birikirse yük artırma.':'Hafta hafif ve temiz gidiyor. Veri gelmeye devam ettikçe koç yorumu güçlenecek.');
-    let days=dates.map(d=>{let cc=calc(dayData(d)), act=activitySummaryForDate(d), pct=Math.min(100,Math.round((cc.sets/maxDay)*100)), label=getProgramType(dayName(d))||dayName(d), actText=act?` • ${act.emoji} ${act.duration||''}`:'';if(window.SimurgLabels)label=window.SimurgLabels.ui(label); return `<div class="weeklyDayItem"><b>${trDate(d)}</b><div class="weeklyDayBar"><div class="weeklyDayFill" style="width:${pct}%"></div></div><span>${cc.sets} set • ${Math.round(cc.vol).toLocaleString('tr-TR')} kg • ${label}${actText}</span></div>`;}).join('');
+    let days=dates.map(d=>{let cc=calc(dayData(d)), act=activitySummaryForDate(d), pct=Math.min(100,Math.round((cc.sets/maxDay)*100)), label=getProgramType(dayName(d))||dayName(d), actText=act?` • ${escapeAttr(act.emoji)} ${escapeAttr(act.duration||'')}`:'';if(window.SimurgLabels)label=window.SimurgLabels.ui(label); return `<div class="weeklyDayItem"><b>${trDate(d)}</b><div class="weeklyDayBar"><div class="weeklyDayFill" style="width:${pct}%"></div></div><span>${cc.sets} set • ${Math.round(cc.vol).toLocaleString('tr-TR')} kg • ${escapeAttr(label)}${actText}</span></div>`;}).join('');
     let avgSets=gymDays?Math.round(c.sets/gymDays):0;
     let verdict=c.sets===0?'Gym verisi yok; varsa aktivite yükü toparlanma hesabına dahil edilir.':(c.sets<14?'Hafif Gym haftası. Toparlanma veya giriş haftası gibi duruyor.':(c.sets<=28?'Dengeli ve yönetilebilir Gym haftası.':'Yüksek hacimli Gym haftası. Toparlanma ve ağrı sinyallerini takip et.'));
-    weeklyReport.innerHTML=`<div class="weeklyPremiumGrid"><div class="weeklyPremiumCard weeklyLoadStatusCard ${loadCls}"><div class="weeklyPremiumHead"><div><small>Haftalık Yük Durumu</small><b>Genel yük ve toparlanma</b></div><div class="weeklyPremiumPill">${loadLevel}</div></div><div class="weeklyLoadMiniGrid"><div class="weeklyLoadMiniBox"><small>Gym</small><b>${gymDays} gün</b></div><div class="weeklyLoadMiniBox"><small>Aktivite</small><b>${activityDays} gün</b></div><div class="weeklyLoadMiniBox"><small>Aktivite Süresi</small><b>${minutes} dk</b></div><div class="weeklyLoadMiniBox"><small>Toparlanma</small><b>${recoveryNeed}</b></div></div><div class="weeklyLoadVerdict"><b>Koç notu:</b> ${loadAdvice}</div></div><div class="weeklyPremiumCard"><div class="weeklyPremiumHead"><div><small>Haftalık Yük</small><b>${trDate(weekStart)} - ${trDate(addDays(weekStart,6))}</b></div><div class="weeklyPremiumPill">${completed}/7 gün</div></div><div class="weeklyMetricGrid"><div class="weeklyMetricBox"><small>Set</small><b>${c.sets}</b></div><div class="weeklyMetricBox"><small>Tekrar</small><b>${c.reps}</b></div><div class="weeklyMetricBox"><small>Hacim</small><b>${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div></div><div class="weeklyInsight"><b>Odak:</b> ${topPart[0]} (${topPart[1]} set). <b>Ortalama:</b> ${avgSets} set/Gym günü. ${verdict}</div></div><div class="weeklyPremiumCard"><div class="weeklyPremiumHead"><div><small>Gün Dağılımı</small><b>Gün Gün Dağılım</b></div><div class="weeklyPremiumPill">${topPart[0]}</div></div><div class="weeklyDayList">${days}</div></div></div>`;
+    weeklyReport.innerHTML=`<div class="weeklyPremiumGrid"><div class="weeklyPremiumCard weeklyLoadStatusCard ${loadCls}"><div class="weeklyPremiumHead"><div><small>Haftalık Yük Durumu</small><b>Genel yük ve toparlanma</b></div><div class="weeklyPremiumPill">${loadLevel}</div></div><div class="weeklyLoadMiniGrid"><div class="weeklyLoadMiniBox"><small>Gym</small><b>${gymDays} gün</b></div><div class="weeklyLoadMiniBox"><small>Aktivite</small><b>${activityDays} gün</b></div><div class="weeklyLoadMiniBox"><small>Aktivite Süresi</small><b>${minutes} dk</b></div><div class="weeklyLoadMiniBox"><small>Toparlanma</small><b>${recoveryNeed}</b></div></div><div class="weeklyLoadVerdict"><b>Koç notu:</b> ${loadAdvice}</div></div><div class="weeklyPremiumCard"><div class="weeklyPremiumHead"><div><small>Haftalık Yük</small><b>${trDate(weekStart)} - ${trDate(addDays(weekStart,6))}</b></div><div class="weeklyPremiumPill">${completed}/7 gün</div></div><div class="weeklyMetricGrid"><div class="weeklyMetricBox"><small>Set</small><b>${c.sets}</b></div><div class="weeklyMetricBox"><small>Tekrar</small><b>${c.reps}</b></div><div class="weeklyMetricBox"><small>Hacim</small><b>${Math.round(c.vol).toLocaleString('tr-TR')} kg</b></div></div><div class="weeklyInsight"><b>Odak:</b> ${escapeAttr(topPart[0])} (${topPart[1]} set). <b>Ortalama:</b> ${avgSets} set/Gym günü. ${escapeAttr(verdict)}</div></div><div class="weeklyPremiumCard"><div class="weeklyPremiumHead"><div><small>Gün Dağılımı</small><b>Gün Gün Dağılım</b></div><div class="weeklyPremiumPill">${escapeAttr(topPart[0])}</div></div><div class="weeklyDayList">${days}</div></div></div>`;
   };
   const previousRender=window.render;
   if(typeof previousRender==='function'){
@@ -8035,8 +8066,8 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
       const dates=[...new Set(newW.map(w=>w.date).filter(Boolean))];
       const ex=[...new Set(newW.map(w=>w.exercise).filter(Boolean))];
       parts.push(`<span class="sumPill">🏋️ <strong>${newW.length}</strong> workout kaydı</span>`);
-      if(dates[0]) parts.push(`<span class="sumPill">📅 ${dates.map(trSafeDate).join(', ')}</span>`);
-      if(ex.length) parts.push(`<span class="sumPill">${ex.slice(0,3).join(' · ')}${ex.length>3?' +'+(ex.length-3):''}</span>`);
+      if(dates[0]) parts.push(`<span class="sumPill">📅 ${dates.map(trSafeDate).map(escapeAttr).join(', ')}</span>`);
+      if(ex.length) parts.push(`<span class="sumPill">${ex.slice(0,3).map(escapeAttr).join(' · ')}${ex.length>3?' +'+(ex.length-3):''}</span>`);
     }
     if(newA.length){
       const dates=[...new Set(newA.map(r=>r.date).filter(Boolean))];
@@ -8044,14 +8075,14 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
       const active=newA.reduce((a,r)=>a+(Number(r.activeCal)||0),0);
       const latest=newA[newA.length-1]||{};
       parts.push(`<span class="sumPill">⌚ <strong>${newA.length}</strong> aktivite</span>`);
-      parts.push(`<span class="sumPill">${types.join(' + ')}</span>`);
-      if(dates[0]) parts.push(`<span class="sumPill">📅 ${dates.map(trSafeDate).join(', ')}</span>`);
-      if(latest.duration) parts.push(`<span class="sumPill">⏱️ ${durationLabel(latest.duration)}</span>`);
+      parts.push(`<span class="sumPill">${types.map(escapeAttr).join(' + ')}</span>`);
+      if(dates[0]) parts.push(`<span class="sumPill">📅 ${dates.map(trSafeDate).map(escapeAttr).join(', ')}</span>`);
+      if(latest.duration) parts.push(`<span class="sumPill">⏱️ ${escapeAttr(durationLabel(latest.duration))}</span>`);
       if(active) parts.push(`<span class="sumPill">🔥 ${active} kcal</span>`);
     }
     if(newDaily.length) parts.push(`<span class="sumPill">📝 <strong>${newDaily.length}</strong> daily note</span>`);
     if(newWeekly.length) parts.push(`<span class="sumPill">📅 <strong>${newWeekly.length}</strong> weekly note</span>`);
-    setImportSummary(`<b>${source||'Import'} tamamlandı.</b><br>${parts.join('')}`);
+    setImportSummary(`<b>${escapeAttr(source||'Import')} tamamlandı.</b><br>${parts.join('')}`);
   }
   function wrapImportFunction(name,label){
     const old=window[name];
@@ -11423,7 +11454,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
         var watch=watchRowsForDate(date);
         var activity=watch.length?activitySummaryForDate(date):null;
         var badge=activity?'<div class="activityDayBadge" title="'+escapeAttr(activity.fullLabel||activity.shortLabel||'')+'">'+escapeAttr(onlyDurationLabel(activity))+'</div>':'';
-        return '<button class="dayBtn '+(date===selectedDate?'active':'')+' '+off+'" onclick="selectDay(\''+d+'\')"><span class="renameDayBtn" title="Program adını düzenle" onclick="event.stopPropagation();openProgramNameEdit(\''+d+'\')">✎</span><div class="main">'+d+'</div><div class="type">'+type+'</div>'+badge+'</button>';
+        return '<button class="dayBtn '+(date===selectedDate?'active':'')+' '+off+'" onclick="selectDay(\''+d+'\')"><span class="renameDayBtn" title="Program adını düzenle" onclick="event.stopPropagation();openProgramNameEdit(\''+d+'\')">✎</span><div class="main">'+escapeAttr(d)+'</div><div class="type">'+escapeAttr(type)+'</div>'+badge+'</button>';
       }).join('');
     };
     window.renderProgramDays.__v13=true;
@@ -11445,20 +11476,18 @@ button,.btn,.gymMiniBtn,input,select,textarea{
       if(a.rows&&a.rows.length>1) stats.push(['Kayıt',a.rows.length+' segment']);
       var type=a.primary||'Other';
       var note=(DATA&&DATA.activityNotes&&DATA.activityNotes[String(date)+'::'+String(type||'Other')])||'';
-      var safeType=JSON.stringify(type);
-      var safeDate=JSON.stringify(date);
       var noteHtml=note?'<div class="activityQuickNoteBox"><b>Quick Note:</b> '+escapeAttr(note)+'</div>':'';
       var loadLabel=(a.rows&&a.rows.length>1)?'Combined Load':'Apple Watch Load';
       return '<div class="activitySessionCard" data-activity-type="'+escapeAttr(type)+'">'
         +'<div class="activitySessionTop">'
           +'<div class="activitySessionTitle">'
-            +'<div class="activityIcon">'+a.emoji+'</div>'
-            +'<div><small>ACTIVITY SESSION</small><b>'+escapeAttr(a.name)+'</b><span>'+trDate(date)+' · Workout Logger aktivitesi</span></div>'
+            +'<div class="activityIcon">'+escapeAttr(a.emoji)+'</div>'
+            +'<div><small>ACTIVITY SESSION</small><b>'+escapeAttr(a.name)+'</b><span>'+escapeAttr(trDate(date))+' · Workout Logger aktivitesi</span></div>'
           +'</div>'
           +'<div class="activityTopActions">'
             +'<div class="activityPill">'+loadLabel+'</div>'
-            +'<button class="activityNoteBtn" onclick=\'setActivityQuickNote('+safeDate+','+safeType+');return false;\'>Not</button>'
-            +'<button class="activityDeleteBtn" onclick=\'deleteActivityCard('+safeDate+','+safeType+');return false;\'>Sil</button>'
+            +'<button class="activityNoteBtn" type="button" data-activity-action="note" data-activity-date="'+escapeAttr(date)+'" data-activity-type="'+escapeAttr(type)+'">Not</button>'
+            +'<button class="activityDeleteBtn" type="button" data-activity-action="delete" data-activity-date="'+escapeAttr(date)+'" data-activity-type="'+escapeAttr(type)+'">Sil</button>'
           +'</div>'
         +'</div>'
         +'<div class="activityStatsGrid">'+stats.map(function(pair){return '<div class="activityStatBox"><small>'+pair[0]+'</small><b>'+escapeAttr(pair[1])+'</b></div>';}).join('')+'</div>'
@@ -11471,6 +11500,18 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   function install(){
     installRenderProgramDaysPatch();
     installActivityCardPatch();
+    var root=document.getElementById('workoutGroups');
+    if(root&&!root.dataset.safeActivityActionsBound){
+      root.dataset.safeActivityActionsBound='true';
+      root.addEventListener('click',function(event){
+        var button=event.target.closest('[data-activity-action]');
+        if(!button)return;
+        var date=String(button.dataset.activityDate||''),type=String(button.dataset.activityType||'');
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+        if(button.dataset.activityAction==='note'&&typeof window.setActivityQuickNote==='function')window.setActivityQuickNote(date,type);
+        if(button.dataset.activityAction==='delete'&&typeof window.deleteActivityCard==='function')window.deleteActivityCard(date,type);
+      });
+    }
     try{ if(typeof window.render==='function') window.render(); }catch(e){}
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install); else install();
@@ -15805,10 +15846,10 @@ m Shell V4: Logger information architecture fix -->
 })();
 </script>
 <link rel="stylesheet" href="./polar-workout.css?v=11">
-<script src="./polar-workout.js?v=12"></script>
+<script src="./polar-workout.js?v=13"></script>
 <script src="./workout-source-policy.js?v=2"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=31">
-<script src="./premium-standard.js?v=32"></script>
+<script src="./premium-standard.js?v=33"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=5"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=23">

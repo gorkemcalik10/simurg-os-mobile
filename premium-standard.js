@@ -88,7 +88,7 @@
     var primary=[activityDate(activity.date,withYear)+(activity.startTime?' · '+activity.startTime:'') ,activity.duration,activity.cal!=null?formatLoad(activity.cal)+' kcal':''].filter(Boolean).join(' · ');
     var heart=[activity.avgHR!=null?'Ort. HR '+formatLoad(activity.avgHR):'',activity.maxHR!=null?'Maks. HR '+formatLoad(activity.maxHR):''].filter(Boolean).join(' · ');
     var footer=[activity.source==='Polar Bridge'?'Polar data':activity.source,zoneSummary(activity)].filter(Boolean).join(' · ');
-    var tag=activity.polar?'button':'div',action=activity.polar?' type="button" onclick="simurgOpenPolarWorkoutFor(\''+esc(activity.date)+'\',\''+esc(activity.startTime||'')+'\')"':'';
+    var tag=activity.polar?'button':'div',action=activity.polar?' type="button" data-gp-polar-date="'+esc(activity.date)+'" data-gp-polar-start="'+esc(activity.startTime||'')+'"':'';
     return '<'+tag+' class="gp-card gp-activity gp-activity-detail '+(activity.polar?'tappable polar-source':'')+'"'+action+'><small class="gp-kicker">'+esc(kicker)+'</small><h3>'+esc(activity.name)+'</h3><p>'+esc(primary)+'</p>'+(heart?'<p>'+esc(heart)+'</p>':'')+'<span>'+esc(footer)+'</span></'+tag+'>';
   }
   function recoveryInterpretation(model){
@@ -369,5 +369,14 @@
   function refreshAll(){renderHome();refineGym();refineLogger();cleanCoaching();cleanDataCenter();polishReports();refineProgramIntelligence();localizeVisible();if(window.SimurgCurrentWeekUX&&typeof window.SimurgCurrentWeekUX.refresh==='function')window.SimurgCurrentWeekUX.refresh();if(window.SimurgSmartProgression&&typeof window.SimurgSmartProgression.refresh==='function')window.SimurgSmartProgression.refresh();if(window.SimurgProfessionalPolish&&typeof window.SimurgProfessionalPolish.refresh==='function')window.SimurgProfessionalPolish.refresh();if(typeof window.simurgDisableLoggerTrendTooltip==='function')window.simurgDisableLoggerTrendTooltip();if(window.SimurgPolarBridge&&typeof window.SimurgPolarBridge.refresh==='function')window.SimurgPolarBridge.refresh();}
   function dataChanged(reason){if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate(reason||'dataChanged');refreshAll();}
   window.SimurgPremium={refreshScreen:refreshScreen,refreshAll:refreshAll,dataChanged:dataChanged,renderHome:renderHome,localizeVisible:localizeVisible};
-  ready(function(){refreshAll();});
+  ready(function(){
+    document.addEventListener('click',function(event){
+      var card=event.target.closest('[data-gp-polar-date]');
+      if(!card)return;
+      var date=String(card.dataset.gpPolarDate||'');
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||typeof window.simurgOpenPolarWorkoutFor!=='function')return;
+      window.simurgOpenPolarWorkoutFor(date,String(card.dataset.gpPolarStart||''));
+    });
+    refreshAll();
+  });
 })();

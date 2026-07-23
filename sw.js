@@ -1,13 +1,13 @@
-const SIMURG_CACHE = 'simurg-cloud-auth-phase-2b-1';
+const SIMURG_CACHE = 'simurg-security-xss-hardening-1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './polar-workout.css?v=11',
-  './polar-workout.js?v=12',
+  './polar-workout.js?v=13',
   './workout-source-policy.js?v=2',
   './premium-standard.css?v=31',
-  './premium-standard.js?v=32',
+  './premium-standard.js?v=33',
   './simurg-signal-model.js?v=4',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=5',

@@ -71,9 +71,9 @@
   function dateChipLabel(value){try{return new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'short',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));}catch(e){return value;}}
   function dateNavigatorHtml(){
     initializeSelection();var bounds=navigatorBounds(),dates=[shiftDate(selectedDate,-1),selectedDate,shiftDate(selectedDate,1)].filter(function(date,index,list){return date>=bounds.min&&date<=bounds.max&&list.indexOf(date)===index;});
-    return '<div class="pw-date-nav"><button type="button" onclick="polarWorkoutMoveDate(-1)" '+(selectedDate<=bounds.min?'disabled':'')+' aria-label="Önceki gün">‹</button><div class="pw-date-chips">'+dates.map(function(date){return '<button type="button" class="pw-date-chip '+(date===selectedDate?'active':'')+' '+(dayWorkouts(date).length?'has-workout':'')+'" onclick="polarWorkoutSelectDate(\''+date+'\')"><b>'+esc(dateChipLabel(date))+'</b><small>'+esc(date.slice(0,4))+'</small></button>';}).join('')+'</div><button type="button" onclick="polarWorkoutMoveDate(1)" '+(selectedDate>=bounds.max?'disabled':'')+' aria-label="Sonraki gün">›</button><button class="pw-date-latest" type="button" onclick="polarWorkoutGoLatest()">En Güncel</button></div>';
+    return '<div class="pw-date-nav"><button type="button" onclick="polarWorkoutMoveDate(-1)" '+(selectedDate<=bounds.min?'disabled':'')+' aria-label="Önceki gün">‹</button><div class="pw-date-chips">'+dates.map(function(date){return '<button type="button" class="pw-date-chip '+(date===selectedDate?'active':'')+' '+(dayWorkouts(date).length?'has-workout':'')+'" data-pw-date="'+esc(date)+'"><b>'+esc(dateChipLabel(date))+'</b><small>'+esc(date.slice(0,4))+'</small></button>';}).join('')+'</div><button type="button" onclick="polarWorkoutMoveDate(1)" '+(selectedDate>=bounds.max?'disabled':'')+' aria-label="Sonraki gün">›</button><button class="pw-date-latest" type="button" onclick="polarWorkoutGoLatest()">En Güncel</button></div>';
   }
-  function workoutSelectorHtml(workouts,selected){if(workouts.length<2)return '';return '<div class="pw-workout-picker">'+workouts.map(function(workout){var active=workoutKey(workout)===workoutKey(selected);return '<button type="button" class="'+(active?'active':'')+'" onclick="polarWorkoutSelectSession(\''+esc(workoutKey(workout))+'\')"><b>'+esc(workoutLabel(workout.workoutType||workout.activityType))+'</b><span>'+esc(compactDuration(workout.startTime)||'Oturum')+'</span></button>';}).join('')+'</div>';}
+  function workoutSelectorHtml(workouts,selected){if(workouts.length<2)return '';return '<div class="pw-workout-picker">'+workouts.map(function(workout,index){var active=workoutKey(workout)===workoutKey(selected);return '<button type="button" class="'+(active?'active':'')+'" data-pw-session-index="'+index+'"><b>'+esc(workoutLabel(workout.workoutType||workout.activityType))+'</b><span>'+esc(compactDuration(workout.startTime)||'Oturum')+'</span></button>';}).join('')+'</div>';}
   function normalizeImpact(raw){
     raw=raw&&typeof raw==='object'?raw:{};
     return {
@@ -272,6 +272,18 @@
       var main=document.querySelector('main');
       if(!main) return null;
       section=document.createElement('section');section.id='polar-workout';section.className='section simurgPolarWorkout';section.innerHTML=sectionHtml();main.appendChild(section);
+    }
+    if(!section.dataset.safeSelectionBound){
+      section.dataset.safeSelectionBound='true';
+      section.addEventListener('click',function(event){
+        var dateButton=event.target.closest('[data-pw-date]');
+        if(dateButton){window.polarWorkoutSelectDate(dateButton.dataset.pwDate);return;}
+        var sessionButton=event.target.closest('[data-pw-session-index]');
+        if(sessionButton){
+          var index=Number(sessionButton.dataset.pwSessionIndex),workouts=dayWorkouts(selectedDate);
+          if(Number.isInteger(index)&&index>=0&&index<workouts.length)window.polarWorkoutSelectSession(workoutKey(workouts[index]));
+        }
+      });
     }
     return section;
   }

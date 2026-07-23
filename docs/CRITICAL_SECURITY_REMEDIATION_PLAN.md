@@ -1063,3 +1063,93 @@ security controls, recursively safe unknown-field preservation, pure versioned
 migrations, and an atomic backup/commit/rollback boundary. This preserves existing
 real backups and Polar history while preventing prototype pollution, wrong-root
 replacement, partial imports, and cloud metadata interference.
+
+## 17. Patch A implementation result
+
+Patch A was implemented on the `security/xss-hardening` working tree without
+changing `DATA`, serialization, calculations, import semantics, Cloud Sync,
+Supabase, OAuth, or Polar mapping.
+
+### Confirmed active sinks fixed
+
+- Base Logger exercise/body-part output and edit modal values are encoded before
+  entering HTML.
+- Exercise edit, set edit, and add-set actions no longer place exercise names in
+  inline JavaScript. They use numeric record indexes and delegated click/keyboard
+  handlers.
+- Program names, activity badges, readiness/risk explanations, Daily/Weekly
+  reports, Raw Performance, PR summaries, Coaching targets, Phoenix focus text,
+  and import summaries encode externally controlled display strings.
+- Daily report navigation no longer embeds imported dates in inline JavaScript.
+  It uses an ISO-date `data-report-date` value and a delegated handler.
+- Mobile activity Note/Delete controls no longer embed activity type/date strings
+  in inline handlers.
+- Polar workout session selection uses a validated numeric list index and delegated
+  handler. Polar date chips use validated ISO dates.
+- Premium Home Polar activity cards use inert `data-*` values and a delegated
+  handler instead of an externally influenced inline `onclick`.
+
+### Active sinks intentionally left unchanged
+
+- Static developer-controlled handlers for fixed tabs, navigation buttons, modal
+  controls, and fixed program weekday constants remain inline. Their arguments do
+  not originate from `DATA`, imports, cloud payloads, or Polar responses.
+- Static `innerHTML` templates and already escaped premium/desktop/Polar output
+  remain in place to avoid an unrelated renderer rewrite.
+- Legacy templates under disabled archive containers were not modified because
+  they are not loaded into the active runtime.
+
+### Files changed
+
+- `index.html`
+- `polar-workout.js`
+- `premium-standard.js`
+- `sw.js`
+- `tests/xss-rendering.test.js`
+- `tests/run-tests.js`
+- `docs/CRITICAL_SECURITY_REMEDIATION_PLAN.md`
+
+### Helpers and event handling
+
+- Added a small numeric `safeDataIndex` guard in the base runtime.
+- Reused the existing `escapeAttr`/`esc` output helpers.
+- Added scoped delegated handlers for Logger record actions, Daily report dates,
+  mobile activity actions, Polar dates/sessions, and premium Polar activity cards.
+
+### Tests added
+
+`tests/xss-rendering.test.js` covers the five hostile payloads from the remediation
+request plus normal Turkish Unicode text. It verifies escaping round trips, absence
+of executable element markup, removal of user-derived inline handlers, and the new
+delegated-action contracts.
+
+### Runtime and automated checks
+
+- Active inline and external JavaScript syntax: passed.
+- Full automated suite: passed.
+- `git diff --check`: passed.
+- Mobile browser check at 390 × 844: Home, Logger, Menu, and Data Center opened;
+  bottom navigation remained available; no horizontal overflow or captured
+  console error was observed. Signed-out Cloud Push/Pull/Check actions remained
+  disabled.
+- Desktop browser check at 1440 × 900: Home Overview/Recovery/Sleep/Load,
+  Workout Logger, and Data Center opened without horizontal overflow or captured
+  console errors. Signed-out cloud actions remained disabled.
+- Responsive width checks at 861, 880, 900, 901, 1280, and 1440 pixels reported
+  zero document-level horizontal overflow.
+- A complete hostile backup/import click-through remains a manual release check;
+  automated rendering/source-contract tests cover the patched sinks without
+  mutating real browser storage.
+
+### Remaining uncertainty
+
+This patch addresses the confirmed active sinks and source contracts inspected in
+the current runtime. It is not a claim that every future renderer or third-party
+browser behavior is free of XSS risk. Restore validation remains a separate
+defense boundary.
+
+### Patch B status
+
+Patch B has not been implemented. General JSON restore and append-import schema
+validation, size/depth limits, prototype-key rejection, migration, backup, atomic
+commit, and rollback remain future work.
