@@ -111,14 +111,8 @@
     return value;
   }
   function normalizePulledData(value){
-    if(!isPlainObject(value))throw new Error('Bulut payload kökü geçerli bir nesne değil.');
-    if(!Array.isArray(value.appleWatch))value.appleWatch=[];
-    if(!Array.isArray(value.dailyNotes))value.dailyNotes=[];
-    if(!Array.isArray(value.weeklyNotes))value.weeklyNotes=[];
-    if(!isPlainObject(value.customGymPrograms))value.customGymPrograms={};
-    if(!isPlainObject(value.programNames))value.programNames={};
-    if(!isPlainObject(value.activityNotes))value.activityNotes={};
-    return value;
+    if(!window.SimurgDataValidation)throw new Error('DATA doğrulayıcı yüklenemedi.');
+    return window.SimurgDataValidation.prepareFull(value,{source:'authenticated-cloud-pull'}).data;
   }
   function downloadLocalBackup(value){
     var stamp=new Date().toISOString().replace(/[:.]/g,'-');
@@ -137,17 +131,15 @@
     var previousRaw=localStorage.getItem(LOCAL_DATA_KEY);
     try{
       DATA=value;
-      if(typeof save==='function')save();
-      else{
-        localStorage.setItem(LOCAL_DATA_KEY,JSON.stringify(DATA));
-        if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('cloud-pull');
-        if(typeof render==='function')render();
-      }
+      localStorage.setItem(LOCAL_DATA_KEY,JSON.stringify(DATA));
+      if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('cloud-pull');
+      if(typeof render==='function')render();
+      if(typeof window.renderDataLocalStatus==='function')window.renderDataLocalStatus();
     }catch(error){
       DATA=previousData;
       if(previousRaw===null)localStorage.removeItem(LOCAL_DATA_KEY);
       else localStorage.setItem(LOCAL_DATA_KEY,previousRaw);
-      if(typeof render==='function')render();
+      try{if(typeof render==='function')render();}catch(rollbackError){}
       throw error;
     }
   }
@@ -295,7 +287,7 @@
         setStatus('Bulutta henüz veri yok.','ok');
         return;
       }
-      if(!isPlainObject(result.data.payload))throw new Error('Bulut payload kökü geçerli bir nesne değil.');
+      var pulled=normalizePulledData(result.data.payload);
       setRevisionStatus(result.data.revision,result.data.updated_at);
       if(!window.confirm('Buluttan Al, mevcut yerel DATA verisini değiştirecek. Önce otomatik JSON yedeği indirilecek. Devam edilsin mi?')){
         setStatus('Alım iptal edildi. Yerel veri değiştirilmedi.','');
@@ -304,7 +296,6 @@
       setStatus('Alınıyor… Yerel yedek hazırlanıyor.','');
       var oldData=requireCurrentData();
       downloadLocalBackup(oldData);
-      var pulled=normalizePulledData(result.data.payload);
       persistPulledData(pulled);
       writeMeta(context.userId,{revision:result.data.revision,updatedAt:result.data.updated_at,lastPullAt:new Date().toISOString(),lastPushAt:''});
       setStatus('Güncel: bulut verisi alındı ve yerel yedek indirildi.','ok');

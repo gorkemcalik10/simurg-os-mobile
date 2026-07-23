@@ -1194,8 +1194,130 @@ the current runtime. It is not a claim that every future renderer or third-party
 browser behavior is free of XSS risk. Restore validation remains a separate
 defense boundary.
 
-### Patch B status
+## 18. Patch B implementation result
 
-Patch B has not been implemented. General JSON restore and append-import schema
-validation, size/depth limits, prototype-key rejection, migration, backup, atomic
-commit, and rollback remain future work.
+Patch B was implemented on the `security/xss-hardening` working tree. It does not
+change Supabase requests, authentication/session restoration, cloud revision
+conflict rules, Polar OAuth/token handling, live AccessLink mapping, calculations,
+navigation, or the serialized `DATA` model.
+
+### Validation architecture
+
+- `simurg-data-validation.js` is the shared validation boundary for startup,
+  restore, Cloud Pull, and append imports.
+- Full restore roots must be plain JSON objects. The validator applies the
+  25 MiB payload, depth 32, node 250,000, object-key 25,000, array 100,000, and
+  string 256 KiB limits from this plan.
+- `__proto__`, `prototype`, and `constructor` are rejected recursively at every
+  depth before cloning, migration, normalization, or assignment.
+- Known critical namespaces use strict shape and record validation. Safe unknown
+  fields are recursively scanned, preserved, and reported as warnings.
+- Auth/session, Supabase, cloud revision, Polar capability, and localStorage
+  control namespaces are rejected at the DATA root. `_meta` is limited to the
+  application-owned build and local-update timestamp fields.
+- Missing `schemaVersion` is treated as a legacy backup. Pure migration fills
+  stable missing collections, performs documented numeric normalization for
+  workout/activity records, sets schema version 1, and validates the migrated
+  candidate again.
+- Date keys and record dates must be real `YYYY-MM-DD` dates. Known numbers must
+  be finite and satisfy broad compatibility ranges. Polar history keeps legacy
+  single-record and current multi-record day buckets.
+
+### Protected application routes
+
+The shared boundary protects:
+
+- existing localStorage DATA during startup
+- JSON backup file restore
+- authenticated Cloud Pull payload application
+- Universal Import
+- workout JSON and callable workout-array import
+- Apple Watch/activity JSON and callable activity import
+- manual Polar Workout
+- manual Polar Recovery
+- callable Polar Bridge receive/test flow
+- the legacy Polar Recovery helper reference
+- import undo snapshot restore
+
+The active runtime controller is installed after the existing legacy wrappers, so
+inline UI entry points and callable hidden helpers resolve to the staged
+implementations. Polar Workout and Polar Bridge still use their existing pure
+normalizers before the validated candidate is committed.
+
+### Atomic application and rollback
+
+- Parsing, safety scanning, migration, normalization, dedupe, and final validation
+  operate on a detached candidate.
+- Append routes stage all rows against a validated clone of current DATA; one bad
+  row rejects the complete import.
+- A full file restore downloads an automatic pre-restore JSON backup. Append
+  routes create the existing durable pre-import snapshot before assignment.
+- Commit retains the previous DATA reference, exact localStorage string, selected
+  date, and previous import snapshot. It assigns once, persists once, and renders
+  once.
+- A persistence or render exception restores DATA, localStorage, selected date,
+  and the snapshot, then redraws the previous state.
+- Cloud Pull validates before revision display, confirmation, local backup,
+  assignment, persistence, and cloud metadata update. Invalid cloud payloads
+  therefore cannot change local DATA or revision metadata.
+- Invalid startup localStorage is not overwritten. The original raw value remains
+  available for recovery while the app starts in memory from validated defaults
+  and exposes a bounded validation error status.
+
+One minimal compatibility guard was added to the existing Readiness HTML helper:
+missing `today`/`types`/`reasons` values now render safe empty values. This was
+required because the new atomic boundary correctly treats any render exception as
+a failed transaction; without the guard, a valid workout-only import for an empty
+date rolled back.
+
+### Files changed
+
+- `simurg-data-validation.js`
+- `index.html`
+- `polar-workout.js`
+- `simurg-cloud-auth.js`
+- `sw.js`
+- `tests/data-validation.test.js`
+- `tests/data-atomic-runtime.test.js`
+- `tests/data-import-contracts.test.js`
+- `tests/cloud-auth.test.js`
+- `tests/runtime-contracts.test.js`
+- `tests/html-syntax.test.js`
+- `tests/run-tests.js`
+- `docs/CRITICAL_SECURITY_REMEDIATION_PLAN.md`
+
+### Patch B verification
+
+- Current and legacy backup fixtures: accepted; safe unknown fields and Polar
+  history preserved.
+- Malformed JSON, null/scalar/array roots, wrong critical namespace types,
+  corrupt workout/Polar records, non-finite values, reserved namespaces,
+  prototype-pollution keys at multiple depths, excessive depth, and oversized
+  payloads: rejected.
+- Unit runtime transaction tests confirm failed append and render failure preserve
+  the exact previous DATA/localStorage/snapshot/date; successful append persists
+  once and renders once.
+- Source-contract tests confirm startup, full restore, all callable append paths,
+  Cloud Pull ordering, auth restoration, cloud conflict logic, and Polar
+  normalization integration.
+- Real browser tests at 390 × 844 confirmed valid workout import, invalid append
+  rollback, recursive blocked-key rejection, valid full backup restore, invalid
+  full restore rollback, Polar history preservation, Polar workout open/back and
+  bottom navigation, signed-out Cloud controls, and no horizontal overflow.
+- Real browser tests at 1440 × 900 confirmed Home previous/next/today and all four
+  Home tabs, Workout Logger, Daily, Weekly, Monthly, Program Intelligence,
+  Coaching, Data Center, and no horizontal overflow.
+- No JavaScript exception was captured. Chromium emitted only its existing
+  advisory that the password input is not contained in a form.
+- Service Worker cache/build label is `security-xss-hardening-3`.
+  `simurg-data-validation.js?v=1`, `polar-workout.js?v=14`, and
+  `simurg-cloud-auth.js?v=2` match between `index.html` and `CORE_ASSETS`.
+
+### Remaining uncertainty
+
+The local test origin had no authenticated Supabase account, so a live signed-in
+Cloud Pull was not executed. Static/runtime contracts confirm that session restore
+does not initiate Push/Pull, request and revision logic is unchanged, and invalid
+payload validation precedes every local or metadata mutation. Final manual release
+verification should still perform one authenticated valid Pull and one deliberately
+invalid payload test in a non-production test account.

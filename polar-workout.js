@@ -116,6 +116,9 @@
     };
   }
   function importPolarWorkout(input){
+    if(window.SimurgDataAtomic&&typeof window.SimurgDataAtomic.appendPolarWorkout==='function'){
+      return window.SimurgDataAtomic.appendPolarWorkout(input);
+    }
     var store=ensureStore();
     if(!store) throw new Error('Polar Workout veri alanı hazırlanamadı');
     var workout=normalizeWorkout(input);
@@ -360,6 +363,7 @@
     window.universalImport.__polarWorkout=true;
   }
 
+  window.SimurgPolarWorkoutNormalize=normalizeWorkout;
   window.importPolarWorkout=importPolarWorkout;
   window.renderPolarWorkout=render;
   window.polarWorkoutSelectDate=function(date){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date||'')))return;selectedDate=date;selectedWorkoutKey=null;currentTab='overview';render();var section=document.getElementById('polar-workout');if(section)section.scrollTop=0;};

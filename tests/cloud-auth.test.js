@@ -46,8 +46,8 @@ run('signed-out cloud controls start disabled', () => {
 
 run('official Supabase v2 and one local controller are loaded', () => {
   assert.match(index, /cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2\.95\.0/);
-  assert.match(index, /simurg-cloud-auth\.js\?v=1/);
-  assert.match(sw, /simurg-cloud-auth\.js\?v=1/);
+  assert.match(index, /simurg-cloud-auth\.js\?v=2/);
+  assert.match(sw, /simurg-cloud-auth\.js\?v=2/);
 });
 
 run('active runtime contains no legacy shared cloud model', () => {
@@ -102,12 +102,14 @@ run('existing push requires base and performs conditional revision update', () =
 
 run('pull confirms, backs up, validates, then persists and stores revision', () => {
   const body = functionBody(cloud, 'pullUserData');
+  const validateAt = body.indexOf('normalizePulledData(result.data.payload)');
+  const revisionAt = body.indexOf('setRevisionStatus(result.data.revision');
   const confirmAt = body.indexOf('window.confirm(');
   const backupAt = body.indexOf('downloadLocalBackup(oldData)');
   const persistAt = body.indexOf('persistPulledData(pulled)');
   const metaAt = body.indexOf('writeMeta(context.userId');
-  assert.ok(confirmAt >= 0 && backupAt > confirmAt && persistAt > backupAt && metaAt > persistAt);
-  assert.match(body, /isPlainObject\(result\.data\.payload\)/);
+  assert.ok(validateAt >= 0 && revisionAt > validateAt && confirmAt > revisionAt && backupAt > confirmAt && persistAt > backupAt && metaAt > persistAt);
+  assert.match(body, /normalizePulledData\(result\.data\.payload\)/);
   assert.match(body, /\.select\('payload,revision,updated_at'\)/);
   assert.match(body, /\.eq\('user_id',context\.userId\)/);
 });
@@ -123,8 +125,11 @@ run('cloud metadata is scoped and excludes payload, token, email and password', 
   assert.doesNotMatch(cloud, /DATA\.(?:token|accessToken|refreshToken|password|userId|email)\s*=/i);
 });
 
-run('localStorage-first DATA startup remains unchanged', () => {
-  assert.match(index, /let DATA=JSON\.parse\(localStorage\.getItem\('atlas_summary_reports'\)\|\|JSON\.stringify\(INITIAL\)\)/);
+run('localStorage-first DATA startup validates before assignment and preserves invalid raw data', () => {
+  assert.match(index, /simurgStoredDataRaw=localStorage\.getItem\('atlas_summary_reports'\)/);
+  assert.match(index, /SimurgDataValidation\.prepareFullText\(simurgStoredDataRaw/);
+  assert.doesNotMatch(index, /let DATA=JSON\.parse\(localStorage\.getItem\('atlas_summary_reports'\)/);
+  assert.match(index, /__simurgStartupDataValidationError/);
 });
 
 run('canonical controller exposes one function per cloud action', () => {

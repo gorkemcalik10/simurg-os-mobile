@@ -6227,9 +6227,24 @@ body{background:#050607!important;}
 </main></div>
 <div class="modal" id="editModal"><div class="modalbox"><div class="modalTop"><h2 id="modalTitle">Düzenle</h2><button class="btn sec" onclick="closeModal()">Kapat</button></div><div id="modalBody"></div><div class="actions"><button class="btn" onclick="saveEdit()">Kaydet</button><button class="btn danger" onclick="deleteEditing()">Sil</button></div></div></div>
 <div class="modal programNameModal" id="programNameModal"><div class="modalbox"><div class="modalTop"><h2>Program İsmini Düzenle</h2><button class="btn sec" onclick="closeProgramNameModal()">Kapat</button></div><div id="programNameBody"></div><div class="actions"><button class="btn" onclick="saveProgramNameEdit()">Kaydet</button><button class="btn sec" onclick="resetProgramNameEdit()">Varsayılana Dön</button></div></div></div>
+<script src="./simurg-data-validation.js?v=1"></script>
 <script>
 const INITIAL={"schemaVersion":1,"workouts":[],"metrics":[],"nutrition":[],"recovery":[],"appleWatch":[],"dailyNotes":[],"weeklyNotes":[],"customGymPrograms":{},"programNames":{},"polarWorkouts":{"daily":{},"latest":null},"polarActivity":{"daily":{},"latest":null},"polarProfile":{"latest":null},"polarSleep":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarNightlyRecharge":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarContinuousHr":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarCardioLoad":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarConnection":{"connected":false,"status":"disconnected","lastSyncAt":null,"lastError":null,"source":"Polar AccessLink"}};
-let DATA=JSON.parse(localStorage.getItem('atlas_summary_reports')||JSON.stringify(INITIAL));
+window.SIMURG_INITIAL_DEFAULTS=INITIAL;
+let DATA;
+var simurgStoredDataRaw=localStorage.getItem('atlas_summary_reports');
+try{
+  DATA=simurgStoredDataRaw
+    ?SimurgDataValidation.prepareFullText(simurgStoredDataRaw,{source:'startup-local-storage'}).data
+    :SimurgDataValidation.prepareFull(INITIAL,{source:'startup-defaults'}).data;
+}catch(simurgStartupDataError){
+  DATA=SimurgDataValidation.prepareFull(INITIAL,{source:'startup-fallback'}).data;
+  window.__simurgStartupDataValidationError={
+    code:simurgStartupDataError&&simurgStartupDataError.code||'startup_validation_failed',
+    message:simurgStartupDataError&&simurgStartupDataError.message||'Yerel DATA doğrulanamadı.'
+  };
+  console.warn('Simurg OS: geçersiz yerel DATA değiştirilmeden güvenli başlangıç verisi kullanıldı.');
+}
 if(!DATA.appleWatch) DATA.appleWatch=[];
 if(!DATA.dailyNotes) DATA.dailyNotes=[];
 if(!DATA.weeklyNotes) DATA.weeklyNotes=[];
@@ -7585,7 +7600,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=security-xss-hardening-2').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=security-xss-hardening-3').catch(function(){});
   });
 }
 </script>
@@ -7605,11 +7620,11 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
 
   window.renderReadinessHtml=function(date){
     let r=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):calculateReadiness(date);
-    let t=r.today;
+    let t=r.today||{};
     let typeText=shortTypeList(t.types);
-    let reasonText=r.reasons.length?r.reasons.slice(0,3).join(', '):'olumsuz sinyal yok';
+    let reasonText=Array.isArray(r.reasons)&&r.reasons.length?r.reasons.slice(0,3).join(', '):'olumsuz sinyal yok';
     let bg=`conic-gradient(#23ce7a 0 ${r.score}%, #172033 ${r.score}% 100%)`;
-    return `<div class="readinessScoreBox"><div class="readinessCircle" style="background:${bg}">${r.score}</div><div class="readinessMeta"><b>${escapeAttr(r.status)}</b><span>${escapeAttr(r.advice)}</span><div class="readinessPills"><span class="readinessPill activityTag">${escapeAttr(typeText)}</span><span class="readinessPill">${escapeAttr(t.level)} load</span><span class="readinessPill">${Math.round(t.minutes)} dk</span><span class="readinessPill">${escapeAttr(t.active)} kcal</span><span class="readinessPill">${escapeAttr(t.avgHR||'-')} bpm</span></div><div class="activityLoadCard"><b>Etkenler:</b> ${escapeAttr(reasonText)}</div></div></div>`;
+    return `<div class="readinessScoreBox"><div class="readinessCircle" style="background:${bg}">${r.score}</div><div class="readinessMeta"><b>${escapeAttr(r.status)}</b><span>${escapeAttr(r.advice)}</span><div class="readinessPills"><span class="readinessPill activityTag">${escapeAttr(typeText)}</span><span class="readinessPill">${escapeAttr(t.level||'-')} load</span><span class="readinessPill">${Math.round(Number(t.minutes)||0)} dk</span><span class="readinessPill">${escapeAttr(t.active==null?'-':t.active)} kcal</span><span class="readinessPill">${escapeAttr(t.avgHR||'-')} bpm</span></div><div class="activityLoadCard"><b>Etkenler:</b> ${escapeAttr(reasonText)}</div></div></div>`;
   };
 
   window.renderInjuryRiskHtml=function(date){
@@ -15854,7 +15869,7 @@ m Shell V4: Logger information architecture fix -->
 	    return null;
 	  };
 
-	  window.SimurgPolarBridge={refresh:function(screen){
+	  window.SimurgPolarBridge={normalize:normalize,refresh:function(screen){
 	    store();
 	    if(!screen||screen==='data')renderDataCenterBridge();
 	    if(!screen||screen==='polar')renderPolarBridgeTab();
@@ -15873,7 +15888,7 @@ m Shell V4: Logger information architecture fix -->
 })();
 </script>
 <link rel="stylesheet" href="./polar-workout.css?v=11">
-<script src="./polar-workout.js?v=13"></script>
+<script src="./polar-workout.js?v=14"></script>
 <script src="./workout-source-policy.js?v=2"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=31">
 <script src="./premium-standard.js?v=33"></script>
@@ -15882,4 +15897,17 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./desktop-alignment.css?v=23">
 <script src="./desktop-alignment.js?v=25"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
-<script src="./simurg-cloud-auth.js?v=1" defer></script>
+<script src="./simurg-cloud-auth.js?v=2" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  if(!window.SimurgDataValidation)return;
+  window.SimurgDataValidation.installRuntime({
+    getData:function(){return DATA;},
+    setData:function(value){DATA=value;},
+    getSelectedDate:function(){return selectedDate;},
+    setSelectedDate:function(value){selectedDate=value;weekStart=mondayOf(value);},
+    render:function(){render();},
+    download:function(name,text){download(name,text);}
+  });
+});
+</script>
