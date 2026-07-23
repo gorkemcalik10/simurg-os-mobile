@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-security-xss-hardening-1';
+const SIMURG_CACHE = 'simurg-security-xss-hardening-2';
 const CORE_ASSETS = [
   './',
   './index.html',

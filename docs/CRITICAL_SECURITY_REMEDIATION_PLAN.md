@@ -1116,6 +1116,52 @@ Supabase, OAuth, or Polar mapping.
 - Added scoped delegated handlers for Logger record actions, Daily report dates,
   mobile activity actions, Polar dates/sessions, and premium Polar activity cards.
 
+### Patch A.1 residual correction
+
+The initial Patch A review found and corrected four residual active paths:
+
+- Imported custom Gym IDs were still embedded in inline Gym action handlers.
+  Gym add-set, save, history, clear, and delete now use escaped inert
+  `data-gym-action`/`data-gym-key` attributes and one allowlisted delegated click
+  handler on `#gymModeList`.
+- Gym History now encodes persisted workout dates before inserting their visible
+  labels into HTML.
+- Both base and active Daily Summary renderers encode persisted visible dates;
+  the existing delegated, validated report-date navigation remains unchanged.
+- Data Center local-status timestamps are now assigned with `textContent` through
+  created DOM nodes, including invalid timestamp strings returned unchanged by
+  the formatter.
+
+The follow-up active date/time scan also encoded imported date labels in report,
+coach, PR, snapshot, and import-summary HTML paths. Text-only date assignments and
+internally generated fixed navigation dates were left unchanged.
+
+### Patch A.1 verification
+
+- Source-contract tests cover the malicious custom Gym ID, malicious workout
+  date, malicious timestamp, normal ISO date, and normal Turkish Unicode text.
+  These tests verify encoding and delegated-action structure; they do not by
+  themselves prove browser execution safety.
+- An isolated browser runtime loaded the hostile fixture through the real JSON
+  import UI. The custom key round-tripped through `dataset`, and add-set, save,
+  history open/close, clear, delete, and exercise-name editing dispatched through
+  the allowlisted Gym handler.
+- Daily Summary and Gym History displayed the malicious date as literal text with
+  no generated `img`, `svg`, or inline event-handler node. This runtime pass also
+  exposed and corrected two active analytics date outputs (`Latest Log` and best
+  weight date) that the source-only review had missed.
+- The Data Center status grid rendered with created DOM nodes and `textContent`;
+  signed-out Cloud actions remained disabled. The hostile timestamp precedence
+  cases are covered by source contracts because a real import intentionally
+  records a fresh local-update timestamp.
+- Mobile 390 × 844 and desktop 1440 × 900 navigation checks reported no
+  document-level horizontal overflow. Polar workout open/back, mobile bottom
+  navigation, desktop sidebar, Home tabs, and Daily date movement remained
+  functional.
+- The Patch A.1 index change uses Service Worker build/cache label
+  `security-xss-hardening-2`; external Polar and premium asset versions are
+  unchanged.
+
 ### Tests added
 
 `tests/xss-rendering.test.js` covers the five hostile payloads from the remediation
@@ -1137,9 +1183,9 @@ delegated-action contracts.
   console errors. Signed-out cloud actions remained disabled.
 - Responsive width checks at 861, 880, 900, 901, 1280, and 1440 pixels reported
   zero document-level horizontal overflow.
-- A complete hostile backup/import click-through remains a manual release check;
-  automated rendering/source-contract tests cover the patched sinks without
-  mutating real browser storage.
+- Patch A.1 added an isolated hostile JSON import click-through for Gym and
+  persisted-date render paths. A broader representative-backup matrix remains a
+  manual release check and belongs to the later restore-validation boundary.
 
 ### Remaining uncertainty
 
