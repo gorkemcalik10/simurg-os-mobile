@@ -143,6 +143,10 @@
     var match=trimmed.match(new RegExp('^'+numeric+'$'))
       ||trimmed.match(new RegExp('^'+numeric+'\\s*\\/\\s*10$','i'))
       ||trimmed.match(new RegExp('^rpe\\s*:?\\s*'+numeric+'(?:\\s*\\/\\s*10)?$','i'));
+    if(!match){
+      var labeled=trimmed.match(new RegExp('^'+numeric+' *[-–—] *(.+)$','u'));
+      if(labeled&&/^\p{L}[\p{L} ]{0,38}\p{L}$/u.test(labeled[2]))match=labeled;
+    }
     if(!match)fail('invalid_number','Geçerli sonlu sayı bekleniyor',path);
     return number(Number(match[1].replace(',','.')),path,{min:0,max:10});
   }

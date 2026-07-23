@@ -33,7 +33,12 @@ for (const [input, expected] of [
   ['RPE 6', 6],
   ['RPE: 6', 6],
   ['6/10', 6],
-  ['RPE 6/10', 6]
+  ['RPE 6/10', 6],
+  ['6 - Orta', 6],
+  ['5-Orta', 5],
+  ['7 – Zor', 7],
+  ['8 — Çok Zor', 8],
+  ['6 - orta', 6]
 ]) {
   run(`legacy Apple Watch RPE ${JSON.stringify(input)} normalizes`, () => {
     assert.equal(legacy(input), expected);
@@ -46,7 +51,10 @@ for (const input of ['', '-', '—', 'N/A', 'NA', 'null', 'unknown']) {
   });
 }
 
-for (const input of ['hard', 'very tired', 'RPE 6 or 7', '6 7', 11, '11', 'RPE 11', Infinity]) {
+for (const input of [
+  'hard', 'very tired', '6 hard', '6 - 7', '6 - orta 7',
+  'RPE 6 or 7', '6 7', 11, '11', 'RPE 11', '11 - Zor', Infinity
+]) {
   run(`invalid Apple Watch RPE ${JSON.stringify(input)} is rejected`, () => {
     assert.throws(() => legacy(input), error => (
       error
@@ -56,7 +64,7 @@ for (const input of ['hard', 'very tired', 'RPE 6 or 7', '6 7', 11, '11', 'RPE 1
   });
 }
 
-for (const input of ['6', 'RPE 6', '6/10', '-']) {
+for (const input of ['6', 'RPE 6', '6/10', '6 - Orta', '-']) {
   run(`active Apple Watch RPE ${JSON.stringify(input)} stays rejected`, () => {
     assert.throws(
       () => validation.prepareFull(payload(input), { source: 'active-entry' }),
