@@ -112,7 +112,7 @@
   }
   function normalizePulledData(value){
     if(!window.SimurgDataValidation)throw new Error('DATA doğrulayıcı yüklenemedi.');
-    return window.SimurgDataValidation.prepareFull(value,{source:'authenticated-cloud-pull'}).data;
+    return window.SimurgDataValidation.prepareFull(value,{source:'authenticated-cloud-pull',legacyAppleWatchRpe:true}).data;
   }
   function downloadLocalBackup(value){
     var stamp=new Date().toISOString().replace(/[:.]/g,'-');

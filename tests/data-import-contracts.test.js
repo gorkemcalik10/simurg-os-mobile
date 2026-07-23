@@ -45,7 +45,7 @@ run('startup validates stored DATA before the DATA assignment', () => {
 run('full file restore enforces size, detached validation, backup and atomic commit', () => {
   const source = body(validator, 'secureRestore');
   assert.match(source, /file\.size>LIMITS\.maxBytes/);
-  assert.match(source, /prepareFullText\(String\(reader\.result/);
+  assert.match(source, /prepareFullText\(String\(reader\.result[\s\S]*legacyAppleWatchRpe:true/);
   assert.match(source, /downloadBackup:true/);
   assert.match(source, /commit\(prepared\.data/);
   assert.doesNotMatch(source, /adapter\.setData|localStorage\.setItem\(DATA_KEY/);
@@ -83,7 +83,7 @@ run('Cloud Pull validates before revision display, confirmation, backup, persist
   const persistAt = source.indexOf('persistPulledData(pulled)');
   const metaAt = source.indexOf('writeMeta(context.userId');
   assert.ok(validateAt >= 0 && revisionAt > validateAt && confirmAt > revisionAt && backupAt > confirmAt && persistAt > backupAt && metaAt > persistAt);
-  assert.match(body(cloud, 'normalizePulledData'), /SimurgDataValidation\.prepareFull/);
+  assert.match(body(cloud, 'normalizePulledData'), /SimurgDataValidation\.prepareFull[\s\S]*legacyAppleWatchRpe:true/);
 });
 
 run('Cloud requests, auth restore, conflict logic and Polar normalization remain intact', () => {

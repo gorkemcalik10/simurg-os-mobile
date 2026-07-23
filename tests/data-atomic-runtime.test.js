@@ -56,6 +56,20 @@ run('failed append leaves DATA and localStorage byte-for-byte unchanged', () => 
   assert.equal(storage.get('atlas_summary_reports'), beforeRaw);
 });
 
+run('invalid active Apple Watch RPE leaves DATA and localStorage byte-for-byte unchanged', () => {
+  const beforeData = JSON.stringify(data);
+  const beforeRaw = storage.get('atlas_summary_reports');
+  boxes.universalJsonBox.value = JSON.stringify({
+    type: 'activity',
+    date: '2026-07-23',
+    activityType: 'Run',
+    rpe: 'hard'
+  });
+  assert.equal(window.universalImport(), null);
+  assert.equal(JSON.stringify(data), beforeData);
+  assert.equal(storage.get('atlas_summary_reports'), beforeRaw);
+});
+
 run('render failure rolls back exact DATA, localStorage, date and import snapshot', () => {
   const before = data;
   const beforeRaw = storage.get('atlas_summary_reports');

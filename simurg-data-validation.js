@@ -133,6 +133,19 @@
     if(options.max!=null&&next>options.max)fail('number_too_large','Sayı izin verilen aralığın üstünde',path);
     return next;
   }
+  function legacyAppleWatchRpe(value,path){
+    if(value==null)return null;
+    if(typeof value==='number')return number(value,path,{min:0,max:10});
+    if(typeof value!=='string')fail('invalid_number','Geçerli sonlu sayı bekleniyor',path);
+    var trimmed=value.trim();
+    if(trimmed===''||/^(?:-|—|n\/a|na|null|unknown)$/i.test(trimmed))return null;
+    var numeric='([+-]?(?:\\d+(?:[.,]\\d+)?|[.,]\\d+))';
+    var match=trimmed.match(new RegExp('^'+numeric+'$'))
+      ||trimmed.match(new RegExp('^'+numeric+'\\s*\\/\\s*10$','i'))
+      ||trimmed.match(new RegExp('^rpe\\s*:?\\s*'+numeric+'(?:\\s*\\/\\s*10)?$','i'));
+    if(!match)fail('invalid_number','Geçerli sonlu sayı bekleniyor',path);
+    return number(Number(match[1].replace(',','.')),path,{min:0,max:10});
+  }
   function validDate(value){
     if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;
     var date=new Date(value+'T00:00:00Z');
@@ -185,9 +198,16 @@
     ['type','kind','activityType','activity','source','startTime','duration','notes','note'].forEach(function(key){
       if(row[key]!=null)text(row[key],path+'.'+key,key==='notes'||key==='note'?LIMITS.maxString:2048,true);
     });
-    ['activeCal','activeCalories','totalCal','totalCalories','avgHR','maxHR','minHR','distance','rpe'].forEach(function(key){
+    ['activeCal','activeCalories','totalCal','totalCalories','avgHR','maxHR','minHR','distance'].forEach(function(key){
       if(row[key]!=null&&row[key]!=='')row[key]=number(row[key],path+'.'+key,{coerce:options.coerce,min:0,max:10000000});
     });
+    if(row.rpe!=null&&row.rpe!==''){
+      row.rpe=number(row.rpe,path+'.rpe',{
+        coerce:options.coerceRpe===undefined?options.coerce:options.coerceRpe,
+        min:0,
+        max:options.rpeMax==null?10000000:options.rpeMax
+      });
+    }
     if(row.segments!=null){
       array(row.segments,path+'.segments');
       row.segments=row.segments.map(function(segment,index){
@@ -282,7 +302,8 @@
     scan(value);
     return value;
   }
-  function migrate(candidate,warnings){
+  function migrate(candidate,warnings,options){
+    options=options||{};
     var version=candidate.schemaVersion;
     if(version==null){
       version=0;
@@ -318,7 +339,13 @@
     }
     if(isPlainObject(candidate.polarBridge))fillDailyDates(candidate.polarBridge,'$.polarBridge');
     candidate.workouts=candidate.workouts.map(function(row,index){return validateWorkoutRecord(row,'$.workouts['+index+']',{coerce:true})});
-    candidate.appleWatch=candidate.appleWatch.map(function(row,index){return validateActivityRecord(row,'$.appleWatch['+index+']',{coerce:true})});
+    candidate.appleWatch=candidate.appleWatch.map(function(row,index){
+      var rowPath='$.appleWatch['+index+']';
+      if(options.legacyAppleWatchRpe&&isPlainObject(row)&&row.rpe!==undefined){
+        row.rpe=legacyAppleWatchRpe(row.rpe,rowPath+'.rpe');
+      }
+      return validateActivityRecord(row,rowPath,{coerce:true,coerceRpe:false,rpeMax:10});
+    });
     return candidate;
   }
   function validateKnown(candidate,options){
@@ -334,7 +361,7 @@
     Object.keys(candidate.activityNotes||{}).forEach(function(key){text(candidate.activityNotes[key],pathFor('$.activityNotes',key),LIMITS.maxString,true)});
     Object.keys(candidate.autoNextTargets||{}).forEach(function(key){plain(candidate.autoNextTargets[key],pathFor('$.autoNextTargets',key));scan(candidate.autoNextTargets[key])});
     candidate.workouts.forEach(function(row,index){validateWorkoutRecord(row,'$.workouts['+index+']',{coerce:!!options.coerce})});
-    candidate.appleWatch.forEach(function(row,index){validateActivityRecord(row,'$.appleWatch['+index+']',{coerce:!!options.coerce})});
+    candidate.appleWatch.forEach(function(row,index){validateActivityRecord(row,'$.appleWatch['+index+']',{coerce:!!options.coerce,coerceRpe:false,rpeMax:10})});
     candidate.dailyNotes.forEach(function(row,index){validateDailyRecord(row,'$.dailyNotes['+index+']')});
     candidate.weeklyNotes.forEach(function(row,index){validateWeeklyRecord(row,'$.weeklyNotes['+index+']')});
     ['metrics','nutrition','recovery'].forEach(function(key){candidate[key].forEach(function(row,index){plain(row,'$.'+key+'['+index+']');if(row.date!=null)date(row.date,'$.'+key+'['+index+'].date');scan(row)})});
@@ -379,7 +406,7 @@
     if(utf8Bytes(serialized)>maxBytes)fail('payload_too_large','DATA payload izin verilen boyutu aşıyor','$');
     var candidate=clone(value);
     var warnings=[];
-    candidate=migrate(candidate,warnings);
+    candidate=migrate(candidate,warnings,options);
     scan(candidate,options);
     validateKnown(candidate,{coerce:false});
     var known={schemaVersion:true};
@@ -414,7 +441,7 @@
     rows.forEach(function(input,index){
       var safeInput=clone(input);
       if(typeof normalizer==='function')safeInput=normalizer(safeInput);
-      var row=validateActivityRecord(safeInput,'$.import.activities['+index+']',{coerce:true});
+      var row=validateActivityRecord(safeInput,'$.import.activities['+index+']',{coerce:true,coerceRpe:false,rpeMax:10});
       var expanded=Array.isArray(row.segments)&&row.segments.length?row.segments:[row];
       expanded.forEach(function(item){
         delete item.segments;
@@ -627,7 +654,7 @@
       var reader=new FileReader();
       reader.onload=function(){
         try{
-          var prepared=prepareFullText(String(reader.result||''),{source:'backup-file-restore'});
+          var prepared=prepareFullText(String(reader.result||''),{source:'backup-file-restore',legacyAppleWatchRpe:true});
           commit(prepared.data,{source:'backup-file-restore',downloadBackup:true,backupLabel:'simurg-pre-restore'});
           alert('JSON yedeği doğrulandı ve geri yüklendi.');
         }catch(error){alert('JSON içe aktarılamadı: '+message(error))}
