@@ -8,6 +8,19 @@ const index = read('index.html');
 const cloud = read('simurg-cloud-auth.js');
 const sw = read('sw.js');
 const activeRuntime = `${index}\n${cloud}\n${sw}`;
+const activeProductionAssets = [
+  'index.html',
+  'sw.js',
+  'manifest.json',
+  'simurg-signal-model.js',
+  'simurg-data-validation.js',
+  'polar-workout.js',
+  'workout-source-policy.js',
+  'premium-standard.js',
+  'polar-accesslink.js',
+  'desktop-alignment.js',
+  'simurg-cloud-auth.js'
+].map(read).join('\n');
 
 function run(name, fn) {
   try { fn(); process.stdout.write(`✓ ${name}\n`); }
@@ -51,11 +64,26 @@ run('official Supabase v2 and one local controller are loaded', () => {
 });
 
 run('active runtime contains no legacy shared cloud model', () => {
+  assert.doesNotMatch(activeProductionAssets, /\.from\(\s*['\"]simurg_data['\"]\s*\)/);
   assert.doesNotMatch(activeRuntime, /\/rest\/v1\/simurg_data\b/);
   assert.doesNotMatch(activeRuntime, /id=eq\.main/);
   assert.doesNotMatch(activeRuntime, /SIMURG_SYNC_ID/);
+  assert.doesNotMatch(activeProductionAssets, /\bid\s*:\s*['\"]main['\"]/);
   assert.doesNotMatch(activeRuntime, /Authorization["']?\s*:\s*["']Bearer|Bearer\s*["']?\s*\+\s*SIMURG_SUPABASE_KEY/);
   assert.doesNotMatch(index, /function\s+(?:pushToCloud|pullFromCloud|checkCloudStatus)\s*\(|window\.(?:pushToCloud|pullFromCloud)\s*=/);
+});
+
+run('production assets exclude removed legacy scripts and retain the authenticated cloud contract', () => {
+  for (const file of ['script.js', ...Array.from({ length: 25 }, (_, index) => `script_${index}.js`), 'all_scripts.js']) {
+    assert.doesNotMatch(index, new RegExp(`(?:^|[/'\"])${file.replace('.', '\\.')}(?:[?/'\"])`));
+    assert.doesNotMatch(sw, new RegExp(`(?:^|[/'\"])${file.replace('.', '\\.')}(?:[?/'\"])`));
+  }
+  assert.match(cloud, /TABLE='simurg_user_data'/);
+  assert.match(cloud, /\.eq\('user_id',context\.userId\)/);
+  const pull = functionBody(cloud, 'pullUserData');
+  assert.match(pull, /normalizePulledData\(result\.data\.payload\)/);
+  assert.match(pull, /downloadLocalBackup\(oldData\)/);
+  assert.match(pull, /persistPulledData\(pulled\)/);
 });
 
 run('auth changes do not mutate DATA or app localStorage', () => {
