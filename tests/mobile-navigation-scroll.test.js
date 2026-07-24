@@ -28,7 +28,7 @@ for (const route of [
 
 const baseShow = active.match(/function show\(id,btn\)\{([\s\S]*?)\n\}/);
 assert.ok(baseShow);
-assert.match(baseShow[1], /window\.innerWidth>860/);
-assert.doesNotMatch(baseShow[1], /if\(window\.innerWidth<=860\)[^\n]*window\.scrollTo/);
+assert.match(baseShow[1], /window\.innerWidth>900/);
+assert.doesNotMatch(baseShow[1], /if\(window\.innerWidth<=900\)[^\n]*window\.scrollTo/);
 assert.match(script[1], /function closeMenu\(\)\{[^}]*classList\.remove\('open'\)[^}]*classList\.remove\('open'\)/);
 process.stdout.write('✓ Mobile navigation has one router and section scroll reset\n');

@@ -155,7 +155,7 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
 .simurg-activity-card .activitySessionTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:0 0 12px}
 .simurg-activity-card .activityStatsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:0}
 
-@media(max-width:860px){
+@media(max-width:900px){
   /* Gym navigation header only. */
   #gym.gp-gym-refined .topbar{display:grid!important;grid-template-columns:1fr!important;gap:7px!important;padding:8px 2px 10px!important}
   #gym.gp-gym-refined .topbar .title{display:block!important;margin:0!important}
@@ -208,7 +208,7 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
 #home>*:not(.gp-home-shell){display:none!important}
 #home,#home.gp-home,#home .gp-home-shell,#home .gp-home-pane{animation:none!important;transition:none!important}
 
-@media(max-width:860px){
+@media(max-width:900px){
   /* Logger session summary density and title only. */
   #workout.gp-logger-refined #psLoggerHero{padding:11px!important;border-radius:19px!important;min-height:0!important;box-shadow:0 10px 25px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.025)!important}
   #workout.gp-logger-refined #psLoggerHero .psLoggerHeroTop{margin-bottom:7px!important;gap:8px!important}
@@ -260,7 +260,7 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
 }
 
 /* Mobile module menu only; desktop and navigation behavior stay untouched. */
-@media(max-width:860px){
+@media(max-width:900px){
   #simurgV8Shade{
     background:rgba(1,4,9,.78)!important;
     transition:none!important;
@@ -363,7 +363,7 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
 }
 
 /* Mobile Workout Logger presentation; the existing renderer and DOM stay authoritative. */
-@media(max-width:860px){
+@media(max-width:900px){
   #workout.gp-logger-refined{
     padding-bottom:calc(var(--simurgNativeBottom,90px) + 48px)!important;
   }
@@ -768,7 +768,7 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
 }
 
 /* B Horizon Flow Mobile Final */
-@media(max-width:860px){
+@media(max-width:900px){
   :root{--simurgNativeNavH:64px;--simurgNativeBottom:calc(var(--simurgNativeNavH) + 26px + env(safe-area-inset-bottom,0px));--simurgNativeTop:calc(12px + env(safe-area-inset-top,0px))}
   html,body{width:100%!important;height:100%!important;min-height:100%!important;overflow:hidden!important;overscroll-behavior:none!important;scroll-behavior:auto!important;background:#060a0f!important}
   body{position:fixed!important;inset:0!important;padding:0!important}

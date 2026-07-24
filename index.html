@@ -5948,17 +5948,17 @@ body{background:#050607!important;}
 <div class="app"><aside>
 <div class="logo simurgBrandPolish"><div class="mark">🕊️</div><div class="brandWrap"><div class="brand"><span class="brandMain">SIMURG</span><span class="brandOs">OS</span></div><small>Yüksel. Kaydet. Yeniden İnşa Et.</small></div></div>
 <div class="nav">
-<button class="active" onclick="window.innerWidth<=860?simurgV8Go('home','home'):show('home',this)">🏠 Ana Sayfa</button>
-<button onclick="window.innerWidth<=860?simurgV8Go('recovery','home'):show('recovery',this)">💠 Toparlanma</button>
-<button onclick="window.innerWidth<=860?simurgV8Go('workout','logger'):show('workout',this)">🏋️ Workout Logger</button>
-<button onclick="window.innerWidth<=860?simurgV8Go('gym','gym'):show('gym',this)">📱 Gym Mode</button>
-<button onclick="window.innerWidth<=860?simurgV8Go('daily','menu'):show('daily',this)">📝 Daily Summary</button>
-<button onclick="window.innerWidth<=860?simurgV8Go('weekly','menu'):show('weekly',this)">📅 Weekly Summary</button>
-<button onclick="window.innerWidth<=860?simurgV8Go('program','menu'):show('program',this)">🧭 Program Intelligence</button>
-<button onclick="window.innerWidth<=860?simurgV8Go('monthly','menu'):show('monthly',this)">🗓️ Monthly Review</button>
-<button onclick="window.innerWidth<=860?simurgV8Go('coaching','menu'):show('coaching',this)">🧠 Coaching</button>
-<button onclick="window.innerWidth<=860?simurgV8Go('reports','menu'):show('reports',this)">📈 Progress & Analytics</button>
-<button onclick="window.innerWidth<=860?simurgV8Go('data','menu'):show('data',this)">💾 Data Center</button>
+<button class="active" onclick="window.innerWidth<=900?simurgV8Go('home','home'):show('home',this)">🏠 Ana Sayfa</button>
+<button onclick="window.innerWidth<=900?simurgV8Go('recovery','home'):show('recovery',this)">💠 Toparlanma</button>
+<button onclick="window.innerWidth<=900?simurgV8Go('workout','logger'):show('workout',this)">🏋️ Workout Logger</button>
+<button onclick="window.innerWidth<=900?simurgV8Go('gym','gym'):show('gym',this)">📱 Gym Mode</button>
+<button onclick="window.innerWidth<=900?simurgV8Go('daily','menu'):show('daily',this)">📝 Daily Summary</button>
+<button onclick="window.innerWidth<=900?simurgV8Go('weekly','menu'):show('weekly',this)">📅 Weekly Summary</button>
+<button onclick="window.innerWidth<=900?simurgV8Go('program','menu'):show('program',this)">🧭 Program Intelligence</button>
+<button onclick="window.innerWidth<=900?simurgV8Go('monthly','menu'):show('monthly',this)">🗓️ Monthly Review</button>
+<button onclick="window.innerWidth<=900?simurgV8Go('coaching','menu'):show('coaching',this)">🧠 Coaching</button>
+<button onclick="window.innerWidth<=900?simurgV8Go('reports','menu'):show('reports',this)">📈 Progress & Analytics</button>
+<button onclick="window.innerWidth<=900?simurgV8Go('data','menu'):show('data',this)">💾 Data Center</button>
 </div>
 <div class="sidecard quoteCard">
   <p>MOTİVASYON</p>
@@ -5991,7 +5991,7 @@ body{background:#050607!important;}
     </div>
     <h2>Bugünün Kararı</h2>
     <p id="homeCoachNote">Seçili tarih için toparlanma verisi bekleniyor.</p>
-    <button onclick="window.innerWidth<=860?simurgV8Go('recovery','home'):show('recovery',document.querySelectorAll('.nav button')[1])">Recovery Detayını Aç →</button>
+    <button onclick="window.innerWidth<=900?simurgV8Go('recovery','home'):show('recovery',document.querySelectorAll('.nav button')[1])">Recovery Detayını Aç →</button>
   </div>
 
   <div class="v4ScoreStack">
@@ -6026,8 +6026,8 @@ body{background:#050607!important;}
   </div>
 
   <div class="v4Actions">
-    <button class="v4Mini" onclick="window.innerWidth<=860?simurgV8Go('workout','logger'):show('workout',document.querySelectorAll('.nav button')[2])"><small>SESSION</small><b>Logger</b><span>Seansı kaydet →</span></button>
-    <button class="v4Mini" onclick="window.innerWidth<=860?simurgV8Go('data','menu'):show('data',document.querySelectorAll('.nav button')[10])"><small>IMPORT</small><b>Polar JSON</b><span>Recovery ekle →</span></button>
+    <button class="v4Mini" onclick="window.innerWidth<=900?simurgV8Go('workout','logger'):show('workout',document.querySelectorAll('.nav button')[2])"><small>SESSION</small><b>Logger</b><span>Seansı kaydet →</span></button>
+    <button class="v4Mini" onclick="window.innerWidth<=900?simurgV8Go('data','menu'):show('data',document.querySelectorAll('.nav button')[10])"><small>IMPORT</small><b>Polar JSON</b><span>Recovery ekle →</span></button>
   </div>
 </section>
 
@@ -6094,7 +6094,7 @@ body{background:#050607!important;}
       <b id="gymDayTitle">-</b>
       <span id="gymDayMeta">-</span>
     </div>
-    <button class="btn gymImportJsonBtn" onclick="window.innerWidth<=860?simurgV8Go('data','menu'):show('data',[...document.querySelectorAll('.nav button')].find(b=>b.textContent.includes('Data Center')))">Import JSON</button>
+    <button class="btn gymImportJsonBtn" onclick="window.innerWidth<=900?simurgV8Go('data','menu'):show('data',[...document.querySelectorAll('.nav button')].find(b=>b.textContent.includes('Data Center')))">Import JSON</button>
   </div>
   <div id="gymModeList" class="gymModeList"></div>
 </section>
@@ -6208,7 +6208,7 @@ body{background:#050607!important;}
   <h2>Polar Toparlanma İçe Aktarımı</h2>
   <div class="sub">Polar Loop Gen 2 için uyku, HRV, dinlenik nabız, Nightly Recharge ve aktivite yükünü Simurg coaching motoruna bağlar.</div>
   <div class="polarImportTabs"><button class="active">Polar</button><button>Apple Watch</button><button>Elle</button></div>
-  <div class="actions"><button class="btn polarSampleBtn" onclick="fillPolarSample()">Örnek Polar JSON</button><button class="btn sec" onclick="window.innerWidth<=860?simurgV8Go('home','home'):show('home',document.querySelectorAll('.nav button')[0])">Ana Ekrana Dön</button></div>
+  <div class="actions"><button class="btn polarSampleBtn" onclick="fillPolarSample()">Örnek Polar JSON</button><button class="btn sec" onclick="window.innerWidth<=900?simurgV8Go('home','home'):show('home',document.querySelectorAll('.nav button')[0])">Ana Ekrana Dön</button></div>
   <div class="mapGrid"><div>Uyku Skoru → <b>Uyku Skoru</b></div><div>HRV → <b>Hazırlık Motoru</b></div><div>Dinlenik HR → <b>Toparlanma</b></div><div>Gece Toparlanması → <b>Koçluk</b></div><div>Aktivite Yükü → <b>Yük & Yorgunluk</b></div><div>Öznel → <b>Günlük Kontrol</b></div></div>
 </div>
 
@@ -6293,7 +6293,7 @@ let target=document.getElementById(id);
 if(target) target.classList.add('active');
 document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
 if(btn) btn.classList.add('active');
-if(window.innerWidth>860) window.scrollTo({top:0,behavior:'smooth'});
+if(window.innerWidth>900) window.scrollTo({top:0,behavior:'smooth'});
 render();
 }
 function changeWeek(n){weekStart=addDays(weekStart,n);selectedDate=addDays(selectedDate,n);weekStart=mondayOf(selectedDate);render()}
@@ -7582,7 +7582,7 @@ render()
 
   function activateTarget(id, btn){
     if(!id) return;
-    if(window.innerWidth<=860 && typeof window.simurgV8Go==='function'){
+    if(window.innerWidth<=900 && typeof window.simurgV8Go==='function'){
       const key=id==='workout'?'logger':id==='home'||id==='recovery'?'home':id==='gym'?'gym':id==='polar'?'polar':'menu';
       window.simurgV8Go(id,key);
       return;
@@ -7622,7 +7622,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=volume-engine-1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=responsive-overflow-1').catch(function(){});
   });
 }
 </script>
@@ -8024,7 +8024,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
     selectedDate=date;
     weekStart=mondayOf(selectedDate);
-    if(window.innerWidth<=860)simurgV8Go('workout','logger');
+    if(window.innerWidth<=900)simurgV8Go('workout','logger');
     else{show('workout',document.querySelector('.nav button'));render();}
   }
   const reportRoot=document.getElementById('dailyReport');
@@ -9843,7 +9843,7 @@ textarea,input,select{
     const t=safeToday();
     const active=String(window.selectedDate||selectedDate)===t;
     const shownProgram=window.SimurgLabels?window.SimurgLabels.sentence(programFor(t)):programFor(t);
-    helper.innerHTML=`<div><small>${active?'Bugünün Programı':'Bugün'}</small><b>${shownProgram}</b><span>${safeTr(t)} • Gym modu bugünün tarihine göre hazır.</span></div><button class="btn sec" onclick="window.innerWidth<=860?(selectedDate=todayStr(),weekStart=mondayOf(selectedDate),simurgV8Go('gym','gym')):(goToday(),show('gym',document.querySelector('.nav button:nth-child(2)')))">Bugünün Programına Git</button>`;
+    helper.innerHTML=`<div><small>${active?'Bugünün Programı':'Bugün'}</small><b>${shownProgram}</b><span>${safeTr(t)} • Gym modu bugünün tarihine göre hazır.</span></div><button class="btn sec" onclick="window.innerWidth<=900?(selectedDate=todayStr(),weekStart=mondayOf(selectedDate),simurgV8Go('gym','gym')):(goToday(),show('gym',document.querySelector('.nav button:nth-child(2)')))">Bugünün Programına Git</button>`;
   }
 
   function applyRestDayCard(){
@@ -9869,7 +9869,7 @@ textarea,input,select{
   window.goToLastImportedDate=function(){
     const d=localStorage.getItem('simurg_last_imported_date')||'';
     if(!d) return;
-    selectedDate=d; weekStart=safeMonday(d); if(window.innerWidth<=860)simurgV8Go('workout','logger');else{render();show('workout',document.querySelector('.nav button'));}
+    selectedDate=d; weekStart=safeMonday(d); if(window.innerWidth<=900)simurgV8Go('workout','logger');else{render();show('workout',document.querySelector('.nav button'));}
   };
   function showImportDate(d){
     if(!d) return;
@@ -10453,7 +10453,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
 }
 .simurgMobileBottomNav,.simurgMobileSheet,.simurgMobileShade{display:none;}
 .mobileOnlyQuick{display:none;}
-@media(max-width:860px){
+@media(max-width:900px){
   html,body{background:#05070b!important;}
   body{padding-bottom:calc(var(--mobileNavH) + var(--safeBottom))!important;}
   .app{display:block!important;min-height:100vh!important;background:radial-gradient(circle at 50% -15%,rgba(31,214,123,.11),transparent 34%),linear-gradient(180deg,#070a10,#04060a 52%,#05070b)!important;}
@@ -10585,7 +10585,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   .mobileOnlyQuick{display:flex!important;gap:8px!important;overflow-x:auto!important;padding:2px 0 10px!important;}
   .mobileOnlyQuick button{border:1px solid rgba(255,255,255,.08)!important;background:#101720!important;color:#dfe8f5!important;border-radius:999px!important;padding:9px 12px!important;white-space:nowrap!important;font-weight:850!important;}
 }
-@media(min-width:861px){
+@media(min-width:901px){
   .simurgMobileBottomNav,.simurgMobileSheet,.simurgMobileShade{display:none!important;}
 }
 </style>
@@ -10657,7 +10657,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
 
 <!-- SIMURG WHOOP MOBILE V8 — usability hardening from phone test -->
 <style id="simurgWhoopMobileV8Fixes">
-@media(max-width:860px){
+@media(max-width:900px){
   html{font-size:16px!important;-webkit-text-size-adjust:100%!important;overflow-x:hidden!important;}
   body{overflow-x:hidden!important;background:#05070b!important;}
   *{box-sizing:border-box!important;}
@@ -10774,7 +10774,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   .simurgV8Grid button{min-height:72px!important;border:1px solid rgba(255,255,255,.08)!important;background:#0f161f!important;color:#ecf4ff!important;border-radius:21px!important;font-weight:900!important;font-size:11px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;}
   .simurgV8Grid button i{font-style:normal!important;font-size:20px!important;}
 }
-@media(min-width:861px){#simurgV8Nav,#simurgV8Shade,#simurgV8Sheet{display:none!important;}}
+@media(min-width:901px){#simurgV8Nav,#simurgV8Shade,#simurgV8Sheet{display:none!important;}}
 </style>
 <script id="simurgWhoopMobileV8Script">
 (function(){
@@ -14394,7 +14394,7 @@ m Shell V4: Logger information architecture fix -->
 </template>
 <!-- SIMURG OS Logger mobile trend tooltip disable: keep bars, remove popups -->
 <style id="simurgLoggerMobileTrendTooltipDisable">
-@media(max-width:860px){
+@media(max-width:900px){
   #workout #trendBars .bar.tooltipItem,
   #workout #trendBars .bar.tooltipItem:hover,
   #workout #trendBars .bar.tooltipItem:active,
@@ -14421,7 +14421,7 @@ m Shell V4: Logger information architecture fix -->
 </style>
 <script id="simurgLoggerMobileTrendTooltipDisableScript">
 (function(){
-  var MOBILE_WIDTH=860;
+  var MOBILE_WIDTH=900;
   function isMobile(){return window.innerWidth<=MOBILE_WIDTH;}
   function bars(){return document.querySelectorAll('#workout #trendBars .bar.tooltipItem');}
   function apply(){
@@ -14454,7 +14454,7 @@ m Shell V4: Logger information architecture fix -->
 
 <!-- SIMURG OS Polar Bridge v1: Apple Health Shortcut Sync preparation -->
 <style id="simurgPolarBridgeV1Style">
-@media(max-width:860px){
+@media(max-width:900px){
 	  .polarBridgeCard,
 	  .polarBridgeHero,
 	  .polarBridgeEmpty,
@@ -15915,7 +15915,7 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./polar-workout.css?v=11">
 <script src="./polar-workout.js?v=14"></script>
 <script src="./workout-source-policy.js?v=3"></script>
-<link rel="stylesheet" href="./premium-standard.css?v=31">
+<link rel="stylesheet" href="./premium-standard.css?v=32">
 <script src="./premium-standard.js?v=35"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=7"></script>
