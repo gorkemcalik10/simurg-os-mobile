@@ -19,6 +19,12 @@ assert.match(home, /hasTimeline\?'<section class="gp-ref-timeline"/);
 assert.match(home, /data-gp-polar-date=/);
 assert.match(home, /if\(!loadResult\.available\)return '<div class="gp-home-pane active gp-reference-load"/);
 assert.match(home, /overviewLoad=model\.loadResult&&model\.loadResult\.available\?model\.load:null/);
+assert.match(home, /loadStatus=overviewLoad==null\?'Bekleniyor'/);
+assert.match(home, /class="gp-home-shell simurgReferenceOverviewShell" data-home-layout="mobile-overview"/);
+assert.match(home, /gp-home-pane active gp-reference-overview simurgReferenceOverview/);
+assert.match(home, /desiredLayout=window\.innerWidth>900\?'desktop':homeTab==='overview'\?'mobile-overview':'mobile'/);
+assert.match(home, /simurgReferenceReadiness.*simurgReferenceHorizon.*simurgReferencePlan.*simurgReferenceSessions.*simurgReferenceCoach/s);
+assert.match(home, /simurgReferenceSessionMetrics.*class="volume".*<small>Hacim<\/small>/s);
 assert.doesNotMatch(home, /synthetic_test_fixture|SYNTHETIC TEST DATA/);
 
 assert.match(polar, /var tabs=\['overview','heart','zones','load'\]/);
@@ -43,6 +49,17 @@ for (const selector of [
   '.gp-ref-readiness', '.gp-ref-horizon', '.gp-ref-recovery-hero',
   '.gp-ref-sleep-hero', '.gp-ref-load-hero'
 ]) assert.ok(homeCss.includes(`#home.gp-home ${selector}`), `Home reference selector missing: ${selector}`);
+for (const selector of [
+  '.simurgReferenceHeader', '.simurgReferenceOverview', '.simurgReferenceReadiness',
+  '.simurgReferenceHorizon', '.simurgReferencePlan', '.simurgReferenceSessions',
+  '.simurgReferenceCoach'
+]) assert.ok(homeCss.includes(`#home.gp-home ${selector}`), `Exact Overview selector missing: ${selector}`);
+assert.match(homeCss, /\.simurgReferenceReadiness\{[^}]*height:128px/);
+assert.match(homeCss, /\.simurgReferenceHorizon\{[^}]*height:118px/);
+assert.match(homeCss, /\.simurgReferencePlan\{[^}]*height:86px/);
+assert.match(homeCss, /\.simurgReferenceSession\{[^}]*height:134px/);
+assert.match(homeCss, /\.simurgReferenceSessionMetrics\{[^}]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+assert.match(homeCss, /\.simurgReferenceCoach\{[^}]*height:169px/);
 assert.match(polarCss, /@media\(max-width:900px\)/);
 assert.match(polarCss, /@media\(min-width:901px\)/);
 assert.match(polarCss, /\.pw-tab:focus-visible\{outline:1px solid rgba\(32,187,237,.28\)/);

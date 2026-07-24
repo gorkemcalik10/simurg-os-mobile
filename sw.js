@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-premium-ui-fidelity-v1';
+const SIMURG_CACHE = 'simurg-home-overview-fidelity-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -8,8 +8,8 @@ const CORE_ASSETS = [
   './polar-workout.css?v=13',
   './polar-workout.js?v=16',
   './workout-source-policy.js?v=3',
-  './premium-standard.css?v=34',
-  './premium-standard.js?v=37',
+  './premium-standard.css?v=35',
+  './premium-standard.js?v=38',
   './simurg-signal-model.js?v=6',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=7',
