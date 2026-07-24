@@ -37,17 +37,18 @@ run('AccessLink publishes status and refreshes existing render system', () => {
 
 run('changed production assets use matching cache versions', () => {
   for (const asset of [
-    'simurg-data-validation.js?v=2',
+    'simurg-volume-model.js?v=1',
+    'simurg-data-validation.js?v=3',
     'polar-accesslink.js?v=7',
     'desktop-alignment.css?v=24',
-    'desktop-alignment.js?v=28',
+    'desktop-alignment.js?v=29',
     'simurg-cloud-auth.js?v=3'
   ]) {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=account-polar-1/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-account-polar-1'/);
+  assert.match(index, /sw\.js\?v=volume-engine-1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-volume-engine-1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

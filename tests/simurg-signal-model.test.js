@@ -4,6 +4,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const ROOT = path.resolve(__dirname, '..');
+const VOLUME_SOURCE = fs.readFileSync(path.join(ROOT, 'simurg-volume-model.js'), 'utf8');
 const MODEL_SOURCE = fs.readFileSync(path.join(ROOT, 'simurg-signal-model.js'), 'utf8');
 
 function sourceDurationMinutes(value) {
@@ -66,6 +67,8 @@ function makeRuntime(data = {}, selectedDate = '2026-07-17') {
     },
   };
   window.window = window;
+  vm.runInNewContext(VOLUME_SOURCE, context, { filename: 'simurg-volume-model.js' });
+  window.SimurgVolumeModel = context.SimurgVolumeModel;
   vm.runInNewContext(MODEL_SOURCE, context, { filename: 'simurg-signal-model.js' });
   return { model: window.SimurgSignalModel, labels: window.SimurgLabels, window, context, listeners };
 }

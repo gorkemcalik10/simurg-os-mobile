@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Simurg OS Cloud Sync</title>
-<script src="./simurg-signal-model.js?v=5"></script>
+<script src="./simurg-volume-model.js?v=1"></script>
+<script src="./simurg-signal-model.js?v=6"></script>
 <style>
 :root{
   --bg:#04070a;--panel:#0a1118;--panel2:#0d161e;--line:rgba(166,180,194,.15);--text:#eef1f4;--muted:#8e99a5;
@@ -23,6 +24,7 @@ main{padding:28px 30px 18px;max-width:1500px}.topbar{display:flex;justify-conten
 .dayProgram{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:14px}.dayBtn{background:var(--hz-field,var(--panel));border:1px solid var(--hz-line,var(--line));border-radius:14px;padding:14px 10px;color:white;cursor:pointer;text-align:center}.dayBtn.active{background:var(--hz-amber-soft,rgba(245,163,13,.10));border-color:var(--hz-amber,var(--blue));color:var(--hz-amber,var(--blue));box-shadow:inset 0 -3px 0 var(--hz-amber,var(--blue))}.dayBtn .main{font-weight:900}.dayBtn .type{font-size:12px;color:var(--muted);margin-top:5px}
 .group,.card{background:linear-gradient(180deg,var(--hz-surface-2,var(--panel2)),var(--hz-field,var(--panel)));border:1px solid var(--hz-line,var(--line));border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 20px 45px rgba(0,0,0,.25)}.groupHead{display:flex;justify-content:space-between;align-items:center;margin:0 6px 12px}.groupTitle{font-size:19px;font-weight:900}.groupMeta{color:var(--muted);font-size:13px;margin-left:8px}.groupPill{border:1px solid rgba(245,163,13,.24);color:var(--hz-amber,var(--blue));border-radius:10px;padding:7px 12px;background:var(--hz-field,var(--panel))}
 .exerciseGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.exerciseCard{background:linear-gradient(180deg,var(--hz-surface,var(--panel)),var(--hz-field,var(--panel)));border:1px solid var(--hz-line,var(--line));border-radius:14px;padding:14px;min-height:185px;position:relative;overflow:hidden}.exerciseCard:hover{border-color:rgba(245,163,13,.42);box-shadow:0 0 0 1px rgba(245,163,13,.16),0 15px 35px rgba(245,163,13,.06)}.exTop{display:flex;justify-content:space-between;gap:10px;align-items:start}.exName{font-size:16px;font-weight:850;cursor:pointer}.exName:hover{color:var(--hz-amber,var(--blue))}.menuBtn{background:transparent;border:0;color:#a9b8ca;font-size:22px;cursor:pointer}
+.exerciseIdentity{min-width:0}.loadProfileTag{display:block;width:max-content;max-width:100%;margin-top:5px;color:#8fa6c2;font-size:10px;line-height:1.3}.loadProfileTag.factor2{color:#6fb6ff}.loadProfileEditor{margin:4px 0 12px;padding:12px;border:1px solid rgba(96,165,250,.18);border-radius:12px;background:rgba(7,18,34,.68)}.loadProfileEditor label{display:block;margin-bottom:7px;color:#dbeafe;font-size:12px;font-weight:800}.loadProfileEditor select{margin-bottom:7px}.loadProfileEditor small{display:block;color:#91a4bd;font-size:11px;line-height:1.45}.loadProfileWarning{margin-top:8px;color:#fbbf24!important}
 .setTable{width:100%;border-collapse:collapse;margin-top:12px}.setTable td,.setTable th{padding:8px 5px;text-align:right;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px}.setTable th:first-child,.setTable td:first-child{text-align:center}.setTable th{font-size:11px;color:#a9b8ca;font-weight:700}.setTable tr:hover td{color:var(--blue)}.addSet{margin-top:10px;color:var(--blue);cursor:pointer;font-size:13px}.blueLine{position:absolute;left:14px;bottom:0;height:3px;background:var(--blue);width:45%;border-radius:6px 6px 0 0}
 .emptyState{padding:28px;border:1px dashed var(--line);border-radius:18px;text-align:center;color:var(--muted);background:rgba(12,23,36,.5)}.emptyState b{color:white}
 .right{display:flex;flex-direction:column;gap:14px}.panel{background:linear-gradient(180deg,var(--hz-surface-2,var(--panel2)),var(--hz-field,var(--panel)));border:1px solid var(--hz-line,var(--line));border-radius:16px;padding:17px}.panel h3{margin:0 0 15px;font-size:16px}.donut{width:130px;height:130px;border-radius:50%;background:conic-gradient(var(--blue) 0 73%,var(--green) 73% 82%,var(--purple) 82% 100%);margin:auto;position:relative}.donut:after{content:"";position:absolute;inset:33px;background:var(--hz-field,var(--panel));border-radius:50%}.legend{display:grid;gap:12px;margin-top:16px}.leg{display:flex;justify-content:space-between;color:#dce8f5}.dot{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:8px}.bars{display:flex;align-items:end;height:125px;gap:14px;border-bottom:1px solid var(--hz-line,var(--line));padding:0 10px}.bar{width:22px;background:linear-gradient(180deg,var(--hz-amber,var(--blue)),#b66d00);border-radius:5px 5px 0 0}.summaryRow{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 0;color:#dce8f5}.bottomStats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:8px;background:var(--hz-surface-2,var(--panel2));border:1px solid var(--hz-line,var(--line));border-radius:14px;overflow:hidden}.stat{padding:14px 20px;border-right:1px solid var(--hz-line,var(--line))}.stat:last-child{border-right:0}.stat b,.metric{font-size:28px;color:var(--hz-amber,var(--blue));font-weight:950}
@@ -1110,6 +1112,7 @@ aside{
   color:#8fa6c2;
   font-size:10px;
 }
+.gymLoadProfileNote{display:block;margin-top:6px;color:#8fa6c2;font-size:10px;line-height:1.4}.gymLoadProfileNote.warn{color:#fbbf24}
 .gymInputBox input{
   width:100%;
   background:var(--hz-field);
@@ -5288,8 +5291,8 @@ if(!CSS.escape){CSS.escape=function(s){return String(s).replace(/["\\]/g,'\\$&')
   }
   function workoutFor(date){
     var data=dataRoot(), rows=(data.workouts||[]).filter(function(w){return String(w.date||'')===String(date);});
-    var sets=rows.length, volume=rows.reduce(function(a,w){return a+(num(w.weight)||0)*(num(w.reps)||0);},0);
-    return {sets:sets,volume:Math.round(volume)};
+    var summary=window.SimurgVolumeModel.summary(rows);
+    return {sets:summary.sets,volume:Math.round(summary.volume)};
   }
   function latestWorkout(entry){
     if(entry && Array.isArray(entry.workouts) && entry.workouts.length) return entry.workouts[0];
@@ -6227,9 +6230,9 @@ body{background:#050607!important;}
 </main></div>
 <div class="modal" id="editModal"><div class="modalbox"><div class="modalTop"><h2 id="modalTitle">Düzenle</h2><button class="btn sec" onclick="closeModal()">Kapat</button></div><div id="modalBody"></div><div class="actions"><button class="btn" onclick="saveEdit()">Kaydet</button><button class="btn danger" onclick="deleteEditing()">Sil</button></div></div></div>
 <div class="modal programNameModal" id="programNameModal"><div class="modalbox"><div class="modalTop"><h2>Program İsmini Düzenle</h2><button class="btn sec" onclick="closeProgramNameModal()">Kapat</button></div><div id="programNameBody"></div><div class="actions"><button class="btn" onclick="saveProgramNameEdit()">Kaydet</button><button class="btn sec" onclick="resetProgramNameEdit()">Varsayılana Dön</button></div></div></div>
-<script src="./simurg-data-validation.js?v=2"></script>
+<script src="./simurg-data-validation.js?v=3"></script>
 <script>
-const INITIAL={"schemaVersion":1,"workouts":[],"metrics":[],"nutrition":[],"recovery":[],"appleWatch":[],"dailyNotes":[],"weeklyNotes":[],"customGymPrograms":{},"programNames":{},"polarWorkouts":{"daily":{},"latest":null},"polarActivity":{"daily":{},"latest":null},"polarProfile":{"latest":null},"polarSleep":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarNightlyRecharge":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarContinuousHr":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarCardioLoad":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarConnection":{"connected":false,"status":"disconnected","lastSyncAt":null,"lastError":null,"source":"Polar AccessLink"}};
+const INITIAL={"schemaVersion":1,"workouts":[],"metrics":[],"nutrition":[],"recovery":[],"appleWatch":[],"dailyNotes":[],"weeklyNotes":[],"customGymPrograms":{},"programNames":{},"exerciseLoadProfiles":{},"polarWorkouts":{"daily":{},"latest":null},"polarActivity":{"daily":{},"latest":null},"polarProfile":{"latest":null},"polarSleep":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarNightlyRecharge":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarContinuousHr":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarCardioLoad":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarConnection":{"connected":false,"status":"disconnected","lastSyncAt":null,"lastError":null,"source":"Polar AccessLink"}};
 window.SIMURG_INITIAL_DEFAULTS=INITIAL;
 let DATA;
 var simurgStoredDataRaw=localStorage.getItem('atlas_summary_reports');
@@ -6250,6 +6253,7 @@ if(!DATA.dailyNotes) DATA.dailyNotes=[];
 if(!DATA.weeklyNotes) DATA.weeklyNotes=[];
 if(!DATA.customGymPrograms) DATA.customGymPrograms={};
 if(!DATA.programNames) DATA.programNames={};
+if(!DATA.exerciseLoadProfiles) DATA.exerciseLoadProfiles={};
 let selectedDate=todayStr(), weekStart=mondayOf(selectedDate), editIndexes=[];
 const program=[
   ['Monday','Push Strength'],
@@ -6298,7 +6302,7 @@ function render(){renderProgramDays();renderWeekStrip();renderWorkout();renderGy
 window.__simurgBaseRender=render;
 function dayData(date){return DATA.workouts.filter(w=>w.date===date)}
 function weekDates(){weekStart=mondayOf(weekStart);return [0,1,2,3,4,5,6].map(i=>addDays(weekStart,i))}
-function calc(items){let vol=items.reduce((a,w)=>a+w.weight*w.reps,0), reps=items.reduce((a,w)=>a+w.reps,0);let parts={}, exs={};items.forEach(w=>{parts[w.bodyPart]=(parts[w.bodyPart]||0)+1;if(!exs[w.exercise])exs[w.exercise]=[];exs[w.exercise].push(w)});return {sets:items.length,reps,vol,parts,exs}}
+function calc(items){let summary=SimurgVolumeModel.summary(items),parts={},exs={};items.forEach(w=>{let row=SimurgVolumeModel.row(w);parts[w.bodyPart]=(parts[w.bodyPart]||0)+row.sets;if(!exs[w.exercise])exs[w.exercise]=[];exs[w.exercise].push(w)});return {sets:summary.sets,reps:summary.reps,vol:summary.volume,parts,exs}}
 function renderProgramDays(){
   dayProgram.innerHTML=program.map(([d,defaultType],i)=>{
     let date=addDays(weekStart,i);
@@ -6345,7 +6349,9 @@ function renderWorkout(){
 }
 function exCard(ex,sets){
   let firstIndex=sets.length?DATA.workouts.indexOf(sets[0]):-1;
-  return `<div class="exerciseCard"><div class="exTop"><div class="exName" role="button" tabindex="0" data-workout-action="edit-exercise" data-workout-index="${firstIndex}">${escapeAttr(ex)}</div><button class="menuBtn" type="button" data-workout-action="edit-exercise" data-workout-index="${firstIndex}">⋮</button></div><table class="setTable"><thead><tr><th>SET</th><th>TEKRAR</th><th>KİLO</th></tr></thead><tbody>${sets.map((s,i)=>{let idx=DATA.workouts.indexOf(s);return `<tr tabindex="0" data-workout-action="edit-set" data-workout-index="${idx}"><td>${i+1}</td><td>${escapeAttr(s.reps)}</td><td>${escapeAttr(s.weight)}</td></tr>`}).join('')}</tbody></table><button class="addSet" type="button" data-workout-action="add-set" data-workout-index="${firstIndex}">+ Set Ekle</button><div class="blueLine"></div></div>`
+  let profile=SimurgVolumeModel.profileFor(ex);
+  let profileText=profile.weightLabel+(profile.factor===2?' · Hacim ×2':'');
+  return `<div class="exerciseCard"><div class="exTop"><div class="exerciseIdentity"><div class="exName" role="button" tabindex="0" data-workout-action="edit-exercise" data-workout-index="${firstIndex}">${escapeAttr(ex)}</div><span class="loadProfileTag ${profile.factor===2?'factor2':''}">${escapeAttr(profileText)}</span></div><button class="menuBtn" type="button" data-workout-action="edit-exercise" data-workout-index="${firstIndex}">⋮</button></div><table class="setTable"><thead><tr><th>SET</th><th>TEKRAR</th><th>KİLO</th></tr></thead><tbody>${sets.map((s,i)=>{let idx=DATA.workouts.indexOf(s);return `<tr tabindex="0" data-workout-action="edit-set" data-workout-index="${idx}"><td>${i+1}</td><td>${escapeAttr(s.reps)}</td><td>${escapeAttr(s.weight)}</td></tr>`}).join('')}</tbody></table><button class="addSet" type="button" data-workout-action="add-set" data-workout-index="${firstIndex}">+ Set Ekle</button><div class="blueLine"></div></div>`
 }
 function handleWorkoutAction(target){
   let actionNode=target&&target.closest?target.closest('[data-workout-action]'):null;
@@ -6523,7 +6529,8 @@ function readGymMetaFromCard(card){
     custom:card.dataset.custom==='1',
     name:(card.querySelector('.gymExerciseName')?.value||'').trim()||'Yeni Hareket',
     bodyPart:(card.querySelector('.gymExerciseBody')?.value||'').trim()||'Other',
-    setCount:Math.max(1,Number(card.querySelector('.gymExerciseSets')?.value)||1)
+    setCount:Math.max(1,Number(card.querySelector('.gymExerciseSets')?.value)||1),
+    loadPreset:card.querySelector('.gymExerciseLoadPreset')?.value||'UNASSIGNED'
   };
 }
 function upsertGymProgramMeta(meta){
@@ -6563,6 +6570,9 @@ function saveGymExercise(key){
   const coach=readGymCoachFromCard(card);
   upsertGymProgramMeta(meta);
   const possibleOld=[meta.currentName,meta.originalName];
+  const previousName=meta.currentName||meta.originalName;
+  if(SimurgVolumeModel.profileKey(previousName)!==SimurgVolumeModel.profileKey(meta.name)) SimurgVolumeModel.moveProfile(previousName,meta.name);
+  SimurgVolumeModel.setProfile(meta.name,meta.loadPreset);
   migrateGymExerciseName(possibleOld,meta.name,meta.bodyPart);
   let rows=[...card.querySelectorAll('.gymSetInputRow')];
   DATA.workouts=DATA.workouts.filter(w=>!(w.date===selectedDate && [meta.name,...possibleOld].includes(w.exercise)));
@@ -6648,9 +6658,10 @@ function exerciseSessions(ex){
   return Object.keys(byDate).sort((a,b)=>parseDate(b)-parseDate(a)).map(date=>({date,rows:byDate[date]}));
 }
 function exerciseSessionStats(rows){
-  const sets=rows.length;
-  const reps=rows.reduce((a,w)=>a+(Number(w.reps)||0),0);
-  const vol=rows.reduce((a,w)=>a+(Number(w.weight)||0)*(Number(w.reps)||0),0);
+  const summary=SimurgVolumeModel.summary(rows);
+  const sets=summary.sets;
+  const reps=summary.reps;
+  const vol=summary.volume;
   const best=rows.reduce((m,w)=>{
     const wt=Number(w.weight)||0, rp=Number(w.reps)||0;
     if(wt>m.weight || (wt===m.weight && rp>m.reps)) return {weight:wt,reps:rp};
@@ -6738,13 +6749,15 @@ function renderGymMode(){
   }
   list.innerHTML=addCard+gymItems.map(item=>{
     let ex=item.name, bodyPart=item.bodyPart, setCount=item.setCount;
+    let loadProfile=SimurgVolumeModel.profileFor(ex);
+    let loadOptions=[{preset:'UNASSIGNED',label:'Yük tipi seçilmedi'}].concat(SimurgVolumeModel.presetOptions()).map(option=>`<option value="${option.preset}" ${option.preset===loadProfile.preset?'selected':''}>${gymSafe(option.label)}</option>`).join('');
     let rows=gymRowsForExercise(ex,bodyPart,setCount);
     let savedCount=DATA.workouts.filter(w=>w.date===selectedDate && w.exercise===ex).length;
     let coach=gymCoachForExercise(selectedDate,ex);
     let target=buildNextTarget(ex);
     let rowHtml=rows.map(r=>`<div class="gymSetInputRow">
       <strong>#${r.index}</strong>
-      <label class="gymInputBox"><small>Weight</small><input class="gymWeight" inputmode="decimal" placeholder="kg" value="${gymSafe(r.weight)}"></label>
+      <label class="gymInputBox"><small>Weight · ${gymSafe(loadProfile.weightLabel)}</small><input class="gymWeight" inputmode="decimal" placeholder="kg" value="${gymSafe(r.weight)}"></label>
       <label class="gymInputBox"><small>Reps</small><input class="gymReps" inputmode="numeric" placeholder="reps" value="${gymSafe(r.reps)}"></label>
     </div>`).join('');
     return `<div class="gymCard ${savedCount?'':'isTemplate'}" data-gym-key="${gymSafe(item.key)}" data-original-name="${gymSafe(item.originalName)}" data-current-name="${gymSafe(ex)}" data-custom="${item.custom?'1':'0'}">
@@ -6754,8 +6767,11 @@ function renderGymMode(){
             <label class="gymMetaInput"><small>Exercise</small><input class="gymExerciseName" value="${gymSafe(ex)}" placeholder="Hareket adı"></label>
             <label class="gymMetaInput"><small>Body Part</small><input class="gymExerciseBody" value="${gymSafe(bodyPart)}" placeholder="Chest / Back"></label>
             <label class="gymMetaInput"><small>Planned Set</small><input class="gymExerciseSets" inputmode="numeric" value="${gymSafe(setCount)}"></label>
+            <label class="gymMetaInput"><small>Yük Tipi</small><select class="gymExerciseLoadPreset">${loadOptions}</select></label>
           </div>
-          <div class="gymProgramNote">${item.custom?'Özel egzersiz':'Şablon egzersizi'} • Kaydetme sonrası bulut senkronizasyonu verisine dahil olur.</div>
+          <div class="gymProgramNote">${item.custom?'Özel egzersiz':'Şablon egzersizi'} • ${gymSafe(loadProfile.weightLabel)}${loadProfile.factor===2?' • Hacim ×2':''} • Kaydetme sonrası bulut senkronizasyonu verisine dahil olur.</div>
+          ${loadProfile.preset==='UNASSIGNED'?'<span class="gymLoadProfileNote warn">Yük tipi seçilmedi; hacim ×1 hesaplanır.</span>':''}
+          <span class="gymLoadProfileNote">Bu değişiklik geçmiş hacim değerlerini de yeniden hesaplar.</span>
         </div>
         <div class="gymBadge ${item.custom?'custom':''}">${savedCount?savedCount+' saved':setCount+' set'}</div>
       </div>
@@ -7267,7 +7283,7 @@ if(document.getElementById('wlWatchMaxHR')){
 }
 }
 
-function workoutVolume(rows){return rows.reduce((a,w)=>a+(Number(w.weight)||0)*(Number(w.reps)||0)*(Number(w.sets)||1),0)}
+function workoutVolume(rows){return SimurgVolumeModel.summary(rows).volume}
 function exerciseDateGroups(ex){
   let groups={};
   DATA.workouts.filter(w=>w.exercise===ex).forEach(w=>{
@@ -7334,10 +7350,11 @@ function renderReports(){
     vols[bp]=(vols[bp]||0)+sets;
     totals.sets+=sets;
     totals.reps+=reps*sets;
-    totals.volume+=weight*reps*sets;
+    let derivedVolume=SimurgVolumeModel.row(w).volume;
+    totals.volume+=derivedVolume;
     let score=weight;
     if(!best[w.exercise] || score>Number(best[w.exercise].weight||0) || (score===Number(best[w.exercise].weight||0) && reps>Number(best[w.exercise].reps||0))){
-      best[w.exercise]={weight:weight,reps:reps,date:w.date,bodyPart:bp,volume:weight*reps*sets};
+      best[w.exercise]={weight:weight,reps:reps,date:w.date,bodyPart:bp,volume:derivedVolume};
     }
   });
   let volumeEntries=Object.entries(vols).sort((a,b)=>b[1]-a[1]);
@@ -7497,9 +7514,14 @@ function renderPhoenixReport(){
 }
 
 function renderSide(){let c=calc(DATA.workouts);sideSets.textContent=c.sets+' set';sideReps.textContent=c.reps+' tekrar';sideVolume.textContent=Math.round(c.vol).toLocaleString('tr-TR')+' kg'}
-function openEditExercise(ex){editIndexes=DATA.workouts.map((w,i)=>w.exercise===ex&&w.date===selectedDate?i:null).filter(i=>i!==null);let first=DATA.workouts[editIndexes[0]];if(!first)return;modalTitle.textContent=ex+' düzenle';modalBody.innerHTML=`<input id="editExerciseName" value="${escapeAttr(first.exercise)}"><select id="editBodyPart"><option>${escapeAttr(first.bodyPart)}</option><option>Chest</option><option>Back</option><option>Rear Delt</option><option>Biceps</option><option>Triceps</option><option>Side Delt</option><option>Scapula</option></select>`+editIndexes.map((idx,i)=>{let s=DATA.workouts[idx];return `<div class="form5"><input value="Set ${i+1}" disabled><input value="${escapeAttr(s.notes)}" id="note_${idx}"><input value="1" disabled><input id="reps_${idx}" value="${escapeAttr(s.reps)}"><input id="weight_${idx}" value="${escapeAttr(s.weight)}"></div>`}).join('');editModal.classList.add('active')}
-function openEditSet(idx){idx=safeDataIndex(idx);let s=idx==null?null:DATA.workouts[idx];if(!s)return;editIndexes=[idx];modalTitle.textContent=String(s.exercise||'')+' set düzenle';modalBody.innerHTML=`<input id="editExerciseName" value="${escapeAttr(s.exercise)}"><select id="editBodyPart"><option>${escapeAttr(s.bodyPart)}</option><option>Chest</option><option>Back</option><option>Rear Delt</option><option>Biceps</option><option>Triceps</option><option>Side Delt</option><option>Scapula</option></select><input id="reps_${idx}" value="${escapeAttr(s.reps)}" placeholder="Tekrar"><input id="weight_${idx}" value="${escapeAttr(s.weight)}" placeholder="Kilo"><input id="note_${idx}" value="${escapeAttr(s.notes)}" placeholder="Not">`;editModal.classList.add('active')}
-function saveEdit(){let name=document.getElementById('editExerciseName').value, body=document.getElementById('editBodyPart').value;editIndexes.forEach(idx=>{DATA.workouts[idx].exercise=name;DATA.workouts[idx].bodyPart=body;DATA.workouts[idx].reps=Number(document.getElementById('reps_'+idx).value)||0;DATA.workouts[idx].weight=Number(String(document.getElementById('weight_'+idx).value).replace(',','.'))||0;DATA.workouts[idx].notes=document.getElementById('note_'+idx)?.value||''});closeModal();save()}
+function loadProfileEditor(ex){
+  let profile=SimurgVolumeModel.profileFor(ex);
+  let options=[{preset:'UNASSIGNED',label:'Yük tipi seçilmedi'}].concat(SimurgVolumeModel.presetOptions()).map(item=>`<option value="${item.preset}" ${item.preset===profile.preset?'selected':''}>${escapeAttr(item.label)}</option>`).join('');
+  return `<div class="loadProfileEditor"><label for="editLoadPreset">Yük Tipi</label><select id="editLoadPreset">${options}</select><small>${escapeAttr(profile.weightLabel)}${profile.factor===2?' · Hacim ×2':''}</small>${profile.preset==='UNASSIGNED'?'<small class="loadProfileWarning">Yük tipi seçilmedi; hacim güvenli olarak ×1 hesaplanır.</small>':''}<small class="loadProfileWarning">Bu değişiklik geçmiş hacim değerlerini de yeniden hesaplar.</small></div>`;
+}
+function openEditExercise(ex){editIndexes=DATA.workouts.map((w,i)=>w.exercise===ex&&w.date===selectedDate?i:null).filter(i=>i!==null);let first=DATA.workouts[editIndexes[0]];if(!first)return;modalTitle.textContent=ex+' düzenle';modalBody.innerHTML=`<input id="editExerciseName" value="${escapeAttr(first.exercise)}"><select id="editBodyPart"><option>${escapeAttr(first.bodyPart)}</option><option>Chest</option><option>Back</option><option>Rear Delt</option><option>Biceps</option><option>Triceps</option><option>Side Delt</option><option>Scapula</option></select>`+loadProfileEditor(first.exercise)+editIndexes.map((idx,i)=>{let s=DATA.workouts[idx];return `<div class="form5"><input value="Set ${i+1}" disabled><input value="${escapeAttr(s.notes)}" id="note_${idx}"><input value="1" disabled><input id="reps_${idx}" value="${escapeAttr(s.reps)}"><input id="weight_${idx}" value="${escapeAttr(s.weight)}"></div>`}).join('');editModal.classList.add('active')}
+function openEditSet(idx){idx=safeDataIndex(idx);let s=idx==null?null:DATA.workouts[idx];if(!s)return;editIndexes=[idx];modalTitle.textContent=String(s.exercise||'')+' set düzenle';modalBody.innerHTML=`<input id="editExerciseName" value="${escapeAttr(s.exercise)}"><select id="editBodyPart"><option>${escapeAttr(s.bodyPart)}</option><option>Chest</option><option>Back</option><option>Rear Delt</option><option>Biceps</option><option>Triceps</option><option>Side Delt</option><option>Scapula</option></select>${loadProfileEditor(s.exercise)}<input id="reps_${idx}" value="${escapeAttr(s.reps)}" placeholder="Tekrar"><input id="weight_${idx}" value="${escapeAttr(s.weight)}" placeholder="Kilo"><input id="note_${idx}" value="${escapeAttr(s.notes)}" placeholder="Not">`;editModal.classList.add('active')}
+function saveEdit(){let oldName=String(DATA.workouts[editIndexes[0]]?.exercise||''),name=document.getElementById('editExerciseName').value,body=document.getElementById('editBodyPart').value,preset=document.getElementById('editLoadPreset')?.value||'UNASSIGNED';if(SimurgVolumeModel.profileKey(oldName)!==SimurgVolumeModel.profileKey(name))SimurgVolumeModel.moveProfile(oldName,name);SimurgVolumeModel.setProfile(name,preset);editIndexes.forEach(idx=>{DATA.workouts[idx].exercise=name;DATA.workouts[idx].bodyPart=body;DATA.workouts[idx].reps=Number(document.getElementById('reps_'+idx).value)||0;DATA.workouts[idx].weight=Number(String(document.getElementById('weight_'+idx).value).replace(',','.'))||0;DATA.workouts[idx].notes=document.getElementById('note_'+idx)?.value||''});closeModal();save()}
 function deleteEditing(){editIndexes.sort((a,b)=>b-a).forEach(i=>DATA.workouts.splice(i,1));closeModal();save()}
 function closeModal(){editModal.classList.remove('active')}
 function addSetToExercise(ex){let last=DATA.workouts.filter(w=>w.exercise===ex&&w.date===selectedDate).at(-1);if(!last)return;DATA.workouts.push({...last,notes:'Yeni set'});save()}
@@ -7600,7 +7622,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=account-polar-1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=volume-engine-1').catch(function(){});
   });
 }
 </script>
@@ -8409,7 +8431,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
   const BUILD='Simurg OS Coach Upgrade Pack v2';
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
   function scoreSet(w){return (Number(w.weight)||0)*1000+(Number(w.reps)||0);}
-  function volumeSet(w){return (Number(w.weight)||0)*(Number(w.reps)||0);}
+  function volumeSet(w){return window.SimurgVolumeModel.row(w).volume;}
   function bestSetForExercise(ex){
     const rows=((typeof DATA!=='undefined'&&DATA.workouts)||[]).filter(w=>String(w.exercise||'')===String(ex));
     if(!rows.length) return null;
@@ -8635,7 +8657,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
   function n(v){return Number(v)||0;}
   function scoreSet(w){return n(w.weight)*1000+n(w.reps);}
-  function volumeSet(w){return n(w.weight)*n(w.reps);}
+  function volumeSet(w){return window.SimurgVolumeModel.row(w).volume;}
   function rowsForExercise(ex){return ((typeof DATA!=='undefined'&&DATA.workouts)||[]).filter(w=>String(w.exercise||'')===String(ex));}
   function bestSetForExercise(ex){
     const rows=rowsForExercise(ex);
@@ -8813,7 +8835,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
   function n(v){return Number(v)||0;}
   function scoreSet(w){return n(w.weight)*1000+n(w.reps);}
-  function volumeSet(w){return n(w.weight)*n(w.reps);}
+  function volumeSet(w){return window.SimurgVolumeModel.row(w).volume;}
   function rowsForExercise(ex){return ((typeof DATA!=='undefined'&&DATA.workouts)||[]).filter(w=>String(w.exercise||'')===String(ex));}
   function bestSetForExercise(ex){
     const rows=rowsForExercise(ex);
@@ -8988,7 +9010,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
   }
 
   function scoreSet(w){return n(w.weight)*1000+n(w.reps);}
-  function volSet(w){return n(w.weight)*n(w.reps);}
+  function volSet(w){return window.SimurgVolumeModel.row(w).volume;}
   function rowsForExercise(ex){return ((typeof DATA!=='undefined'&&DATA.workouts)||[]).filter(w=>String(w.exercise||'')===String(ex));}
   function bestSet(ex){const rows=rowsForExercise(ex);return rows.length?rows.slice().sort((a,b)=>scoreSet(b)-scoreSet(a)||volSet(b)-volSet(a))[0]:null;}
   function sessions(ex){
@@ -9207,7 +9229,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     const actDays={size:shared?shared.activityDays:new Set(acts.map(a=>a.date)).size};
     const sets=shared?shared.sets:workouts.length;
     const reps=shared?shared.reps:workouts.reduce((s,w)=>s+(+w.reps||0),0);
-    const vol=Math.round(shared?shared.volume:workouts.reduce((s,w)=>s+((+w.weight||0)*(+w.reps||0)),0));
+    const vol=Math.round(shared?shared.volume:window.SimurgVolumeModel.summary(workouts).volume);
     const exCount={}, partCount={};
     workouts.forEach(w=>{const ex=w.exercise||'Unknown'; exCount[ex]=(exCount[ex]||0)+1; const bp=w.bodyPart||(typeof part==='function'?part(w.exercise):'Other'); partCount[bp]=(partCount[bp]||0)+1;});
     const topEx=Object.entries(exCount).sort((a,b)=>b[1]-a[1])[0]||['-',0];
@@ -9661,7 +9683,8 @@ textarea,input,select{
     const shared=window.SimurgSignalModel&&ds.length?window.SimurgSignalModel.week(ds[0]):null;
     if(shared){const c={sets:shared.sets,reps:shared.reps,vol:shared.volume,parts:typeof calc==='function'?calc(shared.rows).parts:{}},topPart=Object.entries(c.parts||{}).sort((a,b)=>b[1]-a[1])[0]||['Veri Birikiyor',0];let recovery='Düşük';if(shared.painCount||Number(shared.avgRpe)>=8.5||shared.activityMinutes>150||shared.sets>28)recovery='Yüksek';else if(Number(shared.avgRpe)>=7.5||shared.activityMinutes>90||shared.sets>22)recovery='Orta';return {ds,ws:shared.rows,c,acts:shared.physicalSessions,actMinutes:shared.activityMinutes,activeCal:shared.activeCalories,avgRpe:shared.avgRpe==null?'-':shared.avgRpe.toFixed(1),pain:shared.painCount,gymDays:shared.gymDays,actDays:shared.activityDays,topPart,recovery,quality:Math.max(0,100-shared.painCount*22-shared.badFormCount*18),next:shared.painCount||shared.badFormCount?'Yükü artırma; form ve ağrısız uygulamayı koru.':'Kalite korunursa kontrollü küçük artış uygula.'};}
     const ws=ds.flatMap(d=>typeof dayData==='function'?dayData(d):workouts().filter(w=>w.date===d));
-    const c=typeof calc==='function'?calc(ws):{sets:ws.reduce((s,w)=>s+n(w.sets),0),reps:ws.reduce((s,w)=>s+n(w.reps),0),vol:ws.reduce((s,w)=>s+n(w.weight)*n(w.reps)*Math.max(1,n(w.sets)||1),0),parts:{}};
+    const fallbackSummary=window.SimurgVolumeModel.summary(ws);
+    const c=typeof calc==='function'?calc(ws):{sets:fallbackSummary.sets,reps:fallbackSummary.reps,vol:fallbackSummary.volume,parts:{}};
     const acts=activities().filter(a=>ds.includes(a.date));
     const actMinutes=acts.reduce((s,a)=>s+dmins(a.duration),0);
     const activeCal=acts.reduce((s,a)=>s+n(a.activeCal),0);
@@ -10039,7 +10062,8 @@ textarea,input,select{
   function weekStats(start){
     const ds=weekList(start); const workouts=((DATA&&DATA.workouts)||[]).filter(w=>ds.includes(w.date));
     const acts=((DATA&&DATA.appleWatch)||[]).filter(a=>ds.includes(a.date));
-    const c=typeof calc==='function'?calc(workouts):{sets:workouts.length,reps:workouts.reduce((s,w)=>s+num(w.reps),0),vol:workouts.reduce((s,w)=>s+num(w.reps)*num(w.weight),0)};
+    const fallbackSummary=window.SimurgVolumeModel.summary(workouts);
+    const c=typeof calc==='function'?calc(workouts):{sets:fallbackSummary.sets,reps:fallbackSummary.reps,vol:fallbackSummary.volume};
     const minutes=acts.reduce((s,a)=>s+(typeof durationMinutes==='function'?durationMinutes(a.duration):0),0);
     const rpes=workouts.map(w=>num(w.rpe)).filter(Boolean).concat(acts.map(a=>num(a.rpe)).filter(Boolean));
     return {sets:c.sets||0,vol:c.vol||0,minutes,activityDays:new Set(acts.map(a=>a.date)).size,gymDays:new Set(workouts.map(w=>w.date)).size,avgRpe:rpes.length?rpes.reduce((a,b)=>a+b,0)/rpes.length:0};
@@ -11985,7 +12009,8 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     if(typeof window.exCard==='function' || typeof exCard==='function'){
       window.__simurgPremiumShellV3ExCardLocked=true;
       window.exCard = exCard = function(ex,sets){
-        return '<div class="exerciseCard"><div class="exTop"><div class="exName">'+esc(ex)+'</div></div><table class="setTable"><thead><tr><th>SET</th><th>TEKRAR</th><th>KİLO</th></tr></thead><tbody>'+sets.map(function(s,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(s.reps)+'</td><td>'+esc(s.weight)+'</td></tr>';}).join('')+'</tbody></table><div class="blueLine"></div></div>';
+        var profile=window.SimurgVolumeModel.profileFor(ex),profileText=profile.weightLabel+(profile.factor===2?' · Hacim ×2':'');
+        return '<div class="exerciseCard"><div class="exTop"><div class="exerciseIdentity"><div class="exName">'+esc(ex)+'</div><span class="loadProfileTag '+(profile.factor===2?'factor2':'')+'">'+esc(profileText)+'</span></div></div><table class="setTable"><thead><tr><th>SET</th><th>TEKRAR</th><th>KİLO</th></tr></thead><tbody>'+sets.map(function(s,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(s.reps)+'</td><td>'+esc(s.weight)+'</td></tr>';}).join('')+'</tbody></table><div class="blueLine"></div></div>';
       };
     }
   }
@@ -13072,7 +13097,7 @@ m Shell V4: Logger information architecture fix -->
   }
   function stat(rows){
     rows=rows||[];
-    var reps=rows.reduce(function(a,w){return a+n(w.reps);},0), vol=rows.reduce(function(a,w){return a+n(w.weight)*n(w.reps);},0);
+    var summary=window.SimurgVolumeModel.summary(rows),reps=summary.reps,vol=summary.volume;
     var best=rows.reduce(function(m,w){var wt=n(w.weight),rp=n(w.reps);return (wt>m.weight||(wt===m.weight&&rp>m.reps))?{weight:wt,reps:rp}:m;},{weight:0,reps:0});
     var rpe=rows.map(function(w){return n(w.rpe);}).filter(Boolean).slice(-1)[0]||0;
     var form=(rows.map(function(w){return w.form||'';}).filter(Boolean).slice(-1)[0]||'').trim();
@@ -15889,13 +15914,13 @@ m Shell V4: Logger information architecture fix -->
 </script>
 <link rel="stylesheet" href="./polar-workout.css?v=11">
 <script src="./polar-workout.js?v=14"></script>
-<script src="./workout-source-policy.js?v=2"></script>
+<script src="./workout-source-policy.js?v=3"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=31">
-<script src="./premium-standard.js?v=34"></script>
+<script src="./premium-standard.js?v=35"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=7"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=24">
-<script src="./desktop-alignment.js?v=28"></script>
+<script src="./desktop-alignment.js?v=29"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
 <script src="./simurg-cloud-auth.js?v=3" defer></script>
 <script>

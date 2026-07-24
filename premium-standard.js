@@ -322,7 +322,7 @@
   function average(rows,key){var nums=rows.map(function(row){return number(row&&row[key]);}).filter(function(v){return v!=null;});return nums.length?(nums.reduce(function(a,b){return a+b;},0)/nums.length).toFixed(1):'—';}
   function calcRows(rows){
     try{if(typeof calc==='function')return calc(rows);}catch(e){}
-    return {sets:rows.reduce(function(s,row){return s+(number(row.sets)||1);},0),reps:rows.reduce(function(s,row){return s+(number(row.reps)||0)*(number(row.sets)||1);},0),vol:rows.reduce(function(s,row){return s+(number(row.weight)||0)*(number(row.reps)||0)*(number(row.sets)||1);},0)};
+    var summary=window.SimurgVolumeModel.summary(rows);return {sets:summary.sets,reps:summary.reps,vol:summary.volume};
   }
   function selectedWeek(){
     try{if(typeof weekDates==='function')return weekDates();}catch(e){}

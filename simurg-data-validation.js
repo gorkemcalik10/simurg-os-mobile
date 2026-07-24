@@ -20,13 +20,13 @@
   BLOCKED_KEYS.prototype=true;
   BLOCKED_KEYS.constructor=true;
   var ARRAY_NAMES=['workouts','metrics','nutrition','recovery','appleWatch','dailyNotes','weeklyNotes'];
-  var MAP_NAMES=['customGymPrograms','programNames','activityNotes','autoNextTargets','recoveryEntries'];
+  var MAP_NAMES=['customGymPrograms','programNames','activityNotes','autoNextTargets','recoveryEntries','exerciseLoadProfiles'];
   var POLAR_HISTORY_NAMES=['polarSleep','polarNightlyRecharge','polarContinuousHr','polarCardioLoad'];
   var RESERVED_ROOTS={auth:true,session:true,supabase:true,cloudAuth:true,cloudSession:true,simurg_cloud_meta:true,simurg_polar_accesslink_client_v1:true};
   var DEFAULTS={
     schemaVersion:CURRENT_SCHEMA_VERSION,
     workouts:[],metrics:[],nutrition:[],recovery:[],appleWatch:[],dailyNotes:[],weeklyNotes:[],
-    customGymPrograms:{},programNames:{},
+    customGymPrograms:{},programNames:{},exerciseLoadProfiles:{},
     polarWorkouts:{daily:{},latest:null},
     polarActivity:{daily:{},latest:null},
     polarProfile:{latest:null},

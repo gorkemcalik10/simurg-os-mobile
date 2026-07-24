@@ -16,8 +16,11 @@ function run(name, fn) {
 }
 
 run('signal model loads before dependent runtimes', () => {
+  const volumePos = index.indexOf('simurg-volume-model.js');
   const modelPos = index.indexOf('simurg-signal-model.js');
+  assert.ok(volumePos >= 0);
   assert.ok(modelPos >= 0);
+  assert.ok(volumePos < modelPos);
   assert.ok(modelPos < index.indexOf('premium-standard.js'));
   assert.ok(modelPos < index.indexOf('desktop-alignment.js'));
 });
@@ -31,7 +34,7 @@ run('service worker registration and cache share one build label', () => {
 });
 
 run('index asset versions match CORE_ASSETS', () => {
-  for (const file of ['simurg-data-validation.js', 'simurg-signal-model.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js']) {
+  for (const file of ['simurg-volume-model.js', 'simurg-data-validation.js', 'simurg-signal-model.js', 'workout-source-policy.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js']) {
     const escaped = file.replace('.', '\\.');
     const indexVersion = index.match(new RegExp(`${escaped}\\?v=([^"']+)`));
     const swVersion = sw.match(new RegExp(`${escaped}\\?v=([^"']+)`));

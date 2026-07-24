@@ -12,6 +12,7 @@ const activeProductionAssets = [
   'index.html',
   'sw.js',
   'manifest.json',
+  'simurg-volume-model.js',
   'simurg-signal-model.js',
   'simurg-data-validation.js',
   'polar-workout.js',

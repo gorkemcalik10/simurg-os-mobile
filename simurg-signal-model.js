@@ -83,7 +83,7 @@
   function gymRows(date){return (root().workouts||[]).filter(function(row){return row&&row.date===date;});}
   function gymSummary(rows){
     var sets=0,reps=0,volume=0,rpes=[],forms=[],pains=[];
-    rows.forEach(function(row){var count=firstNumber(row.sets,1)||1,rep=number(row.reps)||0,weight=number(row.weight)||0,rpe=number(row.rpe);sets+=count;reps+=rep*count;volume+=weight*rep*count;if(rpe!=null)rpes.push(rpe);var form=firstText(row.form);if(form)forms.push(ui(title(form)));var pain=firstText(row.pain);if(pain)pains.push(ui(title(pain)));});
+    rows.forEach(function(row){var calculated=window.SimurgVolumeModel.row(row),count=calculated.sets,rep=calculated.reps,rpe=number(row.rpe);sets+=count;reps+=rep*count;volume+=calculated.volume;if(rpe!=null)rpes.push(rpe);var form=firstText(row.form);if(form)forms.push(ui(title(form)));var pain=firstText(row.pain);if(pain)pains.push(ui(title(pain)));});
     return {rows:rows,sets:sets,reps:reps,volume:volume,rpe:rpes.length?rpes.reduce(function(a,b){return a+b;},0)/rpes.length:null,form:forms.length?forms[forms.length-1]:null,pain:pains.length?pains[pains.length-1]:null};
   }
   function recoveryAt(date){
@@ -145,7 +145,7 @@
   }
   function bodyGroups(rows){var groups={};rows.forEach(function(row){var key=firstText(row.bodyPart,row.category,row.classification)||'Diğer';(groups[key]=groups[key]||[]).push(row);});return groups;}
   function prSummary(rows,start,end){
-    var grouped={};(root().workouts||[]).filter(function(row){return row&&row.exercise&&dateValue(row.date);}).forEach(function(row){var ex=String(row.exercise).trim(),key=ex.toLocaleLowerCase('tr-TR')+'|'+row.date,session=grouped[key]||(grouped[key]={date:row.date,exercise:ex,weight:0,volume:0,reps:0});var weight=number(row.weight)||0,reps=number(row.reps)||0,sets=firstNumber(row.sets,1)||1;session.volume+=weight*reps*sets;if(weight>session.weight){session.weight=weight;session.reps=reps;}});
+    var grouped={};(root().workouts||[]).filter(function(row){return row&&row.exercise&&dateValue(row.date);}).forEach(function(row){var ex=String(row.exercise).trim(),key=ex.toLocaleLowerCase('tr-TR')+'|'+row.date,session=grouped[key]||(grouped[key]={date:row.date,exercise:ex,weight:0,volume:0,reps:0}),calculated=window.SimurgVolumeModel.row(row),weight=calculated.enteredWeight,reps=calculated.reps;session.volume+=calculated.volume;if(weight>session.weight){session.weight=weight;session.reps=reps;}});
     var sessions=Object.keys(grouped).map(function(key){return grouped[key];}).sort(function(a,b){return a.date.localeCompare(b.date)||a.exercise.localeCompare(b.exercise,'tr');}),best={},history=[];
     sessions.forEach(function(session){var key=session.exercise.toLocaleLowerCase('tr-TR'),known=!!best[key],current=best[key]||(best[key]={exercise:session.exercise,weight:0,volume:0,weightDate:null,volumeDate:null}),types=[];if(known&&session.weight>current.weight)types.push('Ağırlık');if(known&&session.volume>current.volume)types.push('Hacim');if(session.weight>current.weight){current.weight=session.weight;current.weightDate=session.date;}if(session.volume>current.volume){current.volume=session.volume;current.volumeDate=session.date;}if(types.length)history.push({date:session.date,exercise:session.exercise,types:types,weight:session.weight,volume:session.volume,reps:session.reps});});
     var selected=history.filter(function(event){return event.date>=start&&event.date<=end;});

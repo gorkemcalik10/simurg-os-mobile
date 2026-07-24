@@ -9,7 +9,7 @@ function base() {
   return {
     schemaVersion: 1,
     workouts: [], metrics: [], nutrition: [], recovery: [], appleWatch: [], dailyNotes: [], weeklyNotes: [],
-    customGymPrograms: {}, programNames: {},
+    customGymPrograms: {}, programNames: {}, exerciseLoadProfiles: {},
     polarWorkouts: { daily: {}, latest: null },
     polarActivity: { daily: {}, latest: null },
     polarProfile: { latest: null },
@@ -27,9 +27,11 @@ function rejects(fn, code) {
 run('valid current backup is accepted without losing safe unknown fields', () => {
   const input = base();
   input.futureSafeNamespace = { label: 'Göğüs & Omuz — İyi Form, Ağrı Yok' };
+  input.exerciseLoadProfiles['incline db press'] = { preset: 'DUAL_DUMBBELL', updatedAt: '2026-07-24T10:00:00.000Z' };
   input.workouts.push({ date: '2026-07-23', exercise: 'Incline DB Press', sets: 3, reps: 8, weight: 20 });
   const result = validation.prepareFull(input);
   assert.equal(result.data.workouts[0].exercise, 'Incline DB Press');
+  assert.deepEqual(result.data.exerciseLoadProfiles, input.exerciseLoadProfiles);
   assert.deepEqual(result.data.futureSafeNamespace, input.futureSafeNamespace);
   assert.ok(result.warnings.some(warning => warning.includes('futureSafeNamespace')));
 });

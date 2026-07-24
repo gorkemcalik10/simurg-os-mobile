@@ -1,20 +1,21 @@
-const SIMURG_CACHE = 'simurg-account-polar-1';
+const SIMURG_CACHE = 'simurg-volume-engine-1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './simurg-data-validation.js?v=2',
+  './simurg-volume-model.js?v=1',
+  './simurg-data-validation.js?v=3',
   './polar-workout.css?v=11',
   './polar-workout.js?v=14',
-  './workout-source-policy.js?v=2',
+  './workout-source-policy.js?v=3',
   './premium-standard.css?v=31',
-  './premium-standard.js?v=34',
-  './simurg-signal-model.js?v=5',
+  './premium-standard.js?v=35',
+  './simurg-signal-model.js?v=6',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=7',
   './simurg-cloud-auth.js?v=3',
   './desktop-alignment.css?v=24',
-  './desktop-alignment.js?v=28',
+  './desktop-alignment.js?v=29',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
