@@ -260,6 +260,38 @@
     return '<div class="pw-card"><div class="pw-card-title"><h2>RPE</h2></div><div class="pw-rpe-head"><b>'+esc(rpe==null?'—':rpe)+'<span> / 10</span></b><em>'+esc(workout.rpeLabel||'—')+'</em></div><div class="pw-rpe-scale">'+(rpe==null?'':'<i class="pw-rpe-marker" style="left:'+rpe*10+'%"></i>')+'</div></div>';
   }
   function coachNoteCard(workout){var note=text(workout.trainingImpact&&workout.trainingImpact.coachNote,'');if(!note)return '';return '<div class="pw-card"><div class="pw-card-title"><h2>Koç Notu</h2></div><p class="pw-copy">'+esc(note)+'</p></div>';}
+  function mobileMetric(tone,icon,label,value,unit){
+    return '<div class="pw-ref-metric '+tone+'"><span aria-hidden="true">'+icon+'</span><small>'+esc(label)+'</small><b>'+esc(value)+'<em>'+esc(unit||'')+'</em></b></div>';
+  }
+  function mobileOverview(workout){
+    var metrics=[
+      mobileMetric('duration','◷','Süre',workout.duration||'—',''),
+      mobileMetric('energy','△','Kalori',workout.activeCal==null?'—':formattedNumber(workout.activeCal),'kcal'),
+      mobileMetric('heart','♡','Ort. HR',workout.avgHR==null?'—':formattedNumber(workout.avgHR),'bpm'),
+      mobileMetric('heart-max','♥','Maks. HR',workout.maxHR==null?'—':formattedNumber(workout.maxHR),'bpm'),
+      mobileMetric('rpe','◇','RPE',workout.rpe==null?'—':formattedNumber(workout.rpe),'/10'),
+      mobileMetric('source','⌁','Kaynak',workout.source||'Polar Flow','')
+    ];
+    return '<div class="pw-pane active pw-reference-overview" data-pw-pane="overview"><section class="pw-card pw-ref-overview-card"><div class="pw-card-title"><h2>GENEL BAKIŞ</h2></div><div class="pw-ref-metric-grid">'+metrics.join('')+'</div></section>'+zoneCard(workout,'Nabız Bölgeleri Dağılımı',hasZoneData(workout)?'Bölge süreleri gerçek Polar antrenman kaydından alınır.':'Sınıflandırılmış bölge detayı mevcut değil.',false)+fuelCard(workout)+trainingImpactCard(workout)+'</div>';
+  }
+  function mobileHeart(workout){
+    var hasSeries=seriesValues(workout).length>0;
+    return '<div class="pw-pane active pw-reference-heart" data-pw-pane="heart"><section class="pw-ref-heart-hero"><div><span aria-hidden="true">♡</span><small>ORTALAMA HR</small><strong>'+esc(workout.avgHR==null?'—':formattedNumber(workout.avgHR))+'<em>bpm</em></strong></div><div><span aria-hidden="true">♥</span><small>MAKSİMUM HR</small><strong>'+esc(workout.maxHR==null?'—':formattedNumber(workout.maxHR))+'<em>bpm</em></strong></div></section>'+(hasSeries?'<section class="pw-card pw-ref-heart-chart"><div class="pw-card-title"><h2>KALP GRAFİĞİ</h2></div>'+chartContent(workout)+'</section>':'')+zoneCard(workout,'Nabız Bölgeleri Süreleri','',true)+heartInterpretation(workout)+'</div>';
+  }
+  function zoneDonutCard(workout){
+    if(!hasZoneData(workout))return '<section class="pw-card pw-compact-note"><div class="pw-card-title"><h2>Nabız Bölgeleri</h2></div><p>Sınıflandırılmış nabız bölgesi detayı mevcut değil.</p></section>';
+    var p5=pctFor(workout,'zone5'),p4=pctFor(workout,'zone4'),p3=pctFor(workout,'zone3'),p2=pctFor(workout,'zone2'),p1=pctFor(workout,'zone1'),a=p5,b=a+p4,c=b+p3,d=c+p2,e=d+p1,classified=classifiedZoneSeconds(workout),unclassified=seconds(workout.zoneSummary&&workout.zoneSummary.unclassifiedTime);
+    var gradient='conic-gradient(#e4333c 0 '+a+'%,#ed7a0b '+a+'% '+b+'%,#61b72b '+b+'% '+c+'%,#168ed5 '+c+'% '+d+'%,#71879a '+d+'% '+e+'%,rgba(91,111,131,.2) '+e+'% 100%)';
+    return '<section class="pw-card pw-ref-zone-hero"><div class="pw-card-title"><h2>NABIZ BÖLGELERİ</h2></div><div class="pw-ref-zone-donut" style="--pw-zone-gradient:'+gradient+'"><div><b>'+esc(compactDuration(workout.duration)||compactDuration(classified))+'</b><small>Toplam Süre</small></div></div>'+zoneRows(workout,true)+(unclassified>0?'<div class="pw-ref-unclassified">Sınıflandırılmamış · '+esc(compactDuration(workout.zoneSummary.unclassifiedTime))+'</div>':'')+'</section>';
+  }
+  function mobileZones(workout){
+    return '<div class="pw-pane active pw-reference-zones" data-pw-pane="zones">'+zoneDonutCard(workout)+zoneSummaryCard(workout)+zoneInterpretation(workout)+'</div>';
+  }
+  function mobileLoad(workout){
+    if(workout.trainingLoad==null)return '<div class="pw-pane active pw-reference-load" data-pw-pane="load"><section class="pw-card pw-ref-load-empty"><span aria-hidden="true">◇</span><div><small>ANTRENMAN YÜKÜ</small><h2>Bu antrenman için yük verisi bulunmuyor</h2><p>Polar bu seans için training load göndermedi.</p></div></section>'+(workout.rpe==null?'':rpeCard(workout))+coachNoteCard(workout)+'</div>';
+    var loadValue=formattedNumber(workout.trainingLoad),ring=clamp(num(workout.trainingLoad,0),0,100);
+    return '<div class="pw-pane active pw-reference-load" data-pw-pane="load"><section class="pw-card pw-ref-load-hero"><div class="pw-card-title"><h2>ANTRENMAN YÜKÜ</h2></div><div class="pw-ref-load-gauge" style="--pw-load-value:'+ring+'%"><div><b>'+esc(loadValue)+'</b><small>Aktivite Yükü</small></div></div><span class="pw-ref-load-badge">'+esc(loadStatus(workout))+'</span><p>'+esc(overviewInterpretation(workout))+'</p><div class="pw-ref-load-metrics">'+mobileMetric('energy','△','Aktif Enerji',workout.activeCal==null?'—':formattedNumber(workout.activeCal),'kcal')+mobileMetric('rpe','◇','RPE',workout.rpe==null?'—':formattedNumber(workout.rpe),'/10')+mobileMetric('source','⌁','Yük Kaynağı',workout.trainingLoadType||workout.source||'Polar','')+'</div></section>'+loadImpactCard(workout)+coachNoteCard(workout)+'</div>';
+  }
   function overview(workout){return heroCard(workout)+zoneCard(workout,'Nabız Bölgeleri',hasZoneData(workout)?'Bölge detayları Polar’dan geldiği haliyle gösteriliyor.':'Sınıflandırılmış bölge detayı mevcut değil.',false)+fuelCard(workout)+trainingImpactCard(workout)+chartCard(workout,'Nabız Trendi');}
   function heart(workout){return heartSummary(workout)+chartCard(workout,'Nabız (bpm)')+zoneCard(workout,'Nabız Bölgeleri','',true)+heartInterpretation(workout);}
   function zones(workout){return zoneCard(workout,'Nabız Bölgeleri','',true)+zoneSummaryCard(workout)+zoneInterpretation(workout);}
@@ -293,7 +325,7 @@
   function render(){
     var section=ensureSection();if(!section) return;
     initializeSelection();var workout=latest(),content=document.getElementById('pwContent'),dateNavigator=document.getElementById('pwDateNavigator'),selector=document.getElementById('pwWorkoutSelector'),dayList=dayWorkouts(selectedDate);
-    tabs.forEach(function(tab){var button=document.getElementById('pwTab-'+tab);if(button) button.classList.toggle('active',tab===currentTab);});
+    tabs.forEach(function(tab){var button=document.getElementById('pwTab-'+tab);if(button){var active=tab===currentTab;button.classList.toggle('active',active);button.setAttribute('aria-selected',active?'true':'false');}});
     if(!content) return;
     var subtitle=document.getElementById('pwSubtitle'),source=document.getElementById('pwSource');
     if(dateNavigator){var navHtml=dateNavigatorHtml();if(dateNavigator.innerHTML!==navHtml)dateNavigator.innerHTML=navHtml;}
@@ -306,7 +338,7 @@
     if(source)source.style.display='flex';
     if(subtitle){var subtitleText=[workoutLabel(workout.workoutType||workout.activityType),dateLabel(workout),workout.startTime].filter(Boolean).join(' · ');if(subtitle.textContent!==subtitleText)subtitle.textContent=subtitleText;}
     if(source){var sourceHtml='<i></i><span>'+esc(workout.source||'Polar Flow')+' · '+esc(workout.device||'Polar cihazı')+'</span>';if(source.innerHTML!==sourceHtml)source.innerHTML=sourceHtml;}
-    var renderers={overview:overview,heart:heart,zones:zones,load:load};
+    var renderers=window.innerWidth<=900?{overview:mobileOverview,heart:mobileHeart,zones:mobileZones,load:mobileLoad}:{overview:overview,heart:heart,zones:zones,load:load};
     var next=renderers[currentTab](workout);if(content.innerHTML!==next)content.innerHTML=next;
   }
   function markPolarWorkoutActive(){

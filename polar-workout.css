@@ -141,14 +141,85 @@ body[data-simurg-active-screen="polar-workout"] #polar-workout{display:block!imp
 .pw-empty button{margin-top:20px;border:1px solid rgba(16,185,255,.35);border-radius:14px;padding:11px 15px;background:rgba(16,185,255,.1);color:#7bddff;font-size:11px;font-weight:900}
 .pw-empty.compact{padding:28px 18px}.pw-empty.compact .pw-empty-mark{width:52px;height:52px;margin-bottom:13px;font-size:21px}.pw-empty.compact h2{font-size:16px!important}
 
-@media(max-width:860px){
+@media(max-width:900px){
   #polar-workout{height:100%!important;min-height:0!important;padding-bottom:96px!important;overflow-x:hidden!important;overflow-y:auto!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain!important;scroll-behavior:auto!important;contain:none!important;transform:none!important;will-change:auto!important}
-  #polar-workout .pw-shell{border:0;border-radius:0;box-shadow:none;min-height:calc(100dvh - 88px);overflow:visible!important}
+  #polar-workout{
+    --pw-ref-bg:#040a12;--pw-ref-surface:#09131e;--pw-ref-surface-2:#0c1926;--pw-ref-surface-3:#102131;
+    --pw-ref-line:rgba(125,157,187,.18);--pw-ref-text:#f2f6fa;--pw-ref-muted:#8190a0;
+    --pw-ref-cyan:#20bbed;--pw-ref-green:#54cc5f;--pw-ref-amber:#ee9d08;--pw-ref-red:#f04e58;
+  }
+  #polar-workout .pw-shell{border:0;border-radius:0;box-shadow:none;min-height:calc(100dvh - 88px);overflow:visible!important;background:linear-gradient(180deg,#07111b,var(--pw-ref-bg) 46%,#02070c 100%)!important}
   #polar-workout .pw-content,#polar-workout .pw-pane{overflow:visible!important;touch-action:pan-y!important;contain:none!important;transform:none!important;will-change:auto!important}
-  #polar-workout .pw-card{box-shadow:0 9px 24px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.025)}
-  #polar-workout .pw-header{padding-top:13px}
+  #polar-workout .pw-header{padding:8px 10px 6px!important;border-color:var(--pw-ref-line)!important;background:#07111b!important}
+  #polar-workout .pw-head-row{grid-template-columns:30px minmax(0,1fr) 30px!important;gap:7px!important}
+  #polar-workout .pw-head-icon{width:30px!important;height:30px!important;border-color:var(--pw-ref-line)!important;border-radius:9px!important;background:var(--pw-ref-surface)!important;box-shadow:none!important}
+  #polar-workout .pw-brand{margin-bottom:2px!important;color:var(--pw-ref-cyan)!important;font-size:6px!important;letter-spacing:1.1px!important}
+  #polar-workout .pw-head-copy h1{font-size:16px!important;line-height:1.05!important;letter-spacing:0!important}
+  #polar-workout .pw-subtitle{margin-top:3px!important;color:#a7b4c1!important;font-size:7.5px!important}
+  #polar-workout .pw-source{margin-top:3px!important;color:#78b9d2!important;font-size:6.5px!important}
+  #polar-workout .pw-source i{width:7px!important;height:12px!important;box-shadow:none!important}
+  #polar-workout .pw-date-nav{grid-template-columns:27px minmax(0,1fr) 27px auto!important;padding:5px 8px!important;border-color:var(--pw-ref-line)!important;background:#06101a!important}
+  #polar-workout .pw-date-nav>button{height:28px!important;border-color:var(--pw-ref-line)!important;border-radius:8px!important;background:var(--pw-ref-surface)!important}
+  #polar-workout .pw-date-chip{height:31px!important;border-color:var(--pw-ref-line)!important;border-radius:8px!important;background:#08131e!important}
+  #polar-workout .pw-date-chip.active{border-color:rgba(32,187,237,.42)!important;background:rgba(32,187,237,.1)!important;box-shadow:none!important}
+  #polar-workout .pw-tabs{gap:4px!important;padding:3px 8px!important;border-color:var(--pw-ref-line)!important;background:#06101a!important}
+  #polar-workout .pw-tab{position:relative!important;padding:7px 2px!important;border:1px solid transparent!important;border-radius:8px!important;color:#8190a0!important;font-size:7px!important;letter-spacing:0!important;outline:0!important;box-shadow:none!important}
+  #polar-workout .pw-tab.active{border-color:transparent!important;background:rgba(32,187,237,.07)!important;color:#7bdcff!important;outline:0!important;box-shadow:none!important}
+  #polar-workout .pw-tab.active:after{display:block!important;left:27%!important;right:27%!important;bottom:2px!important;height:1px!important;background:var(--pw-ref-cyan)!important;box-shadow:none!important}
+  #polar-workout .pw-tab:focus{outline:0!important;box-shadow:none!important}
+  #polar-workout .pw-tab:focus-visible{outline:1px solid rgba(32,187,237,.28)!important;outline-offset:-2px!important}
+  #polar-workout .pw-content{padding:7px 8px!important}
+  #polar-workout .pw-pane{display:grid!important;gap:8px!important;min-width:0!important}
+  #polar-workout .pw-card{margin:0!important;padding:10px!important;border:1px solid var(--pw-ref-line)!important;border-radius:17px!important;background:linear-gradient(155deg,var(--pw-ref-surface-2),var(--pw-ref-surface))!important;box-shadow:0 8px 20px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.025)!important}
+  #polar-workout .pw-card-title{margin-bottom:9px!important}
+  #polar-workout .pw-card-title h2{color:var(--pw-ref-text)!important;font-size:9px!important;line-height:1.2!important;letter-spacing:.6px!important}
+  #polar-workout .pw-info{width:15px!important;height:15px!important;font-size:8px!important}
+  #polar-workout .pw-ref-metric-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+  #polar-workout .pw-ref-metric{position:relative!important;display:grid!important;grid-template-columns:24px minmax(0,1fr)!important;grid-template-rows:auto auto!important;align-items:center!important;gap:3px 7px!important;min-width:0!important;min-height:58px!important;padding:7px!important;border:1px solid rgba(125,157,187,.13)!important;border-radius:11px!important;background:#07111b!important}
+  #polar-workout .pw-ref-metric:nth-child(3n),#polar-workout .pw-ref-metric:nth-child(n+4){border:1px solid rgba(125,157,187,.13)!important}
+  #polar-workout .pw-ref-metric>span{grid-row:1/3;display:grid!important;place-items:center!important;width:24px!important;min-height:24px!important;border-radius:8px!important;background:rgba(238,157,8,.12)!important;color:#ffb51f!important;font-size:12px!important}
+  #polar-workout .pw-ref-metric.heart>span,#polar-workout .pw-ref-metric.heart-max>span{background:rgba(240,78,88,.11)!important;color:#ff6c75!important}
+  #polar-workout .pw-ref-metric.rpe>span{background:rgba(242,193,39,.11)!important;color:#f5c842!important}
+  #polar-workout .pw-ref-metric.source>span{background:rgba(32,187,237,.11)!important;color:#68d7f5!important}
+  #polar-workout .pw-ref-metric small{min-width:0!important;color:var(--pw-ref-muted)!important;font-size:6px!important;line-height:1.15!important;letter-spacing:.4px!important;text-transform:uppercase!important;overflow-wrap:anywhere!important}
+  #polar-workout .pw-ref-metric b{min-width:0!important;color:var(--pw-ref-text)!important;font-size:12px!important;line-height:1.1!important;white-space:normal!important;overflow-wrap:anywhere!important}
+  #polar-workout .pw-ref-metric b em{margin-left:2px!important;color:#8292a2!important;font-size:6px!important;font-style:normal!important}
+  #polar-workout .pw-zone-list{gap:6px!important}
+  #polar-workout .pw-zone-row{grid-template-columns:20px 48px minmax(0,1fr) 38px 25px!important;gap:5px!important;font-size:8px!important}
+  #polar-workout .pw-zone-badge{height:20px!important;border-radius:6px!important;font-size:8px!important;box-shadow:none!important}
+  #polar-workout .pw-zone-track{height:6px!important;border-radius:99px!important;background:#111f2c!important}
+  #polar-workout .pw-footnote{margin-top:8px!important;color:#8292a2!important;font-size:7.5px!important}
+  #polar-workout .pw-ref-heart-hero{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  #polar-workout .pw-ref-heart-hero>div{position:relative!important;min-width:0!important;padding:12px 12px 11px 44px!important;border:1px solid var(--pw-ref-line)!important;border-radius:16px!important;background:radial-gradient(circle at 16% 42%,rgba(240,78,88,.1),transparent 30%),linear-gradient(155deg,var(--pw-ref-surface-2),var(--pw-ref-surface))!important}
+  #polar-workout .pw-ref-heart-hero>div>span{position:absolute!important;left:11px!important;top:50%!important;display:grid!important;place-items:center!important;width:25px!important;height:25px!important;transform:translateY(-50%)!important;border-radius:8px!important;background:rgba(240,78,88,.11)!important;color:#ff6670!important;font-size:13px!important}
+  #polar-workout .pw-ref-heart-hero small{display:block!important;color:#8393a3!important;font-size:6.5px!important;letter-spacing:.6px!important}.pw-ref-heart-hero strong{display:block!important;margin-top:7px!important;color:var(--pw-ref-red)!important;font-size:27px!important;line-height:1!important}.pw-ref-heart-hero strong em{margin-left:3px!important;color:#8292a2!important;font-size:7px!important;font-style:normal!important}
+  #polar-workout .pw-chart-box{height:142px!important;border-color:var(--pw-ref-line)!important;background:#06101a!important}
+  #polar-workout .pw-chart-line{stroke:var(--pw-ref-red)!important;filter:drop-shadow(0 0 3px rgba(240,78,88,.28))!important}
+  #polar-workout .pw-ref-zone-hero{display:grid!important;justify-items:stretch!important}
+  #polar-workout .pw-ref-zone-donut{display:grid!important;place-items:center!important;width:112px!important;aspect-ratio:1!important;margin:0 auto 9px!important;border-radius:50%!important;background:var(--pw-zone-gradient)!important}
+  #polar-workout .pw-ref-zone-donut>div{display:grid!important;place-items:center!important;width:87px!important;aspect-ratio:1!important;border-radius:50%!important;background:#07111b!important}
+  #polar-workout .pw-ref-zone-donut b{color:var(--pw-ref-text)!important;font-size:18px!important;line-height:1!important}.pw-ref-zone-donut small{margin-top:4px!important;color:#7e8e9e!important;font-size:6.5px!important}
+  #polar-workout .pw-ref-unclassified{margin-top:9px!important;padding:7px 9px!important;border:1px solid var(--pw-ref-line)!important;border-radius:9px!important;background:#07111b!important;color:#8393a3!important;font-size:7.5px!important}
+  #polar-workout .pw-summary-row{grid-template-columns:minmax(0,1fr) auto auto!important;gap:7px!important;padding:8px 0!important;font-size:8px!important}
+  #polar-workout .pw-summary-name{gap:6px!important}.pw-summary-name i{width:8px!important;height:8px!important}
+  #polar-workout .pw-copy{color:#aab5bf!important;font-size:8.5px!important;line-height:1.5!important}
+  #polar-workout .pw-ref-load-hero{position:relative!important;border-color:rgba(238,157,8,.28)!important;background:radial-gradient(circle at 50% 26%,rgba(238,157,8,.1),transparent 36%),linear-gradient(155deg,var(--pw-ref-surface-2),var(--pw-ref-surface))!important}
+  #polar-workout .pw-ref-load-gauge{display:grid!important;place-items:center!important;width:152px!important;aspect-ratio:1!important;margin:2px auto 8px!important;border-radius:50%!important;background:conic-gradient(from 225deg,var(--pw-ref-green) 0 var(--pw-load-value),rgba(87,116,142,.18) var(--pw-load-value) 75%,transparent 75% 100%)!important}
+  #polar-workout .pw-ref-load-gauge>div{display:grid!important;place-items:center!important;width:121px!important;aspect-ratio:1!important;border-radius:50%!important;background:#07111b!important}
+  #polar-workout .pw-ref-load-gauge b{color:var(--pw-ref-text)!important;font-size:36px!important;line-height:1!important}.pw-ref-load-gauge small{margin-top:4px!important;color:#8493a2!important;font-size:7px!important}
+  #polar-workout .pw-ref-load-badge{display:table!important;margin:0 auto!important;padding:5px 9px!important;border:1px solid rgba(84,204,95,.3)!important;border-radius:8px!important;background:rgba(84,204,95,.1)!important;color:#72df7c!important;font-size:8px!important;font-weight:850!important}
+  #polar-workout .pw-ref-load-hero>p{margin:9px auto 11px!important;max-width:280px!important;color:#9aa8b5!important;font-size:8.5px!important;line-height:1.45!important;text-align:center!important}
+  #polar-workout .pw-ref-load-metrics{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;border-top:1px solid var(--pw-ref-line)!important}
+  #polar-workout .pw-ref-load-metrics .pw-ref-metric{border-bottom:0!important}
+  #polar-workout .pw-ref-load-empty{display:grid!important;grid-template-columns:38px minmax(0,1fr)!important;align-items:center!important;gap:11px!important;min-height:92px!important;border-color:rgba(238,157,8,.24)!important;background:linear-gradient(155deg,rgba(238,157,8,.07),var(--pw-ref-surface))!important}
+  #polar-workout .pw-ref-load-empty>span{display:grid!important;place-items:center!important;width:38px!important;height:38px!important;border-radius:11px!important;background:rgba(238,157,8,.12)!important;color:#ffb51f!important;font-size:17px!important}
+  #polar-workout .pw-ref-load-empty small{display:block!important;color:#9a8c72!important;font-size:6.5px!important;font-weight:850!important;letter-spacing:.7px!important}.pw-ref-load-empty h2{margin:4px 0!important;color:var(--pw-ref-text)!important;font-size:12px!important;letter-spacing:0!important}.pw-ref-load-empty p{margin:0!important;color:#8998a6!important;font-size:8px!important;line-height:1.4!important}
+  #polar-workout .pw-impact-list{gap:0!important}.pw-impact-line{grid-template-columns:8px minmax(0,1fr) minmax(70px,42%)!important;padding:8px 0!important;font-size:8px!important}
+  #polar-workout .pw-impact-line b{font-size:8px!important}
+  #polar-workout .pw-compact-note{padding:11px!important}.pw-compact-note p{font-size:8.5px!important}
+  #polar-workout .pw-workout-picker{padding:6px 8px 0!important}.pw-workout-picker button{min-height:34px!important;padding:7px 9px!important;border-color:var(--pw-ref-line)!important;border-radius:9px!important;background:var(--pw-ref-surface)!important}
 }
-@media(min-width:861px){
+@media(min-width:901px){
   #polar-workout{padding-bottom:30px}
   #polar-workout .pw-shell{margin-top:4px}
 }

@@ -1,15 +1,15 @@
-const SIMURG_CACHE = 'simurg-responsive-overflow-1';
+const SIMURG_CACHE = 'simurg-premium-ui-fidelity-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './simurg-volume-model.js?v=1',
   './simurg-data-validation.js?v=3',
-  './polar-workout.css?v=11',
-  './polar-workout.js?v=14',
+  './polar-workout.css?v=13',
+  './polar-workout.js?v=16',
   './workout-source-policy.js?v=3',
-  './premium-standard.css?v=32',
-  './premium-standard.js?v=35',
+  './premium-standard.css?v=34',
+  './premium-standard.js?v=37',
   './simurg-signal-model.js?v=6',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=7',
