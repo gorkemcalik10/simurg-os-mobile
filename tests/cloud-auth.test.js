@@ -59,8 +59,8 @@ run('signed-out cloud controls start disabled', () => {
 
 run('official Supabase v2 and one local controller are loaded', () => {
   assert.match(index, /cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2\.95\.0/);
-  assert.match(index, /simurg-cloud-auth\.js\?v=2/);
-  assert.match(sw, /simurg-cloud-auth\.js\?v=2/);
+  assert.match(index, /simurg-cloud-auth\.js\?v=3/);
+  assert.match(sw, /simurg-cloud-auth\.js\?v=3/);
 });
 
 run('active runtime contains no legacy shared cloud model', () => {

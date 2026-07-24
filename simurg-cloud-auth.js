@@ -11,6 +11,10 @@
   function byId(id){return document.getElementById(id)}
   function hasSession(){return !!(state.session&&state.session.user&&state.session.user.id)}
   function currentUserId(){return hasSession()?String(state.session.user.id):''}
+  function publishAuthState(){
+    var detail={signedIn:hasSession(),userId:currentUserId()};
+    try{document.dispatchEvent(new CustomEvent('simurg:cloud-auth-state',{detail:detail}));}catch(error){}
+  }
   function isPlainObject(value){
     if(!value||Object.prototype.toString.call(value)!=='[object Object]')return false;
     var proto=Object.getPrototypeOf(value);
@@ -156,6 +160,12 @@
     if(!hasSession())throw new Error('Önce oturum açın.');
     return {client:getClient(),session:state.session,userId:currentUserId()};
   }
+  async function getSession(){
+    if(state.session)return state.session;
+    var result=await getClient().auth.getSession();
+    if(result.error)throw result.error;
+    return result.data&&result.data.session?result.data.session:null;
+  }
   async function signInToCloud(){
     if(!setBusy('sign-in','Giriş yapılıyor…'))return;
     var emailInput=byId('cloudAuthEmail');
@@ -168,10 +178,12 @@
       if(result.error)throw result.error;
       if(!result.data||!result.data.session)throw new Error('Oturum oluşturulamadı.');
       state.session=result.data.session;
+      publishAuthState();
       setRevisionStatus(null,'');
       setStatus('Oturum açık. Bulut işlemleri yalnızca açık komutla çalışır.','ok');
     }catch(error){
       state.session=null;
+      publishAuthState();
       setStatus('Giriş başarısız: '+safeMessage(error,'Kimlik bilgilerini kontrol edin.'),'err');
     }finally{
       if(passwordInput)passwordInput.value='';
@@ -332,16 +344,19 @@
           setStatus('Oturum kapalı. Yerel veriler korunuyor.','');
         }
         renderAuthState();
+        publishAuthState();
       });
       authSubscription=listener&&listener.data?listener.data.subscription:null;
       state.initializing=false;
       renderAuthState();
+      publishAuthState();
       if(hasSession())setStatus('Hazır: Oturum açık. Push ve Pull yalnızca açık komutla çalışır.','ok');
       else setStatus('Oturum kapalı. Bulut işlemleri devre dışı.','');
     }catch(error){
       state.initializing=false;
       state.session=null;
       renderAuthState();
+      publishAuthState();
       setStatus('Hata: '+safeMessage(error,'Bulut kimlik doğrulaması başlatılamadı.'),'err');
     }
   }
@@ -351,7 +366,7 @@
   window.checkUserCloudStatus=checkUserCloudStatus;
   window.pushUserData=pushUserData;
   window.pullUserData=pullUserData;
-  window.SimurgCloudAuth={initialize:initialize,getClient:getClient};
+  window.SimurgCloudAuth={initialize:initialize,getClient:getClient,getSession:getSession};
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
   else initialize();

@@ -1,6 +1,6 @@
 import {
   ApiError,
-  authenticateConnection,
+  authenticatedPolarContext,
   decryptSecret,
   errorResponse,
   getAdmin,
@@ -15,9 +15,11 @@ Deno.serve(async (req) => {
   const admin = getAdmin();
   try {
     if (req.method !== "POST" && req.method !== "DELETE") throw new ApiError(405, "method_not_allowed", "Use POST or DELETE to disconnect Polar.");
-    const connection = await authenticateConnection(req, admin);
+    const context = await authenticatedPolarContext(req, admin);
+    const connection = context.connection;
+    if (!connection) return json(req, { ok: true, connection: { connected: false, status: "disconnected", lastSyncAt: null } });
     if (connection.status === "disconnected" || !connection.access_token) {
-      return json(req, { ok: true, connection: { status: "disconnected", lastSyncAt: connection.last_sync_at } });
+      return json(req, { ok: true, connection: { connected: false, status: "disconnected", lastSyncAt: connection.last_sync_at } });
     }
     const accessToken = await decryptSecret(connection.access_token);
     if (!accessToken) throw new ApiError(409, "missing_access_token", "Polar access token is unavailable.");
@@ -36,7 +38,7 @@ Deno.serve(async (req) => {
     }).eq("id", connection.id);
     if (error) throw new ApiError(500, "disconnect_store_failed", "Polar connection state could not be cleared.");
     await admin.from("polar_sync_log").insert({ connection_id: connection.id, sync_type: "disconnect", status: "success", finished_at: new Date().toISOString() });
-    return json(req, { ok: true, connection: { status: "disconnected", lastSyncAt: connection.last_sync_at } });
+    return json(req, { ok: true, connection: { connected: false, status: "disconnected", lastSyncAt: connection.last_sync_at } });
   } catch (error) {
     return errorResponse(req, error);
   }

@@ -39,9 +39,10 @@ Deno.serve(async (req) => {
       .eq("state_hash", await hashSecret(state))
       .is("used_at", null)
       .gt("expires_at", now)
-      .select("client_id,client_key_hash,return_url")
+      .select("user_id,client_id,client_key_hash,return_url")
       .maybeSingle();
     if (error || !data) throw new ApiError(400, "invalid_state", "OAuth state is invalid, expired, or already used.");
+    if (!data.user_id) throw new ApiError(400, "legacy_state_requires_restart", "Restart Polar connection from an authenticated Simurg session.");
     stateRow = data;
     fallbackUrl = String(data.return_url || fallbackUrl);
 
@@ -94,6 +95,7 @@ Deno.serve(async (req) => {
 
     const expiresIn = Number(tokenPayload.expires_in);
     const connectionPayload = {
+      user_id: data.user_id,
       client_id: data.client_id,
       client_key_hash: data.client_key_hash,
       polar_user_id: polarUserId,
@@ -104,13 +106,34 @@ Deno.serve(async (req) => {
       status: "connected",
       error_message: null,
     };
-    const { data: existingConnection } = await admin.from("polar_connections").select("id").eq("client_id", data.client_id).maybeSingle();
-    let connectionId: string | null = existingConnection?.id || null;
+    const [ownedResult, polarResult, deviceResult] = await Promise.all([
+      admin.from("polar_connections").select("id,user_id,polar_user_id").eq("user_id", data.user_id).maybeSingle(),
+      admin.from("polar_connections").select("id,user_id,polar_user_id").eq("polar_user_id", polarUserId).maybeSingle(),
+      admin.from("polar_connections").select("id,user_id,polar_user_id").eq("client_id", data.client_id).maybeSingle(),
+    ]);
+    if (ownedResult.error || polarResult.error || deviceResult.error) {
+      throw new ApiError(500, "connection_lookup_failed", "Existing Polar connections could not be checked.");
+    }
+    const ownedConnection = ownedResult.data;
+    const polarConnection = polarResult.data;
+    const deviceConnection = deviceResult.data;
+    if (polarConnection?.user_id && polarConnection.user_id !== data.user_id) {
+      throw new ApiError(409, "polar_account_already_owned", "This Polar account belongs to another Simurg account.");
+    }
+    if (deviceConnection?.user_id && deviceConnection.user_id !== data.user_id) {
+      throw new ApiError(409, "device_connection_already_owned", "This device connection belongs to another Simurg account.");
+    }
+    const candidates = [ownedConnection, polarConnection, deviceConnection].filter(Boolean);
+    const candidateIds = Array.from(new Set(candidates.map((row) => row!.id)));
+    if (candidateIds.length > 1) {
+      throw new ApiError(409, "connection_merge_required", "Existing Polar connection records require manual review before reconnecting.");
+    }
+    let connectionId: string | null = candidateIds[0] || null;
     if (connectionId) {
       const { error: updateError } = await admin.from("polar_connections").update(connectionPayload).eq("id", connectionId);
       if (updateError) throw new ApiError(500, "connection_store_failed", "Polar connection could not be updated.");
     } else {
-      const { data: stored, error: storeError } = await admin.from("polar_connections").upsert(connectionPayload, { onConflict: "polar_user_id" }).select("id").single();
+      const { data: stored, error: storeError } = await admin.from("polar_connections").insert(connectionPayload).select("id").single();
       if (storeError || !stored) throw new ApiError(500, "connection_store_failed", "Polar connection could not be stored.");
       connectionId = stored.id;
     }

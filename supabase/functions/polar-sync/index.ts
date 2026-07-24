@@ -1,6 +1,6 @@
 import {
   ApiError,
-  authenticateConnection,
+  authenticatedPolarContext,
   decryptSecret,
   errorResponse,
   getAdmin,
@@ -64,9 +64,20 @@ Deno.serve(async (req) => {
   let logId: string | null = null;
   try {
     if (req.method !== "GET" && req.method !== "POST") throw new ApiError(405, "method_not_allowed", "Use GET for status or POST for manual sync.");
-    const connection = await authenticateConnection(req, admin);
+    const context = await authenticatedPolarContext(req, admin);
+    const connection = context.connection;
+    if (!connection) {
+      if (req.method === "GET") {
+        return json(req, {
+          ok: true,
+          connected: false,
+          connection: { connected: false, status: "disconnected", lastSyncAt: null, claimedLegacy: false },
+        });
+      }
+      throw new ApiError(409, "not_connected", "Polar account is not connected to this Simurg account.");
+    }
     connectionId = connection.id;
-    if (req.method === "GET") return json(req, { ok: true, connection: publicConnection(connection) });
+    if (req.method === "GET") return json(req, { ok: true, connected: publicConnection(connection).connected, connection: { ...publicConnection(connection), claimedLegacy: context.claimedLegacy } });
     if (connection.status !== "connected" || !connection.access_token) throw new ApiError(409, "not_connected", "Polar account is not connected.");
 
     const accessToken = await decryptSecret(connection.access_token);

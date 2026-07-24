@@ -1,5 +1,6 @@
 import {
   ApiError,
+  authenticateUser,
   configuredAppUrl,
   errorResponse,
   getAdmin,
@@ -32,9 +33,11 @@ Deno.serve(async (req) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
     const returnUrl = configuredAppUrl();
     const admin = getAdmin();
+    const user = await authenticateUser(req, admin);
     await admin.from("polar_oauth_states").delete().lt("expires_at", new Date().toISOString());
     const { error } = await admin.from("polar_oauth_states").insert({
       state_hash: await hashSecret(state),
+      user_id: user.id,
       client_id: clientId,
       client_key_hash: await hashSecret(clientKey),
       return_url: returnUrl,

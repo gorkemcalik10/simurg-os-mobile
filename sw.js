@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-shared-polar-load-1';
+const SIMURG_CACHE = 'simurg-account-polar-1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -11,10 +11,10 @@ const CORE_ASSETS = [
   './premium-standard.js?v=34',
   './simurg-signal-model.js?v=5',
   './polar-accesslink.css?v=4',
-  './polar-accesslink.js?v=6',
-  './simurg-cloud-auth.js?v=2',
+  './polar-accesslink.js?v=7',
+  './simurg-cloud-auth.js?v=3',
   './desktop-alignment.css?v=24',
-  './desktop-alignment.js?v=27',
+  './desktop-alignment.js?v=28',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

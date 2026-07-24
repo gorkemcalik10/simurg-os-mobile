@@ -15,12 +15,13 @@ function run(name, fn) {
 
 run('desktop Polar header renders one existing sync action', () => {
   assert.equal((desktop.match(/Manuel Senkronizasyon/g) || []).length, 1);
-  assert.match(desktop, /onclick="if\(window\.simurgPolarSyncNow\) window\.simurgPolarSyncNow\(\)"/);
+  assert.match(desktop, /connected\?'if\(window\.simurgPolarSyncNow\) window\.simurgPolarSyncNow\(\)'/);
+  assert.match(desktop, /Polar Hesabını Bağla/);
   assert.doesNotMatch(desktop, /request\('polar-sync'/);
 });
 
 run('desktop Polar sync action follows shared busy and status state', () => {
-  assert.match(desktop, /syncBusy\|\|!syncAvailable\?'disabled':''/);
+  assert.match(desktop, /syncBusy\|\|checking\|\|signedOut/);
   assert.match(desktop, /aria-busy=/);
   assert.match(desktop, /dlPolarSyncMessage/);
   assert.match(desktop, /simurg:polar-sync-state/);
@@ -37,15 +38,16 @@ run('AccessLink publishes status and refreshes existing render system', () => {
 run('changed production assets use matching cache versions', () => {
   for (const asset of [
     'simurg-data-validation.js?v=2',
-    'polar-accesslink.js?v=6',
+    'polar-accesslink.js?v=7',
     'desktop-alignment.css?v=24',
-    'desktop-alignment.js?v=27'
+    'desktop-alignment.js?v=28',
+    'simurg-cloud-auth.js?v=3'
   ]) {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=shared-polar-load-1/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-shared-polar-load-1'/);
+  assert.match(index, /sw\.js\?v=account-polar-1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-account-polar-1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

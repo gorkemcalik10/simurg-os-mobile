@@ -143,6 +143,7 @@ export function errorResponse(req: Request, error: unknown): Response {
 
 export type PolarConnection = {
   id: string;
+  user_id: string | null;
   client_id: string;
   client_key_hash: string;
   polar_user_id: number;
@@ -155,26 +156,81 @@ export type PolarConnection = {
   error_message: string | null;
 };
 
-export async function authenticateConnection(req: Request, admin = getAdmin()): Promise<PolarConnection> {
+export type AuthenticatedPolarContext = {
+  userId: string;
+  connection: PolarConnection | null;
+  claimedLegacy: boolean;
+};
+
+const connectionColumns = "id,user_id,client_id,client_key_hash,polar_user_id,access_token,refresh_token,token_expires_at,connected_at,last_sync_at,status,error_message";
+
+export async function authenticateUser(req: Request, admin = getAdmin()): Promise<{ id: string }> {
+  const authorization = req.headers.get("authorization") || "";
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  if (!match) throw new ApiError(401, "missing_session", "A valid Simurg Cloud session is required.");
+  const { data, error } = await admin.auth.getUser(match[1]);
+  if (error || !data.user) throw new ApiError(401, "invalid_session", "The Simurg Cloud session is invalid or expired.");
+  if ((data.user as { is_anonymous?: boolean }).is_anonymous) {
+    throw new ApiError(403, "permanent_account_required", "A permanent Simurg Cloud account is required.");
+  }
+  return { id: data.user.id };
+}
+
+function capabilityFromRequest(req: Request): { clientId: string; clientKeyHash: Promise<string> } | null {
   const clientId = req.headers.get("x-simurg-polar-client") || "";
   const clientKey = req.headers.get("x-simurg-polar-key") || "";
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clientId) || clientKey.length < 32) {
-    throw new ApiError(401, "invalid_client_capability", "Polar connection capability is missing or invalid.");
+    return null;
   }
-  const clientKeyHash = await hashSecret(clientKey);
-  const { data, error } = await admin
+  return { clientId, clientKeyHash: hashSecret(clientKey) };
+}
+
+export async function authenticatedPolarContext(req: Request, admin = getAdmin()): Promise<AuthenticatedPolarContext> {
+  const user = await authenticateUser(req, admin);
+  const { data: owned, error: ownedError } = await admin
     .from("polar_connections")
-    .select("id,client_id,client_key_hash,polar_user_id,access_token,refresh_token,token_expires_at,connected_at,last_sync_at,status,error_message")
-    .eq("client_id", clientId)
-    .eq("client_key_hash", clientKeyHash)
+    .select(connectionColumns)
+    .eq("user_id", user.id)
     .maybeSingle();
-  if (error) throw new ApiError(500, "connection_lookup_failed", "Polar connection lookup failed.");
-  if (!data) throw new ApiError(404, "connection_not_found", "No Polar connection exists for this device.");
-  return data as PolarConnection;
+  if (ownedError) throw new ApiError(500, "connection_lookup_failed", "Polar connection lookup failed.");
+  if (owned) return { userId: user.id, connection: owned as PolarConnection, claimedLegacy: false };
+
+  const capability = capabilityFromRequest(req);
+  if (!capability) return { userId: user.id, connection: null, claimedLegacy: false };
+  const { data: legacy, error: legacyError } = await admin
+    .from("polar_connections")
+    .select(connectionColumns)
+    .is("user_id", null)
+    .eq("client_id", capability.clientId)
+    .eq("client_key_hash", await capability.clientKeyHash)
+    .maybeSingle();
+  if (legacyError) throw new ApiError(500, "legacy_connection_lookup_failed", "Legacy Polar connection lookup failed.");
+  if (!legacy) return { userId: user.id, connection: null, claimedLegacy: false };
+
+  const { data: claimed, error: claimError } = await admin
+    .from("polar_connections")
+    .update({ user_id: user.id })
+    .eq("id", legacy.id)
+    .is("user_id", null)
+    .select(connectionColumns)
+    .maybeSingle();
+  if (claimError) throw new ApiError(409, "legacy_claim_conflict", "The legacy Polar connection could not be claimed by this account.");
+  if (claimed) return { userId: user.id, connection: claimed as PolarConnection, claimedLegacy: true };
+
+  const { data: raced } = await admin.from("polar_connections").select(connectionColumns).eq("user_id", user.id).maybeSingle();
+  if (raced) return { userId: user.id, connection: raced as PolarConnection, claimedLegacy: false };
+  throw new ApiError(409, "legacy_claim_conflict", "The legacy Polar connection was claimed by another account.");
+}
+
+export async function authenticateConnection(req: Request, admin = getAdmin()): Promise<PolarConnection> {
+  const context = await authenticatedPolarContext(req, admin);
+  if (!context.connection) throw new ApiError(404, "connection_not_found", "No Polar connection exists for this Simurg account.");
+  return context.connection;
 }
 
 export function publicConnection(connection: PolarConnection) {
   return {
+    connected: connection.status === "connected" && Boolean(connection.access_token),
     status: connection.status,
     polarUserId: String(connection.polar_user_id),
     connectedAt: connection.connected_at,
