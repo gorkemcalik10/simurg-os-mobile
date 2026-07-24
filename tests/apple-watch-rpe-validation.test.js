@@ -34,6 +34,7 @@ for (const [input, expected] of [
   ['RPE: 6', 6],
   ['6/10', 6],
   ['RPE 6/10', 6],
+  ['RPE: 6/10', 6],
   ['6 - Orta', 6],
   ['5-Orta', 5],
   ['7 – Zor', 7],
@@ -45,7 +46,7 @@ for (const [input, expected] of [
   });
 }
 
-for (const input of ['', '-', '—', 'N/A', 'NA', 'null', 'unknown']) {
+for (const input of [null, '', '-', '—', 'N/A', 'NA', 'null', 'unknown', 'NaN', 'Infinity', 'undefined', false, true, {}, []]) {
   run(`legacy Apple Watch placeholder ${JSON.stringify(input)} becomes null`, () => {
     assert.equal(legacy(input), null);
   });
@@ -53,7 +54,15 @@ for (const input of ['', '-', '—', 'N/A', 'NA', 'null', 'unknown']) {
 
 for (const input of [
   'hard', 'very tired', '6 hard', '6 - 7', '6 - orta 7',
-  'RPE 6 or 7', '6 7', 11, '11', 'RPE 11', '11 - Zor', Infinity
+  'RPE 6 or 7', '6 7'
+]) {
+  run(`unknown legacy Apple Watch RPE ${JSON.stringify(input)} becomes null`, () => {
+    assert.equal(legacy(input), null);
+  });
+}
+
+for (const input of [
+  11, '11', 'RPE 11', '11 - Zor', Infinity
 ]) {
   run(`invalid Apple Watch RPE ${JSON.stringify(input)} is rejected`, () => {
     assert.throws(() => legacy(input), error => (
@@ -64,7 +73,16 @@ for (const input of [
   });
 }
 
-for (const input of ['6', 'RPE 6', '6/10', '6 - Orta', '-']) {
+run('legacy normalization preserves the rest of the Apple Watch record', () => {
+  const result = validation.prepareFull({
+    appleWatch: [{ date: '2026-07-23', activityType: 'Run', activeCalories: 420, rpe: {} }]
+  }, { source: 'validator-runtime-test', legacyAppleWatchRpe: true }).data.appleWatch[0];
+  assert.equal(result.rpe, null);
+  assert.equal(result.activeCalories, 420);
+  assert.equal(result.activityType, 'Run');
+});
+
+for (const input of ['6', 'RPE 6', '6/10', '6 - Orta', '-', false, {}]) {
   run(`active Apple Watch RPE ${JSON.stringify(input)} stays rejected`, () => {
     assert.throws(
       () => validation.prepareFull(payload(input), { source: 'active-entry' }),

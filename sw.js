@@ -1,9 +1,9 @@
-const SIMURG_CACHE = 'simurg-security-xss-hardening-3';
+const SIMURG_CACHE = 'simurg-polar-sync-rpe-1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './simurg-data-validation.js?v=1',
+  './simurg-data-validation.js?v=2',
   './polar-workout.css?v=11',
   './polar-workout.js?v=14',
   './workout-source-policy.js?v=2',
@@ -11,10 +11,10 @@ const CORE_ASSETS = [
   './premium-standard.js?v=33',
   './simurg-signal-model.js?v=4',
   './polar-accesslink.css?v=4',
-  './polar-accesslink.js?v=5',
+  './polar-accesslink.js?v=6',
   './simurg-cloud-auth.js?v=2',
-  './desktop-alignment.css?v=23',
-  './desktop-alignment.js?v=25',
+  './desktop-alignment.css?v=24',
+  './desktop-alignment.js?v=26',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

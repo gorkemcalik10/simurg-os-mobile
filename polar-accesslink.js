@@ -124,6 +124,24 @@
     if(status==='error')return 'hata';
     return String(Number(counts[key]||0));
   }
+  function publishSyncState(){
+    var snapshot={
+      busy:!!state.busy,
+      status:state.status||'disconnected',
+      lastSyncAt:state.lastSyncAt||null,
+      message:state.message||'',
+      errorMessage:state.errorMessage||''
+    };
+    window.simurgPolarSyncState=snapshot;
+    try{document.dispatchEvent(new CustomEvent('simurg:polar-sync-state',{detail:snapshot}));}catch(e){}
+  }
+  function refreshExistingViews(){
+    try{
+      if(typeof render==='function'){render();return;}
+      if(window.SimurgPremium&&typeof window.SimurgPremium.refreshAll==='function')window.SimurgPremium.refreshAll();
+      if(window.SimurgDesktop&&typeof window.SimurgDesktop.dataChanged==='function')window.SimurgDesktop.dataChanged();
+    }catch(e){}
+  }
   function cardHtml(){
     var data=ensureStores(),connection=data&&data.polarConnection||{},status=state.status||connection.status||'disconnected',connected=status==='connected';
     var counts=state.counts||connection.lastCounts||normalizedCounts({}),statuses=state.statuses||connection.lastStatuses||{};
@@ -139,7 +157,7 @@
   function renderCard(){
     var section=document.getElementById('polar');if(!section)return;var dashboard=section.querySelector('.polarDashboardV1')||section;
     var card=document.getElementById('polarAccessLinkCard');if(!card){card=document.createElement('div');card.id='polarAccessLinkCard';card.className='polarAccessLinkCard';dashboard.insertBefore(card,dashboard.firstChild);}
-    if(card.parentNode!==dashboard)dashboard.insertBefore(card,dashboard.firstChild);card.innerHTML=cardHtml();
+    if(card.parentNode!==dashboard)dashboard.insertBefore(card,dashboard.firstChild);card.innerHTML=cardHtml();publishSyncState();
   }
   function installObserver(){
     var section=document.getElementById('polar');if(!section)return false;if(observedSection===section){renderCard();return true;}
@@ -160,7 +178,7 @@
     if(state.busy)return;state.busy=true;state.errorMessage='';state.message='Polar Flow verileri senkronize ediliyor.';renderCard();
     try{var payload=await request('polar-sync','POST',{});mergeSync(payload);var counts=payload.counts||{};state.message='Senkron tamamlandı: '+Number(counts.workouts||0)+' antrenman, '+Number(counts.activity!=null?counts.activity:counts.activities||0)+' aktivite, '+Number(counts.sleep||0)+' uyku kaydı.';state.errorMessage=(payload.warnings||[]).join(' ');}
     catch(error){state.errorMessage=error.message;state.message='Polar senkronizasyonu tamamlanamadı.';}
-    state.busy=false;renderCard();
+    state.busy=false;renderCard();refreshExistingViews();
   };
   window.simurgPolarDisconnect=async function(){
     if(state.busy||!confirm('Polar Flow bağlantısı kesilecek. Daha önce senkronize edilen Simurg verileri korunacak. Devam edelim mi?'))return;

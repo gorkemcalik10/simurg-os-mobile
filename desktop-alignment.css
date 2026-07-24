@@ -56,6 +56,9 @@
   .dlProgramGrid .dlTargetRow{min-width:0;overflow:visible}.dlProgramGrid .dlTargetRow>div{min-width:0}.dlProgramGrid .dlTargetRow span{white-space:normal;overflow-wrap:anywhere}
   #desktopPolarData .dlPolarBody{background:linear-gradient(145deg,var(--hz-surface-2),var(--hz-field))!important}
   #desktopPolarData .dlHeader nav button{border-color:rgba(48,185,223,.28)!important;background:var(--hz-cyan-soft)!important;color:#70d8f1!important}
+  #desktopPolarData .dlHeader nav button:disabled{cursor:wait!important;opacity:.55!important}
+  #desktopPolarData .dlPolarSyncMessage{display:block;max-width:260px;color:#9fb1bf;font-size:9px;font-weight:750;line-height:1.35;overflow-wrap:anywhere}
+  #desktopPolarData .dlPolarSyncMessage.error{color:#ff9aa7}
 }
 
 /* Desktop B Horizon Flow v1. Mobile rules remain owned by premium-standard.css. */

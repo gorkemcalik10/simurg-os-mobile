@@ -6223,11 +6223,11 @@ body{background:#050607!important;}
 <!-- Legacy dedicated Workout / Apple Watch import cards intentionally hidden. Universal Import is the single entry point. -->
 <textarea id="workoutJsonBox" style="display:none"></textarea><textarea id="watchJsonBox" style="display:none"></textarea>
 <div class="card"><h2>Genel veri</h2><div class="actions"><button class="btn" onclick="exportJSON()">JSON Yedekle</button><button class="btn" onclick="exportCSV()">CSV Dışa Aktar</button><button class="btn sec" onclick="document.getElementById('importFile').click()">JSON İçe Aktar</button><input type="file" id="importFile" style="display:none" onchange="importJSON(event)"></div></div>
-<div class="versionBadgeCard"><div><b>Simurg OS WHOOP Mobile V8</b><span>Stable Mode Ready · Universal Import Only · Quick Notes · Cloud Summary</span></div><div class="versionBadgePill">Stable Mode Ready</div></div></section>
+<div class="versionBadgeCard"><div><b>Simurg OS Mobile V8</b><span>Stable Mode Ready · Universal Import Only · Quick Notes · Cloud Summary</span></div><div class="versionBadgePill">Stable Mode Ready</div></div></section>
 </main></div>
 <div class="modal" id="editModal"><div class="modalbox"><div class="modalTop"><h2 id="modalTitle">Düzenle</h2><button class="btn sec" onclick="closeModal()">Kapat</button></div><div id="modalBody"></div><div class="actions"><button class="btn" onclick="saveEdit()">Kaydet</button><button class="btn danger" onclick="deleteEditing()">Sil</button></div></div></div>
 <div class="modal programNameModal" id="programNameModal"><div class="modalbox"><div class="modalTop"><h2>Program İsmini Düzenle</h2><button class="btn sec" onclick="closeProgramNameModal()">Kapat</button></div><div id="programNameBody"></div><div class="actions"><button class="btn" onclick="saveProgramNameEdit()">Kaydet</button><button class="btn sec" onclick="resetProgramNameEdit()">Varsayılana Dön</button></div></div></div>
-<script src="./simurg-data-validation.js?v=1"></script>
+<script src="./simurg-data-validation.js?v=2"></script>
 <script>
 const INITIAL={"schemaVersion":1,"workouts":[],"metrics":[],"nutrition":[],"recovery":[],"appleWatch":[],"dailyNotes":[],"weeklyNotes":[],"customGymPrograms":{},"programNames":{},"polarWorkouts":{"daily":{},"latest":null},"polarActivity":{"daily":{},"latest":null},"polarProfile":{"latest":null},"polarSleep":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarNightlyRecharge":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarContinuousHr":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarCardioLoad":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarConnection":{"connected":false,"status":"disconnected","lastSyncAt":null,"lastError":null,"source":"Polar AccessLink"}};
 window.SIMURG_INITIAL_DEFAULTS=INITIAL;
@@ -7600,7 +7600,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=security-xss-hardening-3').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=polar-sync-rpe-1').catch(function(){});
   });
 }
 </script>
@@ -15893,9 +15893,9 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./premium-standard.css?v=31">
 <script src="./premium-standard.js?v=33"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
-<script src="./polar-accesslink.js?v=5"></script>
-<link rel="stylesheet" href="./desktop-alignment.css?v=23">
-<script src="./desktop-alignment.js?v=25"></script>
+<script src="./polar-accesslink.js?v=6"></script>
+<link rel="stylesheet" href="./desktop-alignment.css?v=24">
+<script src="./desktop-alignment.js?v=26"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
 <script src="./simurg-cloud-auth.js?v=2" defer></script>
 <script>

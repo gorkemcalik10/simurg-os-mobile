@@ -136,9 +136,9 @@
   function legacyAppleWatchRpe(value,path){
     if(value==null)return null;
     if(typeof value==='number')return number(value,path,{min:0,max:10});
-    if(typeof value!=='string')fail('invalid_number','Geçerli sonlu sayı bekleniyor',path);
+    if(typeof value!=='string')return null;
     var trimmed=value.trim();
-    if(trimmed===''||/^(?:-|—|n\/a|na|null|unknown)$/i.test(trimmed))return null;
+    if(trimmed===''||/^(?:-|—|n\/a|na|null|unknown|nan|infinity|undefined)$/i.test(trimmed))return null;
     var numeric='([+-]?(?:\\d+(?:[.,]\\d+)?|[.,]\\d+))';
     var match=trimmed.match(new RegExp('^'+numeric+'$'))
       ||trimmed.match(new RegExp('^'+numeric+'\\s*\\/\\s*10$','i'))
@@ -147,7 +147,7 @@
       var labeled=trimmed.match(new RegExp('^'+numeric+' *[-–—] *(.+)$','u'));
       if(labeled&&/^\p{L}[\p{L} ]{0,38}\p{L}$/u.test(labeled[2]))match=labeled;
     }
-    if(!match)fail('invalid_number','Geçerli sonlu sayı bekleniyor',path);
+    if(!match)return null;
     return number(Number(match[1].replace(',','.')),path,{min:0,max:10});
   }
   function validDate(value){
