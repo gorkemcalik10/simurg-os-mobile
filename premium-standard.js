@@ -49,9 +49,13 @@
     var waiting=score==null&&!available.length,partial=score==null&&available.length>0,status=nativeResult&&nativeResult.status||(score==null?'WAITING':score>=70?'READY':score>=55?'CONTROLLED':'RECOVERY');
     var advice=nativeResult&&nativeResult.advice||'Bu tarih için yeterli readiness verisi yok.';if(window.SimurgLabels)advice=window.SimurgLabels.sentence(advice);return {score:score,label:score==null?(partial?'Sinyaller Birikiyor':'Veri Bekleniyor'):(score>=70?'Antrenmana Hazır':score>=55?'Kontrollü İlerle':'Toparlanma Öncelikli'),status:status,confidence:nativeResult&&nativeResult.confidence||{available:available.length,label:partial?'Kısmi':waiting?'Bekleniyor':'Mevcut'},source:nativeResult?'Koç Mantığı':'Toparlanma kayıtları',signals:signals,selectedDate:date,isPartial:partial,isWaiting:waiting,advice:advice,today:nativeResult&&nativeResult.today||{watch:[],types:[],minutes:0,active:0}};
   }
+  function sharedLoad(date){
+    if(window.SimurgSignalModel&&typeof window.SimurgSignalModel.load==='function'){var resolved=window.SimurgSignalModel.load(date);if(resolved)return resolved;}
+    return {date:date,value:null,cardioLoad:null,strain:null,tolerance:null,ratio:null,statusRaw:null,statusLabel:'Henüz hesaplanmadı',available:false,source:'None',sourceDate:null};
+  }
   function homeModel(date){
     var data=dataRoot(),bridge=bridgeEntry(data,date)||{},recovery=recoveryEntry(data,date)||{},chosen=window.SimurgWorkoutSource&&window.SimurgWorkoutSource.day?window.SimurgWorkoutSource.day(date):null,polar=chosen&&chosen.primaryPolar||null,apple=chosen&&chosen.appleLegacy||appleAt(data,date),gym=chosen&&chosen.gym||((data.workouts||[]).filter(function(row){return row&&row.date===date;}));
-    var polarSleep=polarLatest(data,'polarSleep',date),polarNightly=polarLatest(data,'polarNightlyRecharge',date),polarCardio=polarLatest(data,'polarCardioLoad',date);
+    var polarSleep=polarLatest(data,'polarSleep',date),polarNightly=polarLatest(data,'polarNightlyRecharge',date),loadResult=sharedLoad(date);
     var sleepMinutes=firstNumber(polarSleep&&polarSleep.durationMinutes,polarSleep&&secondsToMinutes(polarSleep.durationSeconds),bridge.sleepDurationMinutes,recovery.sleepDurationMinutes,recovery.sleepMinutes);
     var sleepScore=firstNumber(polarSleep&&polarSleep.sleepScore,bridge.sleepScore,recovery.sleepScore);
     var nightly=firstNumber(bridge.nightlyRecharge,recovery.nightlyRecharge,recovery.nightlyRechargeScore);
@@ -60,7 +64,7 @@
     var rhr=firstNumber(polarNightly&&polarNightly.heartRateAvg,bridge.restingHr,recovery.restingHr,recovery.restingHR,recovery.rhr);
     var sleepHr=firstNumber(bridge.sleepHr,recovery.sleepHr,recovery.sleepHR);
     var respiratory=firstNumber(polarNightly&&polarNightly.breathingRateAvg,bridge.respiratoryRate,recovery.respiratoryRate);
-    var load=firstNumber(polarCardio&&polarCardio.cardioLoad,polar&&polar.trainingLoad,bridge.cardioLoad,recovery.activityLoad,recovery.physicalLoad);
+    var load=loadResult.available?loadResult.value:null;
     var activeEnergy=firstNumber(bridge.activeEnergyKcal,bridge.activeEnergy,polar&&polar.activeCal,polar&&polar.calories,apple&&apple.activeCal);
     var gymRpes=gym.map(function(x){return number(x.rpe);}).filter(function(x){return x!=null;});
     var rpe=firstNumber(polar&&polar.rpe,gymRpes.length?gymRpes.reduce(function(a,b){return a+b;},0)/gymRpes.length:null,bridge.workouts&&bridge.workouts[0]&&bridge.workouts[0].rpe,apple&&apple.rpe);
@@ -70,7 +74,7 @@
       bridge.workouts&&bridge.workouts[0]?{name:activityLabel(bridge.workouts[0].type||'Workout'),duration:bridge.workouts[0].duration,date:bridge.date,cal:bridge.workouts[0].activeEnergy,avgHR:bridge.workouts[0].avgHr,maxHR:bridge.workouts[0].maxHr,source:'Polar Bridge'}:null;
     var hasRecoverySignals=[hrv,rhr,respiratory,nightlyDisplay].some(function(value){return value!=null&&value!=='';});
     var readinessResult=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):resolveReadiness(date,{recovery:recovery,hasActivity:!!(polar||apple||gym.length),signals:{hrv:hrv,rhr:rhr,respiratory:respiratory,sleepScore:sleepScore,cardioLoad:load}}),readiness=readinessResult.score;
-    return {selectedDate:date,data:data,bridge:bridge,recovery:recovery,polar:polar,apple:apple,gym:gym,workoutSource:chosen&&chosen.source,polarSleep:polarSleep,polarNightly:polarNightly,polarCardio:polarCardio,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,readinessResult:readinessResult,hasRecoverySignals:hasRecoverySignals,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
+    return {selectedDate:date,data:data,bridge:bridge,recovery:recovery,polar:polar,apple:apple,gym:gym,workoutSource:chosen&&chosen.source,polarSleep:polarSleep,polarNightly:polarNightly,loadResult:loadResult,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,readinessResult:readinessResult,hasRecoverySignals:hasRecoverySignals,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
   }
   function metric(label,value,unit){var textValue=label==='Latest Activity'||label==='Aggressiveness';return '<div class="gp-metric '+(textValue?'gp-metric-text':'')+'"><small>'+esc(label)+'</small><b>'+esc(value==null?'—':value)+(value==null?'':'<em>'+esc(unit||'')+'</em>')+'</b></div>';}
   function ring(label,value,color,stateLabel){var pct=value==null?0:clamp(value,0,100);return '<div class="gp-ring-card '+(stateLabel?'partial':'')+'"><div class="gp-ring" style="--gp-value:'+pct+'%;--gp-ring-color:'+color+'"><div><b>'+esc(value==null?'—':Math.round(value))+'</b><small>'+esc(stateLabel||'/100')+'</small></div></div><small>'+esc(label)+'</small>'+(stateLabel?'<span>Kısmi veri</span>':'')+'</div>';}
@@ -181,7 +185,7 @@
   }
   function loadPane(model){
     var status=loadAggressiveness(model),tone=status==='NORMAL'?'good':status==='REDUCED'?'warn':'';
-    var statusLabel=status==='NORMAL'?'Normal':status==='REDUCED'?'Azaltılmış':'Bekleniyor',metrics=[];if(model.load!=null)metrics.push(metric('Aktivite Yükü',formatLoad(model.load),''));if(model.activeEnergy!=null)metrics.push(metric('Aktif Enerji',formatLoad(model.activeEnergy),'kcal'));if(model.rpe!=null)metrics.push(metric('RPE',formatLoad(model.rpe),'/10'));if(model.polar&&number(model.polar.trainingLoad)!=null)metrics.push(metric('Polar Antrenman Yükü',formatLoad(model.polar.trainingLoad),''));metrics.push(metric('Agresiflik',statusLabel,''));
+    var statusLabel=status==='NORMAL'?'Normal':status==='REDUCED'?'Azaltılmış':'Bekleniyor',loadResult=model.loadResult||sharedLoad(model.selectedDate),metrics=[];if(loadResult.available)metrics.push(metric('Aktivite Yükü',formatLoad(loadResult.value),''));if(model.activeEnergy!=null)metrics.push(metric('Aktif Enerji',formatLoad(model.activeEnergy),'kcal'));if(model.rpe!=null)metrics.push(metric('RPE',formatLoad(model.rpe),'/10'));if(loadResult.available)metrics.push(metric('Yük Kaynağı',loadResult.source,''));metrics.push(metric('Agresiflik',statusLabel,''));
     return '<div class="gp-home-pane active" data-home-pane="load"><div class="gp-card"><div class="gp-card-head"><h2>Yük Özeti</h2><span class="gp-status '+tone+'">'+statusLabel+'</span></div><div class="gp-metric-grid">'+metrics.join('')+'</div><div class="gp-interpret">'+esc(loadInterpretation(model))+'</div></div>'+(model.activity?activityCard(model.activity,'Son Antrenman / Aktivite',true):'')+'</div>';
   }
   function homeShell(){
@@ -215,7 +219,7 @@
   };
   window.homePremiumSetTab=function(tab){if(homeTabs.indexOf(tab)<0||tab===homeTab)return;homeTab=tab;renderHome();var home=document.getElementById('home');if(home)home.scrollTop=0;};
   window.SimurgReadiness={resolve:function(date){return resolveReadiness(date||homeDateValue(),homeModelSignals(date||homeDateValue()));}};
-  function homeModelSignals(date){var data=dataRoot(),night=polarLatest(data,'polarNightlyRecharge',date)||{},sleep=polarLatest(data,'polarSleep',date)||{},load=polarLatest(data,'polarCardioLoad',date)||{},recovery=recoveryEntry(data,date)||{},session=window.SimurgWorkoutSource&&window.SimurgWorkoutSource.day?window.SimurgWorkoutSource.day(date):null,hasGym=(data.workouts||[]).some(function(row){return row&&row.date===date;});return {recovery:recovery,hasActivity:!!(hasGym||session&&session.primaryPolar||session&&session.appleLegacy),signals:{hrv:firstNumber(night.heartRateVariabilityAvg,recovery.hrvMs,recovery.hrv),rhr:firstNumber(night.heartRateAvg,recovery.restingHr,recovery.rhr),respiratory:firstNumber(night.breathingRateAvg,recovery.respiratoryRate),sleepScore:firstNumber(sleep.sleepScore,recovery.sleepScore),cardioLoad:firstNumber(load.cardioLoad,load.strain,recovery.activityLoad)}};}
+  function homeModelSignals(date){var data=dataRoot(),night=polarLatest(data,'polarNightlyRecharge',date)||{},sleep=polarLatest(data,'polarSleep',date)||{},loadResult=sharedLoad(date),recovery=recoveryEntry(data,date)||{},session=window.SimurgWorkoutSource&&window.SimurgWorkoutSource.day?window.SimurgWorkoutSource.day(date):null,hasGym=(data.workouts||[]).some(function(row){return row&&row.date===date;});return {recovery:recovery,hasActivity:!!(hasGym||session&&session.primaryPolar||session&&session.appleLegacy),signals:{hrv:firstNumber(night.heartRateVariabilityAvg,recovery.hrvMs,recovery.hrv),rhr:firstNumber(night.heartRateAvg,recovery.restingHr,recovery.rhr),respiratory:firstNumber(night.breathingRateAvg,recovery.respiratoryRate),sleepScore:firstNumber(sleep.sleepScore,recovery.sleepScore),cardioLoad:loadResult.available?loadResult.value:null}};}
 
   function selectedDateValue(){try{return selectedDate||today();}catch(e){return today();}}
   function premiumLongDate(value){try{return new Intl.DateTimeFormat('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));}catch(e){return value;}}

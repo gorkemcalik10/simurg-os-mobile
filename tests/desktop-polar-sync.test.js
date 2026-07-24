@@ -39,13 +39,13 @@ run('changed production assets use matching cache versions', () => {
     'simurg-data-validation.js?v=2',
     'polar-accesslink.js?v=6',
     'desktop-alignment.css?v=24',
-    'desktop-alignment.js?v=26'
+    'desktop-alignment.js?v=27'
   ]) {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=polar-sync-rpe-1/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-polar-sync-rpe-1'/);
+  assert.match(index, /sw\.js\?v=shared-polar-load-1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-shared-polar-load-1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

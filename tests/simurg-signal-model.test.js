@@ -29,9 +29,12 @@ function makeRuntime(data = {}, selectedDate = '2026-07-17') {
       durationMinutes: sourceDurationMinutes,
       validApple: () => true,
       day(date) {
+        const polarRows = (((data.polarWorkouts || {}).daily || {})[date]) || [];
+        const polarList = Array.isArray(polarRows) ? polarRows : [polarRows];
         return {
           gym: (data.workouts || []).filter((row) => row.date === date),
-          polar: (((data.polarWorkouts || {}).daily || {})[date]) || [],
+          polar: polarRows,
+          primaryPolar: polarList.filter(Boolean)[0] || null,
           apple: (data.appleWatch || []).filter((row) => row.date === date),
         };
       },
@@ -236,6 +239,94 @@ run('week and month cache survive reads and invalidate only explicitly', () => {
   const third = runtime.model.month('2026-07');
   assert.notEqual(third, first);
   assert.equal(runtime.model.debugStats().invalidations, 1);
+});
+
+run('shared load resolves same-date Polar Cardio Load fields', () => {
+  const date = '2026-07-24';
+  const model = makeRuntime({ polarCardioLoad: { daily: { [date]: {
+    date, cardioLoad: 42.6, strain: 38.2, tolerance: 30.1,
+    cardioLoadRatio: 1.27, cardioLoadStatus: 'PRODUCTIVE',
+  } } } }).model;
+  assert.deepEqual(JSON.parse(JSON.stringify(model.load(date))), {
+    date, value: 42.6, cardioLoad: 42.6, strain: 38.2, tolerance: 30.1,
+    ratio: 1.27, statusRaw: 'PRODUCTIVE', statusLabel: 'Üretken',
+    available: true, source: 'Polar Cardio Load', sourceDate: date,
+  });
+});
+
+run('unavailable next-day load never leaks across dates or becomes zero', () => {
+  const first = '2026-07-24';
+  const next = '2026-07-25';
+  const model = makeRuntime({ polarCardioLoad: { daily: {
+    [first]: { date: first, cardioLoad: 42.6, cardioLoadStatus: 'PRODUCTIVE' },
+    [next]: { date: next, cardioLoad: 0, strain: 0, tolerance: 0, cardioLoadRatio: 0, cardioLoadStatus: 'LOAD_STATUS_NOT_AVAILABLE' },
+  } } }).model;
+  assert.equal(model.load(first).value, 42.6);
+  assert.equal(model.load(first).sourceDate, first);
+  assert.equal(model.load(next).value, null);
+  assert.equal(model.load(next).available, false);
+  assert.equal(model.load(next).statusLabel, 'Henüz hesaplanmadı');
+});
+
+run('real available zero is preserved', () => {
+  const date = '2026-07-26';
+  const load = makeRuntime({ polarCardioLoad: { daily: { [date]: {
+    date, cardioLoad: 0, strain: 0, tolerance: 25, cardioLoadRatio: 0, cardioLoadStatus: 'DETRAINING',
+  } } } }).model.load(date);
+  assert.equal(load.available, true);
+  assert.equal(load.value, 0);
+  assert.equal(load.source, 'Polar Cardio Load');
+});
+
+run('same-date Polar workout is the first fallback', () => {
+  const date = '2026-07-27';
+  const load = makeRuntime({ polarWorkouts: { daily: { [date]: [polar(date, { trainingLoad: 18 })] } } }).model.load(date);
+  assert.equal(load.value, 18);
+  assert.equal(load.source, 'Polar Workout');
+  assert.equal(load.strain, null);
+  assert.equal(load.tolerance, null);
+  assert.equal(load.ratio, null);
+});
+
+run('same-date Polar Bridge is used after workout', () => {
+  const date = '2026-07-28';
+  const load = makeRuntime({ polarBridge: { daily: { [date]: { date, cardioLoad: 12 } } } }).model.load(date);
+  assert.equal(load.value, 12);
+  assert.equal(load.source, 'Polar Bridge');
+});
+
+run('same-date Recovery is used after Bridge', () => {
+  const date = '2026-07-29';
+  const load = makeRuntime({ recoveryEntries: { [date]: { date, activityLoad: 9 } } }).model.load(date);
+  assert.equal(load.value, 9);
+  assert.equal(load.source, 'Recovery');
+});
+
+run('mismatched embedded source dates are never used', () => {
+  const date = '2026-07-24';
+  const model = makeRuntime({
+    polarCardioLoad: { daily: { [date]: { date: '2026-07-25', cardioLoad: 99, cardioLoadStatus: 'PRODUCTIVE' } } },
+    polarBridge: { daily: { [date]: { date: '2026-07-25', cardioLoad: 88 } } },
+  }).model;
+  assert.equal(model.load(date).available, false);
+  assert.equal(model.load(date).source, 'None');
+});
+
+run('weekly load average excludes unavailable days and includes real zero', () => {
+  const start = '2026-07-20';
+  const daily = {
+    '2026-07-20': { cardioLoad: 10, cardioLoadStatus: 'PRODUCTIVE' },
+    '2026-07-21': { cardioLoad: 20, cardioLoadStatus: 'MAINTAINING' },
+    '2026-07-22': { cardioLoad: 30, cardioLoadStatus: 'PRODUCTIVE' },
+    '2026-07-23': { cardioLoad: 0, tolerance: 25, cardioLoadStatus: 'DETRAINING' },
+    '2026-07-24': { cardioLoad: 0, cardioLoadStatus: 'LOAD_STATUS_NOT_AVAILABLE' },
+    '2026-07-25': { cardioLoad: 0, cardioLoadStatus: 'NOT_AVAILABLE' },
+    '2026-07-26': { cardioLoad: 0, strain: 0, tolerance: 0, cardioLoadRatio: 0 },
+  };
+  const week = makeRuntime({ polarCardioLoad: { daily } }).model.week(start);
+  assert.deepEqual(Array.from(week.loadSeries), [10, 20, 30, 0, null, null, null]);
+  assert.equal(week.loads.filter((item) => item.available).length, 4);
+  assert.equal(week.avgLoad, 15);
 });
 
 if (process.exitCode) process.exit(process.exitCode);
