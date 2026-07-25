@@ -29,6 +29,11 @@ assert.match(
 assert.match(html, /function hasPhysicalActivity\(d\)/);
 assert.match(html, /shared\.primaryPolar\|\|shared\.appleLegacy/);
 assert.doesNotMatch(html, /if\(hasGym\(d\) \|\| hasWatch\(d\)\) return/);
+assert.doesNotMatch(
+  html,
+  /window\.selectedDate\|\|selectedDate/,
+  'mobile reports must prefer the canonical selectedDate over the compatibility mirror',
+);
 assert.doesNotMatch(premium, /setInterval\s*\(/);
 
 process.stdout.write('✓ Mobile menu reports keep responsive cards and month navigation\n');

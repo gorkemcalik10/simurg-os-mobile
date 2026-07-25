@@ -7622,7 +7622,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=mobile-stability-audit-2').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=mobile-stability-audit-3').catch(function(){});
   });
 }
 </script>
@@ -9102,7 +9102,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     return {q,cls,label,text};
   }
   function monthlyStats(){
-    const base=(window.selectedDate||new Date().toISOString().slice(0,10));
+    const base=(selectedDate||window.selectedDate||new Date().toISOString().slice(0,10));
     const ym=String(base).slice(0,7);
     const shared=window.SimurgSignalModel?window.SimurgSignalModel.month(ym):null;
     if(shared){const c=typeof calc==='function'?calc(shared.rows):{parts:{}},exCount={};shared.rows.forEach(w=>{const ex=w.exercise||'Bilinmiyor';exCount[ex]=(exCount[ex]||0)+1;});const topEx=Object.entries(exCount).sort((a,b)=>b[1]-a[1])[0]||['-',0],topPart=Object.entries(c.parts||{}).sort((a,b)=>b[1]-a[1])[0]||['-',0];return {ym,days:shared.gymDays,actDays:shared.activityDays,sets:shared.sets,vol:Math.round(shared.volume),topEx:topEx[0],topPart:topPart[0],pain:shared.painCount,minutes:Math.round(shared.activityMinutes),verdict:shared.painCount?'Ay içinde ağrı sinyali var. Gelecek blokta yükten önce hareket kalitesi takip edilmeli.':shared.gymDays>=8?'Ay düzenli ve temiz ilerliyor. Ana hedef: sürdürülebilir ilerleme.':'Veri biriktikçe aylık değerlendirme daha anlamlı olacak.'};}
@@ -9220,7 +9220,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     const n=parseFloat(s); return isNaN(n)?0:n;
   }
   function monthlyStatsStandalone(){
-    const base=(window.selectedDate||new Date().toISOString().slice(0,10));
+    const base=(selectedDate||window.selectedDate||new Date().toISOString().slice(0,10));
     const ym=String(base).slice(0,7);
     const shared=window.SimurgSignalModel?window.SimurgSignalModel.month(ym):null;
     const workouts=shared?shared.rows:((typeof DATA!=='undefined'&&DATA.workouts)||[]).filter(w=>String(w.date||'').startsWith(ym));
@@ -9849,14 +9849,14 @@ textarea,input,select{
       list.parentNode.insertBefore(helper,list);
     }
     const t=safeToday();
-    const active=String(window.selectedDate||selectedDate)===t;
+    const active=String(selectedDate||window.selectedDate)===t;
     const shownProgram=window.SimurgLabels?window.SimurgLabels.sentence(programFor(t)):programFor(t);
     helper.innerHTML=`<div><small>${active?'Bugünün Programı':'Bugün'}</small><b>${shownProgram}</b><span>${safeTr(t)} • Gym modu bugünün tarihine göre hazır.</span></div><button class="btn sec" onclick="window.innerWidth<=900?(selectedDate=todayStr(),weekStart=mondayOf(selectedDate),simurgV8Go('gym','gym')):(goToday(),show('gym',document.querySelector('.nav button:nth-child(2)')))">Bugünün Programına Git</button>`;
   }
 
   function applyRestDayCard(){
     const wg=document.getElementById('workoutGroups'); if(!wg) return;
-    const d=String(window.selectedDate||selectedDate);
+    const d=String(selectedDate||window.selectedDate);
     if(hasGym(d) || hasPhysicalActivity(d)) return;
     const type=programFor(d),shownType=window.SimurgLabels?window.SimurgLabels.sentence(type):type;
     wg.innerHTML=`<div class="restDayCard"><small>DİNLENME GÜNÜ</small><b>${safeTr(d)}</b><span>${shownType}. Bu gün için Gym veya aktivite kaydı yok. Aktif toparlanma, yürüyüş, yüzme ya da ek antrenman yaptıysan Evrensel İçe Aktarım ile ekleyebilirsin.</span></div>`;
@@ -9896,9 +9896,9 @@ textarea,input,select{
   const prevUniversal=window.universalImport;
   if(typeof prevUniversal==='function' && !window.__simurgImportDateHelperWrapped){
     window.universalImport=function(){
-      const before=String(window.selectedDate||selectedDate||'');
+      const before=String(selectedDate||window.selectedDate||'');
       const res=prevUniversal.apply(this,arguments);
-      const after=String(window.selectedDate||selectedDate||before);
+      const after=String(selectedDate||window.selectedDate||before);
       showImportDate(after);
       applyUx();
       return res;

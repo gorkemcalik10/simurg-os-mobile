@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-mobile-stability-audit-2';
+const SIMURG_CACHE = 'simurg-mobile-stability-audit-3';
 const CORE_ASSETS = [
   './',
   './index.html',
