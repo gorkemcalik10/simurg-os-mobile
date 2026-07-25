@@ -326,7 +326,8 @@
     var targetMonth=new Date(Date.UTC(year,month+(Number(delta)||0),1));
     var lastDay=new Date(Date.UTC(targetMonth.getUTCFullYear(),targetMonth.getUTCMonth()+1,0)).getUTCDate();
     var next=new Date(Date.UTC(targetMonth.getUTCFullYear(),targetMonth.getUTCMonth(),Math.min(day,lastDay))).toISOString().slice(0,10);
-    try{selectedDate=next;if(typeof mondayOf==='function')weekStart=mondayOf(next);}catch(error){window.selectedDate=next;}
+    try{selectedDate=next;if(typeof mondayOf==='function')weekStart=mondayOf(next);}catch(error){}
+    window.selectedDate=next;
     if(typeof window.render==='function')window.render();
     if(typeof window.renderMonthlyReviewPanel==='function')window.renderMonthlyReviewPanel();
     polishReports();

@@ -16,6 +16,16 @@ assert.match(css, /body\[data-simurg-active-screen="polar-workout"\] #polar-work
 assert.match(premium, /function ensureMonthlyNavigation\(\)/);
 assert.match(premium, /window\.simurgPremiumShiftMonth=function\(delta\)/);
 assert.match(premium, /Math\.min\(day,lastDay\)/);
+assert.match(
+  premium,
+  /selectedDate=next[\s\S]*window\.selectedDate=next[\s\S]*window\.render\(\)/,
+  'month navigation must update both the canonical app date and legacy monthly report date before rendering',
+);
+assert.match(
+  html,
+  /function monthlyStatsStandalone\(\)\{[\s\S]*window\.selectedDate/,
+  'monthly report must read the date synchronized by month navigation',
+);
 assert.match(html, /function hasPhysicalActivity\(d\)/);
 assert.match(html, /shared\.primaryPolar\|\|shared\.appleLegacy/);
 assert.doesNotMatch(html, /if\(hasGym\(d\) \|\| hasWatch\(d\)\) return/);
