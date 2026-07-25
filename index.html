@@ -7622,7 +7622,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=responsive-overflow-1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=mobile-stability-audit-1').catch(function(){});
   });
 }
 </script>
@@ -9814,7 +9814,15 @@ textarea,input,select{
   function safeTr(d){try{return trDate(d)}catch(e){return d}}
   function safeDay(d){try{return dayName(d)}catch(e){return ''}}
   function safeMonday(d){try{return mondayOf(d)}catch(e){return d}}
-  function hasWatch(d){try{return (watchRowsForDate(d)||[]).length>0}catch(e){return false}}
+  function hasPhysicalActivity(d){
+    try{
+      if(window.SimurgWorkoutSource&&typeof window.SimurgWorkoutSource.day==='function'){
+        const shared=window.SimurgWorkoutSource.day(d);
+        if(shared&&(shared.primaryPolar||shared.appleLegacy))return true;
+      }
+      return (watchRowsForDate(d)||[]).length>0;
+    }catch(e){return false}
+  }
   function hasGym(d){try{return (dayData(d)||[]).length>0}catch(e){return false}}
   function programFor(d){try{return getProgramLabelForDate(d)}catch(e){return safeDay(d)}}
 
@@ -9849,7 +9857,7 @@ textarea,input,select{
   function applyRestDayCard(){
     const wg=document.getElementById('workoutGroups'); if(!wg) return;
     const d=String(window.selectedDate||selectedDate);
-    if(hasGym(d) || hasWatch(d)) return;
+    if(hasGym(d) || hasPhysicalActivity(d)) return;
     const type=programFor(d),shownType=window.SimurgLabels?window.SimurgLabels.sentence(type):type;
     wg.innerHTML=`<div class="restDayCard"><small>DİNLENME GÜNÜ</small><b>${safeTr(d)}</b><span>${shownType}. Bu gün için Gym veya aktivite kaydı yok. Aktif toparlanma, yürüyüş, yüzme ya da ek antrenman yaptıysan Evrensel İçe Aktarım ile ekleyebilirsin.</span></div>`;
   }
@@ -15915,8 +15923,8 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./polar-workout.css?v=11">
 <script src="./polar-workout.js?v=14"></script>
 <script src="./workout-source-policy.js?v=3"></script>
-<link rel="stylesheet" href="./premium-standard.css?v=32">
-<script src="./premium-standard.js?v=35"></script>
+<link rel="stylesheet" href="./premium-standard.css?v=33">
+<script src="./premium-standard.js?v=36"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=7"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=24">

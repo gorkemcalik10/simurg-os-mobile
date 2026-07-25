@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-responsive-overflow-1';
+const SIMURG_CACHE = 'simurg-mobile-stability-audit-1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -8,8 +8,8 @@ const CORE_ASSETS = [
   './polar-workout.css?v=11',
   './polar-workout.js?v=14',
   './workout-source-policy.js?v=3',
-  './premium-standard.css?v=32',
-  './premium-standard.js?v=35',
+  './premium-standard.css?v=33',
+  './premium-standard.js?v=36',
   './simurg-signal-model.js?v=6',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=7',

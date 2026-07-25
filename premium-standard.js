@@ -246,6 +246,11 @@
     if(window.innerWidth<=900)workout.querySelectorAll('.dayProgram .active,.weekStrip .active').forEach(function(card){card.scrollIntoView({behavior:'auto',block:'nearest',inline:'center'});});
   }
 
+  function syncNavPressed(){
+    document.querySelectorAll('#simurgV8Nav button[data-key]').forEach(function(button){
+      button.setAttribute('aria-pressed',button.classList.contains('active')?'true':'false');
+    });
+  }
   function normalizeNav(){
     var nav=document.getElementById('simurgV8Nav');if(!nav)return;
     var order=['home','gym','logger','polar','menu'];
@@ -253,6 +258,7 @@
     var expected=order.filter(function(key){return nav.querySelector('[data-key="'+key+'"]');});
     if(current.join('|')!==expected.join('|'))expected.forEach(function(key){var item=nav.querySelector('[data-key="'+key+'"]');if(item)nav.appendChild(item);});
     nav.setAttribute('aria-label','Simurg mobil gezinme');
+    syncNavPressed();
     var logger=nav.querySelector('[data-key="logger"]');if(logger)Array.from(logger.childNodes).forEach(function(node){if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim())node.nodeValue='Günlük';});
   }
   function localizeVisible(){
@@ -292,11 +298,41 @@
     if(typeof window.renderDataLocalStatus==='function')window.renderDataLocalStatus();
   }
   function reportCopyBar(id,label,buttonLabel,handler){return '<div id="'+id+'" class="gp-report-copy"><div><small>Rapor Dışa Aktarımı</small><b>'+esc(label)+'</b></div><button class="btn sec" type="button" onclick="'+handler+'()">'+esc(buttonLabel)+'</button></div>';}
+  function monthLabel(value){
+    try{return new Intl.DateTimeFormat('tr-TR',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));}catch(error){return String(value||'').slice(0,7);}
+  }
+  function ensureMonthlyNavigation(){
+    var section=document.getElementById('monthly'),topbar=section&&section.querySelector('.topbar');if(!topbar)return;
+    var nav=topbar.querySelector('.gp-month-nav');
+    if(!nav){
+      nav=document.createElement('div');
+      nav.className='gp-month-nav';
+      nav.setAttribute('role','group');
+      nav.setAttribute('aria-label','Aylık rapor dönemi');
+      nav.innerHTML='<button type="button" aria-label="Önceki ay" onclick="simurgPremiumShiftMonth(-1)">‹</button><output id="gpMonthNavLabel"></output><button type="button" aria-label="Sonraki ay" onclick="simurgPremiumShiftMonth(1)">›</button>';
+      topbar.appendChild(nav);
+    }
+    var label=nav.querySelector('#gpMonthNavLabel');if(label)label.textContent=monthLabel(selectedDateValue());
+  }
   function polishReports(){
     var program=document.getElementById('programReport');if(program){var utility=document.getElementById('programReportUtilityBar');if(utility&&program.lastElementChild!==utility)program.appendChild(utility);}
     var weekly=document.getElementById('weeklyReport');if(weekly&&!document.getElementById('gpWeeklyCopy'))weekly.insertAdjacentHTML('beforeend',reportCopyBar('gpWeeklyCopy','Seçili haftayı temiz analiz metni olarak kopyala.','Haftalık Raporu Kopyala','copyWeeklyPremiumReport'));
     var monthly=document.getElementById('monthlyReport');if(monthly&&!document.getElementById('gpMonthlyCopy'))monthly.insertAdjacentHTML('beforeend',reportCopyBar('gpMonthlyCopy','Seçili ayı temiz analiz metni olarak kopyala.','Aylık Raporu Kopyala','copyMonthlyPremiumReport'));
+    ensureMonthlyNavigation();
   }
+  window.simurgPremiumShiftMonth=function(delta){
+    var current=selectedDateValue(),parts=String(current).split('-').map(Number);
+    var year=parts[0]||new Date().getUTCFullYear(),month=(parts[1]||1)-1,day=parts[2]||1;
+    var targetMonth=new Date(Date.UTC(year,month+(Number(delta)||0),1));
+    var lastDay=new Date(Date.UTC(targetMonth.getUTCFullYear(),targetMonth.getUTCMonth()+1,0)).getUTCDate();
+    var next=new Date(Date.UTC(targetMonth.getUTCFullYear(),targetMonth.getUTCMonth(),Math.min(day,lastDay))).toISOString().slice(0,10);
+    try{selectedDate=next;if(typeof mondayOf==='function')weekStart=mondayOf(next);}catch(error){window.selectedDate=next;}
+    if(typeof window.render==='function')window.render();
+    if(typeof window.renderMonthlyReviewPanel==='function')window.renderMonthlyReviewPanel();
+    polishReports();
+    localizeVisible();
+    var section=document.getElementById('monthly');if(section)section.scrollTop=0;
+  };
   function refineProgramIntelligence(){
     var program=document.getElementById('programReport');if(!program)return;
     Array.from(program.querySelectorAll('.programIntelPremiumCard:not(.wide)')).forEach(function(card){
@@ -370,7 +406,7 @@
     if(id==='workout'&&typeof window.simurgDisableLoggerTrendTooltip==='function')window.simurgDisableLoggerTrendTooltip();
     if(window.SimurgPolarBridge&&typeof window.SimurgPolarBridge.refresh==='function'&&(id==='home'||id==='polar'||id==='coaching'||id==='data'))window.SimurgPolarBridge.refresh(id);
   }
-  function refreshAll(){renderHome();refineGym();refineLogger();cleanCoaching();cleanDataCenter();polishReports();refineProgramIntelligence();localizeVisible();if(window.SimurgCurrentWeekUX&&typeof window.SimurgCurrentWeekUX.refresh==='function')window.SimurgCurrentWeekUX.refresh();if(window.SimurgSmartProgression&&typeof window.SimurgSmartProgression.refresh==='function')window.SimurgSmartProgression.refresh();if(window.SimurgProfessionalPolish&&typeof window.SimurgProfessionalPolish.refresh==='function')window.SimurgProfessionalPolish.refresh();if(typeof window.simurgDisableLoggerTrendTooltip==='function')window.simurgDisableLoggerTrendTooltip();if(window.SimurgPolarBridge&&typeof window.SimurgPolarBridge.refresh==='function')window.SimurgPolarBridge.refresh();}
+  function refreshAll(){normalizeNav();renderHome();refineGym();refineLogger();cleanCoaching();cleanDataCenter();polishReports();refineProgramIntelligence();localizeVisible();if(window.SimurgCurrentWeekUX&&typeof window.SimurgCurrentWeekUX.refresh==='function')window.SimurgCurrentWeekUX.refresh();if(window.SimurgSmartProgression&&typeof window.SimurgSmartProgression.refresh==='function')window.SimurgSmartProgression.refresh();if(window.SimurgProfessionalPolish&&typeof window.SimurgProfessionalPolish.refresh==='function')window.SimurgProfessionalPolish.refresh();if(typeof window.simurgDisableLoggerTrendTooltip==='function')window.simurgDisableLoggerTrendTooltip();if(window.SimurgPolarBridge&&typeof window.SimurgPolarBridge.refresh==='function')window.SimurgPolarBridge.refresh();}
   function dataChanged(reason){if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate(reason||'dataChanged');refreshAll();}
   window.SimurgPremium={refreshScreen:refreshScreen,refreshAll:refreshAll,dataChanged:dataChanged,renderHome:renderHome,localizeVisible:localizeVisible};
   ready(function(){
@@ -380,6 +416,9 @@
       var date=String(card.dataset.gpPolarDate||'');
       if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||typeof window.simurgOpenPolarWorkoutFor!=='function')return;
       window.simurgOpenPolarWorkoutFor(date,String(card.dataset.gpPolarStart||''));
+    });
+    document.addEventListener('click',function(event){
+      if(event.target.closest('#simurgV8Nav button[data-key]'))syncNavPressed();
     });
     refreshAll();
   });
