@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-home-overview-fidelity-v1';
+const SIMURG_CACHE = 'simurg-premium-route-recovery-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,10 @@ const CORE_ASSETS = [
   './workout-source-policy.js?v=3',
   './premium-standard.css?v=35',
   './premium-standard.js?v=38',
+  './gym-logger-premium.css?v=1',
+  './gym-logger-premium.js?v=1',
+  './menu-premium.css?v=1',
+  './menu-premium.js?v=1',
   './simurg-signal-model.js?v=6',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=7',
