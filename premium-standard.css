@@ -785,7 +785,14 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
   main>.section.active{display:block!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain!important;scroll-behavior:auto!important;padding:var(--simurgNativeTop) 12px var(--simurgNativeBottom)!important}
   main>.section.active::-webkit-scrollbar{display:none!important}
   #simurgStandaloneHint{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important}
-  html[data-simurg-active-key="gym"] #simurgStandaloneHint{display:block!important;height:auto!important;min-height:0!important;margin:0!important;padding:12px 13px!important}
+  html[data-simurg-active-key="gym"] #simurgStandaloneHint{
+    display:block!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:12px 13px!important;
+    bottom:calc(var(--simurgNativeNavH,64px) + 22px + env(safe-area-inset-bottom,0px))!important;
+  }
   #simurgAlertPanel{display:none;position:fixed;inset:0;z-index:2147483400;padding:22px 14px;align-items:flex-end;background:rgba(0,0,0,.72)}
   #simurgAlertPanel.open{display:flex!important}#simurgAlertPanel .psAlertSheet{width:min(100%,500px);max-height:72svh;margin:0 auto;padding:14px;border:1px solid var(--hf-line);border-radius:21px;background:#0d151d;overflow-y:auto}#simurgAlertPanel .psAlertHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}#simurgAlertPanel .psAlertItem{padding:11px;border:1px solid var(--hf-line-soft);border-radius:14px;background:#080e14}
   :is(#home.gp-home,#gym.gp-gym-refined,#workout.gp-logger-refined,#polar-workout,#polar,#coaching.section,#program.section,#weekly.section,#monthly.section,#data.section){

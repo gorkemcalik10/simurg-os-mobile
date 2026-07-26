@@ -46,6 +46,11 @@ run('service worker registration and cache share one build label', () => {
   assert.ok(registration);
   assert.ok(cache);
   assert.equal(registration[1], cache[1]);
+  assert.match(sw, /function pruneStaleCoreAssetVersions\(cache\)/);
+  assert.match(sw, /currentPaths\.has\(url\.pathname\)/);
+  assert.match(sw, /!currentUrls\.has\(url\.href\)/);
+  assert.match(sw, /cache\.addAll\(CORE_ASSETS\)\.then\(\(\) => pruneStaleCoreAssetVersions\(cache\)\)/);
+  assert.match(sw, /caches\.open\(SIMURG_CACHE\)\.then\(pruneStaleCoreAssetVersions\)/);
 });
 
 run('index asset versions match CORE_ASSETS', () => {

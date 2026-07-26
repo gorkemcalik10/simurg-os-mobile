@@ -8,7 +8,7 @@ const CORE_ASSETS = [
   './polar-workout.css?v=11',
   './polar-workout.js?v=14',
   './workout-source-policy.js?v=3',
-  './premium-standard.css?v=33',
+  './premium-standard.css?v=34',
   './premium-standard.js?v=38',
   './simurg-signal-model.js?v=6',
   './simurg-coach-engine.js?v=2',
@@ -23,11 +23,38 @@ const CORE_ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
+
+function coreAssetUrl(asset) {
+  return new URL(asset, self.registration.scope).href;
+}
+
+function pruneStaleCoreAssetVersions(cache) {
+  const currentUrls = new Set(CORE_ASSETS.map(coreAssetUrl));
+  const currentPaths = new Set(CORE_ASSETS.map(asset => new URL(asset, self.registration.scope).pathname));
+  return cache.keys().then(requests => Promise.all(requests.map(request => {
+    const url = new URL(request.url);
+    const staleCoreVersion =
+      url.origin === self.location.origin &&
+      currentPaths.has(url.pathname) &&
+      !currentUrls.has(url.href);
+    return staleCoreVersion ? cache.delete(request) : false;
+  })));
+}
+
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(SIMURG_CACHE).then(cache => cache.addAll(CORE_ASSETS)).then(()=>self.skipWaiting()));
+  event.waitUntil(
+    caches.open(SIMURG_CACHE)
+      .then(cache => cache.addAll(CORE_ASSETS).then(() => pruneStaleCoreAssetVersions(cache)))
+      .then(() => self.skipWaiting())
+  );
 });
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== SIMURG_CACHE).map(k => caches.delete(k)))).then(()=>self.clients.claim()));
+  event.waitUntil(
+    Promise.all([
+      caches.keys().then(keys => Promise.all(keys.filter(k => k !== SIMURG_CACHE).map(k => caches.delete(k)))),
+      caches.open(SIMURG_CACHE).then(pruneStaleCoreAssetVersions)
+    ]).then(() => self.clients.claim())
+  );
 });
 self.addEventListener('fetch', event => {
   const req = event.request;
