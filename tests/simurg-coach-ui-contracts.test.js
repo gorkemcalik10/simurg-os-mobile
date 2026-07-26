@@ -33,7 +33,31 @@ run('mobile Coaching exposes daily weekly and history views', () => {
   assert.match(ui, /BUGÜNKÜ DURUM/);
   assert.match(ui, /HAREKET REHBERİ/);
   assert.match(ui, /VERİ GÜVENİ/);
-  assert.match(ui, /Detaylı Analiz/);
+  assert.match(ui, /Detaylı gerekçe/);
+  assert.match(ui, /<details class="sci-details"><summary>Detaylı gerekçe<\/summary>/);
+  assert.match(ui, /<h3>Günlük değerlendirme<\/h3><p>'\+esc\(daily\.summary\)/);
+});
+
+run('compact Coach hero keeps decisions and safety fields unchanged', () => {
+  assert.match(ui, /function hero\(result,kicker\)/);
+  assert.match(ui, /Hazırlık '\+esc\(score\(result\)\)/);
+  assert.match(ui, /Veri güveni '\+esc\(confidence\(result\)\)/);
+  assert.match(ui, /esc\(decision\(result\)\)/);
+  assert.match(ui, /esc\(adjustment\(result\)\)/);
+  assert.match(ui, /list\(daily\.warnings,'Belirgin risk uyarısı yok\.',3\)/);
+  assert.match(ui, /function actionItems\(result\)/);
+  assert.match(ui, /\.slice\(0,3\)/);
+  assert.doesNotMatch(ui, /class="sci-score"/);
+});
+
+run('Coach movement labels are localized without changing guidance keys', () => {
+  for (const label of ['ANA HAREKET', 'TAMAMLAYICI', 'STABİLİTE / POSTÜR', 'KONDİSYON']) {
+    assert.match(ui, new RegExp(label));
+  }
+  for (const key of ['mainLifts', 'accessories', 'stabilityPosture', 'conditioning']) {
+    assert.match(ui, new RegExp(`value\\.${key}`));
+  }
+  assert.doesNotMatch(ui, />Readiness</);
 });
 
 run('Home has one short coach deep-link and Recovery has distinct insight', () => {
@@ -59,6 +83,9 @@ run('desktop delegates Coaching to the common Coach UI output', () => {
 run('coach UI preserves section scrolling and avoids lifecycle polling', () => {
   assert.match(css, /\.sci-coaching\{[^}]*overflow-y:auto/);
   assert.match(css, /main>#coaching\.section\.active\.sci-coaching\{[^}]*padding-bottom:calc\(var\(--simurgNativeNavH,76px\) \+ 34px \+ env\(safe-area-inset-bottom,0px\)\)!important;scroll-padding-bottom:/);
+  assert.match(css, /\.sci-priority-grid\{[^}]*align-items:start/);
+  assert.match(css, /\.sci-card\{[^}]*height:max-content/);
+  assert.match(css, /\.sci-hero-main,\.sci-hero-summary\{[^}]*height:auto/);
   assert.doesNotMatch(ui, /new\s+MutationObserver|setInterval\s*\(/);
   assert.doesNotMatch(ui, /\bfetch\s*\(|supabase\.functions|OPENAI_API_KEY/);
 });
