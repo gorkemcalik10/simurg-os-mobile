@@ -6606,8 +6606,8 @@ function addGymSet(key){
   let n=wrap.querySelectorAll('.gymSetInputRow').length+1;
   wrap.insertAdjacentHTML('beforeend',`<div class="gymSetInputRow">
     <strong>#${n}</strong>
-    <label class="gymInputBox"><small>Weight</small><input class="gymWeight" inputmode="decimal" placeholder="kg"></label>
-    <label class="gymInputBox"><small>Reps</small><input class="gymReps" inputmode="numeric" placeholder="reps"></label>
+    <label class="gymInputBox"><small>Kilo</small><input class="gymWeight" inputmode="decimal" enterkeyhint="next" placeholder="kg"></label>
+    <label class="gymInputBox"><small>Tekrar</small><input class="gymReps" inputmode="numeric" enterkeyhint="done" placeholder="tekrar"></label>
   </div>`);
 }
 function clearGymExercise(key){
@@ -6699,7 +6699,7 @@ function renderHistoryHtml(ex){
   return '<div class="historyList">'+sessions.map(s=>{
     const st=exerciseSessionStats(s.rows);
     const setText=s.rows.map(w=>`${gymSafe(w.weight)}kg x ${gymSafe(w.reps)}`).join(' / ');
-    return `<div class="historyItem"><b>${gymSafe(trDate(s.date))} • ${st.sets} set • ${Math.round(st.vol).toLocaleString('tr-TR')} kg</b><span>${setText}</span><div class="historyBadges"><em>Best ${st.best.weight}kg x ${st.best.reps}</em>${st.rpe?`<em>RPE ${gymSafe(st.rpe)}</em>`:''}${st.form?`<em>Form ${gymSafe(st.form)}</em>`:''}${st.pain?`<em>Pain ${gymSafe(st.pain)}</em>`:''}</div></div>`;
+    return `<div class="historyItem"><b>${gymSafe(trDate(s.date))} • ${st.sets} set • ${Math.round(st.vol).toLocaleString('tr-TR')} kg</b><span>${setText}</span><div class="historyBadges"><em>En iyi ${st.best.weight}kg x ${st.best.reps}</em>${st.rpe?`<em>RPE ${gymSafe(st.rpe)}</em>`:''}${st.form?`<em>Form ${gymSafe(st.form)}</em>`:''}${st.pain?`<em>Ağrı ${gymSafe(st.pain)}</em>`:''}</div></div>`;
   }).join('')+'</div>';
 }
 function toggleGymHistory(key){
@@ -6746,7 +6746,8 @@ function renderGymMode(){
     <button class="btn" onclick="addGymExercise()">+ Hareket Ekle</button>
   </div>`;
   if(!gymItems.length){
-    list.innerHTML=addCard+'<div class="gymEmpty">Bugün dinlenme günü. İstersen + Hareket Ekle ile toparlanma, mobilite, merkez bölge veya ekstra pump çalışması girebilirsin.</div>';
+    const emptyPrefix=selectedDate===todayStr()?'Bugün':'Seçili gün';
+    list.innerHTML=addCard+`<div class="gymEmpty">${emptyPrefix} dinlenme günü. İstersen + Hareket Ekle ile toparlanma, mobilite, merkez bölge veya ekstra pump çalışması girebilirsin.</div>`;
     return;
   }
   list.innerHTML=addCard+gymItems.map(item=>{
@@ -6759,37 +6760,37 @@ function renderGymMode(){
     let target=buildNextTarget(ex);
     let rowHtml=rows.map(r=>`<div class="gymSetInputRow">
       <strong>#${r.index}</strong>
-      <label class="gymInputBox"><small>Weight · ${gymSafe(loadProfile.weightLabel)}</small><input class="gymWeight" inputmode="decimal" placeholder="kg" value="${gymSafe(r.weight)}"></label>
-      <label class="gymInputBox"><small>Reps</small><input class="gymReps" inputmode="numeric" placeholder="reps" value="${gymSafe(r.reps)}"></label>
+      <label class="gymInputBox"><small>Kilo · ${gymSafe(loadProfile.weightLabel)}</small><input class="gymWeight" inputmode="decimal" enterkeyhint="next" placeholder="kg" value="${gymSafe(r.weight)}"></label>
+      <label class="gymInputBox"><small>Tekrar</small><input class="gymReps" inputmode="numeric" enterkeyhint="done" placeholder="tekrar" value="${gymSafe(r.reps)}"></label>
     </div>`).join('');
     return `<div class="gymCard ${savedCount?'':'isTemplate'}" data-gym-key="${gymSafe(item.key)}" data-original-name="${gymSafe(item.originalName)}" data-current-name="${gymSafe(ex)}" data-custom="${item.custom?'1':'0'}">
       <div class="gymCardHead">
         <div style="flex:1">
           <div class="gymMetaGrid">
-            <label class="gymMetaInput"><small>Exercise</small><input class="gymExerciseName" value="${gymSafe(ex)}" placeholder="Hareket adı"></label>
-            <label class="gymMetaInput"><small>Body Part</small><input class="gymExerciseBody" value="${gymSafe(bodyPart)}" placeholder="Chest / Back"></label>
-            <label class="gymMetaInput"><small>Planned Set</small><input class="gymExerciseSets" inputmode="numeric" value="${gymSafe(setCount)}"></label>
+            <label class="gymMetaInput"><small>Egzersiz</small><input class="gymExerciseName" enterkeyhint="next" value="${gymSafe(ex)}" placeholder="Hareket adı"></label>
+            <label class="gymMetaInput"><small>Bölge</small><input class="gymExerciseBody" enterkeyhint="next" value="${gymSafe(bodyPart)}" placeholder="Göğüs / Sırt"></label>
+            <label class="gymMetaInput"><small>Planlanan Set</small><input class="gymExerciseSets" inputmode="numeric" enterkeyhint="next" value="${gymSafe(setCount)}"></label>
             <label class="gymMetaInput"><small>Yük Tipi</small><select class="gymExerciseLoadPreset">${loadOptions}</select></label>
           </div>
           <div class="gymProgramNote">${item.custom?'Özel egzersiz':'Şablon egzersizi'} • ${gymSafe(loadProfile.weightLabel)}${loadProfile.factor===2?' • Hacim ×2':''} • Kaydetme sonrası bulut senkronizasyonu verisine dahil olur.</div>
           ${loadProfile.preset==='UNASSIGNED'?'<span class="gymLoadProfileNote warn">Yük tipi seçilmedi; hacim ×1 hesaplanır.</span>':''}
           <span class="gymLoadProfileNote">Bu değişiklik geçmiş hacim değerlerini de yeniden hesaplar.</span>
         </div>
-        <div class="gymBadge ${item.custom?'custom':''}">${savedCount?savedCount+' saved':setCount+' set'}</div>
+        <div class="gymBadge ${item.custom?'custom':''}">${savedCount?savedCount+' kayıtlı':setCount+' set'}</div>
       </div>
-      <div class="gymTargetBox ${target.level}"><b>Next Target</b>${gymSafe(target.text)}</div>
+      <div class="gymTargetBox ${target.level}"><b>Sonraki Hedef</b>${gymSafe(target.text)}</div>
       <div class="gymCoachBox">
         <label><small>RPE</small><select class="gymRpe"><option value="">Seç</option>${[5,6,7,8,9,10].map(v=>`<option value="${v}" ${String(coach.rpe)===String(v)?'selected':''}>${v}</option>`).join('')}</select></label>
-        <label><small>Form</small><select class="gymForm"><option value="" ${!coach.form?'selected':''}>Seç</option><option value="Good" ${coach.form==='Good'?'selected':''}>Good</option><option value="Okay" ${coach.form==='Okay'?'selected':''}>Okay</option><option value="Bad" ${coach.form==='Bad'?'selected':''}>Bad</option></select></label>
-        <label><small>Pain</small><select class="gymPain"><option value="None" ${coach.pain==='None'?'selected':''}>None</option><option value="Mild" ${coach.pain==='Mild'?'selected':''}>Mild</option><option value="Warning" ${coach.pain==='Warning'?'selected':''}>Warning</option></select></label>
+        <label><small>Form</small><select class="gymForm"><option value="" ${!coach.form?'selected':''}>Seç</option><option value="Good" ${coach.form==='Good'?'selected':''}>İyi</option><option value="Okay" ${coach.form==='Okay'?'selected':''}>Orta</option><option value="Bad" ${coach.form==='Bad'?'selected':''}>Kötü</option></select></label>
+        <label><small>Ağrı</small><select class="gymPain"><option value="None" ${coach.pain==='None'?'selected':''}>Yok</option><option value="Mild" ${coach.pain==='Mild'?'selected':''}>Hafif</option><option value="Warning" ${coach.pain==='Warning'?'selected':''}>Uyarı</option></select></label>
       </div>
       <div class="gymSetList">${rowHtml}</div>
       <div class="gymCardActions">
         <button type="button" class="gymMiniBtn" data-gym-action="add-set" data-gym-key="${gymSafe(item.key)}">+ Set</button>
-        <button type="button" class="gymMiniBtn primary" data-gym-action="save" data-gym-key="${gymSafe(item.key)}">Save</button>
-        <button type="button" class="gymMiniBtn" data-gym-action="history" data-gym-key="${gymSafe(item.key)}">History</button>
-        <button type="button" class="gymMiniBtn" data-gym-action="clear" data-gym-key="${gymSafe(item.key)}">Clear</button>
-        ${item.custom?`<button type="button" class="gymMiniBtn" data-gym-action="delete" data-gym-key="${gymSafe(item.key)}">Delete</button>`:''}
+        <button type="button" class="gymMiniBtn primary" data-gym-action="save" data-gym-key="${gymSafe(item.key)}">Kaydet</button>
+        <button type="button" class="gymMiniBtn" data-gym-action="history" data-gym-key="${gymSafe(item.key)}">Geçmiş</button>
+        <button type="button" class="gymMiniBtn" data-gym-action="clear" data-gym-key="${gymSafe(item.key)}">Temizle</button>
+        ${item.custom?`<button type="button" class="gymMiniBtn" data-gym-action="delete" data-gym-key="${gymSafe(item.key)}">Sil</button>`:''}
       </div>
       <div class="gymHistoryPanel"></div>
     </div>`;
@@ -7974,11 +7975,11 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
   }
   function lastSessionSnapshotHtml(ex,date){
     const s=lastCompletedSession(ex,date);
-    if(!s || typeof exerciseSessionStats!=='function') return `<div class="gymSnapshotBlock"><b>Last Session</b><span>Bu hareket için önceki kayıt yok. Bugün temiz formu referans al.</span></div>`;
+    if(!s || typeof exerciseSessionStats!=='function') return `<div class="gymSnapshotBlock"><b>Son Antrenman</b><span>Bu hareket için önceki kayıt yok. Bugün temiz formu referans al.</span></div>`;
     const st=exerciseSessionStats(s.rows);
     const sets=s.rows.map(w=>`${gymSafe(w.weight)}kg x ${gymSafe(w.reps)}`).join(' / ');
-    const meta=[st.rpe?`RPE ${st.rpe}`:'',st.form?`Form ${st.form}`:'',st.pain&&st.pain!=='None'?`Pain ${st.pain}`:''].filter(Boolean).join(' · ');
-    return `<div class="gymSnapshotBlock"><b>Last Session · ${escapeAttr(trDate(s.date))}</b><span>${sets}${meta?` · ${meta}`:''}</span></div>`;
+    const meta=[st.rpe?`RPE ${st.rpe}`:'',st.form?`Form ${st.form}`:'',st.pain&&st.pain!=='None'?`Ağrı ${st.pain}`:''].filter(Boolean).join(' · ');
+    return `<div class="gymSnapshotBlock"><b>Son Antrenman · ${escapeAttr(trDate(s.date))}</b><span>${sets}${meta?` · ${meta}`:''}</span></div>`;
   }
   function painMemoryHtml(ex,date){
     const rows=(DATA.workouts||[]).filter(w=>w.exercise===ex && parseDate(w.date)<parseDate(date||selectedDate) && dateDiffDays(date||selectedDate,w.date)<=14)
@@ -7986,8 +7987,8 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     if(!rows.length) return '';
     const hasWarning=rows.some(w=>String(w.pain||'').toLowerCase()==='warning' || String(w.form||'').toLowerCase()==='bad');
     const latest=rows.sort((a,b)=>parseDate(b.date)-parseDate(a.date))[0];
-    const signal=[latest.pain&&latest.pain!=='None'?`Pain ${latest.pain}`:'',latest.form==='Bad'?'Form Bad':''].filter(Boolean).join(' · ');
-    return `<div class="gymPainMemoryBlock ${hasWarning?'warning':''}"><b>Health Memory</b><span>Son kayıtta risk sinyali: ${esc(signal||'dikkat')} (${escapeAttr(trDate(latest.date))}). Bugün formu önceliklendir, gerekirse yük artırma.</span></div>`;
+    const signal=[latest.pain&&latest.pain!=='None'?`Ağrı ${latest.pain}`:'',latest.form==='Bad'?'Form Kötü':''].filter(Boolean).join(' · ');
+    return `<div class="gymPainMemoryBlock ${hasWarning?'warning':''}"><b>Sağlık Geçmişi</b><span>Son kayıtta risk sinyali: ${esc(signal||'dikkat')} (${escapeAttr(trDate(latest.date))}). Bugün formu önceliklendir, gerekirse yük artırma.</span></div>`;
   }
   function applyGymSmartCoach(){
     document.querySelectorAll('.gymCard').forEach(card=>{
@@ -9808,6 +9809,13 @@ textarea,input,select{
   @media(max-width:780px){
     .todayProgramHelper{flex-direction:column;align-items:flex-start;}
     .todayProgramHelper .btn{width:100%;}
+    #gym .todayProgramHelper[hidden]{display:none!important;}
+    #gym .todayProgramHelper.gymSelectedContext{flex-direction:row;align-items:center;padding:8px 10px;margin:7px 0 9px;}
+    #gym .todayProgramHelper.gymSelectedContext span{margin-top:1px;font-size:11px;}
+    #gym .todayProgramHelper.gymSelectedContext .btn{width:auto;min-height:34px;padding:0 10px;white-space:nowrap;}
+    #gym .gymAddCard{padding:9px 10px!important;margin-bottom:9px!important;grid-template-columns:minmax(0,1fr) auto!important;}
+    #gym .gymAddCard span{display:-webkit-box!important;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden!important;max-width:180px!important;}
+    #gym .gymAddCard .btn{min-height:36px!important;padding:0 10px!important;}
     .dateBtn.today .d:after, .dayBtn.today .main:after{display:flex;width:max-content;margin:5px auto 0;}
   }`;
   const st=document.createElement('style'); st.id='currentWeekUxPolishCss'; st.textContent=css; document.head.appendChild(st);
@@ -9845,15 +9853,23 @@ textarea,input,select{
   function injectGymTodayHelper(){
     const section=document.getElementById('gym'); if(!section) return;
     const list=document.getElementById('gymModeList'); if(!list) return;
+    if(window.innerWidth>860) return;
     let helper=document.getElementById('todayProgramHelper');
     if(!helper){
       helper=document.createElement('div'); helper.id='todayProgramHelper'; helper.className='todayProgramHelper';
       list.parentNode.insertBefore(helper,list);
     }
     const t=safeToday();
-    const active=String(selectedDate||window.selectedDate)===t;
-    const shownProgram=window.SimurgLabels?window.SimurgLabels.sentence(programFor(t)):programFor(t);
-    helper.innerHTML=`<div><small>${active?'Bugünün Programı':'Bugün'}</small><b>${shownProgram}</b><span>${safeTr(t)} • Gym modu bugünün tarihine göre hazır.</span></div><button class="btn sec" onclick="window.innerWidth<=900?(selectedDate=todayStr(),weekStart=mondayOf(selectedDate),simurgV8Go('gym','gym')):(goToday(),show('gym',document.querySelector('.nav button:nth-child(2)')))">Bugünün Programına Git</button>`;
+    const selected=String(selectedDate||window.selectedDate||t);
+    const active=selected===t;
+    const shownProgram=window.SimurgLabels?window.SimurgLabels.sentence(programFor(selected)):programFor(selected);
+    const heading=section.querySelector('.topbar h1');
+    const heroLabel=section.querySelector('.gymHero small');
+    if(heading) heading.textContent=`Antrenman · ${safeTr(selected)}`;
+    if(heroLabel) heroLabel.textContent=active?'BUGÜN':'SEÇİLİ GÜN';
+    helper.hidden=active;
+    helper.classList.toggle('gymSelectedContext',!active);
+    helper.innerHTML=active?'':`<div><small>GEÇMİŞ TARİH</small><span>${safeTr(selected)} • ${shownProgram}</span></div><button class="btn sec" onclick="selectedDate=todayStr(),weekStart=mondayOf(selectedDate),simurgV8Go('gym','gym')">Bugüne Git</button>`;
   }
 
   function applyRestDayCard(){
@@ -10016,16 +10032,16 @@ textarea,input,select{
   }
   function readiness(ex,date){
     const groups=sessionGroups(ex,date).slice(0,3); const flags=latestCoachFlags(ex);
-    if(flags.pain==='Warning') return {cls:'deload',label:'Deload Watch',icon:'🔴',reason:'Pain warning'};
-    if(flags.pain==='Mild'||flags.form==='Bad') return {cls:'form',label:'Form First',icon:'🟠',reason:'Form/pain signal'};
-    if(!groups.length) return {cls:'recovery',label:'Data Building',icon:'🔵',reason:'First clean record'};
-    if(groups.length===1) return {cls:'hold',label:'Hold Load',icon:'🟡',reason:'Need 2+ sessions'};
+    if(flags.pain==='Warning') return {cls:'deload',label:'Yükü Azalt',icon:'🔴',reason:'Ağrı uyarısı'};
+    if(flags.pain==='Mild'||flags.form==='Bad') return {cls:'form',label:'Önce Form',icon:'🟠',reason:'Form/ağrı sinyali'};
+    if(!groups.length) return {cls:'recovery',label:'Veri Birikiyor',icon:'🔵',reason:'İlk temiz kayıt'};
+    if(groups.length===1) return {cls:'hold',label:'Yükü Koru',icon:'🟡',reason:'En az 2 seans gerekli'};
     const latest=groups[0].best.score, prev=groups.slice(1).reduce((s,g)=>s+g.best.score,0)/(groups.length-1);
     const diff=prev?((latest-prev)/prev)*100:0;
-    if(flags.rpe>=9) return {cls:'hold',label:'Hold Load',icon:'🟡',reason:'High RPE'};
-    if(diff>4 && flags.rpe<=8) return {cls:'ready',label:'Ready to Progress',icon:'🟢',reason:`Trend +${diff.toFixed(1)}%`};
-    if(diff<-5) return {cls:'deload',label:'Recovery Check',icon:'🔴',reason:`Trend ${diff.toFixed(1)}%`};
-    return {cls:'hold',label:'Hold Load',icon:'🟡',reason:'Stable trend'};
+    if(flags.rpe>=9) return {cls:'hold',label:'Yükü Koru',icon:'🟡',reason:'Yüksek RPE'};
+    if(diff>4 && flags.rpe<=8) return {cls:'ready',label:'İlerlemeye Hazır',icon:'🟢',reason:`Trend +${diff.toFixed(1)}%`};
+    if(diff<-5) return {cls:'deload',label:'Toparlanmayı Kontrol Et',icon:'🔴',reason:`Trend ${diff.toFixed(1)}%`};
+    return {cls:'hold',label:'Yükü Koru',icon:'🟡',reason:'Dengeli trend'};
   }
   function nextTarget(ex,date){
     DATA.autoNextTargets=DATA.autoNextTargets||{};
@@ -10055,8 +10071,8 @@ textarea,input,select{
       card.querySelectorAll('.gymSmartBadgeRow,.gymSmartAutoTarget').forEach(x=>x.remove());
       const rd=readiness(ex,date), nt=nextTarget(ex,date), best=bestSet(rowsForExercise(ex));
       const row=document.createElement('div'); row.className='gymSmartBadgeRow';
-      row.innerHTML=`<span class="gymSmartBadge ${rd.cls}">${rd.icon} ${esc(rd.label)}</span><span class="gymSmartBadge">🏆 Best ${esc(fmtSet(best))}</span><span class="gymSmartBadge">📈 ${esc(rd.reason)}</span>`;
-      const target=document.createElement('div'); target.className='gymSmartAutoTarget'; target.innerHTML=`<b>Auto Next:</b> ${esc(nt.text)}`;
+      row.innerHTML=`<span class="gymSmartBadge ${rd.cls}">${rd.icon} ${esc(rd.label)}</span><span class="gymSmartBadge">🏆 En iyi ${esc(fmtSet(best))}</span><span class="gymSmartBadge">📈 ${esc(rd.reason)}</span>`;
+      const target=document.createElement('div'); target.className='gymSmartAutoTarget'; target.innerHTML=`<b>Otomatik Hedef:</b> ${esc(nt.text)}`;
       const note=card.querySelector('.gymProgramNote')||card.querySelector('.gymCardHead');
       if(note&&note.parentNode){note.insertAdjacentElement('afterend',row); row.insertAdjacentElement('afterend',target);} else {card.insertBefore(row,card.firstChild); row.insertAdjacentElement('afterend',target);}
     });
@@ -13130,24 +13146,24 @@ m Shell V4: Logger information architecture fix -->
       return {level:'protect',tone:'protect',label:cat.label,text:ref+'Ağırlık artırmak öncelik değil. Form, tempo, kontrol ve ağrısızlık öncelikli. Özellikle omuz/skapula kalitesi bozulursa yükü artırma.',category:cat,activity:act};
     }
     if(painBad || formBad){
-      return {level:'danger',tone:'caution',label:'Technique priority',text:ref+'Pain sinyali veya Form Okay/Bad var. Kilo artırma; hareketi sadeleştir, kontrollü tempo kullan ve gerekirse hacmi azalt.',category:cat,activity:act};
+      return {level:'danger',tone:'caution',label:'Önce Teknik',text:ref+'Ağrı sinyali veya Form Orta/Kötü var. Kilo artırma; hareketi sadeleştir, kontrollü tempo kullan ve gerekirse hacmi azalt.',category:cat,activity:act};
     }
     if(st.rpe>=9){
       return {level:'danger',tone:'caution',label:'Load caution',text:ref+'RPE çok yüksek. Bugün/sonraki seansta artış yok; aynı hedefi daha temiz tamamla veya hacmi azalt.',category:cat,activity:act};
     }
     if(highExtra){
-      return {level:'warning',tone:'caution',label:'Extra load filter',text:ref+act.text+' Auto Target agresifliği bugün düşürüldü.',category:cat,activity:act};
+      return {level:'warning',tone:'caution',label:'Ek Yük Filtresi',text:ref+act.text+' Otomatik hedef agresifliği bugün düşürüldü.',category:cat,activity:act};
     }
     if(st.form==='Good' && (!st.pain||st.pain==='None') && st.rpe>=6 && st.rpe<=7){
-      return {level:'',tone:'main',label:'Progression allowed',text:ref+'Form Good + Pain None + RPE '+st.rpe+'. Ana hareket olduğu için sonraki antrenmanda +1 tekrar veya çok küçük kilo artışı denenebilir.',category:cat,activity:act};
+      return {level:'',tone:'main',label:'İlerleme Uygun',text:ref+'Form İyi + Ağrı Yok + RPE '+st.rpe+'. Ana hareket olduğu için sonraki antrenmanda +1 tekrar veya çok küçük kilo artışı denenebilir.',category:cat,activity:act};
     }
     if(st.form==='Good' && (!st.pain||st.pain==='None') && st.rpe===8){
-      return {level:'warning',tone:'caution',label:'Maintain target',text:ref+'Performans iyi ama RPE 8. Hedefi koru; ağırlığı artırmadan kaliteyi ve setleri eşitle.',category:cat,activity:act};
+      return {level:'warning',tone:'caution',label:'Hedefi Koru',text:ref+'Performans iyi ama RPE 8. Hedefi koru; ağırlığı artırmadan kaliteyi ve setleri eşitle.',category:cat,activity:act};
     }
     if(medExtra){
-      return {level:'warning',tone:'caution',label:'Controlled start',text:ref+act.text+' İyi hissedersen sadece ana harekette küçük tekrar hedefi yeterli.',category:cat,activity:act};
+      return {level:'warning',tone:'caution',label:'Kontrollü Başla',text:ref+act.text+' İyi hissedersen sadece ana harekette küçük tekrar hedefi yeterli.',category:cat,activity:act};
     }
-    return {level:'',tone:'main',label:'Helper target',text:ref+'Auto Target yardımcı öneridir. Form Good + Pain None netleşirse ana harekette +1 tekrar hedeflenebilir; veri eksikse aynı yükte temiz form öncelikli.',category:cat,activity:act};
+    return {level:'',tone:'main',label:'Yardımcı Hedef',text:ref+'Otomatik hedef yardımcı öneridir. Form İyi + Ağrı Yok netleşirse ana harekette +1 tekrar hedeflenebilir; veri eksikse aynı yükte temiz form öncelikli.',category:cat,activity:act};
   }
   window.simurgSmartExerciseDecision=smartDecision;
 
@@ -13167,9 +13183,9 @@ m Shell V4: Logger information architecture fix -->
       card.classList.remove('smartMainLift','smartProtection','smartCaution');
       card.classList.add(d.category.aggressive?'smartMainLift':(d.tone==='protect'?'smartProtection':'smartCaution'));
       var box=card.querySelector('.gymTargetBox');
-      if(box){box.className='gymTargetBox '+(d.level||''); box.innerHTML='<b>Smart Target</b>'+esc(d.text)+'<br><span class="smartCoachTag '+(d.category.aggressive?'main':d.tone)+'">'+esc(d.category.label)+' · Auto Target helper</span>';}
+      if(box){box.className='gymTargetBox '+(d.level||''); box.innerHTML='<b>Akıllı Hedef</b>'+esc(d.text)+'<br><span class="smartCoachTag '+(d.category.aggressive?'main':d.tone)+'">'+esc(d.category.label)+' · Otomatik hedef yardımcısı</span>';}
       var premium=card.querySelector('.premiumCoachTarget');
-      if(premium){premium.innerHTML='<small>Smart Target Filter</small><b>'+esc(d.label)+'</b><span>'+esc(d.category.aggressive?'Progresyon takip edilir':'Agresif target baskılandı')+'</span>';}
+      if(premium){premium.innerHTML='<small>Akıllı Hedef Filtresi</small><b>'+esc(d.label)+'</b><span>'+esc(d.category.aggressive?'Progresyon takip edilir':'Agresif hedef baskılandı')+'</span>';}
     });
   }
   var oldRenderGym=window.renderGymMode;
