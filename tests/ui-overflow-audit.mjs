@@ -19,7 +19,8 @@ const CARD_SELECTOR = [
   '.card', '.panel', '.group', '.exerciseCard', '.gymCard', '.gymAddCard',
   '.gp-card', '.gp-ring-card', '.gp-home-content > *', '.polarCard',
   '.dlWorkspace section', '.dlActivity', '.dlGroup', '.cloudSyncCard',
-  '.universalImportCard', '.polarBridgeCard', '.dataHealthCard',
+  '.universalImportCard', '.polarBridgeCard', '.dataHealthCard', '.sci-card',
+  '.sci-hero', '.sci-home-insight', '.sci-recovery-insight',
 ].join(',');
 
 const CONTROL_SELECTOR = 'button,input,select,textarea,.badge,[class*="Badge"],[class*="Pill"],[class*="Metric"]';

@@ -27,6 +27,7 @@
     schemaVersion:CURRENT_SCHEMA_VERSION,
     workouts:[],metrics:[],nutrition:[],recovery:[],appleWatch:[],dailyNotes:[],weeklyNotes:[],
     customGymPrograms:{},programNames:{},exerciseLoadProfiles:{},
+    coachIntelligence:{schemaVersion:1,daily:{},weekly:{},patterns:{},aiCache:{},settings:{movementCategories:{}}},
     polarWorkouts:{daily:{},latest:null},
     polarActivity:{daily:{},latest:null},
     polarProfile:{latest:null},
@@ -300,6 +301,51 @@
     if(store.lastSyncAt!=null)optionalDateTime(store.lastSyncAt,path+'.lastSyncAt');
     if(store.lastError!=null)text(store.lastError,path+'.lastError',4096,true);
   }
+  function validateCoachOutput(value,path){
+    plain(value,path);
+    if(value.schemaVersion!=null)number(value.schemaVersion,path+'.schemaVersion',{integer:true,min:1,max:100});
+    if(value.type!=null)text(value.type,path+'.type',64,false);
+    if(value.date!=null)date(value.date,path+'.date');
+    if(value.generatedAt!=null)optionalDateTime(value.generatedAt,path+'.generatedAt');
+    if(value.inputHash!=null)text(value.inputHash,path+'.inputHash',256,false);
+    ['readinessScore','confidenceScore','loadAdjustmentPercent'].forEach(function(key){
+      if(value[key]!=null)number(value[key],path+'.'+key,{min:key==='loadAdjustmentPercent'?-100:0,max:100});
+    });
+    ['readinessStatus','confidenceLabel','headline','summary','trainingDecision','medicalDisclaimer'].forEach(function(key){
+      if(value[key]!=null)text(value[key],path+'.'+key,key==='summary'||key==='medicalDisclaimer'?8192:2048,true);
+    });
+    ['keyDrivers','warnings','recoveryActions','trendInsights','comparisonNotes','missingData'].forEach(function(key){
+      if(value[key]!=null)array(value[key],path+'.'+key);
+    });
+    ['workoutGuidance','baseline','period','patternAnalysis'].forEach(function(key){
+      if(value[key]!=null)plain(value[key],path+'.'+key);
+    });
+    scan(value);
+  }
+  function validateCoachStore(store,path){
+    plain(store,path);
+    number(store.schemaVersion,path+'.schemaVersion',{integer:true,min:1,max:100});
+    ['daily','weekly','patterns','aiCache','settings'].forEach(function(key){plain(store[key],path+'.'+key)});
+    if(store.settings.movementCategories!=null){
+      plain(store.settings.movementCategories,path+'.settings.movementCategories');
+      Object.keys(store.settings.movementCategories).forEach(function(key){
+        text(store.settings.movementCategories[key],pathFor(path+'.settings.movementCategories',key),128,false);
+      });
+    }
+    Object.keys(store.daily).forEach(function(key){
+      date(key,pathFor(path+'.daily',key));
+      var group=store.daily[key],groupPath=pathFor(path+'.daily',key);
+      plain(group,groupPath);
+      Object.keys(group).forEach(function(type){validateCoachOutput(group[type],pathFor(groupPath,type))});
+    });
+    ['weekly','patterns'].forEach(function(namespace){
+      Object.keys(store[namespace]).forEach(function(key){
+        date(key,pathFor(path+'.'+namespace,key));
+        validateCoachOutput(store[namespace][key],pathFor(path+'.'+namespace,key));
+      });
+    });
+    scan(store.aiCache);
+  }
   function permissivePolarRecord(value,path){
     if(!isPlainObject(value))fail('invalid_polar_record','Polar günlük kaydı nesne olmalı',path);
     if(value.date!=null)date(value.date,path+'.date');
@@ -381,6 +427,7 @@
     if(candidate.polarConnection.lastSyncAt!=null)optionalDateTime(candidate.polarConnection.lastSyncAt,'$.polarConnection.lastSyncAt');
     if(candidate.polarConnection.lastError!=null)text(candidate.polarConnection.lastError,'$.polarConnection.lastError',4096,true);
     if(candidate.recoveryEntries!=null)validateDatedMap(candidate.recoveryEntries,'$.recoveryEntries',validatePolarRecoveryRecord,{coerce:!!options.coerce});
+    validateCoachStore(candidate.coachIntelligence,'$.coachIntelligence');
     if(candidate.polarBridge!=null){
       plain(candidate.polarBridge,'$.polarBridge');
       if(candidate.polarBridge.source!=null)text(candidate.polarBridge.source,'$.polarBridge.source',512,true);

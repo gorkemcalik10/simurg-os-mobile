@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-mobile-stability-audit-3';
+const SIMURG_CACHE = 'simurg-coach-ui-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -9,13 +9,17 @@ const CORE_ASSETS = [
   './polar-workout.js?v=14',
   './workout-source-policy.js?v=3',
   './premium-standard.css?v=33',
-  './premium-standard.js?v=37',
+  './premium-standard.js?v=38',
   './simurg-signal-model.js?v=6',
+  './simurg-coach-engine.js?v=1',
+  './simurg-coach-client.js?v=1',
+  './simurg-coach.css?v=3',
+  './simurg-coach-ui.js?v=2',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=7',
   './simurg-cloud-auth.js?v=3',
   './desktop-alignment.css?v=24',
-  './desktop-alignment.js?v=29',
+  './desktop-alignment.js?v=30',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

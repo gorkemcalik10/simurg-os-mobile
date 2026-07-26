@@ -7,6 +7,8 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 const index = read('index.html');
 const premium = read('premium-standard.js');
 const desktop = read('desktop-alignment.js');
+const coachClient = read('simurg-coach-client.js');
+const coachUi = read('simurg-coach-ui.js');
 const cloudAuth = read('simurg-cloud-auth.js');
 const sw = read('sw.js');
 
@@ -25,6 +27,19 @@ run('signal model loads before dependent runtimes', () => {
   assert.ok(modelPos < index.indexOf('desktop-alignment.js'));
 });
 
+run('coach engine loads as an independent runtime before presentation layers', () => {
+  const enginePos = index.indexOf('simurg-coach-engine.js');
+  const clientPos = index.indexOf('simurg-coach-client.js');
+  const uiPos = index.indexOf('simurg-coach-ui.js');
+  assert.ok(enginePos >= 0);
+  assert.ok(enginePos > index.indexOf('simurg-signal-model.js'));
+  assert.ok(clientPos > enginePos);
+  assert.ok(uiPos > clientPos);
+  assert.ok(enginePos < index.indexOf('premium-standard.js'));
+  assert.ok(uiPos < index.indexOf('premium-standard.js'));
+  assert.ok(enginePos < index.indexOf('desktop-alignment.js'));
+});
+
 run('service worker registration and cache share one build label', () => {
   const registration = index.match(/serviceWorker\.register\(['"]\.\/sw\.js\?v=([^'"]+)/);
   const cache = sw.match(/SIMURG_CACHE\s*=\s*['"]simurg-([^'"]+)/);
@@ -34,7 +49,7 @@ run('service worker registration and cache share one build label', () => {
 });
 
 run('index asset versions match CORE_ASSETS', () => {
-  for (const file of ['simurg-volume-model.js', 'simurg-data-validation.js', 'simurg-signal-model.js', 'workout-source-policy.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js']) {
+  for (const file of ['simurg-volume-model.js', 'simurg-data-validation.js', 'simurg-signal-model.js', 'simurg-coach-engine.js', 'simurg-coach-client.js', 'simurg-coach-ui.js', 'simurg-coach.css', 'workout-source-policy.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js']) {
     const escaped = file.replace('.', '\\.');
     const indexVersion = index.match(new RegExp(`${escaped}\\?v=([^"']+)`));
     const swVersion = sw.match(new RegExp(`${escaped}\\?v=([^"']+)`));
@@ -65,7 +80,7 @@ run('desktop reports consume the shared signal model', () => {
 });
 
 run('forbidden lifecycle mechanisms were not added', () => {
-  const changedRuntime = `${premium}\n${desktop}`;
+  const changedRuntime = `${premium}\n${desktop}\n${coachClient}\n${coachUi}`;
   assert.doesNotMatch(changedRuntime, /new\s+MutationObserver/);
   assert.doesNotMatch(changedRuntime, /setInterval\s*\(/);
 });

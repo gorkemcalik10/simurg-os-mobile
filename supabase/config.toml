@@ -9,3 +9,6 @@ verify_jwt = true
 
 [functions.polar-disconnect]
 verify_jwt = true
+
+[functions.simurg-coach]
+verify_jwt = true
