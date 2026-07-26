@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-coach-ui-v1';
+const SIMURG_CACHE = 'simurg-coach-ui-v2';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -13,8 +13,8 @@ const CORE_ASSETS = [
   './simurg-signal-model.js?v=6',
   './simurg-coach-engine.js?v=2',
   './simurg-coach-client.js?v=2',
-  './simurg-coach.css?v=3',
-  './simurg-coach-ui.js?v=2',
+  './simurg-coach.css?v=4',
+  './simurg-coach-ui.js?v=3',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=7',
   './simurg-cloud-auth.js?v=3',
