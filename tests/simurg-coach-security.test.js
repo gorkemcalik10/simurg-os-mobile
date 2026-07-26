@@ -151,6 +151,7 @@ function request(body, token = 'valid-token') {
 
   await run('frontend contains no OpenAI key or direct OpenAI request', () => {
     assert.doesNotMatch(FRONTEND_SOURCE, /OPENAI_API_KEY|sk-proj-|api\.openai\.com|openai\.com\/v1/i);
+    assert.doesNotMatch(FRONTEND_SOURCE, /SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SECRET_KEY|sb_secret_/i);
   });
 
   await run('RLS pgTAP contract covers bidirectional A/B read and update isolation', () => {

@@ -8,6 +8,7 @@
 
   var OUTPUT_SCHEMA_VERSION=1;
   var STORE_SCHEMA_VERSION=1;
+  var LOCAL_NARRATIVE_VERSION=1;
   var OUTPUT_SCHEMA={
     type:'object',
     required:[
@@ -98,6 +99,165 @@
   }
   function unique(values){
     return values.filter(function(value,index){return value&&values.indexOf(value)===index;});
+  }
+  function sentence(value){
+    var next=text(value);
+    if(!next)return null;
+    return /[.!?]$/.test(next)?next:next+'.';
+  }
+  function pick(pool,seed,salt){
+    var raw=String(seed||'')+':'+String(salt||''),hash=0;
+    for(var i=0;i<raw.length;i+=1)hash=(Math.imul(hash,31)+raw.charCodeAt(i))>>>0;
+    return pool[hash%pool.length];
+  }
+  function metricLabel(metric){
+    return {
+      hrv:'HRV',restingHr:'dinlenik/gece nabzı',sleepMinutes:'uyku süresi',
+      sleepScore:'uyku skoru',cardioLoad:'Cardio Load'
+    }[metric]||metric;
+  }
+  function trendSentence(item){
+    if(!item)return null;
+    if(item.summary)return sentence(item.summary);
+    if(item.changePercent==null)return null;
+    if(item.direction==='stable')return metricLabel(item.metric)+' son 7 gün ile önceki 7 gün karşılaştırıldığında belirgin değişim göstermedi; bu görünüm tek başına neden göstermez.';
+    return metricLabel(item.metric)+' son 7 gün ile önceki 7 gün karşılaştırıldığında %'+Math.abs(item.changePercent)+' '+(item.direction==='up'?'yükseldi':'düştü')+'; bu değişim tek başına neden göstermez.';
+  }
+  function decisionSentence(result){
+    var action={
+      progress:'Ana hareketlerde yalnızca teknik temiz, ağrısız ve hedef RPE aralığında kalan setlerde küçük bir progresyon denenebilir.',
+      normal:'Bugünkü program korunabilir; performans hedefini artırmadan planlanan kaliteli setleri tamamlamak uygun görünüyor.',
+      controlled:'Bugün kontrollü başlangıç daha güvenli; ilk çalışma setinin form, ağrı ve beklenmedik yorgunluk yanıtına göre devam et.',
+      reduce:'Toplam çalışma yükünü azalt ve hacim yerine ağrısız, temiz tekrar kalitesini koru.',
+      recovery:'Yoğun performans hedefini geri plana alıp toparlanma odaklı, düşük stresli bir gün seç.',
+      rest:'Bugün planlı antrenman yükü yerine dinlenmeyi önceliklendir.'
+    }[result.trainingDecision];
+    if(result.loadAdjustmentPercent<0&&result.loadAdjustmentPercent>-100)action+=' Motor yaklaşık %'+Math.abs(result.loadAdjustmentPercent)+' yük azaltımı öneriyor.';
+    return action;
+  }
+  function confidenceSentence(result){
+    if(result.missingData&&result.missingData.length){
+      return 'Analiz güveni %'+result.confidenceScore+' ('+String(result.confidenceLabel||'').toLowerCase()+'); '+result.missingData.slice(0,4).join(', ')+' eksik olduğu için yorum temkinli tutuldu.';
+    }
+    return 'Analiz güveni %'+result.confidenceScore+' ('+String(result.confidenceLabel||'').toLowerCase()+'); mevcut Polar ve Gym sinyalleri karar için birlikte kullanılabildi.';
+  }
+  function readinessSentence(result,day){
+    if(result.readinessScore==null)return 'Hazırlık puanı için yeterli recovery sinyali yok; bu nedenle sayısal bir sonuç uydurulmadı ve güvenlik kararı mevcut verilerle sınırlandı.';
+    var variants=[
+      'Bugünkü hazırlık skoru '+result.readinessScore+'/100 olarak hesaplandı.',
+      'Kişisel baseline karşılaştırması bugünkü readiness değerini '+result.readinessScore+'/100 seviyesine yerleştiriyor.',
+      'Toparlanma sinyallerinin ortak değerlendirmesi '+result.readinessScore+'/100 hazırlık gösteriyor.'
+    ];
+    var line=pick(variants,result.inputHash,'readiness');
+    if(day.recovery.hrv!=null&&result.baseline&&result.baseline.hrv.deviation7!=null)line+=' HRV 7 günlük kişisel ortalamaya göre '+(result.baseline.hrv.deviation7>0?'+':'')+result.baseline.hrv.deviation7+'% sapmış durumda.';
+    return line;
+  }
+  function signalSentences(result,day){
+    var lines=[];
+    if(day.recovery.sleepMinutes!=null){
+      var hours=round(day.recovery.sleepMinutes/60,1);
+      var sleep='Uyku süresi '+hours+' saat';
+      if(day.recovery.sleepScore!=null)sleep+=' ve uyku skoru '+round(day.recovery.sleepScore,0)+'/100';
+      if(result.baseline&&result.baseline.sleepMinutes.deviation7!=null)sleep+=', süre kişisel 7 günlük ortalamaya göre '+(result.baseline.sleepMinutes.deviation7>0?'+':'')+result.baseline.sleepMinutes.deviation7+'%';
+      lines.push(sleep+' ölçüldü.');
+    }
+    if(day.recovery.hrv!=null||day.recovery.restingHr!=null){
+      var recovery=[];
+      if(day.recovery.hrv!=null)recovery.push('HRV '+round(day.recovery.hrv,1)+' ms');
+      if(day.recovery.restingHr!=null)recovery.push('dinlenik/gece nabzı '+round(day.recovery.restingHr,0)+' bpm');
+      lines.push(recovery.join(', ')+' olarak kaydedildi; bu değerler kişisel baseline ve diğer sinyallerle birlikte yorumlandı.');
+    }
+    if(day.load.cardioLoad!=null||day.load.cardioLoadRatio!=null){
+      var load=[];
+      if(day.load.cardioLoad!=null)load.push('Cardio Load '+round(day.load.cardioLoad,1));
+      if(day.load.cardioLoadRatio!=null)load.push('Strain/Tolerance oranı '+round(day.load.cardioLoadRatio,2));
+      lines.push(load.join(', ')+'.');
+    }
+    if(day.gym.rows.length){
+      var gym=day.gym.setCount+' set';
+      if(day.gym.avgRpe!=null)gym+=', ortalama RPE '+round(day.gym.avgRpe,1);
+      if(day.gym.formLevel===1)gym+=', form Okay';
+      if(day.gym.formLevel===2)gym+=', form Bad';
+      if(day.gym.painLevel===1)gym+=', ağrı kaydı';
+      if(day.gym.painLevel===2)gym+=', belirgin ağrı uyarısı';
+      lines.push('Gym bağlamında '+gym+' görüldü.');
+    }
+    return lines;
+  }
+  function narrativeHeadline(result){
+    if(result.type==='pattern')return result.trendInsights.length?'Geçmiş veride izlenmeye değer ilişkiler var':'Patern yorumu için henüz yeterli veri yok';
+    if(result.type==='weekly')return {
+      progress:'Hafta genelinde kontrollü ilerleme alanı var',normal:'Haftalık plan dengeli görünüyor',
+      controlled:'Yeni haftaya kontrollü başlamak uygun',reduce:'Haftalık yükte geri adım gerekli',
+      recovery:'Yeni haftada toparlanma öncelikli',rest:'Haftalık yükten tam dinlenmeye geç'
+    }[result.trainingDecision];
+    var prefix=result.type==='pre_workout'?'Antrenman öncesi karar: ':result.type==='post_workout'?'Seans değerlendirmesi: ':'Bugünün kararı: ';
+    return prefix+{
+      progress:'kontrollü progresyon değerlendirilebilir',normal:'plan korunabilir',
+      controlled:'kontrollü ilerle',reduce:'yükü azalt',recovery:'toparlanmayı önceliklendir',rest:'dinlen'
+    }[result.trainingDecision];
+  }
+  function dynamicRecoveryActions(result,day){
+    var actions=(result.recoveryActions||[]).slice();
+    if(day.recovery.sleepMinutes==null)actions.push('Uyku süresi kaydı geldikten sonra recovery yorumunu yeniden değerlendir.');
+    else if(day.recovery.sleepMinutes<420)actions.push('Bu gece uyku fırsatını uzat ve mümkünse düzenli yatış saatini koru.');
+    if(day.gym.painLevel>0)actions.push('Ağrı oluşturan hareket veya açıda yük artırma; ağrısız hareket aralığını koru.');
+    if(day.gym.formLevel>0)actions.push('Bir sonraki sette ağırlık yerine tempo, kontrol ve hareket standardını düzelt.');
+    if(day.gym.avgRpe!=null&&day.gym.avgRpe>=8)actions.push('Yüksek RPE sonrası ek seti yalnızca form ve ağrı kontrolü olumluysa değerlendir.');
+    if(day.load.cardioLoadRatio!=null&&day.load.cardioLoadRatio>=1.3)actions.push('Ek kondisyon hacmi ekleme; mevcut toplam yükün toparlanmasına alan bırak.');
+    if(result.confidenceScore<55)actions.push('Eksik veriler tamamlanana kadar agresif hedef değişikliği yapma.');
+    return unique(actions).slice(0,6);
+  }
+  function composeLocalNarrative(result,context){
+    context=context||{};
+    var day=context.day||{recovery:{},load:{},gym:{rows:[]},physical:{}};
+    var seed=result.inputHash+':'+result.date+':'+result.type;
+    var leads={
+      daily:[
+        'Bugünkü karar tek bir ölçüme değil, toparlanma, yük ve antrenman güvenliği sinyallerinin birlikte değerlendirilmesine dayanıyor.',
+        'Bugünün koç yorumu Polar toparlanma verileri ile Gym güvenlik kayıtlarını aynı çerçevede ele alıyor.',
+        'Mevcut veriler bugünkü kapasiteyi ve antrenman riskini ayrı ayrı değerlendirmeyi gerektiriyor.'
+      ],
+      pre_workout:[
+        'Antrenmana başlamadan önce recovery durumu, son Gym bağlamı ve hareket güvenliği birlikte kontrol edildi.',
+        'Bugünkü program için hazırlık sinyalleri ile form, ağrı ve RPE bağlamı birlikte değerlendirildi.',
+        'Seans hedefi belirlenirken fizyolojik hazırlık kadar hareket kalitesi ve önceki Gym geri bildirimi de dikkate alındı.'
+      ],
+      post_workout:[
+        'Tamamlanan seans, algılanan efor, form, ağrı ve mevcut kardiyovasküler yük bağlamında değerlendirildi.',
+        'Seans sonrası yorum yalnızca yapılan işi değil, bunun toparlanma sinyalleriyle nasıl örtüştüğünü de inceliyor.',
+        'Bir sonraki hedef için Gym kaydı ve Polar yük göstergeleri temkinli biçimde birlikte okundu.'
+      ],
+      weekly:[
+        'Haftalık yorum tek bir güne değil, son yedi gündeki hazırlık, aktivite ve en korumacı güvenlik kararına dayanıyor.',
+        'Bu haftanın özeti toparlanma sürekliliği ile toplam antrenman yükünü birlikte ele alıyor.',
+        'Yeni hafta kararı, yedi günlük sinyallerin ortak yönü ve hafta içindeki risk kayıtları üzerinden oluşturuldu.'
+      ],
+      pattern:[
+        'Pattern Coach yalnızca minimum örnek eşiğini geçen tekrarları raporluyor ve ilişkiyi kesin neden olarak sunmuyor.',
+        'Geçmiş kayıtlar benzer koşulların tekrar edip etmediğini görmek için karşılaştırıldı; sonuçlar olası ilişki diliyle ele alındı.',
+        'Patern analizi, tekrar eden sinyalleri ararken tesadüfi tek günlük sapmaları trendlerden ayırmaya çalışıyor.'
+      ]
+    };
+    var parts=[pick(leads[result.type]||leads.daily,seed,'lead')];
+    if(result.type==='weekly'){
+      parts.push(result.keyDrivers.slice(0,3).join('; ')+'.');
+    }else if(result.type==='pattern'){
+      if(result.trendInsights.length)parts.push(result.trendInsights.slice(0,2).map(trendSentence).filter(Boolean).join(' '));
+      else parts.push('Her karşılaştırma grubunda yeterli örnek bulunmadığı için bugün güvenilir bir tekrarlanan ilişki kurulamadı.');
+    }else{
+      parts.push(readinessSentence(result,day));
+      parts=parts.concat(signalSentences(result,day).slice(0,4));
+    }
+    parts.push(decisionSentence(result));
+    if(result.warnings.length)parts.push('Güvenlik katmanında '+result.warnings.slice(0,2).join(' '));
+    var trend=(result.trendInsights||[]).map(trendSentence).filter(Boolean)[0];
+    if(result.type!=='pattern'&&trend)parts.push('Trend tarafında '+trend);
+    parts.push(confidenceSentence(result));
+    result.headline=narrativeHeadline(result);
+    result.summary=parts.map(sentence).filter(Boolean).join(' ');
+    result.recoveryActions=dynamicRecoveryActions(result,day);
+    return result;
   }
   function normalizeName(value){
     return String(value||'').toLowerCase().replace(/[^a-z0-9çğıöşü]+/gi,' ').replace(/\s+/g,' ').trim();
@@ -395,7 +555,7 @@
     var headline=readinessResult.score==null?'Veri eksik — kontrollü karar':decision==='progress'?'Kontrollü progresyon değerlendirilebilir':decision==='normal'?'Plan korunabilir':decision==='controlled'?'Kontrollü ilerle':decision==='reduce'?'Yükü azalt':'Toparlanmayı önceliklendir';
     var summary=readinessResult.score==null?'Toparlanma verisi kesin bir hazırlık skoru için yetersiz; güvenlik kuralları yine de uygulanıyor.':'Hazırlık skoru kişisel baseline sapmalarıyla, antrenman kararı ise bağımsız güvenlik kurallarıyla oluşturuldu.';
     var safeFeatures={
-      type:type,date:date,recovery:features.recovery,load:features.load,
+      type:type,date:date,localNarrativeVersion:LOCAL_NARRATIVE_VERSION,recovery:features.recovery,load:features.load,
       gym:{setCount:features.gym.setCount,volume:features.gym.volume,avgRpe:features.gym.avgRpe,painLevel:features.gym.painLevel,formLevel:features.gym.formLevel},
       physical:{names:features.physical.names,durationMinutes:features.physical.durationMinutes,avgHr:features.physical.avgHr,maxHr:features.physical.maxHr,racketSport:features.physical.racketSport},
       baselines:baseline,decision:decision
@@ -416,9 +576,14 @@
     data=data||{};options=options||{};
     var day=extractDay(data,date,options),baseline=baselines(data,date,options),missing=missingData(day,baseline),confidenceResult=confidence(day,baseline,missing),readinessResult=readiness(day,baseline,confidenceResult),safetyResult=safety(day,readinessResult,data,options),output=baseOutput(options.type||'daily',date,day,baseline,readinessResult,confidenceResult,safetyResult);
     output.workoutGuidance=movementGuidance(day,safetyResult.decision,data,options);
-    output.trendInsights=['hrv','restingHr','sleepMinutes','cardioLoad'].map(function(key){return trendForMetric(data,date,key,options);}).filter(function(item){return item.qualified;}).map(function(item){return {metric:item.metric,direction:item.direction,changePercent:item.changePercent,recentMean:item.recentMean,previousMean:item.previousMean};});
+    output.trendInsights=['hrv','restingHr','sleepMinutes','cardioLoad'].map(function(key){return trendForMetric(data,date,key,options);}).filter(function(item){return item.qualified;}).map(function(item){
+      var insight={metric:item.metric,direction:item.direction,changePercent:item.changePercent,recentMean:item.recentMean,previousMean:item.previousMean};
+      insight.title=metricLabel(item.metric)+' trendi';
+      insight.summary=trendSentence(insight);
+      return insight;
+    });
     output.comparisonNotes=comparableDays(data,date,day,options).map(function(item){return item.date+' tarihinde benzer sinyal profili görüldü'+(item.avgRpe!=null?' (RPE '+round(item.avgRpe,1)+').':'.');});
-    return output;
+    return composeLocalNarrative(output,{day:day});
   }
   function analyzePreWorkout(data,date,options){
     var result=analyzeDaily(data,date,Object.assign({},options||{},{type:'pre_workout'}));
@@ -439,8 +604,7 @@
         result.inputHash=inputHash({base:result.inputHash,previousGymDate:previousDate,gym:{avgRpe:previous.gym.avgRpe,painLevel:previous.gym.painLevel,formLevel:previous.gym.formLevel}});
       }
     }
-    result.summary='Bugünkü recovery sinyalleri, kişisel baseline ve hareket güvenliği birlikte değerlendirildi.';
-    return result;
+    return composeLocalNarrative(result,{day:current});
   }
   function previousExercisePerformance(data,row,date){
     var rows=(data.workouts||[]).filter(function(item){return item&&item.date<date&&normalizeName(item.exercise)===normalizeName(row.exercise);}).sort(function(a,b){return String(b.date).localeCompare(String(a.date));});
@@ -451,12 +615,11 @@
   function analyzePostWorkout(data,date,options){
     var result=analyzeDaily(data,date,Object.assign({},options||{},{type:'post_workout'})),rows=workoutRows(data,date);
     var comparisons=rows.map(function(row){return previousExercisePerformance(data,row,date);}).filter(Boolean);
-    result.summary=rows.length?'Tamamlanan Gym kaydı, Polar yükü ve RPE/Form/Pain sinyalleri sonraki seans güvenliği için değerlendirildi.':'Tamamlanmış Gym kaydı bulunmadığı için post-workout yorumu sınırlı.';
     result.comparisonNotes=comparisons.slice(0,4).map(function(item){
       return item.exercise+': önceki '+item.previousDate+' seansına göre hacim '+(item.volumeChangePercent==null?'karşılaştırılamadı':(item.volumeChangePercent>0?'+':'')+item.volumeChangePercent+'%')+'.';
     }).concat(result.comparisonNotes);
     if(!rows.length&&result.missingData.indexOf('Tamamlanmış Gym seansı')<0)result.missingData.push('Tamamlanmış Gym seansı');
-    return result;
+    return composeLocalNarrative(result,{day:extractDay(data,date,options)});
   }
   function analyzeWeekly(data,endDate,options){
     var dailyResults=[],start=addDays(endDate,-6);
@@ -481,7 +644,7 @@
     base.warnings=unique(dailyResults.reduce(function(out,item){return out.concat(item.warnings);},[])).slice(0,6);
     base.missingData=unique(dailyResults.reduce(function(out,item){return out.concat(item.missingData);},[]));
     base.inputHash=inputHash({type:'weekly',start:start,end:endDate,daily:dailyResults.map(function(item){return item.inputHash;})});
-    return base;
+    return composeLocalNarrative(base,{day:extractDay(data,endDate,options),dailyResults:dailyResults});
   }
   function association(days,id,title,predicate,outcome,minimum,summary){
     var exposed=[],control=[];
@@ -529,7 +692,7 @@
     daily.trendInsights=analysis.patterns;
     daily.patternAnalysis=analysis;
     daily.inputHash=inputHash({type:'pattern',endDate:endDate,analysis:analysis});
-    return daily;
+    return composeLocalNarrative(daily,{day:extractDay(data,endDate,options)});
   }
   function defaultStore(){
     return {schemaVersion:STORE_SCHEMA_VERSION,daily:{},weekly:{},patterns:{},aiCache:{},settings:{movementCategories:{}}};
@@ -573,6 +736,7 @@
     WINDOW_MINIMUMS:clone(WINDOW_MINIMUMS),
     CATEGORY_LABELS:clone(CATEGORY_LABELS),
     DEFAULT_CATEGORIES:clone(DEFAULT_CATEGORIES),
+    LOCAL_NARRATIVE_VERSION:LOCAL_NARRATIVE_VERSION,
     inputHash:inputHash,
     defaultStore:defaultStore,
     ensureStore:ensureStore,
@@ -581,6 +745,7 @@
     extractDay:extractDay,
     baselines:baselines,
     patternInsights:patternInsights,
+    composeLocalNarrative:composeLocalNarrative,
     analyze:analyze,
     analyzeDaily:analyzeDaily,
     analyzePreWorkout:analyzePreWorkout,

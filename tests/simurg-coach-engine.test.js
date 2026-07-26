@@ -177,6 +177,56 @@ run('daily, pre, post, weekly and pattern share one output contract', () => {
   assert.equal(outputs[3].loadAdjustmentPercent, -25);
 });
 
+run('local narrative composer explains all five coach types with real signals', () => {
+  const scenario = byId.good_recovery;
+  const outputs = [
+    engine.analyzeDaily(scenario.data, scenario.date),
+    engine.analyzePreWorkout(scenario.data, scenario.date),
+    engine.analyzePostWorkout(scenario.data, scenario.date),
+    engine.analyzeWeekly(scenario.data, scenario.date),
+    engine.analyzePatterns(scenario.data, scenario.date)
+  ];
+  outputs.forEach(output => {
+    assert.ok(output.summary.length >= 220, `${output.type} narrative was too short`);
+    assert.match(output.summary, /Analiz güveni/i);
+  });
+  assert.match(outputs[0].summary, /HRV 69 ms/i);
+  assert.match(outputs[0].summary, /uyku süresi 8\.2 saat/i);
+  assert.match(outputs[0].summary, /Cardio Load 34/i);
+  assert.match(outputs[1].summary, /RPE 6\.5/i);
+  assert.match(outputs[2].summary, /seans|Gym kaydı.*Polar yük/i);
+  assert.match(outputs[3].summary, /yedi gün|hafta/i);
+  assert.match(outputs[4].summary, /yeterli|minimum örnek/i);
+});
+
+run('local narrative variation is deterministic and does not alter safety fields', () => {
+  const scenario = plain(byId.pain_bad_form);
+  const first = engine.analyzePreWorkout(scenario.data, scenario.date);
+  const second = engine.analyzePreWorkout(scenario.data, scenario.date);
+  assert.equal(first.summary, second.summary);
+  const safety = {
+    trainingDecision: first.trainingDecision,
+    loadAdjustmentPercent: first.loadAdjustmentPercent,
+    warnings: plain(first.warnings)
+  };
+  const recomposed = engine.composeLocalNarrative(plain(first), {
+    day: engine.extractDay(scenario.data, scenario.date)
+  });
+  assert.equal(recomposed.trainingDecision, safety.trainingDecision);
+  assert.equal(recomposed.loadAdjustmentPercent, safety.loadAdjustmentPercent);
+  assert.deepEqual(recomposed.warnings, safety.warnings);
+  const other = engine.analyzePreWorkout(byId.good_recovery.data, byId.good_recovery.date);
+  assert.notEqual(first.summary, other.summary);
+});
+
+run('missing data and patterns use cautious non-causal Turkish language', () => {
+  const missing = engine.analyzeDaily(byId.missing_polar.data, byId.missing_polar.date);
+  assert.match(missing.summary, /yeterli recovery sinyali yok|eksik olduğu için/i);
+  assert.match(missing.summary, /uydurulmadı|temkinli/i);
+  const pattern = engine.analyzePatterns(byId.repeated_pattern.data, byId.repeated_pattern.date);
+  assert.match(pattern.summary, /olası ilişki|kesin neden|ilişkiyi kesin neden olarak sunmuyor/i);
+});
+
 run('post-workout comparison prioritizes the real previous exercise session', () => {
   const scenario = plain(byId.good_recovery);
   const previousDate = fixtures.addDays(scenario.date, -7);

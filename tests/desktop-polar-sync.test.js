@@ -38,8 +38,8 @@ run('AccessLink publishes status and refreshes existing render system', () => {
 run('changed production assets use matching cache versions', () => {
   for (const asset of [
     'simurg-volume-model.js?v=1',
-    'simurg-coach-engine.js?v=1',
-    'simurg-coach-client.js?v=1',
+    'simurg-coach-engine.js?v=2',
+    'simurg-coach-client.js?v=2',
     'simurg-coach.css?v=3',
     'simurg-coach-ui.js?v=2',
     'simurg-data-validation.js?v=3',
