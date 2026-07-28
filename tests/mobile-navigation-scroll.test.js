@@ -23,7 +23,7 @@ assert.ok(body.indexOf('refreshTarget(id)') < body.indexOf('target.scrollTop=0')
 for (const route of [
   "simurgV8Go('home','home')",
   "simurgV8Go('gym','gym')",
-  "simurgV8Go('daily','logger')",
+  "simurgV8Go('workout','logger')",
   "simurgV8Go('polar','polar')",
   "simurgV8Go('daily','menu')"
 ]) assert.ok(active.includes(route), `mobile entry route missing: ${route}`);

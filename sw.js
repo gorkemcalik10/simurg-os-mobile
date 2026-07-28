@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-mobile-logbook-fix-v1';
+const SIMURG_CACHE = 'simurg-mobile-workout-logbook-v1';
 const CORE_ASSETS = [
   './',
   './index.html',

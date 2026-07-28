@@ -7641,7 +7641,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=mobile-logbook-fix-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=mobile-workout-logbook-v1').catch(function(){});
   });
 }
 </script>
@@ -10861,7 +10861,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   window.simurgV8Go=go; window.simurgV8OpenMenu=openMenu; window.simurgV8CloseMenu=closeMenu;
   ready(function(){
     if(!document.getElementById('simurgV8Nav')){
-      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Üç temel merkez</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('program','menu')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go('data','menu')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedekleme</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('daily','logger')"><i>📋</i>Günlük</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
+      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Üç temel merkez</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('program','menu')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go('data','menu')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedekleme</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Günlük</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
     }
   });
 })();
@@ -13473,7 +13473,7 @@ m Shell V4: Logger information architecture fix -->
     if(id==='home') return 'home';
     return 'menu';
   }
-  function idFromKey(key){return key==='logger'?'daily':key==='menu'?null:key;}
+  function idFromKey(key){return key==='logger'?'workout':key==='menu'?null:key;}
   function activeSection(){return document.querySelector('main > .section.active') || document.querySelector('.section.active');}
   function setNativeKey(id,key){
     key=key || keyFromId(id);

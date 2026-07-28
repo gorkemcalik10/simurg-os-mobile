@@ -116,7 +116,7 @@ run('existing canonical mobile navigation remains unchanged', () => {
   for (const route of [
     "simurgV8Go('home','home')",
     "simurgV8Go('gym','gym')",
-    "simurgV8Go('daily','logger')",
+    "simurgV8Go('workout','logger')",
     "simurgV8Go('polar','polar')"
   ]) assert.ok(html.includes(route));
   assert.match(html, /<nav id="simurgV8Nav"/);

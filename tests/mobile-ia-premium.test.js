@@ -46,12 +46,17 @@ run('Gym uses a single-open-card mobile accordion without changing save contract
   assert.doesNotMatch(mobile, /DATA\.workouts\s*=|localStorage\.setItem/);
 });
 
-run('Daily restores the canonical logbook and keeps workout details available', () => {
+run('Daily opens the canonical workout journal with real Gym details', () => {
   const shell = html.match(/<nav id="simurgV8Nav"[\s\S]*?<\/nav>/);
   assert.ok(shell);
-  assert.match(shell[0], /data-key="logger" onclick="simurgV8Go\('daily','logger'\)"/);
-  assert.match(html, /id==='daily'&&typeof window\.renderDailyReport==='function'/);
-  assert.match(html, /let items=dayData\(date\), c=calc\(items\)/);
+  assert.match(shell[0], /data-key="logger" onclick="simurgV8Go\('workout','logger'\)"/);
+  assert.match(html, /id==='workout'/);
+  assert.match(html, /renderProgramDays\(\)/);
+  assert.match(html, /renderWeekStrip\(\)/);
+  assert.match(html, /renderWorkout\(\)/);
+  assert.match(html, /function renderWorkout\(\)/);
+  assert.match(html, /let day=dayData\(selectedDate\)/);
+  assert.match(html, /let c=calc\(day\)/);
   assert.match(html, /if\(window\.innerWidth<=900\)simurgV8Go\('workout','logger'\)/);
   assert.doesNotMatch(mobile, /else if\(id==='workout'\)renderMobileDaily\(\)/);
   assert.match(css, /#workout\.miaMobileDaily:not\(\.active\)\{display:none!important;\}/);
