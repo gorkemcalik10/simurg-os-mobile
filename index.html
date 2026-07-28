@@ -6626,6 +6626,29 @@ function addGymSet(key){
     <label class="gymInputBox"><small>Tekrar</small><input class="gymReps" inputmode="numeric" enterkeyhint="done" placeholder="tekrar"></label>
   </div>`);
 }
+function removeGymSet(key){
+  const card=gymCardEl(key);
+  const rows=[...(card?.querySelectorAll('.gymSetInputRow')||[])];
+  if(rows.length<=1){
+    const row=rows[0];
+    if(row){
+      const weight=row.querySelector('.gymWeight');
+      const reps=row.querySelector('.gymReps');
+      if(weight) weight.value='';
+      if(reps) reps.value='';
+      weight?.focus({preventScroll:true});
+    }
+    return;
+  }
+  const active=document.activeElement;
+  const removed=rows[rows.length-1];
+  const hadFocus=removed.contains(active);
+  removed.remove();
+  if(hadFocus){
+    const previous=rows[rows.length-2]?.querySelector('.gymWeight');
+    previous?.focus({preventScroll:true});
+  }
+}
 function clearGymExercise(key){
   const card=gymCardEl(key);
   if(!card) return;
@@ -6735,6 +6758,7 @@ function handleGymModeAction(target){
   const action=actionNode.dataset.gymAction;
   if(!key) return;
   if(action==='add-set') addGymSet(key);
+  else if(action==='remove-set') removeGymSet(key);
   else if(action==='save') saveGymExercise(key);
   else if(action==='history') toggleGymHistory(key);
   else if(action==='clear') clearGymExercise(key);
@@ -6803,7 +6827,8 @@ function renderGymMode(){
       <div class="gymSetList">${rowHtml}</div>
       <div class="gymCardActions">
         <button type="button" class="gymMiniBtn" data-gym-action="add-set" data-gym-key="${gymSafe(item.key)}">+ Set</button>
-        <button type="button" class="gymMiniBtn primary" data-gym-action="save" data-gym-key="${gymSafe(item.key)}">Kaydet</button>
+        <button type="button" class="gymMiniBtn" data-gym-action="remove-set" data-gym-key="${gymSafe(item.key)}">− Son Set</button>
+        <button type="button" class="gymMiniBtn primary" data-gym-action="save" data-gym-key="${gymSafe(item.key)}">Egzersizi Kaydet</button>
         <button type="button" class="gymMiniBtn" data-gym-action="history" data-gym-key="${gymSafe(item.key)}">Geçmiş</button>
         <button type="button" class="gymMiniBtn" data-gym-action="clear" data-gym-key="${gymSafe(item.key)}">Temizle</button>
         ${item.custom?`<button type="button" class="gymMiniBtn" data-gym-action="delete" data-gym-key="${gymSafe(item.key)}">Sil</button>`:''}
@@ -7641,7 +7666,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=stability-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=mobile-journal-gym-v1').catch(function(){});
   });
 }
 </script>
@@ -15961,8 +15986,8 @@ m Shell V4: Logger information architecture fix -->
 <script src="./polar-accesslink.js?v=9"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=26">
 <script src="./desktop-alignment.js?v=33"></script>
-<link rel="stylesheet" href="./mobile-ia-premium.css?v=4">
-<script src="./mobile-ia-premium.js?v=3"></script>
+<link rel="stylesheet" href="./mobile-ia-premium.css?v=5">
+<script src="./mobile-ia-premium.js?v=4"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
 <script src="./simurg-cloud-auth.js?v=3" defer></script>
 <script>

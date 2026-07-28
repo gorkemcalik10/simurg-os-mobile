@@ -79,13 +79,17 @@
     var activityMeta=activity?[activity.duration||'',activity.activeCal||activity.calories?Number(activity.activeCal||activity.calories)+' kcal':'',activity.avgHR?activity.avgHR+' bpm':''].filter(Boolean).join(' · '):'Polar senkronizasyonu sonrası burada görünür.';
     var gymMeta=rows.length?summary.sets+' set · '+summary.reps+' tekrar · '+Math.round(summary.volume).toLocaleString('tr-TR')+' kg':'Bu gün için Gym kaydı yok.';
     var sleepDetail=[signals.sleepMinutes!=null?'Uyku '+Math.round(signals.sleepMinutes/60*10)/10+' saat':'',signals.hrv!=null?'HRV '+Math.round(signals.hrv)+' ms':''].filter(Boolean).join(' · ')||'Uyku ve HRV verisi bekleniyor.';
-    shell.innerHTML='<header class="miaDailyHead"><div><small>SEÇİLİ GÜN</small><h1>Günlük</h1><p>'+esc(dateLabel(date))+' · '+esc(dayLabel(date))+'</p></div><div class="miaDateNav"><button type="button" onclick="simurgMobileDailyMove(-1)" aria-label="Önceki gün">←</button><button type="button" onclick="simurgMobileDailyToday()">Bugün</button><button type="button" onclick="simurgMobileDailyMove(1)" aria-label="Sonraki gün">→</button></div></header>'
-      +'<section class="miaCoachCard"><small>SIMURG İÇGÖRÜSÜ</small><h2>'+esc(readinessValue==null?'Veri birikiyor':(readiness.status||'Günün kararı'))+'</h2><p>'+esc(coachCopy(signals,rows.length>0,!!activity))+'</p><button type="button" onclick="simurgV8Go(\'coaching\',\'menu\')">Koçluk detayını aç →</button></section>'
-      +'<div class="miaMetricGrid">'+metric('Hazırlık',readinessValue==null?'—':Math.round(readinessValue),readinessValue==null?'Veri güveni düşük':'100 üzerinden','ready')+metric('Uyku',sleepValue,signals.sleepScore!=null?'Uyku skoru':'Süre / skor','sleep')+metric('Yük',loadValue,signals.cardio!=null?'Kardiyo yükü':'Veri bekleniyor','load')+'</div>'
-      +'<section class="miaDayCard"><div class="miaCardIcon">G</div><div><small>GÜNÜN GYM ANTRENMANI</small><h2>'+esc(rows.length?Array.from(summary.exercises).slice(0,2).join(' · '):'Kayıt bulunmuyor')+'</h2><p>'+esc(gymMeta)+'</p></div><button type="button" onclick="simurgMobileOpenGym()">Gym →</button></section>'
-      +'<section class="miaDayCard"><div class="miaCardIcon polar">P</div><div><small>GÜNÜN POLAR AKTİVİTESİ</small><h2>'+esc(activityName)+'</h2><p>'+esc(activityMeta)+'</p></div><button type="button" onclick="simurgMobileOpenData()">Senkronize et →</button></section>'
-      +'<details class="miaDetails"><summary>Sağlık ve veri ayrıntıları <span>+</span></summary><div class="miaDetailBody">'+metric('Uyku / HRV',sleepDetail,'Polar gece sinyalleri')+metric('Toparlanma',readinessValue==null?'Kısmi':readiness.status||'—',readiness.advice||'Seçili gün değerlendirmesi')+metric('Aktivite yükü',activityMeta,'Seçili gün kaynağı')+'</div></details>'
-      +'<details class="miaDetails miaMore"><summary>Daha Fazla <span>+</span></summary><div class="miaMoreActions"><button type="button" onclick="exportJSON()">JSON yedeği oluştur</button><button type="button" onclick="simurgMobileOpenData()">Veri Merkezi</button></div></details>';
+    var sourceCount=(rows.length?1:0)+(activity?1:0)+(sleepDetail.indexOf('bekleniyor')<0?1:0);
+    shell.innerHTML='<header class="miaDailyHead"><div><small>GÜN KAYDI</small><h1>Günlük</h1><p>'+esc(dateLabel(date))+' · '+esc(dayLabel(date))+'</p></div><div class="miaDateNav"><button type="button" onclick="simurgMobileDailyMove(-1)" aria-label="Önceki gün">←</button><button type="button" onclick="simurgMobileDailyToday()">Bugün</button><button type="button" onclick="simurgMobileDailyMove(1)" aria-label="Sonraki gün">→</button></div></header>'
+      +'<section class="miaLedgerSummary"><div><small>KAYIT DURUMU</small><h2>'+sourceCount+'/3 kaynak hazır</h2><p>Gym, Polar ve gece verileri bu güne ait tek zaman çizelgesinde.</p></div><div class="miaSourceDots"><i class="'+(rows.length?'done':'')+'">G</i><i class="'+(activity?'done':'')+'">P</i><i class="'+(sleepDetail.indexOf('bekleniyor')<0?'done':'')+'">U</i></div></section>'
+      +'<div class="miaTimeline">'
+      +'<section class="miaTimelineItem '+(rows.length?'hasData':'')+'"><i>1</i><div><small>GYM KAYDI</small><h2>'+esc(rows.length?Array.from(summary.exercises).slice(0,3).join(' · '):'Antrenman girilmedi')+'</h2><p>'+esc(gymMeta)+'</p><button type="button" onclick="simurgMobileOpenGym()">'+(rows.length?'Kaydı aç':'Gym kaydı ekle')+' →</button></div></section>'
+      +'<section class="miaTimelineItem '+(activity?'hasData':'')+'"><i>2</i><div><small>POLAR AKTİVİTESİ</small><h2>'+esc(activityName)+'</h2><p>'+esc(activityMeta)+'</p><button type="button" onclick="simurgMobileOpenData()">'+(activity?'Veri Merkezi':'Polar senkronize et')+' →</button></div></section>'
+      +'<section class="miaTimelineItem '+(sleepDetail.indexOf('bekleniyor')<0?'hasData':'')+'"><i>3</i><div><small>GECE & TOPARLANMA</small><h2>'+esc(sleepDetail)+'</h2><p>'+esc(readinessValue==null?'Hazırlık puanı için veri birikiyor.':(readiness.status||'Seçili gün değerlendirmesi'))+'</p></div></section>'
+      +'</div>'
+      +'<details class="miaDetails"><summary>Günün teknik ayrıntıları <span>+</span></summary><div class="miaDetailBody">'+metric('Hazırlık',readinessValue==null?'—':Math.round(readinessValue),readinessValue==null?'Veri güveni düşük':'100 üzerinden')+metric('Uyku',sleepValue,signals.sleepScore!=null?'Uyku skoru':'Süre / skor')+metric('Kardiyo yükü',loadValue,signals.cardio!=null?'Polar yükü':'Veri bekleniyor')+'</div></details>'
+      +'<section class="miaJournalCoach"><div><small>KOÇ NOTU</small><p>'+esc(coachCopy(signals,rows.length>0,!!activity))+'</p></div><button type="button" onclick="simurgV8Go(\'coaching\',\'menu\')">Detay →</button></section>'
+      +'<details class="miaDetails miaMore"><summary>Araçlar <span>+</span></summary><div class="miaMoreActions"><button type="button" onclick="exportJSON()">JSON yedeği oluştur</button><button type="button" onclick="simurgMobileOpenData()">Veri Merkezi</button></div></details>';
   }
   function dailySelect(date){
     try{selectedDate=date;weekStart=mondayOf(date);}catch(error){}
@@ -130,6 +134,12 @@
     var summary=document.createElement('summary');summary.innerHTML='<span>Egzersiz ayarları</span><i>+</i>';
     body.insertBefore(details,head);details.appendChild(summary);details.appendChild(head);
   }
+  function compactTarget(body){
+    var target=body.querySelector(':scope > .gymTargetBox');if(!target||target.closest('.miaTargetDetails'))return;
+    var details=document.createElement('details');details.className='miaTargetDetails';
+    var summary=document.createElement('summary');summary.innerHTML='<span><b>Sonraki hedef</b><small>Önceki kayda göre güvenli öneri</small></span><i>+</i>';
+    target.parentNode.insertBefore(details,target);details.appendChild(summary);details.appendChild(target);
+  }
   function recompactGymExtras(){
     gymEntries.forEach(function(entry){
       Array.from(entry.card.children).forEach(function(child){
@@ -150,11 +160,13 @@
     if(!available.includes(gymActiveKey))gymActiveKey=available[0];
     cards.forEach(function(card){
       if(card.querySelector(':scope > .miaGymSummary'))return;
-      var key=card.dataset.gymKey||'',name=card.querySelector('.gymExerciseName')&&card.querySelector('.gymExerciseName').value||'Egzersiz',body=card.querySelector('.gymExerciseBody')&&card.querySelector('.gymExerciseBody').value||'Bölge',badge=card.querySelector('.gymBadge')&&card.querySelector('.gymBadge').textContent||'';
+      var key=card.dataset.gymKey||'',name=card.querySelector('.gymExerciseName')&&card.querySelector('.gymExerciseName').value||'Egzersiz',body=card.querySelector('.gymExerciseBody')&&card.querySelector('.gymExerciseBody').value||'Bölge',badge=card.querySelector('.gymBadge')&&card.querySelector('.gymBadge').textContent||'',setRows=Array.from(card.querySelectorAll('.gymSetInputRow')),completed=setRows.filter(function(row){return String(row.querySelector('.gymWeight')&&row.querySelector('.gymWeight').value||'').trim()||String(row.querySelector('.gymReps')&&row.querySelector('.gymReps').value||'').trim();}).length;
       var summary=document.createElement('button');summary.type='button';summary.className='miaGymSummary';summary.dataset.gymToggle=key;summary.setAttribute('aria-expanded',key===gymActiveKey?'true':'false');summary.innerHTML='<span class="miaGymOrder">'+String(available.indexOf(key)+1).padStart(2,'0')+'</span><span class="miaGymTitle"><b>'+esc(name)+'</b><small>'+esc(body)+' · '+esc(badge)+'</small></span><span class="miaGymChevron">⌄</span>';
+      summary.querySelector('.miaGymTitle small').textContent=body+' · '+completed+'/'+setRows.length+' set dolu';
       var bodyWrap=document.createElement('div');bodyWrap.className='miaGymBody';
       while(card.firstChild)bodyWrap.appendChild(card.firstChild);
       compactExerciseEditor(bodyWrap);
+      compactTarget(bodyWrap);
       card.appendChild(summary);card.appendChild(bodyWrap);
       var fragment=document.createDocumentFragment();
       var entry={card:card,summary:summary,body:bodyWrap,fragment:fragment};
@@ -165,7 +177,7 @@
       list.__miaGymBound=true;
       list.addEventListener('click',function(event){var button=event.target.closest('[data-gym-toggle]');if(button&&list.contains(button))openGymKey(button.dataset.gymToggle);});
     }
-    setTimeout(recompactGymExtras,200);
+    requestAnimationFrame(recompactGymExtras);
   }
   function patchGymRenderer(){
     if(window.__miaGymRendererPatched||typeof window.renderGymMode!=='function')return;

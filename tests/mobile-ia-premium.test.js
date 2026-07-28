@@ -45,13 +45,30 @@ run('Gym uses a single-open-card mobile accordion without changing save contract
   assert.doesNotMatch(mobile, /DATA\.workouts\s*=|localStorage\.setItem/);
 });
 
-run('Daily is selected-day only and keeps detail/export actions compact', () => {
+run('Daily is a selected-day journal and no longer duplicates Home', () => {
   assert.match(mobile, /\(data\.workouts\|\|\[\]\)\.filter\(function\(row\)\{return row&&row\.date===date;\}\)/);
-  assert.match(mobile, /SIMURG İÇGÖRÜSÜ/);
-  assert.match(mobile, /GÜNÜN GYM ANTRENMANI/);
-  assert.match(mobile, /GÜNÜN POLAR AKTİVİTESİ/);
-  assert.match(mobile, /Sağlık ve veri ayrıntıları/);
+  assert.match(mobile, /GÜN KAYDI/);
+  assert.match(mobile, /KAYIT DURUMU/);
+  assert.match(mobile, /miaTimeline/);
+  assert.match(mobile, /GYM KAYDI/);
+  assert.match(mobile, /POLAR AKTİVİTESİ/);
+  assert.match(mobile, /GECE & TOPARLANMA/);
+  assert.match(mobile, /Günün teknik ayrıntıları/);
+  assert.doesNotMatch(mobile, /SIMURG İÇGÖRÜSÜ/);
   assert.match(mobile, /JSON yedeği oluştur/);
+});
+
+run('Gym exposes add, remove and primary save actions without changing DATA contracts', () => {
+  assert.match(html, /function removeGymSet\(key\)/);
+  assert.match(html, /data-gym-action="remove-set"/);
+  assert.match(html, /Egzersizi Kaydet/);
+  assert.match(html, /if\(action==='remove-set'\) removeGymSet\(key\)/);
+  assert.match(css, /\[data-gym-action="save"\]\{display:flex!important/);
+  assert.match(mobile, /function compactTarget\(body\)/);
+  assert.match(css, /#workout\.miaMobileDaily:not\(\.active\)\{display:none!important/);
+  assert.match(css, /html:not\(\[data-simurg-active-key="home"\]\) #simurgStandaloneHint\{display:none!important/);
+  assert.match(css, /#gym \.miaGymBody>\.gymSetList\{order:1!important/);
+  assert.doesNotMatch(mobile, /DATA\.workouts\s*=|localStorage\.setItem/);
 });
 
 run('Polar AccessLink mounts in Data Center on mobile and defers status loading', () => {
@@ -62,4 +79,4 @@ run('Polar AccessLink mounts in Data Center on mobile and defers status loading'
   assert.match(mobile, /simurgMobileOpenPolarDetails/);
 });
 
-process.stdout.write('6 mobile IA premium tests passed.\n');
+process.stdout.write('7 mobile IA premium tests passed.\n');
