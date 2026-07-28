@@ -7641,7 +7641,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=stability-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=mobile-route-fix-v1').catch(function(){});
   });
 }
 </script>
@@ -10820,9 +10820,13 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   function refreshTarget(id){
     if(id==='gym'&&typeof window.renderGymMode==='function')window.renderGymMode();
     else if(id==='workout'){
-      if(typeof window.renderProgramDays==='function')window.renderProgramDays();
-      if(typeof window.renderWeekStrip==='function')window.renderWeekStrip();
-      if(typeof window.renderWorkout==='function')window.renderWorkout();
+      if(window.innerWidth<=900&&window.SimurgMobileIA&&typeof window.SimurgMobileIA.renderDaily==='function'){
+        window.SimurgMobileIA.renderDaily();
+      }else{
+        if(typeof window.renderProgramDays==='function')window.renderProgramDays();
+        if(typeof window.renderWeekStrip==='function')window.renderWeekStrip();
+        if(typeof window.renderWorkout==='function')window.renderWorkout();
+      }
     }
     else if(id==='daily'&&typeof window.renderDailyReport==='function')window.renderDailyReport();
     else if(id==='weekly'&&typeof window.renderWeeklyReport==='function')window.renderWeeklyReport();
@@ -15961,7 +15965,7 @@ m Shell V4: Logger information architecture fix -->
 <script src="./polar-accesslink.js?v=9"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=26">
 <script src="./desktop-alignment.js?v=33"></script>
-<link rel="stylesheet" href="./mobile-ia-premium.css?v=4">
+<link rel="stylesheet" href="./mobile-ia-premium.css?v=5">
 <script src="./mobile-ia-premium.js?v=3"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
 <script src="./simurg-cloud-auth.js?v=3" defer></script>

@@ -47,11 +47,15 @@ run('Gym uses a single-open-card mobile accordion without changing save contract
 
 run('Daily is selected-day only and keeps detail/export actions compact', () => {
   assert.match(mobile, /\(data\.workouts\|\|\[\]\)\.filter\(function\(row\)\{return row&&row\.date===date;\}\)/);
+  assert.match(html, /id==='workout'\)\{[\s\S]*?window\.SimurgMobileIA\.renderDaily\(\);[\s\S]*?\}else\{[\s\S]*?window\.renderProgramDays/);
   assert.match(mobile, /SIMURG İÇGÖRÜSÜ/);
   assert.match(mobile, /GÜNÜN GYM ANTRENMANI/);
   assert.match(mobile, /GÜNÜN POLAR AKTİVİTESİ/);
   assert.match(mobile, /Sağlık ve veri ayrıntıları/);
   assert.match(mobile, /JSON yedeği oluştur/);
+  assert.match(css, /#workout\.miaMobileDaily:not\(\.active\)\{display:none!important;\}/);
+  assert.match(css, /#workout\.miaMobileDaily\.active\{display:block!important;\}/);
+  assert.doesNotMatch(css, /#workout\.miaMobileDaily\{display:block!important;\}/);
 });
 
 run('Polar AccessLink mounts in Data Center on mobile and defers status loading', () => {

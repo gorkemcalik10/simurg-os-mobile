@@ -52,7 +52,8 @@
   html[data-simurg-active-key="gym"] #simurgStandaloneHint b{font-size:11px!important;line-height:1.2!important;}
   html[data-simurg-active-key="gym"] #simurgStandaloneHint button{min-height:32px!important;padding:6px 10px!important;}
 
-  #workout.miaMobileDaily{display:block!important;}
+  #workout.miaMobileDaily:not(.active){display:none!important;}
+  #workout.miaMobileDaily.active{display:block!important;}
   .miaDailyShell{max-width:430px!important;margin:0 auto!important;padding:2px 0 16px!important;}
   .miaDailyHead{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:12px!important;margin:3px 2px 13px!important;}
   .miaDailyHead small,.miaCoachCard>small,.miaDayCard small{display:block!important;color:#42e292!important;font-size:9px!important;letter-spacing:.18em!important;font-weight:1000!important;margin-bottom:5px!important;}
