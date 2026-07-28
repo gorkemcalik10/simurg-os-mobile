@@ -50,6 +50,8 @@ run('Daily opens the canonical workout journal with real Gym details', () => {
   const shell = html.match(/<nav id="simurgV8Nav"[\s\S]*?<\/nav>/);
   assert.ok(shell);
   assert.match(shell[0], /data-key="logger" onclick="simurgV8Go\('workout','logger'\)"/);
+  assert.match(html, /if\(window\.innerWidth<=900&&id==='daily'\)id='workout'/);
+  assert.match(html, /loggerButton\.setAttribute\('onclick',"simurgV8Go\('workout','logger'\)"\)/);
   assert.match(html, /id==='workout'/);
   assert.match(html, /renderProgramDays\(\)/);
   assert.match(html, /renderWeekStrip\(\)/);
