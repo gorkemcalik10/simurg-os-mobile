@@ -40,4 +40,18 @@ run('desktop logger layout is bounded and mobile rules remain desktop-scoped', (
   assert.match(css, /\.dlDistribution>div\{display:grid/);
 });
 
+run('desktop routes render on demand and reset the page scroll position', () => {
+  assert.match(js, /function activeDesktopScreen\(\)/);
+  assert.match(js, /renderScreen\(activeDesktopScreen\(\)\)/);
+  assert.doesNotMatch(js, /renderHome\(\);logger\(\);polarData\(\);dailySummary\(\);weeklySummary\(\);monthlyReview\(\);program\(\);coaching\(\)/);
+  assert.match(js, /window\.scrollTo\(\{top:0,left:0,behavior:'auto'\}\)/);
+});
+
+run('desktop Home and Data Center stay compact without hiding actions', () => {
+  assert.match(css, /\.gp-desktop-overview:not\(:has\(>\.gp-desktop-prime\)\)>\.gp-desktop-signals\{grid-column:1\/-1\}/);
+  assert.match(css, /#data\.section\.active\{display:grid!important/);
+  assert.match(css, /grid-template-areas:"head head" "cloud cloud" "import status" "general status"/);
+  assert.match(css, /#data\.section>\.cloudSyncCard \.syncInfoGrid\{display:none!important\}/);
+});
+
 if (process.exitCode) process.exit(process.exitCode);
