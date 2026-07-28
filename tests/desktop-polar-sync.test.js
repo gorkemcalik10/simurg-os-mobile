@@ -43,18 +43,20 @@ run('changed production assets use matching cache versions', () => {
     'simurg-coach.css?v=4',
     'simurg-coach-ui.js?v=3',
     'simurg-data-validation.js?v=3',
-    'polar-accesslink.js?v=7',
+    'polar-accesslink.js?v=9',
     'premium-standard.css?v=34',
-    'premium-standard.js?v=38',
+    'premium-standard.js?v=39',
     'desktop-alignment.css?v=24',
     'desktop-alignment.js?v=30',
-    'simurg-cloud-auth.js?v=3'
+    'simurg-cloud-auth.js?v=3',
+    'mobile-ia-premium.css?v=3',
+    'mobile-ia-premium.js?v=3'
   ]) {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=coach-ui-v2/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-coach-ui-v2'/);
+  assert.match(index, /sw\.js\?v=mobile-ia-v1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-mobile-ia-v1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

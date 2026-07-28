@@ -402,14 +402,14 @@
     else if(id==='data')cleanDataCenter();
     if(id==='weekly'||id==='monthly'||id==='program')polishReports();
     if(window.SimurgCurrentWeekUX&&typeof window.SimurgCurrentWeekUX.refresh==='function'&&(id==='gym'||id==='workout'||id==='data'))window.SimurgCurrentWeekUX.refresh();
-    if(window.SimurgSmartProgression&&typeof window.SimurgSmartProgression.refresh==='function'&&(id==='gym'||id==='program'||id==='monthly'))window.SimurgSmartProgression.refresh();
+    if(window.SimurgSmartProgression&&typeof window.SimurgSmartProgression.refresh==='function'&&(id==='gym'||id==='program'||id==='monthly')&&(window.innerWidth>900||id==='program'||id==='monthly'))window.SimurgSmartProgression.refresh();
     if(window.SimurgProfessionalPolish&&typeof window.SimurgProfessionalPolish.refresh==='function')window.SimurgProfessionalPolish.refresh();
     if(id==='workout'&&typeof window.simurgDisableLoggerTrendTooltip==='function')window.simurgDisableLoggerTrendTooltip();
     if(window.SimurgPolarBridge&&typeof window.SimurgPolarBridge.refresh==='function'&&(id==='home'||id==='polar'||id==='coaching'||id==='data'))window.SimurgPolarBridge.refresh(id);
     if(id==='coaching'&&window.SimurgCoachUI&&typeof window.SimurgCoachUI.renderMobile==='function')window.SimurgCoachUI.renderMobile();
   }
   function refreshAll(){normalizeNav();renderHome();refineGym();refineLogger();cleanCoaching();cleanDataCenter();polishReports();refineProgramIntelligence();localizeVisible();if(window.SimurgCoachUI&&typeof window.SimurgCoachUI.renderMobile==='function')window.SimurgCoachUI.renderMobile();if(window.SimurgCurrentWeekUX&&typeof window.SimurgCurrentWeekUX.refresh==='function')window.SimurgCurrentWeekUX.refresh();if(window.SimurgSmartProgression&&typeof window.SimurgSmartProgression.refresh==='function')window.SimurgSmartProgression.refresh();if(window.SimurgProfessionalPolish&&typeof window.SimurgProfessionalPolish.refresh==='function')window.SimurgProfessionalPolish.refresh();if(typeof window.simurgDisableLoggerTrendTooltip==='function')window.simurgDisableLoggerTrendTooltip();if(window.SimurgPolarBridge&&typeof window.SimurgPolarBridge.refresh==='function')window.SimurgPolarBridge.refresh();}
-  function dataChanged(reason){if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate(reason||'dataChanged');if(window.SimurgCoachClient)window.SimurgCoachClient.invalidate();refreshAll();}
+  function dataChanged(reason){if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate(reason||'dataChanged');if(window.SimurgCoachClient)window.SimurgCoachClient.invalidate();if(window.innerWidth<=900)refreshScreen(document.body.getAttribute('data-simurg-active-screen')||'home');else refreshAll();}
   window.SimurgPremium={refreshScreen:refreshScreen,refreshAll:refreshAll,dataChanged:dataChanged,renderHome:renderHome,localizeVisible:localizeVisible};
   ready(function(){
     document.addEventListener('click',function(event){
@@ -422,6 +422,6 @@
     document.addEventListener('click',function(event){
       if(event.target.closest('#simurgV8Nav button[data-key]'))syncNavPressed();
     });
-    refreshAll();
+    if(window.innerWidth<=900)refreshScreen(document.body.getAttribute('data-simurg-active-screen')||'home');else refreshAll();
   });
 })();

@@ -2,7 +2,7 @@
   'use strict';
   var CAPABILITY_KEY='simurg_polar_accesslink_client_v1';
   var state={busy:false,status:'loading',lastSyncAt:null,errorMessage:'',message:'Polar bağlantı durumu kontrol ediliyor.',counts:{workouts:0,activity:0,profile:0,sleep:0,nightlyRecharge:0,continuousHr:0,cardioLoad:0},statuses:{}};
-  var sectionObserver=null,observedSection=null;
+  var sectionObserver=null,observedSection=null,statusLoaded=false;
 
   function ready(fn){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();}
   function root(){try{if(typeof window.simurgGetData==='function')return window.simurgGetData();}catch(e){}try{return DATA;}catch(e){return window.simurgData||{};}}
@@ -160,19 +160,24 @@
       '<div class="polarAccessLinkActions">'+(connected?'<button type="button" onclick="simurgPolarSyncNow()" '+(state.busy?'disabled':'')+'>Şimdi Senkronize Et</button><button class="secondary" type="button" onclick="simurgPolarDisconnect()" '+(state.busy?'disabled':'')+'>Bağlantıyı Kes</button>':checking?'<button type="button" disabled>Kontrol Ediliyor</button>':status==='signed_out'?'<button type="button" disabled>Önce Cloud Oturumu Aç</button>':'<button type="button" onclick="simurgPolarConnect()" '+(state.busy?'disabled':'')+'>Polar Hesabını Bağla</button>')+'</div>'+
       '<div class="polarAccessLinkNote '+(error?'error':'')+'" aria-live="polite">'+esc(error||'Polar AccessLink aktif veri kaynağı · Antrenman, aktivite, uyku, toparlanma ve yük')+'</div>';
   }
+  function cardHost(){
+    if(window.innerWidth<=900)return document.getElementById('mobilePolarSyncHub');
+    var section=document.getElementById('polar');return section&&(section.querySelector('.polarDashboardV1')||section);
+  }
   function renderCard(){
-    var section=document.getElementById('polar');if(!section)return;var dashboard=section.querySelector('.polarDashboardV1')||section;
+    var dashboard=cardHost();if(!dashboard)return;
     var card=document.getElementById('polarAccessLinkCard');if(!card){card=document.createElement('div');card.id='polarAccessLinkCard';card.className='polarAccessLinkCard';dashboard.insertBefore(card,dashboard.firstChild);}
     if(card.parentNode!==dashboard)dashboard.insertBefore(card,dashboard.firstChild);card.innerHTML=cardHtml();publishSyncState();
   }
   function installObserver(){
-    var section=document.getElementById('polar');if(!section)return false;if(observedSection===section){renderCard();return true;}
-    if(sectionObserver)sectionObserver.disconnect();observedSection=section;sectionObserver=new MutationObserver(function(){if(!document.getElementById('polarAccessLinkCard'))renderCard();});sectionObserver.observe(section,{childList:true});renderCard();return true;
+    var host=cardHost();if(!host)return false;if(observedSection===host){renderCard();return true;}
+    if(sectionObserver)sectionObserver.disconnect();observedSection=host;sectionObserver=new MutationObserver(function(){if(!document.getElementById('polarAccessLinkCard'))renderCard();});sectionObserver.observe(host,{childList:true});renderCard();return true;
   }
   async function refreshStatus(){
+    statusLoaded=true;
     state.status='loading';state.errorMessage='';state.message='Polar bağlantı durumu kontrol ediliyor.';renderCard();
     try{var payload=await request('polar-sync','GET');updateLocalConnection(payload.connection,payload.counts,payload.statuses,payload.errors);state.status=payload.connection&&payload.connection.connected?'connected':'disconnected';state.message=state.status==='connected'?(payload.connection.claimedLegacy?'Eski Polar bağlantısı bu Simurg hesabına güvenle taşındı.':'Polar AccessLink manuel senkronizasyonu hazır.'):'Bu Simurg hesabına bağlı Polar hesabı yok.';}
-    catch(error){state.status=error.code==='signed_out'||error.code==='missing_session'||error.code==='invalid_session'?'signed_out':'error';state.message=state.status==='signed_out'?'Polar bağlantısını kullanmak için Simurg Cloud oturumu açın.':'Polar bağlantı durumu doğrulanamadı.';state.errorMessage=error.message;}
+    catch(error){state.status=error.code==='signed_out'||error.code==='missing_session'||error.code==='invalid_session'?'signed_out':'error';state.message=state.status==='signed_out'?'Polar bağlantısını kullanmak için Simurg Cloud oturumu açın.':'Polar bağlantı durumu doğrulanamadı.';state.errorMessage=state.status==='signed_out'?'':error.message;}
     renderCard();
   }
   window.simurgPolarConnect=async function(){
@@ -200,12 +205,21 @@
     url.searchParams.delete('polar');url.searchParams.delete('polar_message');history.replaceState(null,'',url.pathname+url.search+url.hash);return result==='connected';
   }
   ready(function(){
-    ensureStores();handleOauthReturn();installObserver();
-    setTimeout(installObserver,400);setTimeout(installObserver,1200);
-    refreshStatus();
+    ensureStores();var oauthReturn=handleOauthReturn();
+    if(window.innerWidth>900){installObserver();setTimeout(installObserver,400);setTimeout(installObserver,1200);refreshStatus();}
+    else if(oauthReturn&&typeof window.simurgV8Go==='function')window.simurgV8Go('data','menu');
   });
   document.addEventListener('simurg:cloud-auth-state',function(event){
     if(event&&event.detail&&event.detail.signedIn)refreshStatus();
     else{state.status='signed_out';state.message='Polar bağlantısını kullanmak için Simurg Cloud oturumu açın.';state.errorMessage='';renderCard();}
   });
+  window.SimurgPolarAccessLink={
+    mount:function(){
+      if(!installObserver())return false;
+      if(!statusLoaded)refreshStatus();else renderCard();
+      return true;
+    },
+    refresh:function(){return refreshStatus();},
+    state:function(){return Object.assign({},state);}
+  };
 })();
