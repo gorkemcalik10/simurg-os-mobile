@@ -91,6 +91,21 @@ run('mobile Journal navigation and Program cards stay readable without square-ca
   assert.match(css, /#program\.section\.active #programReport :is\(\.programIntelPremiumText,\.programIntelDeltaText\)\{[\s\S]*?overflow-wrap:anywhere!important/);
 });
 
+run('mobile Workout Journal uses premium single-open exercise summaries without mutating data', () => {
+  assert.match(mobile, /function mountJournalDashboard\(\)/);
+  assert.match(mobile, /className='mjExerciseToggle'/);
+  assert.match(mobile, /function openJournalExercise\(card,key\)/);
+  assert.match(mobile, /Array\.from\(document\.querySelectorAll\('#workoutGroups \.exerciseCard\.isJournalOpen'\)\)/);
+  assert.match(mobile, /window\.renderWorkout=function\(\)/);
+  assert.match(mobile, /mountJournal:mountJournalDashboard/);
+  assert.doesNotMatch(mobile, /function mountJournalDashboard\(\)[\s\S]*?DATA\.workouts\s*=/);
+  assert.match(css, /Mobile Workout Journal dashboard v4/);
+  assert.match(css, /#workout\.miaJournalDashboard \.bottomStats\{[\s\S]*?display:grid!important/);
+  assert.match(css, /#workout\.miaJournalDashboard #workoutGroups \.mjExerciseToggle\{[\s\S]*?min-height:64px!important/);
+  assert.match(css, /#workout\.miaJournalDashboard #workoutGroups \.mjExerciseBody\{[\s\S]*?display:none!important/);
+  assert.match(css, /#workout\.miaJournalDashboard #workoutGroups \.exerciseCard\.isJournalOpen \.mjExerciseBody\{[\s\S]*?display:block!important/);
+});
+
 run('Polar AccessLink mounts in Data Center on mobile and defers status loading', () => {
   assert.match(polar, /if\(window\.innerWidth<=900\)return document\.getElementById\('mobilePolarSyncHub'\)/);
   assert.match(polar, /if\(window\.innerWidth>900\)\{installObserver\(\);setTimeout\(installObserver,400\);setTimeout\(installObserver,1200\);refreshStatus\(\);\}/);
@@ -99,4 +114,4 @@ run('Polar AccessLink mounts in Data Center on mobile and defers status loading'
   assert.match(mobile, /simurgMobileOpenPolarDetails/);
 });
 
-process.stdout.write('8 mobile IA premium tests passed.\n');
+process.stdout.write('9 mobile IA premium tests passed.\n');

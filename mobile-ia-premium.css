@@ -879,3 +879,168 @@
     overflow-wrap:anywhere!important;
   }
 }
+
+/* Mobile Workout Journal dashboard v4.
+   Premium exercise summaries stay visible; set details open one at a time. */
+@media(max-width:860px){
+  html body main #workout.miaJournalDashboard .layout>div:first-child{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:9px!important;
+  }
+  html body main #workout.miaJournalDashboard .bottomStats{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    order:-10!important;
+    width:calc(100% - 16px)!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:0 8px!important;
+    border:1px solid rgba(255,255,255,.075)!important;
+    border-radius:17px!important;
+    background:linear-gradient(180deg,#0d161f,#080e14)!important;
+    box-shadow:none!important;
+    overflow:hidden!important;
+  }
+  html body main #workout.miaJournalDashboard .bottomStats .stat{
+    min-width:0!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:10px 6px!important;
+    border-right:1px solid rgba(255,255,255,.07)!important;
+    color:#8794a5!important;
+    font-size:7px!important;
+    line-height:1.25!important;
+    text-align:center!important;
+    white-space:normal!important;
+  }
+  html body main #workout.miaJournalDashboard .bottomStats .stat:last-child{border-right:0!important;}
+  html body main #workout.miaJournalDashboard .bottomStats .stat b{
+    display:inline!important;
+    color:#f4f7fb!important;
+    font-size:15px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups{
+    order:0!important;
+    gap:9px!important;
+  }
+  html body main #workout.miaJournalDashboard .gp-logger-exercises-title{
+    margin-inline:8px!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups>.group{
+    margin-inline:8px!important;
+    padding:10px!important;
+    border-radius:19px!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .exerciseGrid{gap:7px!important;}
+  html body main #workout.miaJournalDashboard #workoutGroups .exerciseCard{
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    border:1px solid rgba(255,255,255,.075)!important;
+    border-radius:16px!important;
+    background:linear-gradient(180deg,rgba(16,24,34,.98),rgba(8,13,20,.98))!important;
+    box-shadow:none!important;
+    overflow:hidden!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseToggle{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto 18px!important;
+    gap:9px!important;
+    align-items:center!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:64px!important;
+    margin:0!important;
+    padding:10px 11px!important;
+    border:0!important;
+    background:transparent!important;
+    color:#eef5ff!important;
+    text-align:left!important;
+    cursor:pointer!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseIdentity{
+    display:block!important;
+    min-width:0!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseIdentity b{
+    display:block!important;
+    max-width:100%!important;
+    font-size:13px!important;
+    line-height:1.2!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseIdentity small{
+    display:block!important;
+    margin-top:4px!important;
+    color:#60b5f1!important;
+    font-size:8.5px!important;
+    line-height:1.2!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseNumbers{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-end!important;
+    gap:3px!important;
+    min-width:54px!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseNumbers strong{
+    color:#f6b229!important;
+    font-size:9px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseNumbers em{
+    color:#7f8b9a!important;
+    font-size:8px!important;
+    line-height:1!important;
+    font-style:normal!important;
+    white-space:nowrap!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseToggle>i{
+    color:#7d8998!important;
+    font-size:17px!important;
+    line-height:1!important;
+    font-style:normal!important;
+    transition:transform .16s ease!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .exerciseCard.isJournalOpen{
+    border-color:rgba(245,163,13,.28)!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .exerciseCard.isJournalOpen .mjExerciseToggle{
+    border-bottom:1px solid rgba(255,255,255,.065)!important;
+    background:rgba(245,163,13,.035)!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .exerciseCard.isJournalOpen .mjExerciseToggle>i{
+    color:#f6b229!important;
+    transform:rotate(180deg)!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseBody{
+    display:none!important;
+    min-width:0!important;
+    padding:7px 10px 9px!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .exerciseCard.isJournalOpen .mjExerciseBody{
+    display:block!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseBody>.exTop,
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseBody>.blueLine{
+    display:none!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups .mjExerciseBody .setTable{
+    margin:0!important;
+  }
+  html body main #workout.miaJournalDashboard #workoutGroups>.simurg-activity-card{
+    margin-inline:8px!important;
+    width:calc(100% - 16px)!important;
+  }
+  html body main #workout.miaJournalDashboard .right{
+    width:calc(100% - 16px)!important;
+    margin-inline:8px!important;
+  }
+}

@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-mobile-journal-program-v3';
+const SIMURG_CACHE = 'simurg-mobile-journal-dashboard-v4';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -20,8 +20,8 @@ const CORE_ASSETS = [
   './simurg-cloud-auth.js?v=3',
   './desktop-alignment.css?v=26',
   './desktop-alignment.js?v=33',
-  './mobile-ia-premium.css?v=9',
-  './mobile-ia-premium.js?v=4',
+  './mobile-ia-premium.css?v=10',
+  './mobile-ia-premium.js?v=5',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

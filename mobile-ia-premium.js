@@ -3,6 +3,7 @@
 
   var gymActiveKey='';
   var gymEntries=new Map();
+  var journalActiveKey='';
   var dailyArchive=null;
   var dailyShell=null;
 
@@ -180,6 +181,93 @@
     try{renderGymMode=window.renderGymMode;}catch(error){}
   }
 
+  function journalNumber(value){
+    var normalized=String(value==null?'':value).replace(/\./g,'').replace(',','.');
+    var parsed=Number(normalized);
+    return Number.isFinite(parsed)?parsed:0;
+  }
+  function journalExerciseKey(card,index){
+    var group=card.closest('.group');
+    var body=group&&group.querySelector('.groupTitle');
+    var name=card.querySelector('.exName');
+    return [body&&body.textContent||'',name&&name.textContent||'',index].join('::');
+  }
+  function journalExerciseStats(card){
+    var rows=Array.from(card.querySelectorAll('.setTable tbody tr'));
+    var reps=0,volume=0;
+    rows.forEach(function(row){
+      var cells=row.querySelectorAll('td');
+      var rowReps=journalNumber(cells[1]&&cells[1].textContent);
+      var weight=journalNumber(cells[2]&&cells[2].textContent);
+      reps+=rowReps;volume+=rowReps*weight;
+    });
+    return {sets:rows.length,reps:reps,volume:Math.round(volume)};
+  }
+  function closeJournalExercise(card){
+    if(!card)return;
+    card.classList.remove('isJournalOpen');
+    var toggle=card.querySelector(':scope > .mjExerciseToggle');
+    if(toggle)toggle.setAttribute('aria-expanded','false');
+  }
+  function openJournalExercise(card,key){
+    Array.from(document.querySelectorAll('#workoutGroups .exerciseCard.isJournalOpen')).forEach(function(open){
+      if(open!==card)closeJournalExercise(open);
+    });
+    var opening=!card.classList.contains('isJournalOpen');
+    closeJournalExercise(card);
+    journalActiveKey='';
+    if(opening){
+      card.classList.add('isJournalOpen');
+      var toggle=card.querySelector(':scope > .mjExerciseToggle');
+      if(toggle)toggle.setAttribute('aria-expanded','true');
+      journalActiveKey=key;
+    }
+  }
+  function mountJournalDashboard(){
+    if(!isMobile())return;
+    var section=document.getElementById('workout');
+    var groups=document.getElementById('workoutGroups');
+    if(!section||!groups)return;
+    section.classList.add('miaJournalDashboard');
+    var cards=Array.from(groups.querySelectorAll('.exerciseCard'));
+    cards.forEach(function(card,index){
+      if(card.querySelector(':scope > .mjExerciseToggle'))return;
+      var name=card.querySelector('.exName');
+      var profile=card.querySelector('.loadProfileTag');
+      var stats=journalExerciseStats(card);
+      var key=journalExerciseKey(card,index);
+      card.dataset.journalKey=key;
+      var toggle=document.createElement('button');
+      toggle.type='button';
+      toggle.className='mjExerciseToggle';
+      toggle.setAttribute('aria-expanded',key===journalActiveKey?'true':'false');
+      toggle.innerHTML='<span class="mjExerciseIdentity"><b>'+esc(name&&name.textContent||'Egzersiz')+'</b><small>'+esc(profile&&profile.textContent||'Kayıtlı egzersiz')+'</small></span>'
+        +'<span class="mjExerciseNumbers"><strong>'+stats.sets+' set</strong><em>'+stats.reps+' tekrar</em></span><i>⌄</i>';
+      toggle.addEventListener('click',function(){openJournalExercise(card,key);});
+      var body=document.createElement('div');
+      body.className='mjExerciseBody';
+      Array.from(card.children).forEach(function(child){
+        if(child.classList&&child.classList.contains('mjExerciseToggle'))return;
+        body.appendChild(child);
+      });
+      card.appendChild(toggle);
+      card.appendChild(body);
+      if(key===journalActiveKey)card.classList.add('isJournalOpen');
+    });
+    if(journalActiveKey&&!groups.querySelector('.exerciseCard[data-journal-key="'+CSS.escape(journalActiveKey)+'"]'))journalActiveKey='';
+  }
+  function patchJournalRenderer(){
+    if(window.__miaJournalRendererPatched||typeof window.renderWorkout!=='function')return;
+    window.__miaJournalRendererPatched=true;
+    var base=window.renderWorkout;
+    window.renderWorkout=function(){
+      var result=base.apply(this,arguments);
+      mountJournalDashboard();
+      return result;
+    };
+    try{renderWorkout=window.renderWorkout;}catch(error){}
+  }
+
   function ensureDataHub(){
     if(!isMobile())return null;
     var data=document.getElementById('data');if(!data)return null;
@@ -215,21 +303,24 @@
       if(!isMobile())return result;
       ['weeklyReport','monthlyReport'].forEach(function(reportId){var report=document.getElementById(reportId);if(report)report.replaceChildren();});
       if(id==='gym')mountGymAccordion();
+      else if(id==='workout')mountJournalDashboard();
       else if(id==='data')mountDataCenter();
       else if(id==='polar'&&window.SimurgPolarBridge&&typeof window.SimurgPolarBridge.refresh==='function')window.SimurgPolarBridge.refresh('polar');
       return result;
     };
   }
   function handleResize(){
-    if(isMobile()){normalizeMobileShell();patchGymRenderer();}
+    if(isMobile()){normalizeMobileShell();patchGymRenderer();patchJournalRenderer();}
     else restoreDesktopDaily();
   }
   ready(function(){
     normalizeMobileShell();
     patchGymRenderer();
+    patchJournalRenderer();
     patchRouter();
     if(document.body.getAttribute('data-simurg-active-screen')==='gym')mountGymAccordion();
+    if(document.body.getAttribute('data-simurg-active-screen')==='workout')mountJournalDashboard();
     window.addEventListener('resize',handleResize,{passive:true});
   });
-  window.SimurgMobileIA={renderDaily:renderMobileDaily,mountGym:mountGymAccordion,mountData:mountDataCenter};
+  window.SimurgMobileIA={renderDaily:renderMobileDaily,mountGym:mountGymAccordion,mountJournal:mountJournalDashboard,mountData:mountDataCenter};
 })();
