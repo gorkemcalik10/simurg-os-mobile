@@ -82,6 +82,15 @@ run('mobile Gym and Workout Journal use compact, conflict-proof dashboard rules'
   assert.match(css, /#workout\.gp-logger-refined \.right\{[\s\S]*?grid-template-columns:1fr!important/);
 });
 
+run('mobile Journal navigation and Program cards stay readable without square-card overflow', () => {
+  assert.match(css, /Mobile journal navigation \+ Program cards v3/);
+  assert.match(css, /#workout\.section\.active\.gp-logger-refined \.topbar \.controls\{[\s\S]*?grid-template-rows:34px 34px!important/);
+  assert.match(css, /#workout\.section\.active\.gp-logger-refined \.weekStrip\{[\s\S]*?margin:0 8px 9px!important/);
+  assert.match(css, /#program\.section\.active #programReport \.programIntelPremiumGrid\{[\s\S]*?grid-template-columns:1fr!important/);
+  assert.match(css, /#program\.section\.active #programReport :is\(\.programIntelPremiumCard,\.programIntelDeltaCard\)\{[\s\S]*?aspect-ratio:auto!important/);
+  assert.match(css, /#program\.section\.active #programReport :is\(\.programIntelPremiumText,\.programIntelDeltaText\)\{[\s\S]*?overflow-wrap:anywhere!important/);
+});
+
 run('Polar AccessLink mounts in Data Center on mobile and defers status loading', () => {
   assert.match(polar, /if\(window\.innerWidth<=900\)return document\.getElementById\('mobilePolarSyncHub'\)/);
   assert.match(polar, /if\(window\.innerWidth>900\)\{installObserver\(\);setTimeout\(installObserver,400\);setTimeout\(installObserver,1200\);refreshStatus\(\);\}/);
@@ -90,4 +99,4 @@ run('Polar AccessLink mounts in Data Center on mobile and defers status loading'
   assert.match(mobile, /simurgMobileOpenPolarDetails/);
 });
 
-process.stdout.write('7 mobile IA premium tests passed.\n');
+process.stdout.write('8 mobile IA premium tests passed.\n');
