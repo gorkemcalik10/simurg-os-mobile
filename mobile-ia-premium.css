@@ -47,10 +47,7 @@
   #gym .miaGymBody .gymProgramNote,#gym .miaGymBody .gymLoadProfileNote{font-size:9px!important;line-height:1.3!important;}
   #gym .miaGymBody .gymTargetBox{margin:8px 0!important;padding:10px!important;}
   #gym .miaGymBody .gymCardActions{position:static!important;background:transparent!important;padding-top:6px!important;}
-  html[data-simurg-active-key="gym"] #simurgStandaloneHint{min-height:50px!important;padding:8px 10px!important;gap:8px!important;}
-  html[data-simurg-active-key="gym"] #simurgStandaloneHint p{display:none!important;}
-  html[data-simurg-active-key="gym"] #simurgStandaloneHint b{font-size:11px!important;line-height:1.2!important;}
-  html[data-simurg-active-key="gym"] #simurgStandaloneHint button{min-height:32px!important;padding:6px 10px!important;}
+  html[data-simurg-active-key="gym"] #simurgStandaloneHint{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;}
 
   #workout.miaMobileDaily:not(.active){display:none!important;}
   #workout.miaMobileDaily.active{display:block!important;}

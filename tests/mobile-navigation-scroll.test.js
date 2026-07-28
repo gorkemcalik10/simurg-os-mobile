@@ -23,7 +23,7 @@ assert.ok(body.indexOf('refreshTarget(id)') < body.indexOf('target.scrollTop=0')
 for (const route of [
   "simurgV8Go('home','home')",
   "simurgV8Go('gym','gym')",
-  "simurgV8Go('workout','logger')",
+  "simurgV8Go('daily','logger')",
   "simurgV8Go('polar','polar')",
   "simurgV8Go('daily','menu')"
 ]) assert.ok(active.includes(route), `mobile entry route missing: ${route}`);
@@ -37,5 +37,6 @@ assert.match(premium, /setAttribute\('aria-pressed',button\.classList\.contains\
 const legacyScript = active.match(/<script id="simurgWhoopMobileV7Script">([\s\S]*?)<\/script>/);
 assert.ok(legacyScript, 'legacy fallback shell is missing');
 assert.doesNotMatch(legacyScript[1], /oldShow|addEventListener\('keydown'/);
-assert.match(premiumCss, /html\[data-simurg-active-key="gym"\] #simurgStandaloneHint\{[\s\S]*?bottom:calc\(var\(--simurgNativeNavH,64px\) \+ 22px \+ env\(safe-area-inset-bottom,0px\)\)!important/);
+assert.match(premiumCss, /#simurgStandaloneHint\{display:none!important/);
+assert.match(fs.readFileSync(path.join(__dirname, '..', 'mobile-ia-premium.css'), 'utf8'), /html\[data-simurg-active-key="gym"\] #simurgStandaloneHint\{display:none!important/);
 process.stdout.write('✓ Mobile navigation has one router and section scroll reset\n');

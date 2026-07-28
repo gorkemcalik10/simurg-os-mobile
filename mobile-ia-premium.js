@@ -109,6 +109,11 @@
   }
   function openGymKey(key){
     var next=gymEntries.get(key);if(!next)return;
+    if(gymActiveKey===key&&next.body.parentNode){
+      closeGymEntry(next);
+      gymActiveKey='';
+      return;
+    }
     if(gymActiveKey&&gymActiveKey!==key)closeGymEntry(gymEntries.get(gymActiveKey));
     if(!next.body.parentNode){
       next.card.appendChild(next.body);
@@ -210,7 +215,6 @@
       if(!isMobile())return result;
       ['weeklyReport','monthlyReport'].forEach(function(reportId){var report=document.getElementById(reportId);if(report)report.replaceChildren();});
       if(id==='gym')mountGymAccordion();
-      else if(id==='workout')renderMobileDaily();
       else if(id==='data')mountDataCenter();
       else if(id==='polar'&&window.SimurgPolarBridge&&typeof window.SimurgPolarBridge.refresh==='function')window.SimurgPolarBridge.refresh('polar');
       return result;

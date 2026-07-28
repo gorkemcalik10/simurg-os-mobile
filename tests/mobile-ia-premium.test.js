@@ -38,6 +38,7 @@ run('mobile render lifecycle is route-aware while desktop keeps the full rendere
 });
 
 run('Gym uses a single-open-card mobile accordion without changing save contracts', () => {
+  assert.match(mobile, /if\(gymActiveKey===key&&next\.body\.parentNode\)\{[\s\S]*?closeGymEntry\(next\);[\s\S]*?gymActiveKey='';[\s\S]*?return;/);
   assert.match(mobile, /if\(gymActiveKey&&gymActiveKey!==key\)closeGymEntry/);
   assert.match(mobile, /document\.createDocumentFragment\(\)/);
   assert.match(mobile, /data-gym-toggle/);
@@ -45,17 +46,18 @@ run('Gym uses a single-open-card mobile accordion without changing save contract
   assert.doesNotMatch(mobile, /DATA\.workouts\s*=|localStorage\.setItem/);
 });
 
-run('Daily is selected-day only and keeps detail/export actions compact', () => {
-  assert.match(mobile, /\(data\.workouts\|\|\[\]\)\.filter\(function\(row\)\{return row&&row\.date===date;\}\)/);
-  assert.match(html, /id==='workout'\)\{[\s\S]*?window\.SimurgMobileIA\.renderDaily\(\);[\s\S]*?\}else\{[\s\S]*?window\.renderProgramDays/);
-  assert.match(mobile, /SIMURG İÇGÖRÜSÜ/);
-  assert.match(mobile, /GÜNÜN GYM ANTRENMANI/);
-  assert.match(mobile, /GÜNÜN POLAR AKTİVİTESİ/);
-  assert.match(mobile, /Sağlık ve veri ayrıntıları/);
-  assert.match(mobile, /JSON yedeği oluştur/);
+run('Daily restores the canonical logbook and keeps workout details available', () => {
+  const shell = html.match(/<nav id="simurgV8Nav"[\s\S]*?<\/nav>/);
+  assert.ok(shell);
+  assert.match(shell[0], /data-key="logger" onclick="simurgV8Go\('daily','logger'\)"/);
+  assert.match(html, /id==='daily'&&typeof window\.renderDailyReport==='function'/);
+  assert.match(html, /let items=dayData\(date\), c=calc\(items\)/);
+  assert.match(html, /if\(window\.innerWidth<=900\)simurgV8Go\('workout','logger'\)/);
+  assert.doesNotMatch(mobile, /else if\(id==='workout'\)renderMobileDaily\(\)/);
   assert.match(css, /#workout\.miaMobileDaily:not\(\.active\)\{display:none!important;\}/);
   assert.match(css, /#workout\.miaMobileDaily\.active\{display:block!important;\}/);
   assert.doesNotMatch(css, /#workout\.miaMobileDaily\{display:block!important;\}/);
+  assert.match(css, /html\[data-simurg-active-key="gym"\] #simurgStandaloneHint\{display:none!important;/);
 });
 
 run('Polar AccessLink mounts in Data Center on mobile and defers status loading', () => {
