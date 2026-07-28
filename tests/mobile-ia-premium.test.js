@@ -65,6 +65,11 @@ run('Daily opens the canonical workout journal with real Gym details', () => {
   assert.match(css, /#workout\.miaMobileDaily\.active\{display:block!important;\}/);
   assert.doesNotMatch(css, /#workout\.miaMobileDaily\{display:block!important;\}/);
   assert.match(css, /html\[data-simurg-active-key="gym"\] #simurgStandaloneHint\{display:none!important;/);
+  assert.match(css, /#workout \.dayProgram\{display:none!important;\}/);
+  assert.match(css, /#workout \.layout>div:first-child\{order:1!important;/);
+  assert.match(css, /#workout \.right\{order:2!important;/);
+  assert.match(css, /#workoutGroups \.exName\{[\s\S]*?overflow-wrap:anywhere!important;/);
+  assert.match(css, /#workoutGroups \.setTable\{[\s\S]*?table-layout:fixed!important;/);
 });
 
 run('Polar AccessLink mounts in Data Center on mobile and defers status loading', () => {
