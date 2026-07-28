@@ -72,6 +72,16 @@ run('Daily opens the canonical workout journal with real Gym details', () => {
   assert.match(css, /#workoutGroups \.setTable\{[\s\S]*?table-layout:fixed!important;/);
 });
 
+run('mobile Gym and Workout Journal use compact, conflict-proof dashboard rules', () => {
+  assert.match(css, /Mobile dashboard density v2/);
+  assert.match(css, /#gym\.gp-gym-refined \.topbar h1\{[\s\S]*?font-size:23px!important/);
+  assert.match(css, /#gym\.gp-gym-refined \.gymHero\{[\s\S]*?min-height:0!important/);
+  assert.match(css, /#workout\.gp-logger-refined \.topbar h1\{[\s\S]*?font-size:23px!important/);
+  assert.match(css, /#workout\.gp-logger-refined #workoutGroups :is\(\.menuBtn,\.addSet\)\{display:none!important/);
+  assert.match(css, /#workout\.gp-logger-refined #workoutGroups>\.simurg-activity-card\{[\s\S]*?min-height:0!important/);
+  assert.match(css, /#workout\.gp-logger-refined \.right\{[\s\S]*?grid-template-columns:1fr!important/);
+});
+
 run('Polar AccessLink mounts in Data Center on mobile and defers status loading', () => {
   assert.match(polar, /if\(window\.innerWidth<=900\)return document\.getElementById\('mobilePolarSyncHub'\)/);
   assert.match(polar, /if\(window\.innerWidth>900\)\{installObserver\(\);setTimeout\(installObserver,400\);setTimeout\(installObserver,1200\);refreshStatus\(\);\}/);
@@ -80,4 +90,4 @@ run('Polar AccessLink mounts in Data Center on mobile and defers status loading'
   assert.match(mobile, /simurgMobileOpenPolarDetails/);
 });
 
-process.stdout.write('6 mobile IA premium tests passed.\n');
+process.stdout.write('7 mobile IA premium tests passed.\n');
