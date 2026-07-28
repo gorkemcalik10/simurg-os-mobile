@@ -1,6 +1,4 @@
-const SIMURG_CACHE = 'simurg-stability-v2';
-const LEGACY_CACHE_PREFIX = 'simurg-';
-const PHOENIX_CACHE_PREFIX = 'simurg-phoenix-signal-';
+const SIMURG_CACHE = 'simurg-stability-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -32,16 +30,6 @@ function coreAssetUrl(asset) {
   return new URL(asset, self.registration.scope).href;
 }
 
-function isPhoenixRequest(url) {
-  const phoenixPath = new URL('./phoenix/', self.registration.scope).pathname;
-  return url.origin === self.location.origin && url.pathname.startsWith(phoenixPath);
-}
-
-function isLegacyCache(cacheName) {
-  return cacheName.startsWith(LEGACY_CACHE_PREFIX) &&
-    !cacheName.startsWith(PHOENIX_CACHE_PREFIX);
-}
-
 function pruneStaleCoreAssetVersions(cache) {
   const currentUrls = new Set(CORE_ASSETS.map(coreAssetUrl));
   const currentPaths = new Set(CORE_ASSETS.map(asset => new URL(asset, self.registration.scope).pathname));
@@ -65,9 +53,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     Promise.all([
-      caches.keys().then(keys => Promise.all(keys
-        .filter(k => isLegacyCache(k) && k !== SIMURG_CACHE)
-        .map(k => caches.delete(k)))),
+      caches.keys().then(keys => Promise.all(keys.filter(k => k !== SIMURG_CACHE).map(k => caches.delete(k)))),
       caches.open(SIMURG_CACHE).then(pruneStaleCoreAssetVersions)
     ]).then(() => self.clients.claim())
   );
@@ -76,7 +62,6 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (isPhoenixRequest(url)) return;
   if (url.hostname.includes('supabase.co')) return;
   if (req.mode === 'navigate') {
     event.respondWith(fetch(req).then(res => {

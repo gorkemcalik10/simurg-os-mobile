@@ -55,8 +55,8 @@ run('changed production assets use matching cache versions', () => {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=stability-v2/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-stability-v2'/);
+  assert.match(index, /sw\.js\?v=stability-v1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-stability-v1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);
