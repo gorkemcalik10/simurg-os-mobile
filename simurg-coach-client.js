@@ -247,7 +247,11 @@
     options=options||{};
     var data=dataRoot(options.data),selected=dateValue(date);
     stats.analysisRuns+=1;
-    var calculated=engine.analyze(type,data,selected,options.engineOptions||{});
+    var engineOptions=Object.assign({},options.engineOptions||{});
+    if(!engineOptions.gymPlan&&root&&root.SimurgSignalModel&&typeof root.SimurgSignalModel.day==='function'){
+      var sharedDay=root.SimurgSignalModel.day(selected);if(sharedDay)engineOptions.gymPlan=sharedDay.gymPlan;
+    }
+    var calculated=engine.analyze(type,data,selected,engineOptions);
     var key=type+':'+selected+':'+calculated.inputHash;
     if(memoryCache.has(key)){
       stats.memoryHits+=1;

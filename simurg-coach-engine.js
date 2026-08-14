@@ -345,6 +345,7 @@
       var category=movementCategory(row.exercise,row,data,options);
       categories[category].push({
         exercise:firstText(row.exercise,'Egzersiz'),
+        exerciseId:firstText(row.exerciseId),
         sets:firstNumber(row.sets,1)||1,reps:firstNumber(row.reps,0)||0,
         weight:firstNumber(row.weight,0)||0,rpe:number(row.rpe),
         form:firstText(row.form),pain:firstText(row.pain),category:category
@@ -379,6 +380,7 @@
       },
       gym:{
         rows:rows,
+        plan:options.gymPlan||null,
         setCount:rows.reduce(function(sum,row){return sum+(firstNumber(row.sets,1)||1);},0),
         volume:rows.reduce(function(sum,row){return sum+volume(row);},0),
         avgRpe:average(rpes),
@@ -583,12 +585,23 @@
       return insight;
     });
     output.comparisonNotes=comparableDays(data,date,day,options).map(function(item){return item.date+' tarihinde benzer sinyal profili görüldü'+(item.avgRpe!=null?' (RPE '+round(item.avgRpe,1)+').':'.');});
+    if(options.gymPlan){
+      output.gymPlan=clone(options.gymPlan);
+      output.keyDrivers.unshift('Seçili Gym bağlamı: '+(options.gymPlan.label||options.gymPlan.mode)+'.');
+      output.keyDrivers=unique(output.keyDrivers).slice(0,6);
+      output.inputHash=inputHash({base:output.inputHash,gymPlan:options.gymPlan});
+      if(options.gymPlan.skipped){
+        output.trainingDecision='rest';output.loadAdjustmentPercent=-100;output.headline='Gym günü açıkça atlandı';
+        output.summary='Bu tarih açıkça atlandı; planlanan seans için progresyon veya hedef mesajı üretilmedi.';
+        output.workoutGuidance={mainLifts:'Bu gün için Gym progresyon hedefi yok.',accessories:'Bu gün için Gym progresyon hedefi yok.',stabilityPosture:'Toparlanma ve ağrısız günlük hareket öncelikli.',conditioning:'Yalnızca gerçekten kaydedilmiş aktiviteler değerlendirilir.'};
+      }
+    }
     return composeLocalNarrative(output,{day:day});
   }
   function analyzePreWorkout(data,date,options){
     var result=analyzeDaily(data,date,Object.assign({},options||{},{type:'pre_workout'}));
     var current=extractDay(data,date,options),previousDate=null;
-    if(!current.gym.rows.length){
+    if(!current.gym.rows.length&&!(options&&options.gymPlan&&options.gymPlan.skipped)){
       previousDate=unique((data.workouts||[]).map(function(row){return row&&row.date;}).filter(function(value){return validDate(value)&&value<date;})).sort().slice(-1)[0]||null;
       if(previousDate){
         var previous=extractDay(data,previousDate,options),baseline=result.baseline,confidenceResult=confidence(current,baseline,result.missingData),readinessResult=readiness(current,baseline,confidenceResult);
@@ -607,7 +620,11 @@
     return composeLocalNarrative(result,{day:current});
   }
   function previousExercisePerformance(data,row,date){
-    var rows=(data.workouts||[]).filter(function(item){return item&&item.date<date&&normalizeName(item.exercise)===normalizeName(row.exercise);}).sort(function(a,b){return String(b.date).localeCompare(String(a.date));});
+    var rows=(data.workouts||[]).filter(function(item){
+      if(!item||item.date>=date)return false;
+      if(row.exerciseId)return item.exerciseId===row.exerciseId;
+      return !item.exerciseId&&normalizeName(item.exercise)===normalizeName(row.exercise);
+    }).sort(function(a,b){return String(b.date).localeCompare(String(a.date));});
     if(!rows.length)return null;
     var previous=rows[0],currentVolume=volume(row),previousVolume=volume(previous);
     return {exercise:row.exercise,previousDate:previous.date,volumeChangePercent:deviation(currentVolume,previousVolume),weightChange:round((number(row.weight)||0)-(number(previous.weight)||0),1)};

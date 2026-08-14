@@ -38,8 +38,8 @@ run('AccessLink publishes status and refreshes existing render system', () => {
 run('changed production assets use matching cache versions', () => {
   for (const asset of [
     'simurg-volume-model.js?v=1',
-    'simurg-coach-engine.js?v=2',
-    'simurg-coach-client.js?v=2',
+    'simurg-coach-engine.js?v=3',
+    'simurg-coach-client.js?v=3',
     'simurg-coach.css?v=4',
     'simurg-coach-ui.js?v=3',
     'simurg-persistence.js?v=1',
@@ -47,9 +47,9 @@ run('changed production assets use matching cache versions', () => {
     'simurg-data-validation.js?v=4',
     'polar-accesslink.js?v=9',
     'premium-standard.css?v=34',
-    'premium-standard.js?v=40',
+    'premium-standard.js?v=41',
     'desktop-alignment.css?v=26',
-    'desktop-alignment.js?v=33',
+    'desktop-alignment.js?v=34',
     'simurg-cloud-auth.js?v=3',
     'mobile-ia-premium.css?v=10',
     'mobile-ia-premium.js?v=6',
@@ -59,8 +59,8 @@ run('changed production assets use matching cache versions', () => {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=storage-identity-safety-v1/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-storage-identity-safety-v1'/);
+  assert.match(index, /sw\.js\?v=actual-workout-day-semantics-v1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-actual-workout-day-semantics-v1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

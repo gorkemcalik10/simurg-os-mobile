@@ -22,7 +22,7 @@ run('coach client and UI assets load in dependency order', () => {
   assert.ok(engine >= 0 && client > engine);
   assert.ok(uiRuntime > client);
   assert.ok(uiRuntime < html.indexOf('premium-standard.js'));
-  assert.match(html, /simurg-coach-client\.js\?v=2/);
+  assert.match(html, /simurg-coach-client\.js\?v=3/);
   assert.match(html, /simurg-coach\.css\?v=4/);
   assert.match(html, /simurg-coach-ui\.js\?v=3/);
 });

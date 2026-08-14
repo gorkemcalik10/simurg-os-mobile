@@ -4,9 +4,9 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Simurg OS Cloud Sync</title>
 <script src="./simurg-volume-model.js?v=1"></script>
-<script src="./simurg-signal-model.js?v=6"></script>
-<script src="./simurg-coach-engine.js?v=2"></script>
-<script src="./simurg-coach-client.js?v=2"></script>
+<script src="./simurg-signal-model.js?v=7"></script>
+<script src="./simurg-coach-engine.js?v=3"></script>
+<script src="./simurg-coach-client.js?v=3"></script>
 <style>
 :root{
   --bg:#04070a;--panel:#0a1118;--panel2:#0d161e;--line:rgba(166,180,194,.15);--text:#eef1f4;--muted:#8e99a5;
@@ -7775,7 +7775,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=storage-identity-safety-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=actual-workout-day-semantics-v1').catch(function(){});
   });
 }
 </script>
@@ -8492,7 +8492,6 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
   window.renderDataLocalStatus=function(){
     const el=document.getElementById('localDataStatus');
     if(!el||typeof DATA==='undefined'||!DATA) return;
-    ensureMeta();
     const c=dataCounts();
     const last=(DATA._meta&&DATA._meta.lastLocalUpdate)||DATA.lastSyncAt||(DATA.polarConnection&&DATA.polarConnection.lastSyncAt)||'';
     const lastLabel=last?fmtDateTime(last):(c.workoutDays||c.activities||c.appleWatch?'Kayıt mevcut':'Henüz kayıt yok');
@@ -8555,7 +8554,6 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     return false;
   };
 
-  ensureMeta();
   setTimeout(()=>{try{renderDataLocalStatus();}catch(e){}},60);
   window.__simurgFinalPreNetlifyPolishV1=true;
 })();
@@ -9992,7 +9990,8 @@ textarea,input,select{
     }catch(e){return false}
   }
   function hasGym(d){try{return (dayData(d)||[]).length>0}catch(e){return false}}
-  function programFor(d){try{return getProgramLabelForDate(d)}catch(e){return safeDay(d)}}
+  function dayPlan(d){try{return window.SimurgSignalModel&&window.SimurgSignalModel.day(d).gymPlan}catch(e){return null}}
+  function programFor(d){const plan=dayPlan(d);if(plan&&plan.label)return plan.label;try{return getProgramLabelForDate(d)}catch(e){return safeDay(d)}}
 
   function applyTodayHighlights(){
     const t=safeToday();
@@ -10034,8 +10033,11 @@ textarea,input,select{
     const wg=document.getElementById('workoutGroups'); if(!wg) return;
     const d=String(selectedDate||window.selectedDate);
     if(hasGym(d) || hasPhysicalActivity(d)) return;
-    const type=programFor(d),shownType=window.SimurgLabels?window.SimurgLabels.sentence(type):type;
-    wg.innerHTML=`<div class="restDayCard"><small>DİNLENME GÜNÜ</small><b>${safeTr(d)}</b><span>${shownType}. Bu gün için Gym veya aktivite kaydı yok. Aktif toparlanma, yürüyüş, yüzme ya da ek antrenman yaptıysan Evrensel İçe Aktarım ile ekleyebilirsin.</span></div>`;
+    const plan=dayPlan(d)||{mode:'rest',label:programFor(d),planned:false,skipped:false,performed:false};
+    const shownType=window.SimurgLabels?window.SimurgLabels.sentence(plan.label):plan.label;
+    const state=plan.skipped?'GÜN ATLANDI':plan.mode==='rest'?'DİNLENME GÜNÜ':plan.mode==='alternate'?'ALTERNATİF PROGRAM':plan.mode==='custom'?'SERBEST ANTRENMAN':'PLANLANDI';
+    const detail=plan.skipped?'Bu gün açıkça atlandı; planlanan program aktif seans değildir.':plan.mode==='rest'?'Takvimde planlı Gym seansı yok ve gerçek aktivite kaydı bulunmuyor.':'Bu program seçili tarih için planlandı ancak henüz gerçek bir Gym kaydı yok.';
+    wg.innerHTML=`<div class="restDayCard"><small>${state}</small><b>${safeTr(d)} · ${shownType}</b><span>${detail}</span></div>`;
   }
 
   function updateBuildLabel(){
@@ -10202,8 +10204,7 @@ textarea,input,select{
     return {cls:'hold',label:'Yükü Koru',icon:'🟡',reason:'Dengeli trend'};
   }
   function nextTarget(ex,date){
-    DATA.autoNextTargets=DATA.autoNextTargets||{};
-    const saved=DATA.autoNextTargets[ex];
+    const saved=DATA.autoNextTargets&&DATA.autoNextTargets[ex];
     const cur=sessionBest(ex,date), groups=sessionGroups(ex,date), last=cur||groups[0]?.best||null, flags=latestCoachFlags(ex), rd=readiness(ex,date);
     let text='İlk temiz seti kaydet; sonra sistem hedefi netleştirsin.';
     if(last){
@@ -16107,11 +16108,11 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./simurg-coach.css?v=4">
 <script src="./simurg-coach-ui.js?v=3"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=34">
-<script src="./premium-standard.js?v=40"></script>
+<script src="./premium-standard.js?v=41"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=9"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=26">
-<script src="./desktop-alignment.js?v=33"></script>
+<script src="./desktop-alignment.js?v=34"></script>
 <link rel="stylesheet" href="./mobile-ia-premium.css?v=10">
 <link rel="stylesheet" href="./simurg-gym-flex.css?v=1">
 <script src="./mobile-ia-premium.js?v=6"></script>
