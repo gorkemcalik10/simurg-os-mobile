@@ -103,6 +103,7 @@
 
   function closeGymEntry(entry){
     if(!entry||!entry.body||!entry.body.parentNode)return;
+    if(typeof window.simurgCaptureGymCardDraft==='function')window.simurgCaptureGymCardDraft(entry.card);
     while(entry.body.firstChild)entry.fragment.appendChild(entry.body.firstChild);
     entry.body.remove();
     entry.card.classList.remove('isOpen');
@@ -123,6 +124,22 @@
     next.card.classList.add('isOpen');
     next.summary.setAttribute('aria-expanded','true');
     gymActiveKey=key;
+  }
+  function openGymAndFocus(key,options){
+    var entry=gymEntries.get(key);if(!entry)return false;
+    if(gymActiveKey!==key||!entry.body.parentNode)openGymKey(key);
+    if(options&&options.focus){
+      var input=entry.card.querySelector('.gymWeight:not([disabled]),.gymExerciseName:not([disabled])');
+      if(input)try{input.focus({preventScroll:true});}catch(error){input.focus();}
+    }
+    requestAnimationFrame(function(){
+      entry.card.scrollIntoView({behavior:'smooth',block:'start'});
+      if(options&&options.focus){
+        var currentInput=entry.card.querySelector('.gymWeight:not([disabled]),.gymExerciseName:not([disabled])');
+        if(currentInput)try{currentInput.focus({preventScroll:true});}catch(error){currentInput.focus();}
+      }
+    });
+    return true;
   }
   function compactProgramEditor(list){
     var add=list.querySelector('.gymAddCard');if(!add||add.closest('.miaProgramEditor'))return;
@@ -172,6 +189,21 @@
       list.addEventListener('click',function(event){var button=event.target.closest('[data-gym-toggle]');if(button&&list.contains(button))openGymKey(button.dataset.gymToggle);});
     }
     setTimeout(recompactGymExtras,200);
+  }
+  function restoreDesktopGym(){
+    var list=document.getElementById('gymModeList');if(!list)return;
+    gymEntries.forEach(function(entry){
+      if(!entry.body.parentNode){entry.card.appendChild(entry.body);entry.body.appendChild(entry.fragment);}
+      Array.from(entry.body.children).forEach(function(child){
+        if(child.classList&&child.classList.contains('miaExerciseEditor')){
+          var head=child.querySelector(':scope > .gymCardHead');if(head)entry.card.appendChild(head);child.remove();
+        }else entry.card.appendChild(child);
+      });
+      entry.body.remove();entry.summary.remove();entry.card.classList.remove('isOpen');
+    });
+    var editor=list.querySelector(':scope > .miaProgramEditor');
+    if(editor){var add=editor.querySelector('.gymAddCard');if(add)list.insertBefore(add,editor);editor.remove();}
+    gymEntries=new Map();gymActiveKey='';
   }
   function patchGymRenderer(){
     if(window.__miaGymRendererPatched||typeof window.renderGymMode!=='function')return;
@@ -310,8 +342,8 @@
     };
   }
   function handleResize(){
-    if(isMobile()){normalizeMobileShell();patchGymRenderer();patchJournalRenderer();}
-    else restoreDesktopDaily();
+    if(isMobile()){normalizeMobileShell();patchGymRenderer();patchJournalRenderer();mountGymAccordion();}
+    else{restoreDesktopGym();restoreDesktopDaily();}
   }
   ready(function(){
     normalizeMobileShell();
@@ -322,5 +354,5 @@
     if(document.body.getAttribute('data-simurg-active-screen')==='workout')mountJournalDashboard();
     window.addEventListener('resize',handleResize,{passive:true});
   });
-  window.SimurgMobileIA={renderDaily:renderMobileDaily,mountGym:mountGymAccordion,mountJournal:mountJournalDashboard,mountData:mountDataCenter};
+  window.SimurgMobileIA={renderDaily:renderMobileDaily,mountGym:mountGymAccordion,mountJournal:mountJournalDashboard,mountData:mountDataCenter,openGym:openGymAndFocus};
 })();

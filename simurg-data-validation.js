@@ -20,13 +20,13 @@
   BLOCKED_KEYS.prototype=true;
   BLOCKED_KEYS.constructor=true;
   var ARRAY_NAMES=['workouts','metrics','nutrition','recovery','appleWatch','dailyNotes','weeklyNotes'];
-  var MAP_NAMES=['customGymPrograms','programNames','activityNotes','autoNextTargets','recoveryEntries','exerciseLoadProfiles'];
+  var MAP_NAMES=['customGymPrograms','programNames','gymDayState','activityNotes','autoNextTargets','recoveryEntries','exerciseLoadProfiles'];
   var POLAR_HISTORY_NAMES=['polarSleep','polarNightlyRecharge','polarContinuousHr','polarCardioLoad'];
   var RESERVED_ROOTS={auth:true,session:true,supabase:true,cloudAuth:true,cloudSession:true,simurg_cloud_meta:true,simurg_polar_accesslink_client_v1:true};
   var DEFAULTS={
     schemaVersion:CURRENT_SCHEMA_VERSION,
     workouts:[],metrics:[],nutrition:[],recovery:[],appleWatch:[],dailyNotes:[],weeklyNotes:[],
-    customGymPrograms:{},programNames:{},exerciseLoadProfiles:{},
+    customGymPrograms:{},programNames:{},gymDayState:{},exerciseLoadProfiles:{},
     coachIntelligence:{schemaVersion:1,daily:{},weekly:{},patterns:{},aiCache:{},settings:{movementCategories:{}}},
     polarWorkouts:{daily:{},latest:null},
     polarActivity:{daily:{},latest:null},
@@ -408,6 +408,14 @@
       scan(entry);
     });
     Object.keys(candidate.programNames||{}).forEach(function(key){text(candidate.programNames[key],pathFor('$.programNames',key),512,true)});
+    Object.keys(candidate.gymDayState||{}).forEach(function(key){
+      var entry=candidate.gymDayState[key],entryPath=pathFor('$.gymDayState',key);
+      date(key,entryPath);plain(entry,entryPath);
+      if(['planned','alternate','custom','skipped'].indexOf(entry.mode)<0)fail('invalid_gym_day_mode','Geçerli Gym gün modu bekleniyor',entryPath+'.mode');
+      if(entry.sourceDay!==null&&entry.sourceDay!==undefined)text(entry.sourceDay,entryPath+'.sourceDay',128,true);
+      if(entry.sourceDate!==null&&entry.sourceDate!==undefined)date(entry.sourceDate,entryPath+'.sourceDate');
+      text(entry.label==null?'':entry.label,entryPath+'.label',512,true);optionalDateTime(entry.updatedAt,entryPath+'.updatedAt');scan(entry);
+    });
     Object.keys(candidate.activityNotes||{}).forEach(function(key){text(candidate.activityNotes[key],pathFor('$.activityNotes',key),LIMITS.maxString,true)});
     Object.keys(candidate.autoNextTargets||{}).forEach(function(key){plain(candidate.autoNextTargets[key],pathFor('$.autoNextTargets',key));scan(candidate.autoNextTargets[key])});
     candidate.workouts.forEach(function(row,index){validateWorkoutRecord(row,'$.workouts['+index+']',{coerce:!!options.coerce})});

@@ -46,6 +46,13 @@ run('Gym uses a single-open-card mobile accordion without changing save contract
   assert.doesNotMatch(mobile, /DATA\.workouts\s*=|localStorage\.setItem/);
 });
 
+run('Gym accordion restores canonical desktop cards across the 900/901 breakpoint', () => {
+  assert.match(mobile, /function restoreDesktopGym\(\)/);
+  assert.match(mobile, /entry\.body\.remove\(\);entry\.summary\.remove\(\)/);
+  assert.match(mobile, /if\(isMobile\(\)\)\{normalizeMobileShell\(\);patchGymRenderer\(\);patchJournalRenderer\(\);mountGymAccordion\(\);\}/);
+  assert.match(mobile, /else\{restoreDesktopGym\(\);restoreDesktopDaily\(\);\}/);
+});
+
 run('Daily opens the canonical workout journal with real Gym details', () => {
   const shell = html.match(/<nav id="simurgV8Nav"[\s\S]*?<\/nav>/);
   assert.ok(shell);
@@ -114,4 +121,4 @@ run('Polar AccessLink mounts in Data Center on mobile and defers status loading'
   assert.match(mobile, /simurgMobileOpenPolarDetails/);
 });
 
-process.stdout.write('9 mobile IA premium tests passed.\n');
+process.stdout.write('10 mobile IA premium tests passed.\n');

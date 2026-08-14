@@ -1,10 +1,12 @@
-const SIMURG_CACHE = 'simurg-mobile-journal-dashboard-v4';
+const SIMURG_CACHE = 'simurg-flexible-workout-day-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './simurg-volume-model.js?v=1',
-  './simurg-data-validation.js?v=3',
+  './simurg-data-validation.js?v=4',
+  './simurg-gym-flex.js?v=1',
+  './simurg-gym-flex.css?v=1',
   './polar-workout.css?v=11',
   './polar-workout.js?v=14',
   './workout-source-policy.js?v=3',
@@ -21,7 +23,7 @@ const CORE_ASSETS = [
   './desktop-alignment.css?v=26',
   './desktop-alignment.js?v=33',
   './mobile-ia-premium.css?v=10',
-  './mobile-ia-premium.js?v=5',
+  './mobile-ia-premium.js?v=6',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
