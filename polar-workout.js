@@ -347,9 +347,9 @@
           var source=String(parsed&&parsed.source||'').trim().toLowerCase();
           if(!Array.isArray(parsed)&&(kind==='polar_flow_workout'||source==='polar flow')){
             var workout=importPolarWorkout(parsed);
+            var persistence=typeof window.save==='function'?window.save():window.SimurgPersistence.persistData(localStorage,root());
+            if(!persistence.ok){window.SimurgPersistence.notifyFailure(persistence,'Polar antrenmanı kaydedilemedi.');return null;}
             if(box) box.value='';
-            if(typeof window.save==='function') window.save();
-            else localStorage.setItem('atlas_summary_reports',JSON.stringify(root()));
             render();
             alert('Polar antrenmanı içe aktarıldı: '+workout.date+' '+(workout.startTime||''));
             return workout;

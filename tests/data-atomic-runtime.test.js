@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict');
 const validation = require('../simurg-data-validation.js');
+const persistence = require('../simurg-persistence.js');
 
 function base() {
   return validation.prepareFull({ workouts: [] }).data;
@@ -10,9 +11,10 @@ function run(name, fn) {
 }
 
 const storage = new Map();
+let storageFailure = null;
 global.localStorage = {
   getItem(key) { return storage.has(key) ? storage.get(key) : null; },
-  setItem(key, value) { storage.set(key, String(value)); },
+  setItem(key, value) { if(storageFailure)throw storageFailure;storage.set(key, String(value)); },
   removeItem(key) { storage.delete(key); }
 };
 const boxes = {
@@ -24,6 +26,7 @@ global.document = { getElementById(id) { return boxes[id] || null; } };
 global.alert = () => {};
 global.window = {
   SimurgDataValidation: validation,
+  SimurgPersistence: persistence,
   SimurgPolarWorkoutNormalize(value) { return { ...value }; }
 };
 
@@ -68,6 +71,17 @@ run('invalid active Apple Watch RPE leaves DATA and localStorage byte-for-byte u
   assert.equal(window.universalImport(), null);
   assert.equal(JSON.stringify(data), beforeData);
   assert.equal(storage.get('atlas_summary_reports'), beforeRaw);
+});
+
+run('quota failure rolls back import and never reports completion', () => {
+  const beforeData=JSON.stringify(data),beforeRaw=storage.get('atlas_summary_reports'),messages=[];
+  global.alert=message=>messages.push(String(message));
+  boxes.universalJsonBox.value=JSON.stringify({type:'workout',workouts:[{date:'2026-07-24',exercise:'Row',sets:1,reps:8,weight:20}]});
+  storageFailure=Object.assign(new Error('full'),{name:'QuotaExceededError'});
+  assert.equal(window.universalImport(),null);storageFailure=null;
+  assert.equal(JSON.stringify(data),beforeData);assert.equal(storage.get('atlas_summary_reports'),beforeRaw);
+  assert.ok(messages.some(message=>/başarısız|yapılamadı/i.test(message)));assert.ok(messages.every(message=>!/tamamlandı|içe aktarıldı/i.test(message)));
+  global.alert=()=>{};
 });
 
 run('render failure rolls back exact DATA, localStorage, date and import snapshot', () => {

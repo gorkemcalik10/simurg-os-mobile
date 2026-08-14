@@ -10,9 +10,11 @@
   function endpoint(name){var base='';try{base=SIMURG_SUPABASE_URL;}catch(e){}return String(base||'').replace(/\/$/,'')+'/functions/v1/'+name;}
   function apiKey(){try{return SIMURG_SUPABASE_KEY||'';}catch(e){return '';}}
   function persist(){
-    try{if(typeof window.simurgPersistData==='function'){window.simurgPersistData();return true;}}catch(e){}
-    try{if(typeof save==='function'){save();return true;}}catch(e){}
-    try{localStorage.setItem('atlas_summary_reports',JSON.stringify(root()));return true;}catch(e){return false;}
+    try{if(typeof window.simurgPersistData==='function')return !!window.simurgPersistData().ok;}catch(e){}
+    try{if(typeof save==='function')return !!save().ok;}catch(e){}
+    var result=window.SimurgPersistence.persistData(localStorage,root());
+    if(!result.ok)window.SimurgPersistence.notifyFailure(result,'Polar verisi yerel olarak kaydedilemedi.');
+    return result.ok;
   }
   function base64Url(bytes){var binary='';bytes.forEach(function(value){binary+=String.fromCharCode(value);});return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,'');}
   function uuid(){if(crypto.randomUUID)return crypto.randomUUID();var bytes=new Uint8Array(16);crypto.getRandomValues(bytes);bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;var hex=Array.from(bytes).map(function(v){return v.toString(16).padStart(2,'0');}).join('');return hex.slice(0,8)+'-'+hex.slice(8,12)+'-'+hex.slice(12,16)+'-'+hex.slice(16,20)+'-'+hex.slice(20);}
@@ -20,7 +22,7 @@
     try{var parsed=JSON.parse(localStorage.getItem(CAPABILITY_KEY)||'null');if(parsed&&parsed.clientId&&parsed.clientKey)return parsed;}catch(e){}
     if(!create)return null;
     var bytes=new Uint8Array(32);crypto.getRandomValues(bytes);var value={clientId:uuid(),clientKey:base64Url(bytes)};
-    localStorage.setItem(CAPABILITY_KEY,JSON.stringify(value));return value;
+    window.SimurgPersistence.requireSuccess(window.SimurgPersistence.writeJson(localStorage,CAPABILITY_KEY,value));return value;
   }
   function ensureStores(){
     var data=root();if(!data||typeof data!=='object')return data;

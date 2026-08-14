@@ -105,9 +105,9 @@
       lastPullAt:typeof next.lastPullAt==='string'?next.lastPullAt:'',
       lastPushAt:typeof next.lastPushAt==='string'?next.lastPushAt:''
     };
-    localStorage.setItem(metaKey(userId),JSON.stringify(safe));
+    window.SimurgPersistence.requireSuccess(window.SimurgPersistence.writeJson(localStorage,metaKey(userId),safe));
   }
-  function clearMeta(userId){if(userId)try{localStorage.removeItem(metaKey(userId))}catch(error){}}
+  function clearMeta(userId){if(userId)window.SimurgPersistence.remove(localStorage,metaKey(userId))}
   function currentData(){return typeof DATA!=='undefined'?DATA:null}
   function requireCurrentData(){
     var value=currentData();
@@ -135,14 +135,14 @@
     var previousRaw=localStorage.getItem(LOCAL_DATA_KEY);
     try{
       DATA=value;
-      localStorage.setItem(LOCAL_DATA_KEY,JSON.stringify(DATA));
+      window.SimurgPersistence.requireSuccess(window.SimurgPersistence.persistData(localStorage,DATA));
       if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('cloud-pull');
       if(typeof render==='function')render();
       if(typeof window.renderDataLocalStatus==='function')window.renderDataLocalStatus();
     }catch(error){
       DATA=previousData;
-      if(previousRaw===null)localStorage.removeItem(LOCAL_DATA_KEY);
-      else localStorage.setItem(LOCAL_DATA_KEY,previousRaw);
+      if(previousRaw===null)window.SimurgPersistence.remove(localStorage,LOCAL_DATA_KEY);
+      else window.SimurgPersistence.writeRaw(localStorage,LOCAL_DATA_KEY,previousRaw);
       try{if(typeof render==='function')render();}catch(rollbackError){}
       throw error;
     }

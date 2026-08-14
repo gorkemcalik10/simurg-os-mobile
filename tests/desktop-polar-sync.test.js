@@ -42,6 +42,8 @@ run('changed production assets use matching cache versions', () => {
     'simurg-coach-client.js?v=2',
     'simurg-coach.css?v=4',
     'simurg-coach-ui.js?v=3',
+    'simurg-persistence.js?v=1',
+    'simurg-gym-identity.js?v=1',
     'simurg-data-validation.js?v=4',
     'polar-accesslink.js?v=9',
     'premium-standard.css?v=34',
@@ -57,8 +59,8 @@ run('changed production assets use matching cache versions', () => {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=flexible-workout-day-v1/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-flexible-workout-day-v1'/);
+  assert.match(index, /sw\.js\?v=storage-identity-safety-v1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-storage-identity-safety-v1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

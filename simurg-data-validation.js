@@ -605,17 +605,17 @@
       try{
         if(options.downloadBackup)backupDownload(previous,options.backupLabel);
         if(options.snapshot){
-          localStorage.setItem(SNAP_KEY,JSON.stringify({meta:{at:new Date().toISOString(),source:options.source||'import',selectedDate:previousDate},data:clone(previous)}));
+          window.SimurgPersistence.requireSuccess(window.SimurgPersistence.writeJson(localStorage,SNAP_KEY,{meta:{at:new Date().toISOString(),source:options.source||'import',selectedDate:previousDate},data:clone(previous)}));
         }
         adapter.setData(prepared);
         setSelected(options.selectedDate||'');
-        localStorage.setItem(DATA_KEY,JSON.stringify(prepared));
+        window.SimurgPersistence.requireSuccess(window.SimurgPersistence.persistData(localStorage,prepared));
         redraw();
         return prepared;
       }catch(error){
         adapter.setData(previous);
-        if(previousRaw===null)localStorage.removeItem(DATA_KEY);else localStorage.setItem(DATA_KEY,previousRaw);
-        if(previousSnapshot===null)localStorage.removeItem(SNAP_KEY);else localStorage.setItem(SNAP_KEY,previousSnapshot);
+        if(previousRaw===null)window.SimurgPersistence.remove(localStorage,DATA_KEY);else window.SimurgPersistence.writeRaw(localStorage,DATA_KEY,previousRaw);
+        if(previousSnapshot===null)window.SimurgPersistence.remove(localStorage,SNAP_KEY);else window.SimurgPersistence.writeRaw(localStorage,SNAP_KEY,previousSnapshot);
         setSelected(previousDate);
         try{redraw()}catch(rollbackError){}
         throw error;
@@ -730,7 +730,7 @@
         plain(snapshot,'$.snapshot');
         var prepared=prepareFull(snapshot.data,{source:'undo-import'});
         commit(prepared.data,{source:'undo-import',selectedDate:snapshot.meta&&snapshot.meta.selectedDate});
-        localStorage.removeItem(SNAP_KEY);
+        window.SimurgPersistence.requireSuccess(window.SimurgPersistence.remove(localStorage,SNAP_KEY));
         alert('Son import geri alındı.');
         return prepared.data;
       }catch(error){alert('Undo başarısız: '+message(error));return null}

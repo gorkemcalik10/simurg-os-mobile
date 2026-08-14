@@ -1,8 +1,10 @@
-const SIMURG_CACHE = 'simurg-flexible-workout-day-v1';
+const SIMURG_CACHE = 'simurg-storage-identity-safety-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './simurg-persistence.js?v=1',
+  './simurg-gym-identity.js?v=1',
   './simurg-volume-model.js?v=1',
   './simurg-data-validation.js?v=4',
   './simurg-gym-flex.js?v=1',

@@ -71,7 +71,7 @@ run('atomic commit retains exact previous DATA, storage, date and snapshot for r
   assert.match(source, /var previousDate=selected\(\)/);
   assert.match(source, /var previousSnapshot=localStorage\.getItem\(SNAP_KEY\)/);
   assert.match(source, /adapter\.setData\(previous\)/);
-  assert.match(source, /localStorage\.setItem\(DATA_KEY,previousRaw\)/);
+  assert.match(source, /SimurgPersistence\.writeRaw\(localStorage,DATA_KEY,previousRaw\)/);
 });
 
 run('Cloud Pull validates before revision display, confirmation, backup, persist and metadata', () => {

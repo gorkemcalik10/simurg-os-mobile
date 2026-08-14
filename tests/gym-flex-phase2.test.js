@@ -69,7 +69,7 @@ run('existing-row skip protection warns and never deletes rows', () => {
 });
 run('save and next preserves other drafts and uses card identity for duplicate names', () => {
   assert.match(index,/const gymSessionDrafts=new Map\(\)/); assert.match(index,/captureGymDrafts\(\)/); assert.match(index,/restoreGymDrafts\(selectedDate\)/);
-  assert.match(index,/gymEntryKey:key/); assert.match(index,/w\.gymEntryKey===key/); assert.match(index,/SimurgMobileIA\?\.openGym\(nextKey/);
+  assert.match(index,/gymEntryKey:key/); assert.match(index,/function gymRowMatches\(item,row,ex\)/); assert.match(index,/row\.exerciseId===item\.exerciseId/); assert.match(index,/SimurgMobileIA\?\.openGym\(nextKey/);
   assert.match(index,/Kaydet ve Sonrakine Geç/);
 });
 
