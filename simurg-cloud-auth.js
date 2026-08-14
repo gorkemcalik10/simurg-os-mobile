@@ -6,7 +6,7 @@
   var META_PREFIX='simurg_cloud_meta:';
   var client=null;
   var authSubscription=null;
-  var state={initializing:true,busy:false,session:null,operation:''};
+  var state={initializing:true,busy:false,session:null,operation:'',lastResult:null,cloudRevision:null};
 
   function byId(id){return document.getElementById(id)}
   function hasSession(){return !!(state.session&&state.session.user&&state.session.user.id)}
@@ -44,12 +44,24 @@
   function setStatus(message,type){
     var element=byId('cloudSyncStatus');
     if(!element)return;
-    element.classList.remove('ok','err','conflict');
+    element.classList.remove('ok','warn','err','conflict');
     if(type)element.classList.add(type);
     element.dataset.state=type||'ready';
     element.textContent=String(message||'');
   }
+  function operationResult(operation,status,details){
+    var result={operation:operation,status:status};
+    if(details&&isPlainObject(details))Object.keys(details).forEach(function(key){result[key]=details[key]});
+    state.lastResult=result;
+    try{document.dispatchEvent(new CustomEvent('simurg:cloud-operation-result',{detail:result}));}catch(error){}
+    return result;
+  }
+  function finishOperation(operation,status,message,type,details){
+    setStatus(message,type);
+    return operationResult(operation,status,details);
+  }
   function setRevisionStatus(revision,updatedAt){
+    state.cloudRevision=revision==null?null:{revision:Number(revision),updatedAt:updatedAt||''};
     if(revision==null){setText('cloudRevisionStatus','Bulut revizyonu: -');return}
     setText('cloudRevisionStatus','Bulut revizyonu: '+revision+' · Son güncelleme: '+formatDate(updatedAt));
   }
@@ -105,7 +117,15 @@
       lastPullAt:typeof next.lastPullAt==='string'?next.lastPullAt:'',
       lastPushAt:typeof next.lastPushAt==='string'?next.lastPushAt:''
     };
-    window.SimurgPersistence.requireSuccess(window.SimurgPersistence.writeJson(localStorage,metaKey(userId),safe));
+    return window.SimurgPersistence.requireSuccess(window.SimurgPersistence.writeJson(localStorage,metaKey(userId),safe));
+  }
+  function tryWriteMeta(userId,next){
+    try{return {ok:true,result:writeMeta(userId,next)}}
+    catch(error){return {ok:false,error:error,persistenceResult:error&&error.persistenceResult?error.persistenceResult:null}}
+  }
+  function metadataWarning(action,error){
+    var detail=safeMessage(error,'Tarayıcı depolaması kullanılamıyor.');
+    return action+' tamamlandı; ancak yerel revizyon bilgisi kaydedilemedi. '+detail+' Otomatik yeniden deneme yapılmadı.';
   }
   function clearMeta(userId){if(userId)window.SimurgPersistence.remove(localStorage,metaKey(userId))}
   function currentData(){return typeof DATA!=='undefined'?DATA:null}
@@ -224,10 +244,12 @@
     finally{clearBusy()}
   }
   async function pushUserData(){
-    if(!setBusy('push','Buluta gönderim hazırlanıyor…'))return;
+    if(!setBusy('push','Buluta gönderim hazırlanıyor…'))return operationResult('push','busy');
+    var stage='local_preparation';
     try{
       var context=await requireSession();
       var localData=requireCurrentData();
+      stage='remote';
       var lookup=await context.client.from(TABLE)
         .select('revision,updated_at')
         .eq('user_id',context.userId)
@@ -235,8 +257,7 @@
       if(lookup.error)throw lookup.error;
       if(!lookup.data){
         if(!window.confirm('Bu hesap için ilk bulut kaydı oluşturulacak. Yerel veriyi açıkça Buluta Göndermek istiyor musunuz?')){
-          setStatus('Gönderim iptal edildi.','');
-          return;
+          return finishOperation('push','cancelled','Gönderim iptal edildi.','');
         }
         setStatus('Gönderiliyor…','');
         var inserted=await context.client.from(TABLE)
@@ -244,27 +265,24 @@
           .select('revision,updated_at');
         if(inserted.error){
           if(inserted.error.code==='23505'){
-            setStatus('Bulut kaydı başka bir cihazda oluşturulmuş. Önce Buluttan Al.','conflict');
-            return;
+            return finishOperation('push','conflict','Bulut kaydı başka bir cihazda oluşturulmuş. Önce Buluttan Al.','conflict');
           }
           throw inserted.error;
         }
         if(!Array.isArray(inserted.data)||inserted.data.length!==1)throw new Error('İlk bulut kaydı doğrulanamadı.');
         var first=inserted.data[0];
-        writeMeta(context.userId,{revision:first.revision,updatedAt:first.updated_at,lastPullAt:'',lastPushAt:new Date().toISOString()});
         setRevisionStatus(first.revision,first.updated_at);
-        setStatus('Güncel: ilk bulut kaydı oluşturuldu.','ok');
-        return;
+        var firstMeta=tryWriteMeta(context.userId,{revision:first.revision,updatedAt:first.updated_at,lastPullAt:'',lastPushAt:new Date().toISOString()});
+        if(!firstMeta.ok)return finishOperation('push','success_with_local_metadata_warning',metadataWarning('İlk bulut kaydı oluşturma',firstMeta.error)+' Yeniden Push yapmadan önce Buluttan Al ile yerel tabanı yenileyin.','warn',{revision:first.revision,updatedAt:first.updated_at,metadataPersisted:false});
+        return finishOperation('push','success','Güncel: ilk bulut kaydı oluşturuldu.','ok',{revision:first.revision,updatedAt:first.updated_at,metadataPersisted:true});
       }
       var meta=readMeta(context.userId);
       if(!meta){
         setRevisionStatus(lookup.data.revision,lookup.data.updated_at);
-        setStatus('Bu bulut kaydı için geçerli yerel taban yok. Önce Buluttan Al.','conflict');
-        return;
+        return finishOperation('push','conflict','Bu bulut kaydı için geçerli yerel taban yok. Önce Buluttan Al.','conflict');
       }
       if(!window.confirm('Yerel DATA, beklenen revizyon '+meta.revision+' üzerinden buluta gönderilecek. Devam edilsin mi?')){
-        setStatus('Gönderim iptal edildi.','');
-        return;
+        return finishOperation('push','cancelled','Gönderim iptal edildi.','');
       }
       setStatus('Gönderiliyor…','');
       var updated=await context.client.from(TABLE)
@@ -274,19 +292,20 @@
         .select('revision,updated_at');
       if(updated.error)throw updated.error;
       if(!Array.isArray(updated.data)||updated.data.length===0){
-        setStatus('Buluttaki veri başka bir cihazda güncellenmiş. Önce Buluttan Al veya yerel yedek oluştur.','conflict');
-        return;
+        return finishOperation('push','conflict','Buluttaki veri başka bir cihazda güncellenmiş. Önce Buluttan Al veya yerel yedek oluştur.','conflict');
       }
       if(updated.data.length!==1)throw new Error('Bulut güncelleme sonucu doğrulanamadı.');
       var row=updated.data[0];
-      writeMeta(context.userId,{revision:row.revision,updatedAt:row.updated_at,lastPullAt:meta.lastPullAt,lastPushAt:new Date().toISOString()});
       setRevisionStatus(row.revision,row.updated_at);
-      setStatus('Güncel: yerel veri güvenli biçimde buluta gönderildi.','ok');
-    }catch(error){setStatus('Gönderim başarısız: '+safeMessage(error,'Tekrar deneyin.'),'err')}
+      var updatedMeta=tryWriteMeta(context.userId,{revision:row.revision,updatedAt:row.updated_at,lastPullAt:meta.lastPullAt,lastPushAt:new Date().toISOString()});
+      if(!updatedMeta.ok)return finishOperation('push','success_with_local_metadata_warning',metadataWarning('Buluta gönderim',updatedMeta.error)+' Yeniden Push yapmadan önce Buluttan Al ile yerel tabanı yenileyin.','warn',{revision:row.revision,updatedAt:row.updated_at,metadataPersisted:false});
+      return finishOperation('push','success','Güncel: yerel veri güvenli biçimde buluta gönderildi.','ok',{revision:row.revision,updatedAt:row.updated_at,metadataPersisted:true});
+    }catch(error){return finishOperation('push',stage==='remote'?'remote_failure':'local_preparation_failure',(stage==='remote'?'Gönderim başarısız: ':'Yerel veri gönderime hazırlanamadı: ')+safeMessage(error,'Tekrar deneyin.'),'err',{metadataPersisted:false})}
     finally{clearBusy()}
   }
   async function pullUserData(){
-    if(!setBusy('pull','Buluttan veri kontrol ediliyor…'))return;
+    if(!setBusy('pull','Buluttan veri kontrol ediliyor…'))return operationResult('pull','busy');
+    var stage='remote';
     try{
       var context=await requireSession();
       var result=await context.client.from(TABLE)
@@ -296,22 +315,32 @@
       if(result.error)throw result.error;
       if(!result.data){
         setRevisionStatus(null,'');
-        setStatus('Bulutta henüz veri yok.','ok');
-        return;
+        return finishOperation('pull','no_remote_data','Bulutta henüz veri yok.','ok');
       }
+      stage='validation';
       var pulled=normalizePulledData(result.data.payload);
       setRevisionStatus(result.data.revision,result.data.updated_at);
       if(!window.confirm('Buluttan Al, mevcut yerel DATA verisini değiştirecek. Önce otomatik JSON yedeği indirilecek. Devam edilsin mi?')){
-        setStatus('Alım iptal edildi. Yerel veri değiştirilmedi.','');
-        return;
+        return finishOperation('pull','cancelled','Alım iptal edildi. Yerel veri değiştirilmedi.','');
       }
       setStatus('Alınıyor… Yerel yedek hazırlanıyor.','');
+      stage='local_preparation';
       var oldData=requireCurrentData();
+      stage='backup';
       downloadLocalBackup(oldData);
+      stage='data_application';
       persistPulledData(pulled);
-      writeMeta(context.userId,{revision:result.data.revision,updatedAt:result.data.updated_at,lastPullAt:new Date().toISOString(),lastPushAt:''});
-      setStatus('Güncel: bulut verisi alındı ve yerel yedek indirildi.','ok');
-    }catch(error){setStatus('Alım başarısız: '+safeMessage(error,'Yerel veri değiştirilmedi.'),'err')}
+      stage='metadata';
+      var pulledMeta=tryWriteMeta(context.userId,{revision:result.data.revision,updatedAt:result.data.updated_at,lastPullAt:new Date().toISOString(),lastPushAt:''});
+      if(!pulledMeta.ok)return finishOperation('pull','success_with_local_metadata_warning',metadataWarning('Buluttan alım',pulledMeta.error)+' Uygulanan DATA korunuyor; depolama sorununu giderdikten sonra gerekirse Pull işlemini açıkça yeniden başlatın.','warn',{revision:result.data.revision,updatedAt:result.data.updated_at,metadataPersisted:false,dataApplied:true});
+      return finishOperation('pull','success','Güncel: bulut verisi alındı ve yerel yedek indirildi.','ok',{revision:result.data.revision,updatedAt:result.data.updated_at,metadataPersisted:true,dataApplied:true});
+    }catch(error){
+      var validationFailed=stage==='validation';
+      var applicationFailed=stage==='data_application';
+      var localPreparationFailed=stage==='local_preparation'||stage==='backup';
+      var message=validationFailed?'Bulut verisi doğrulanamadı: '+safeMessage(error,'Yerel DATA değiştirilmedi.'):(applicationFailed?'Alım uygulanamadı: '+safeMessage(error,'Yerel DATA güvenli biçimde geri alındı.'):(localPreparationFailed?'Yerel alım hazırlığı başarısız: '+safeMessage(error,'Yerel DATA değiştirilmedi.'):'Alım başarısız: '+safeMessage(error,'Yerel veri değiştirilmedi.')));
+      return finishOperation('pull',validationFailed?'validation_failure':(applicationFailed?'data_application_failure':(localPreparationFailed?'local_preparation_failure':'remote_failure')),message,'err',{metadataPersisted:false,dataApplied:false});
+    }
     finally{clearBusy()}
   }
   function bindControls(){
@@ -366,7 +395,7 @@
   window.checkUserCloudStatus=checkUserCloudStatus;
   window.pushUserData=pushUserData;
   window.pullUserData=pullUserData;
-  window.SimurgCloudAuth={initialize:initialize,getClient:getClient,getSession:getSession};
+  window.SimurgCloudAuth={initialize:initialize,getClient:getClient,getSession:getSession,getLastOperationResult:function(){return state.lastResult}};
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
   else initialize();

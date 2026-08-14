@@ -1429,6 +1429,11 @@ aside{
   border-color:rgba(35,206,122,.28);
   background:rgba(35,206,122,.06);
 }
+.syncStatus.warn{
+  color:#ffd27a;
+  border-color:rgba(255,210,122,.34);
+  background:rgba(255,210,122,.08);
+}
 .syncStatus.err{
   color:#ff6b6b;
   border-color:rgba(255,107,107,.30);
@@ -7775,7 +7780,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=actual-workout-day-semantics-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=cloud-metadata-atomicity-v1').catch(function(){});
   });
 }
 </script>
@@ -16117,7 +16122,7 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./simurg-gym-flex.css?v=1">
 <script src="./mobile-ia-premium.js?v=6"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
-<script src="./simurg-cloud-auth.js?v=3" defer></script>
+<script src="./simurg-cloud-auth.js?v=4" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
   if(!window.SimurgDataValidation)return;

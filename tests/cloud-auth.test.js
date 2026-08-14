@@ -60,8 +60,8 @@ run('signed-out cloud controls start disabled', () => {
 
 run('official Supabase v2 and one local controller are loaded', () => {
   assert.match(index, /cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2\.95\.0/);
-  assert.match(index, /simurg-cloud-auth\.js\?v=3/);
-  assert.match(sw, /simurg-cloud-auth\.js\?v=3/);
+  assert.match(index, /simurg-cloud-auth\.js\?v=4/);
+  assert.match(sw, /simurg-cloud-auth\.js\?v=4/);
 });
 
 run('active runtime contains no legacy shared cloud model', () => {
@@ -129,18 +129,20 @@ run('existing push requires base and performs conditional revision update', () =
   assert.match(body, /Buluttaki veri başka bir cihazda güncellenmiş\. Önce Buluttan Al veya yerel yedek oluştur\./);
 });
 
-run('pull confirms, backs up, validates, then persists and stores revision', () => {
+run('pull confirms, backs up, validates, then persists and attempts revision metadata', () => {
   const body = functionBody(cloud, 'pullUserData');
   const validateAt = body.indexOf('normalizePulledData(result.data.payload)');
   const revisionAt = body.indexOf('setRevisionStatus(result.data.revision');
   const confirmAt = body.indexOf('window.confirm(');
   const backupAt = body.indexOf('downloadLocalBackup(oldData)');
   const persistAt = body.indexOf('persistPulledData(pulled)');
-  const metaAt = body.indexOf('writeMeta(context.userId');
+  const metaAt = body.indexOf('tryWriteMeta(context.userId');
   assert.ok(validateAt >= 0 && revisionAt > validateAt && confirmAt > revisionAt && backupAt > confirmAt && persistAt > backupAt && metaAt > persistAt);
   assert.match(body, /normalizePulledData\(result\.data\.payload\)/);
   assert.match(body, /\.select\('payload,revision,updated_at'\)/);
   assert.match(body, /\.eq\('user_id',context\.userId\)/);
+  assert.match(body, /success_with_local_metadata_warning/);
+  assert.match(body, /dataApplied:true/);
 });
 
 run('cloud metadata is scoped and excludes payload, token, email and password', () => {

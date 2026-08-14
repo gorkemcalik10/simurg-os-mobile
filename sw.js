@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-actual-workout-day-semantics-v1';
+const SIMURG_CACHE = 'simurg-cloud-metadata-atomicity-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -21,7 +21,7 @@ const CORE_ASSETS = [
   './simurg-coach-ui.js?v=3',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=9',
-  './simurg-cloud-auth.js?v=3',
+  './simurg-cloud-auth.js?v=4',
   './desktop-alignment.css?v=26',
   './desktop-alignment.js?v=34',
   './mobile-ia-premium.css?v=10',
