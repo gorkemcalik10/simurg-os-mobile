@@ -18,6 +18,7 @@
         "day": "string",
         "exercise": "string",
         "bodyPart": "string",
+        "exerciseType": "optional string",
         "sets": "number, usually 1",
         "reps": "number",
         "weight": "number",
@@ -169,7 +170,7 @@
     },
     {
       "name": "customGymPrograms",
-      "shape": "Object<dateOrProgramKey, {overrides: Object<exerciseName, {name, bodyPart, setCount}>, extras: Array<{id, name, bodyPart, setCount, custom}>}>",
+      "shape": "Object<dateOrProgramKey, {overrides: Object<exerciseName, {name, bodyPart, setCount}>, extras: Array<{id, exerciseId, name, bodyPart, optional exerciseType, setCount, custom}>}>",
       "createdAt": [
         "lazy initialization in Gym code and pull/import defaults"
       ],
@@ -182,6 +183,22 @@
       "stableRecordIds": "partial; extras receive timestamp-derived IDs, overrides are keyed by mutable exercise name",
       "schemaVersioned": false,
       "duplicateRisk": "medium"
+    },
+    {
+      "name": "exerciseCatalog",
+      "shape": "Object<exerciseId, {exerciseId, name, bodyPart, optional exerciseType}>",
+      "createdAt": [
+        "Gym quick add when a new movement is created or an identified movement is selected"
+      ],
+      "mutatedAt": [
+        "Gym quick add and Gym exercise save in index.html"
+      ],
+      "persistedAt": [
+        "save -> localStorage/full cloud payload/backup"
+      ],
+      "stableRecordIds": true,
+      "schemaVersioned": false,
+      "duplicateRisk": "low; equal names remain separate when exerciseId differs"
     },
     {
       "name": "programNames",

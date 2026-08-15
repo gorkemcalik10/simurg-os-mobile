@@ -20,13 +20,13 @@
   BLOCKED_KEYS.prototype=true;
   BLOCKED_KEYS.constructor=true;
   var ARRAY_NAMES=['workouts','metrics','nutrition','recovery','appleWatch','dailyNotes','weeklyNotes'];
-  var MAP_NAMES=['customGymPrograms','programNames','gymDayState','activityNotes','autoNextTargets','recoveryEntries','exerciseLoadProfiles'];
+  var MAP_NAMES=['customGymPrograms','programNames','gymDayState','activityNotes','autoNextTargets','recoveryEntries','exerciseLoadProfiles','exerciseCatalog'];
   var POLAR_HISTORY_NAMES=['polarSleep','polarNightlyRecharge','polarContinuousHr','polarCardioLoad'];
   var RESERVED_ROOTS={auth:true,session:true,supabase:true,cloudAuth:true,cloudSession:true,simurg_cloud_meta:true,simurg_polar_accesslink_client_v1:true};
   var DEFAULTS={
     schemaVersion:CURRENT_SCHEMA_VERSION,
     workouts:[],metrics:[],nutrition:[],recovery:[],appleWatch:[],dailyNotes:[],weeklyNotes:[],
-    customGymPrograms:{},programNames:{},gymDayState:{},exerciseLoadProfiles:{},
+    customGymPrograms:{},programNames:{},gymDayState:{},exerciseLoadProfiles:{},exerciseCatalog:{},
     coachIntelligence:{schemaVersion:1,daily:{},weekly:{},patterns:{},aiCache:{},settings:{movementCategories:{}}},
     polarWorkouts:{daily:{},latest:null},
     polarActivity:{daily:{},latest:null},
@@ -186,6 +186,7 @@
     row.exercise=text(row.exercise==null?'Exercise':row.exercise,path+'.exercise',2048,false);
     if(row.day!=null)text(row.day,path+'.day',128,true);
     if(row.bodyPart!=null)text(row.bodyPart,path+'.bodyPart',256,true);
+    if(row.exerciseType!=null)text(row.exerciseType,path+'.exerciseType',256,true);
     if(row.notes!=null)text(row.notes,path+'.notes',LIMITS.maxString,true);
     if(row.startTime!=null)text(row.startTime,path+'.startTime',128,true);
     row.sets=number(row.sets==null?1:row.sets,path+'.sets',{coerce:options.coerce,integer:true,min:1,max:10000});
@@ -408,6 +409,12 @@
       scan(entry);
     });
     Object.keys(candidate.programNames||{}).forEach(function(key){text(candidate.programNames[key],pathFor('$.programNames',key),512,true)});
+    Object.keys(candidate.exerciseCatalog||{}).forEach(function(key){
+      var entry=candidate.exerciseCatalog[key],entryPath=pathFor('$.exerciseCatalog',key);plain(entry,entryPath);
+      text(entry.exerciseId==null?key:entry.exerciseId,entryPath+'.exerciseId',512,false);
+      text(entry.name,entryPath+'.name',2048,false);text(entry.bodyPart==null?'Other':entry.bodyPart,entryPath+'.bodyPart',256,false);
+      if(entry.exerciseType!=null)text(entry.exerciseType,entryPath+'.exerciseType',256,true);scan(entry);
+    });
     Object.keys(candidate.gymDayState||{}).forEach(function(key){
       var entry=candidate.gymDayState[key],entryPath=pathFor('$.gymDayState',key);
       date(key,entryPath);plain(entry,entryPath);

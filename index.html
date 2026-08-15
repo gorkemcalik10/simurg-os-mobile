@@ -6242,8 +6242,9 @@ body{background:#050607!important;}
 <script src="./simurg-gym-identity.js?v=1"></script>
 <script src="./simurg-data-validation.js?v=4"></script>
 <script src="./simurg-gym-flex.js?v=1"></script>
+<script src="./simurg-exercise-catalog.js?v=1"></script>
 <script>
-const INITIAL={"schemaVersion":1,"workouts":[],"metrics":[],"nutrition":[],"recovery":[],"appleWatch":[],"dailyNotes":[],"weeklyNotes":[],"customGymPrograms":{},"programNames":{},"gymDayState":{},"exerciseLoadProfiles":{},"coachIntelligence":{"schemaVersion":1,"daily":{},"weekly":{},"patterns":{},"aiCache":{},"settings":{"movementCategories":{}}},"polarWorkouts":{"daily":{},"latest":null},"polarActivity":{"daily":{},"latest":null},"polarProfile":{"latest":null},"polarSleep":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarNightlyRecharge":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarContinuousHr":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarCardioLoad":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarConnection":{"connected":false,"status":"disconnected","lastSyncAt":null,"lastError":null,"source":"Polar AccessLink"}};
+const INITIAL={"schemaVersion":1,"workouts":[],"metrics":[],"nutrition":[],"recovery":[],"appleWatch":[],"dailyNotes":[],"weeklyNotes":[],"customGymPrograms":{},"programNames":{},"gymDayState":{},"exerciseLoadProfiles":{},"exerciseCatalog":{},"coachIntelligence":{"schemaVersion":1,"daily":{},"weekly":{},"patterns":{},"aiCache":{},"settings":{"movementCategories":{}}},"polarWorkouts":{"daily":{},"latest":null},"polarActivity":{"daily":{},"latest":null},"polarProfile":{"latest":null},"polarSleep":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarNightlyRecharge":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarContinuousHr":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarCardioLoad":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarConnection":{"connected":false,"status":"disconnected","lastSyncAt":null,"lastError":null,"source":"Polar AccessLink"}};
 window.SIMURG_INITIAL_DEFAULTS=INITIAL;
 let DATA;
 var simurgStoredDataRaw=localStorage.getItem('atlas_summary_reports');
@@ -6504,8 +6505,10 @@ function gymProgramEntryForDate(date){
   const entry=Array.isArray(raw)?{overrides:{},extras:raw}:{overrides:{...((raw&&raw.overrides)||{})},extras:Array.isArray(raw&&raw.extras)?raw.extras:[]};
   entry.extras=entry.extras.map((x,i)=>({
     id:x.id||('legacy_custom_'+i),
+    exerciseId:x.exerciseId||x.id||('legacy_custom_'+i),
     name:x.name||x.exercise||'Yeni Hareket',
     bodyPart:x.bodyPart||'Other',
+    exerciseType:x.exerciseType||'',
     setCount:Number(x.setCount||x.sets||3)||3,
     custom:true,
     prefill:Array.isArray(x.prefill)?x.prefill.map(row=>({weight:row.weight,reps:row.reps})):undefined,
@@ -6547,6 +6550,7 @@ function gymItemsForDate(date){
     originalName:x.name,
     name:x.name||'Yeni Hareket',
     bodyPart:x.bodyPart||'Other',
+    exerciseType:x.exerciseType||'',
     setCount:Number(x.setCount||3)||3,
     custom:true,
     prefill:x.prefill,
@@ -6563,6 +6567,8 @@ function readGymMetaFromCard(card){
     originalName:card.dataset.originalName||'',
     currentName:card.dataset.currentName||'',
     custom:card.dataset.custom==='1',
+    exerciseId:card.dataset.exerciseId||'',
+    exerciseType:card.dataset.exerciseType||'',
     name:(card.querySelector('.gymExerciseName')?.value||'').trim()||'Yeni Hareket',
     bodyPart:(card.querySelector('.gymExerciseBody')?.value||'').trim()||'Other',
     setCount:Math.max(1,Number(card.querySelector('.gymExerciseSets')?.value)||1),
@@ -6580,6 +6586,8 @@ function upsertGymProgramMeta(meta){
     }
     item.name=meta.name;
     item.bodyPart=meta.bodyPart;
+    item.exerciseId=meta.exerciseId||item.exerciseId||id;
+    if(meta.exerciseType)item.exerciseType=meta.exerciseType;
     item.setCount=meta.setCount;
   }else{
     entry.overrides[meta.key]={name:meta.name,bodyPart:meta.bodyPart,setCount:meta.setCount};
@@ -6639,6 +6647,7 @@ function saveGymExercise(key){
   if(!item)return;
   const coach=readGymCoachFromCard(card);
   upsertGymProgramMeta(meta);
+  SimurgExerciseCatalog.register(DATA,{exerciseId:meta.exerciseId||item.exerciseId,name:meta.name,bodyPart:meta.bodyPart,exerciseType:meta.exerciseType});
   const possibleOld=[meta.currentName,meta.originalName];
   const previousName=meta.currentName||meta.originalName;
   if(SimurgVolumeModel.profileKey(previousName)!==SimurgVolumeModel.profileKey(meta.name)) SimurgVolumeModel.moveProfile(previousName,meta.name);
@@ -6658,6 +6667,7 @@ function saveGymExercise(key){
         day:dayName(selectedDate),
         exercise:meta.name,
         bodyPart:meta.bodyPart||part(meta.name),
+        exerciseType:meta.exerciseType||'',
         sets:1,
         reps:Number(String(reps).replace(',','.'))||0,
         weight:Number(String(weight).replace(',','.'))||0,
@@ -6696,14 +6706,61 @@ function clearGymExercise(key){
   const before=DATA.workouts;DATA.workouts=DATA.workouts.filter(w=>!gymRowMatches(item,w,meta.name));
   if(!save().ok)DATA.workouts=before;
 }
-function addGymExercise(){
-  const before=JSON.parse(JSON.stringify(DATA));
-  const entry=ensureGymProgramEntry(selectedDate);
-  const id='custom_'+Date.now();
-  const state=SimurgGymFlex.stateFor(DATA,selectedDate);
-  entry.extras.push({id,name:'Yeni Hareket',bodyPart:'Other',setCount:3,custom:true,sessionOnly:!!(state&&state.mode==='custom')});
-  if(!save().ok)DATA=before;
+function gymExercisePickerSheet(){
+  let shade=document.getElementById('gymExercisePicker');
+  if(shade)return shade;
+  shade=document.createElement('div');shade.id='gymExercisePicker';shade.className='gymExercisePickerShade';shade.hidden=true;
+  shade.innerHTML=`<div class="gymExercisePickerSheet" role="dialog" aria-modal="true" aria-labelledby="gymExercisePickerTitle">
+    <div class="gymExercisePickerHead"><div><small>HIZLI EKLE</small><b id="gymExercisePickerTitle">Hareket seç</b></div><button type="button" class="gymExercisePickerClose" data-exercise-picker-action="close" aria-label="Kapat">×</button></div>
+    <label class="gymExerciseSearch"><span>⌕</span><input id="gymExerciseSearchInput" type="search" autocomplete="off" placeholder="Hareket ara veya yeni isim yaz"></label>
+    <div id="gymExercisePickerResults" class="gymExercisePickerResults"></div>
+    <div class="gymExerciseCreate">
+      <div><small>YENİ HAREKET</small><b>Listede yoksa oluştur</b><span>Benzer isimler otomatik birleştirilmez.</span></div>
+      <label><small>Bölge</small><input id="gymExerciseBodyInput" autocomplete="off" placeholder="Göğüs / Sırt / Omuz"></label>
+      <button type="button" class="gymExerciseCreateButton" data-exercise-picker-action="create">+ Yeni hareket oluştur</button>
+    </div>
+  </div>`;
+  shade.addEventListener('click',event=>{
+    if(event.target===shade||event.target.closest('[data-exercise-picker-action="close"]'))return closeGymExercisePicker();
+    const choice=event.target.closest('[data-exercise-choice]');
+    if(choice)return addGymExerciseFromChoice(SimurgExerciseCatalog.entries(DATA).find(item=>item.key===choice.dataset.exerciseChoice));
+    if(event.target.closest('[data-exercise-picker-action="create"]'))createGymExerciseFromPicker();
+  });
+  shade.querySelector('#gymExerciseSearchInput').addEventListener('input',renderGymExercisePickerResults);
+  document.body.appendChild(shade);return shade;
 }
+function renderGymExercisePickerResults(){
+  const shade=gymExercisePickerSheet(),input=shade.querySelector('#gymExerciseSearchInput'),root=shade.querySelector('#gymExercisePickerResults');
+  const query=input.value.trim(),items=SimurgExerciseCatalog.list(DATA,query,10);
+  root.innerHTML=`<div class="gymExercisePickerLabel">${query?'Arama sonuçları':'Son kullanılanlar'}</div>`+(items.length?items.map(item=>`<button type="button" class="gymExerciseChoice" data-exercise-choice="${gymSafe(item.key)}"><span><b>${gymSafe(item.name)}</b><small>${gymSafe(item.bodyPart||'Other')}</small></span><i>${item.lastUsedDate?gymSafe(trDate(item.lastUsedDate)):'Yeni'}${item.useCount?' · '+item.useCount+' kullanım':''}</i></button>`).join(''):`<div class="gymExercisePickerEmpty">${query?'Eşleşen kayıt yok. Aşağıdan bu isimle yeni hareket oluşturabilirsin.':'İlk hareketini aşağıdan oluştur.'}</div>`);
+  const create=shade.querySelector('.gymExerciseCreateButton');if(create)create.disabled=!query;
+}
+function openGymExercisePicker(){
+  const shade=gymExercisePickerSheet(),search=shade.querySelector('#gymExerciseSearchInput'),body=shade.querySelector('#gymExerciseBodyInput');
+  search.value='';body.value='';shade.hidden=false;renderGymExercisePickerResults();setTimeout(()=>search.focus(),40);
+}
+function closeGymExercisePicker(){const shade=document.getElementById('gymExercisePicker');if(shade)shade.hidden=true}
+function focusGymItem(key){
+  setTimeout(()=>{window.SimurgMobileIA?.mountGym();window.SimurgMobileIA?.openGym(key,{focus:true});const card=gymCardEl(key);card?.scrollIntoView({behavior:'smooth',block:'start'});card?.querySelector('.gymWeight')?.focus()},30);
+}
+function addGymExerciseFromChoice(choice){
+  if(!choice)return;
+  const before=JSON.parse(JSON.stringify(DATA)),exerciseId=choice.exerciseId||SimurgGymIdentity.id('exercise');
+  const current=gymItemsForDate(selectedDate).find(item=>item.exerciseId===exerciseId);
+  if(current){closeGymExercisePicker();focusGymItem(current.key);return}
+  const entry=ensureGymProgramEntry(selectedDate),id=SimurgGymIdentity.id('custom'),state=SimurgGymFlex.stateFor(DATA,selectedDate);
+  SimurgExerciseCatalog.register(DATA,{exerciseId,name:choice.name,bodyPart:choice.bodyPart,exerciseType:choice.exerciseType});
+  entry.extras.push({id,exerciseId,name:choice.name,bodyPart:choice.bodyPart||'Other',exerciseType:choice.exerciseType||'',setCount:3,custom:true,sessionOnly:!!(state&&state.mode==='custom')});
+  const result=save();if(!result.ok){DATA=before;return result}
+  closeGymExercisePicker();focusGymItem('custom::'+id);return result;
+}
+function createGymExerciseFromPicker(){
+  const shade=gymExercisePickerSheet(),name=shade.querySelector('#gymExerciseSearchInput').value.trim(),bodyPart=shade.querySelector('#gymExerciseBodyInput').value.trim();
+  if(!name){shade.querySelector('#gymExerciseSearchInput').focus();return}
+  if(!bodyPart){shade.querySelector('#gymExerciseBodyInput').focus();return}
+  return addGymExerciseFromChoice({exerciseId:SimurgGymIdentity.id('exercise'),name,bodyPart,exerciseType:''});
+}
+function addGymExercise(){openGymExercisePicker()}
 function deleteGymExercise(key){
   const card=gymCardEl(key);
   if(!card) return;
@@ -6874,7 +6931,7 @@ function renderGymWorkoutSelector(template){
   const undo=gymSkipUndo&&gymSkipUndo.date===selectedDate?'<div class="gymSkipUndo"><span>Gün atlandı olarak kaydedildi.</span><button type="button" onclick="undoGymSkippedDay()">Geri Al</button></div>':'';
   root.innerHTML=undo+`<button type="button" class="gymWorkoutSelectorButton" onclick="openGymWorkoutSelector()" aria-haspopup="dialog"><span><small>${gymSafe(prefix)}</small> · ${gymSafe(label)}</span><i>⌄</i></button>`;
 }
-document.addEventListener('keydown',event=>{if(event.key==='Escape')closeGymWorkoutSelector()});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeGymWorkoutSelector();closeGymExercisePicker()}});
 function renderGymMode(){
   let label=document.getElementById('gymDateLabel');
   let title=document.getElementById('gymDayTitle');
@@ -6915,7 +6972,7 @@ function renderGymMode(){
       <label class="gymInputBox"><small>Kilo · ${gymSafe(loadProfile.weightLabel)}</small><input class="gymWeight" inputmode="decimal" enterkeyhint="next" placeholder="kg" value="${gymSafe(r.weight)}"></label>
       <label class="gymInputBox"><small>Tekrar</small><input class="gymReps" inputmode="numeric" enterkeyhint="done" placeholder="tekrar" value="${gymSafe(r.reps)}"></label>
     </div>`).join('');
-    return `<div class="gymCard ${savedCount?'':'isTemplate'}" data-gym-key="${gymSafe(item.key)}" data-gym-date="${gymSafe(selectedDate)}" data-original-name="${gymSafe(item.originalName)}" data-current-name="${gymSafe(ex)}" data-custom="${item.custom?'1':'0'}">
+    return `<div class="gymCard ${savedCount?'':'isTemplate'}" data-gym-key="${gymSafe(item.key)}" data-gym-date="${gymSafe(selectedDate)}" data-original-name="${gymSafe(item.originalName)}" data-current-name="${gymSafe(ex)}" data-custom="${item.custom?'1':'0'}" data-exercise-id="${gymSafe(item.exerciseId)}" data-exercise-type="${gymSafe(item.exerciseType||'')}">
       <div class="gymCardHead">
         <div style="flex:1">
           <div class="gymMetaGrid">
