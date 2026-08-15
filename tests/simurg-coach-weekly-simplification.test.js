@@ -6,9 +6,10 @@ const client = require('../simurg-coach-client.js');
 const fixtures = require('./simurg-coach-fixtures.js');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'simurg-coach-ui.js'), 'utf8');
+const css = fs.readFileSync(path.join(__dirname, '..', 'simurg-coach.css'), 'utf8');
 const clone = value => JSON.parse(JSON.stringify(value));
 
-function runtime(scenario) {
+function runtime(scenario, weeklyOverride) {
   const calls = [];
   const section = { innerHTML: '', classList: { add() {}, remove() {} } };
   const data = clone(scenario.data);
@@ -23,6 +24,7 @@ function runtime(scenario) {
     SimurgCoachClient: {
       resolve(type, date, options) {
         calls.push(type);
+        if (type === 'weekly' && weeklyOverride) return clone(weeklyOverride);
         return client.resolve(type, date, { ...options, data, store: false, remote: false });
       }
     }
@@ -30,6 +32,22 @@ function runtime(scenario) {
   context.globalThis = context;
   vm.runInNewContext(source, context);
   return { context, calls, section };
+}
+
+function weeklyResult(trainingDecision, overrides = {}) {
+  return {
+    trainingDecision,
+    readinessScore: 75,
+    confidenceScore: 80,
+    confidenceLabel: 'Yüksek',
+    keyDrivers: ['Antrenman/aktivite günü: 4'],
+    warnings: [],
+    missingData: [],
+    recoveryActions: [],
+    trendInsights: [],
+    baseline: {},
+    ...overrides
+  };
 }
 
 function run(name, fn) {
@@ -54,6 +72,33 @@ run('mobile Weekly first render uses one weekly result and the simplified hierar
   }
   assert.doesNotMatch(section.innerHTML, /HAFTALIK KOÇ|HAFTANIN SİNYALLERİ|GELECEK KARAR|HAFTALIK RİSKLER|Yeni haftaya hazırlık/);
   assert.doesNotMatch(section.innerHTML, /loadAdjustmentPercent|baseline|strain\/tolerance|progress|controlled/);
+});
+
+run('first Weekly card describes the week while the second preserves the next-week action', () => {
+  const cases = [
+    [weeklyResult('reduce', { warnings: ['Cardio Load yakın döneme göre yüksek.'] }), 'Yük bu hafta biraz yükseldi', 'Yükü biraz azalt'],
+    [weeklyResult('reduce', { warnings: ['Birden fazla olumsuz toparlanma sinyali birlikte görülüyor.'] }), 'Toparlanma bu hafta zorlandı', 'Yükü biraz azalt'],
+    [weeklyResult('normal'), 'Hafta dengeli geçti', 'Planını aynen uygula'],
+    [weeklyResult('recovery', { readinessScore: 48 }), 'Toparlanma bu hafta zorlandı', 'Toparlanmayı öne al'],
+    [weeklyResult('controlled'), 'Bu hafta kontrollü ilerledin', 'Temkinli başla']
+  ];
+
+  for (const [result, expectedSummary, expectedAction] of cases) {
+    const { context, section } = runtime(fixtures.scenarios[0], result);
+    context.simurgCoachSetTab('weekly');
+    const first = section.innerHTML.slice(section.innerHTML.indexOf('sci-weekly-summary'), section.innerHTML.indexOf('</section>', section.innerHTML.indexOf('sci-weekly-summary')));
+    const second = section.innerHTML.slice(section.innerHTML.indexOf('sci-weekly-action'), section.innerHTML.indexOf('</section>', section.innerHTML.indexOf('sci-weekly-action')));
+    assert.match(first, new RegExp(expectedSummary));
+    assert.doesNotMatch(first, new RegExp(expectedAction));
+    assert.match(second, new RegExp(expectedAction));
+  }
+});
+
+run('mobile Coaching hides the legacy local-analysis badge without changing desktop badge styling', () => {
+  assert.match(source, /function aiBadge\(\)\{return '<span class="sci-local-badge">Yerel güvenli analiz<\/span>';\}/);
+  assert.match(css, /@media\(max-width:900px\)\{[^]*?\.sci-mobile-shell \.sci-local-badge\{display:none\}/);
+  assert.match(css, /@media\(min-width:901px\)\{/);
+  assert.doesNotMatch(css, /(?:^|\n)\.sci-local-badge\{display:none\}/);
 });
 
 run('Weekly shows exactly three semantic reasons', () => {

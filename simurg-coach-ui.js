@@ -166,9 +166,12 @@
       +'<h3>Güvenlik notu</h3><p>'+esc(daily.medicalDisclaimer)+'</p></div>';
   }
   function weeklyHeadline(result){
+    var recovery=weeklyRecoveryReason(result).status,load=weeklyLoadReason(result).status,warnings=(result.warnings||[]).join(' ');
+    if(result.trainingDecision==='recovery'||result.trainingDecision==='rest'||recovery==='Düşük'||/olumsuz toparlanma|uyku/i.test(warnings))return 'Toparlanma bu hafta zorlandı';
+    if(load==='Yüksek')return 'Yük bu hafta biraz yükseldi';
     return {
       progress:'Hafta dengeli geçti',normal:'Hafta dengeli geçti',controlled:'Bu hafta kontrollü ilerledin',
-      reduce:'Bu hafta yükü biraz azaltmak iyi olurdu',recovery:'Toparlanma bu hafta öncelikliydi',rest:'Bu hafta dinlenme öncelikliydi'
+      reduce:'Bu hafta kontrollü ilerledin'
     }[result.trainingDecision]||'Bu haftanın verileri değerlendirildi';
   }
   function weeklyWorkoutDays(result){
@@ -202,9 +205,9 @@
   }
   function weeklySummary(result){
     var days=weeklyWorkoutDays(result),reasons=weeklyReasons(result),start=days==null?'Haftanın kayıtları değerlendirildi.':days+' antrenman veya aktivite günü kaydedildi.';
-    var recovery=reasons[0].status==='Veri sınırlı'?'Toparlanma için veri sınırlı':'Toparlanma genel olarak '+reasons[0].status.toLocaleLowerCase('tr-TR');
-    var load=reasons[1].status==='Veri sınırlı'?'yük dağılımı için veri sınırlı':'yük dağılımı '+reasons[1].status.toLocaleLowerCase('tr-TR')+' görünüyor';
-    return start+' '+recovery+'; '+load+'.';
+    var recovery={İyi:'Toparlanman iyi kaldı',Normal:'Toparlanman genel olarak normal kaldı','Biraz düşük':'Toparlanman bazı günlerde zorlandı',Düşük:'Toparlanman bu hafta zorlandı'}[reasons[0].status]||'Toparlanma için veri sınırlı kaldı';
+    var load=reasons[1].status==='Yüksek'?'ancak toplam yük yakın döneme göre yükseldi':reasons[1].status==='Dengeli'?'ve toplam yük dengeli kaldı':'ve yük dağılımı için kayıtlar sınırlı kaldı';
+    return start+' '+recovery+' '+load+'.';
   }
   function weeklyActionExplanation(result){
     return {

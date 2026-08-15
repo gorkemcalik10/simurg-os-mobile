@@ -86,7 +86,7 @@
 @media(max-width:900px){
   .sci-coaching{overflow-y:auto!important;overscroll-behavior:contain;background:transparent!important}
   main>#coaching.section.active.sci-coaching{padding-bottom:calc(var(--simurgNativeNavH,76px) + 34px + env(safe-area-inset-bottom,0px))!important;scroll-padding-bottom:calc(var(--simurgNativeNavH,76px) + 34px + env(safe-area-inset-bottom,0px))!important}
-  .sci-mobile-shell{padding:14px 12px 32px}.sci-head h1{font-size:26px}.sci-local-badge{font-size:9px;padding:7px 9px}
+  .sci-mobile-shell{padding:14px 12px 32px}.sci-head h1{font-size:26px}.sci-mobile-shell .sci-local-badge{display:none}
   .sci-date-nav b{font-size:11px}.sci-date-nav button{padding:8px}
   .sci-hero{display:block;padding:15px;margin-bottom:10px}.sci-hero h2{font-size:20px}.sci-hero-copy p{font-size:13px}.sci-hero-copy p:nth-child(n+3){display:none}.sci-inline-readiness{display:inline-flex}.sci-hero-summary{display:none}.sci-hero-drivers{display:grid;gap:4px}.sci-hero-drivers span{font-size:10.5px}
   .sci-mobile-grid,.sci-priority-grid,.sci-guidance{grid-template-columns:1fr}.sci-card{padding:15px;margin-bottom:10px}.sci-card h3{font-size:16px}
