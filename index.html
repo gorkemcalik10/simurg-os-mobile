@@ -6710,36 +6710,73 @@ function gymExercisePickerSheet(){
   let shade=document.getElementById('gymExercisePicker');
   if(shade)return shade;
   shade=document.createElement('div');shade.id='gymExercisePicker';shade.className='gymExercisePickerShade';shade.hidden=true;
-  shade.innerHTML=`<div class="gymExercisePickerSheet" role="dialog" aria-modal="true" aria-labelledby="gymExercisePickerTitle">
-    <div class="gymExercisePickerHead"><div><small>HIZLI EKLE</small><b id="gymExercisePickerTitle">Hareket seç</b></div><button type="button" class="gymExercisePickerClose" data-exercise-picker-action="close" aria-label="Kapat">×</button></div>
-    <label class="gymExerciseSearch"><span>⌕</span><input id="gymExerciseSearchInput" type="search" autocomplete="off" placeholder="Hareket ara veya yeni isim yaz"></label>
-    <div id="gymExercisePickerResults" class="gymExercisePickerResults"></div>
-    <div class="gymExerciseCreate">
-      <div><small>YENİ HAREKET</small><b>Listede yoksa oluştur</b><span>Benzer isimler otomatik birleştirilmez.</span></div>
-      <label><small>Bölge</small><input id="gymExerciseBodyInput" autocomplete="off" placeholder="Göğüs / Sırt / Omuz"></label>
-      <button type="button" class="gymExerciseCreateButton" data-exercise-picker-action="create">+ Yeni hareket oluştur</button>
+  shade.innerHTML=`<div class="gymExercisePickerSheet" role="dialog" aria-modal="true" aria-labelledby="gymExercisePickerTitle" aria-describedby="gymExercisePickerSubtitle">
+    <div class="gymExercisePickerHandle" aria-hidden="true"></div>
+    <div class="gymExercisePickerHead">
+      <button type="button" class="gymExercisePickerBack" data-exercise-picker-action="browse" aria-label="Hareket listesine dön">‹</button>
+      <div class="gymExercisePickerHeading"><b id="gymExercisePickerTitle">Hareket Ekle</b><span id="gymExercisePickerSubtitle">Geçmişten seç veya yeni oluştur</span></div>
+      <button type="button" class="gymExercisePickerClose" data-exercise-picker-action="close" aria-label="Kapat">×</button>
+    </div>
+    <div class="gymExerciseBrowseView" data-exercise-picker-view="browse">
+      <label class="gymExerciseSearch"><span aria-hidden="true"></span><input id="gymExerciseSearchInput" type="search" autocomplete="off" enterkeyhint="search" placeholder="Hareket ara…" aria-label="Hareket ara"></label>
+      <div class="gymExerciseBrowseBody">
+        <div class="gymExerciseResultsHead"><b id="gymExerciseResultsTitle">Son Kullanılanlar</b><button type="button" data-exercise-picker-action="all">Tüm Hareketler</button></div>
+        <div id="gymExercisePickerResults" class="gymExercisePickerResults"></div>
+      </div>
+      <button type="button" class="gymExerciseNewAction" data-exercise-picker-action="new"><i aria-hidden="true">+</i><span><b>Yeni hareket oluştur</b><small>Listede olmayan bir hareket ekle</small></span><em aria-hidden="true">›</em></button>
+    </div>
+    <div class="gymExerciseCreateView" data-exercise-picker-view="create" hidden>
+      <div class="gymExerciseCreateFields">
+        <label><span>Hareket adı</span><input id="gymExerciseNameInput" autocomplete="off" enterkeyhint="next" placeholder="Örn. Chest Supported Row"></label>
+        <label><span>Kas grubu</span><input id="gymExerciseBodyInput" autocomplete="off" enterkeyhint="done" placeholder="Göğüs, Sırt, Omuz…"></label>
+        <div class="gymExerciseBodyOptions" aria-label="Hızlı kas grubu seçimi"><button type="button" data-exercise-body="Chest">Göğüs</button><button type="button" data-exercise-body="Back">Sırt</button><button type="button" data-exercise-body="Shoulders">Omuz</button><button type="button" data-exercise-body="Biceps">Biceps</button><button type="button" data-exercise-body="Triceps">Triceps</button><button type="button" data-exercise-body="Legs">Bacak</button></div>
+      </div>
+      <button type="button" class="gymExerciseCreateButton" data-exercise-picker-action="create">Hareketi Ekle</button>
     </div>
   </div>`;
   shade.addEventListener('click',event=>{
     if(event.target===shade||event.target.closest('[data-exercise-picker-action="close"]'))return closeGymExercisePicker();
     const choice=event.target.closest('[data-exercise-choice]');
     if(choice)return addGymExerciseFromChoice(SimurgExerciseCatalog.entries(DATA).find(item=>item.key===choice.dataset.exerciseChoice));
+    const bodyChoice=event.target.closest('[data-exercise-body]');
+    if(bodyChoice){shade.querySelector('#gymExerciseBodyInput').value=bodyChoice.dataset.exerciseBody;shade.querySelectorAll('[data-exercise-body]').forEach(button=>button.classList.toggle('active',button===bodyChoice));return}
+    if(event.target.closest('[data-exercise-picker-action="new"]'))return showGymExerciseCreateView();
+    if(event.target.closest('[data-exercise-picker-action="browse"]'))return showGymExerciseBrowseView();
+    if(event.target.closest('[data-exercise-picker-action="all"]')){shade.dataset.expanded='true';return renderGymExercisePickerResults()}
     if(event.target.closest('[data-exercise-picker-action="create"]'))createGymExerciseFromPicker();
   });
   shade.querySelector('#gymExerciseSearchInput').addEventListener('input',renderGymExercisePickerResults);
+  shade.querySelector('#gymExerciseBodyInput').addEventListener('input',()=>shade.querySelectorAll('[data-exercise-body]').forEach(button=>button.classList.toggle('active',button.dataset.exerciseBody===shade.querySelector('#gymExerciseBodyInput').value.trim())));
+  shade.addEventListener('keydown',event=>{if(event.key==='Escape')closeGymExercisePicker()});
   document.body.appendChild(shade);return shade;
 }
 function renderGymExercisePickerResults(){
   const shade=gymExercisePickerSheet(),input=shade.querySelector('#gymExerciseSearchInput'),root=shade.querySelector('#gymExercisePickerResults');
-  const query=input.value.trim(),items=SimurgExerciseCatalog.list(DATA,query,10);
-  root.innerHTML=`<div class="gymExercisePickerLabel">${query?'Arama sonuçları':'Son kullanılanlar'}</div>`+(items.length?items.map(item=>`<button type="button" class="gymExerciseChoice" data-exercise-choice="${gymSafe(item.key)}"><span><b>${gymSafe(item.name)}</b><small>${gymSafe(item.bodyPart||'Other')}</small></span><i>${item.lastUsedDate?gymSafe(trDate(item.lastUsedDate)):'Yeni'}${item.useCount?' · '+item.useCount+' kullanım':''}</i></button>`).join(''):`<div class="gymExercisePickerEmpty">${query?'Eşleşen kayıt yok. Aşağıdan bu isimle yeni hareket oluşturabilirsin.':'İlk hareketini aşağıdan oluştur.'}</div>`);
-  const create=shade.querySelector('.gymExerciseCreateButton');if(create)create.disabled=!query;
+  const query=input.value.trim(),allCount=SimurgExerciseCatalog.entries(DATA).length,expanded=shade.dataset.expanded==='true';
+  const limit=query||expanded?Math.max(1,allCount):6,items=SimurgExerciseCatalog.list(DATA,query,limit);
+  shade.querySelector('#gymExerciseResultsTitle').textContent=query?'Arama Sonuçları':expanded?'Tüm Hareketler':'Son Kullanılanlar';
+  const allButton=shade.querySelector('[data-exercise-picker-action="all"]');allButton.hidden=!!query||expanded||allCount<=6;
+  root.innerHTML=items.length?items.map(item=>`<button type="button" class="gymExerciseChoice" data-exercise-choice="${gymSafe(item.key)}"><span class="gymExerciseChoiceCopy"><b>${gymSafe(item.name)}</b><span><small>${gymSafe(item.bodyPart||'Other')}</small><i>${item.lastUsedDate?'Son: '+gymSafe(trDate(item.lastUsedDate)):'Henüz kullanılmadı'}${item.useCount?' · '+item.useCount+' kullanım':''}</i></span></span><em aria-hidden="true">›</em></button>`).join(''):`<div class="gymExercisePickerEmpty"><b>${query?'Hareket bulunamadı':'Henüz hareket yok'}</b><span>${query?'Yeni bir hareket olarak oluşturabilirsin.':'İlk hareketini oluşturarak başla.'}</span></div>`;
+}
+function setGymExercisePickerView(view){
+  const shade=gymExercisePickerSheet(),create=view==='create';
+  shade.dataset.view=create?'create':'browse';
+  shade.querySelector('[data-exercise-picker-view="browse"]').hidden=create;
+  shade.querySelector('[data-exercise-picker-view="create"]').hidden=!create;
+  shade.querySelector('.gymExercisePickerBack').hidden=!create;
+  shade.querySelector('#gymExercisePickerTitle').textContent=create?'Yeni Hareket':'Hareket Ekle';
+  shade.querySelector('#gymExercisePickerSubtitle').textContent=create?'Hareket adını ve kas grubunu belirle':'Geçmişten seç veya yeni oluştur';
+}
+function showGymExerciseBrowseView(){setGymExercisePickerView('browse');setTimeout(()=>gymExercisePickerSheet().querySelector('#gymExerciseSearchInput').focus(),30)}
+function showGymExerciseCreateView(){
+  const shade=gymExercisePickerSheet(),name=shade.querySelector('#gymExerciseNameInput');
+  name.value=shade.querySelector('#gymExerciseSearchInput').value.trim();setGymExercisePickerView('create');setTimeout(()=>name.focus(),30);
 }
 function openGymExercisePicker(){
-  const shade=gymExercisePickerSheet(),search=shade.querySelector('#gymExerciseSearchInput'),body=shade.querySelector('#gymExerciseBodyInput');
-  search.value='';body.value='';shade.hidden=false;renderGymExercisePickerResults();setTimeout(()=>search.focus(),40);
+  const shade=gymExercisePickerSheet(),search=shade.querySelector('#gymExerciseSearchInput'),name=shade.querySelector('#gymExerciseNameInput'),body=shade.querySelector('#gymExerciseBodyInput');
+  search.value='';name.value='';body.value='';shade.dataset.expanded='false';shade.querySelectorAll('[data-exercise-body]').forEach(button=>button.classList.remove('active'));setGymExercisePickerView('browse');shade.hidden=false;renderGymExercisePickerResults();document.body.classList.add('gymExercisePickerOpen');shade.querySelector('.gymExercisePickerClose').focus({preventScroll:true});
 }
-function closeGymExercisePicker(){const shade=document.getElementById('gymExercisePicker');if(shade)shade.hidden=true}
+function closeGymExercisePicker(){const shade=document.getElementById('gymExercisePicker');if(shade)shade.hidden=true;document.body.classList.remove('gymExercisePickerOpen')}
 function focusGymItem(key){
   setTimeout(()=>{window.SimurgMobileIA?.mountGym();window.SimurgMobileIA?.openGym(key,{focus:true});const card=gymCardEl(key);card?.scrollIntoView({behavior:'smooth',block:'start'});card?.querySelector('.gymWeight')?.focus()},30);
 }
@@ -6755,8 +6792,8 @@ function addGymExerciseFromChoice(choice){
   closeGymExercisePicker();focusGymItem('custom::'+id);return result;
 }
 function createGymExerciseFromPicker(){
-  const shade=gymExercisePickerSheet(),name=shade.querySelector('#gymExerciseSearchInput').value.trim(),bodyPart=shade.querySelector('#gymExerciseBodyInput').value.trim();
-  if(!name){shade.querySelector('#gymExerciseSearchInput').focus();return}
+  const shade=gymExercisePickerSheet(),name=shade.querySelector('#gymExerciseNameInput').value.trim(),bodyPart=shade.querySelector('#gymExerciseBodyInput').value.trim();
+  if(!name){shade.querySelector('#gymExerciseNameInput').focus();return}
   if(!bodyPart){shade.querySelector('#gymExerciseBodyInput').focus();return}
   return addGymExerciseFromChoice({exerciseId:SimurgGymIdentity.id('exercise'),name,bodyPart,exerciseType:''});
 }
@@ -16176,7 +16213,7 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./desktop-alignment.css?v=26">
 <script src="./desktop-alignment.js?v=34"></script>
 <link rel="stylesheet" href="./mobile-ia-premium.css?v=10">
-<link rel="stylesheet" href="./simurg-gym-flex.css?v=1">
+<link rel="stylesheet" href="./simurg-gym-flex.css?v=2">
 <script src="./mobile-ia-premium.js?v=6"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
 <script src="./simurg-cloud-auth.js?v=4" defer></script>

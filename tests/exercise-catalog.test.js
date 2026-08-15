@@ -67,9 +67,16 @@ run('Gym picker reuses choice identity and keeps future exercise type metadata o
   assert.match(index,/const before=JSON\.parse\(JSON\.stringify\(DATA\)\),exerciseId=choice\.exerciseId\|\|SimurgGymIdentity\.id\('exercise'\)/);
   assert.match(index,/entry\.extras\.push\(\{id,exerciseId,name:choice\.name,bodyPart:choice\.bodyPart/);
   assert.match(index,/exerciseType:meta\.exerciseType\|\|''/);
-  assert.match(index,/Benzer isimler otomatik birleştirilmez/);
   assert.match(index,/"exerciseCatalog":\{\}/);
   assert.match(worker,/simurg-exercise-catalog\.js\?v=1/);
+});
+
+run('Gym picker keeps recent results compact while full-catalog search stays available', () => {
+  assert.match(index,/query\|\|expanded\?Math\.max\(1,allCount\):6/);
+  assert.match(index,/data-exercise-picker-action="all">Tüm Hareketler/);
+  assert.match(index,/data-exercise-picker-action="new"/);
+  assert.match(index,/data-exercise-picker-view="create" hidden/);
+  assert.match(index,/name=shade\.querySelector\('#gymExerciseNameInput'\)\.value\.trim\(\)/);
 });
 
 process.stdout.write(`${passed} exercise catalog tests passed.\n`);

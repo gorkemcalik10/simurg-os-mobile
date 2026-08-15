@@ -54,7 +54,7 @@ run('changed production assets use matching cache versions', () => {
     'mobile-ia-premium.css?v=10',
     'mobile-ia-premium.js?v=6',
     'simurg-gym-flex.js?v=1',
-    'simurg-gym-flex.css?v=1'
+    'simurg-gym-flex.css?v=2'
   ]) {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
