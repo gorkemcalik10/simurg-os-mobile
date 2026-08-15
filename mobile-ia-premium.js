@@ -6,6 +6,9 @@
   var journalActiveKey='';
   var dailyArchive=null;
   var dailyShell=null;
+  var programArchive=null;
+  var programShell=null;
+  var programOpenDate='';
 
   function isMobile(){return window.innerWidth<=900;}
   function ready(fn){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();}
@@ -300,6 +303,84 @@
     try{renderWorkout=window.renderWorkout;}catch(error){}
   }
 
+  function programWeekDates(){
+    var start;
+    try{start=mondayOf(currentDate());}catch(error){start=currentDate();}
+    return [0,1,2,3,4,5,6].map(function(offset){try{return addDays(start,offset);}catch(error){return start;}});
+  }
+  function programDayModel(date){
+    var resolved=null,plan=null,items=[];
+    try{resolved=window.SimurgSignalModel&&typeof window.SimurgSignalModel.day==='function'?window.SimurgSignalModel.day(date):null;}catch(error){}
+    plan=resolved&&resolved.gymPlan||{mode:'rest',label:'Dinlenme Günü',planned:false,skipped:false,performed:false};
+    try{items=typeof gymItemsForDate==='function'?gymItemsForDate(date):[];}catch(error){items=[];}
+    if(plan.skipped||plan.mode==='rest')items=[];
+    var dayKey='';try{dayKey=dayName(date);}catch(error){}
+    var scheduledName='';try{scheduledName=typeof getProgramType==='function'?getProgramType(dayKey):'';}catch(error){}
+    var rawName=(plan.mode==='planned'||plan.mode==='rest')?(scheduledName||plan.label):plan.label;
+    var name=rawName||'Dinlenme Günü';
+    if(window.SimurgLabels)name=window.SimurgLabels.sentence(name);
+    var state=plan.skipped?'Atlandı':plan.mode==='rest'?'Dinlenme':'Antrenman';
+    return {date:date,dayKey:dayKey,day:dayLabel(date),name:name,state:state,plan:plan,items:items};
+  }
+  function programExerciseRow(item,index){
+    var body=item.bodyPart||item.exerciseType||'';
+    if(body&&window.SimurgLabels)body=window.SimurgLabels.ui(body);
+    var meta=[body,item.setCount?item.setCount+' set':''].filter(Boolean).join(' · ');
+    return '<li data-exercise-id="'+esc(item.exerciseId||'')+'"><span>'+String(index+1).padStart(2,'0')+'</span><div><b>'+esc(item.name||'Egzersiz')+'</b>'+(meta?'<small>'+esc(meta)+'</small>':'')+'</div></li>';
+  }
+  function programDayCard(model){
+    var open=model.date===programOpenDate,rest=model.plan.mode==='rest',canRename=model.plan.mode==='planned'||rest;
+    var count=model.items.length,summary=rest?'Planlı egzersiz yok':count+' egzersiz';
+    var list=count?'<ol class="miaProgramExercises">'+model.items.map(programExerciseRow).join('')+'</ol>':'<p class="miaProgramEmpty">Bu gün için planlı egzersiz bulunmuyor.</p>';
+    var actions=(canRename?'<button type="button" onclick="simurgMobileProgramRename(\''+esc(model.dayKey)+'\',\''+esc(model.date)+'\')">Program adını düzenle</button>':'')+(rest?'':'<button type="button" class="primary" onclick="simurgMobileProgramOpenGym(\''+esc(model.date)+'\')">Gym’de düzenle</button>');
+    return '<article class="miaProgramDay '+(open?'isOpen ':'')+(rest?'isRest':'')+'"><button type="button" class="miaProgramDayToggle" data-program-toggle="'+esc(model.date)+'" aria-expanded="'+(open?'true':'false')+'"><span class="miaProgramDate"><b>'+esc(model.day)+'</b><small>'+esc(dateLabel(model.date))+'</small></span><span class="miaProgramTitle"><b>'+esc(model.name)+'</b><small>'+esc(model.state)+' · '+esc(summary)+'</small></span><i>⌄</i></button>'+(open?'<div class="miaProgramDetail">'+list+'<div class="miaProgramActions">'+actions+'</div></div>':'')+'</article>';
+  }
+  function ensureProgramShell(){
+    if(!isMobile())return null;
+    var section=document.getElementById('program');if(!section)return null;
+    if(!programArchive){
+      programArchive=document.createDocumentFragment();
+      while(section.firstChild)programArchive.appendChild(section.firstChild);
+      programShell=document.createElement('div');programShell.id='miaProgramShell';programShell.className='miaProgramShell';section.appendChild(programShell);section.classList.add('miaMobileProgram');
+    }
+    if(!programShell.__miaProgramBound){
+      programShell.__miaProgramBound=true;
+      programShell.addEventListener('click',function(event){
+        var toggle=event.target.closest('[data-program-toggle]');if(!toggle)return;
+        programOpenDate=programOpenDate===toggle.dataset.programToggle?'':toggle.dataset.programToggle;
+        renderMobileProgram();
+      });
+    }
+    return programShell;
+  }
+  function renderMobileProgram(){
+    if(!isMobile())return;
+    var shell=ensureProgramShell();if(!shell)return;
+    var dates=programWeekDates();
+    if(!programOpenDate||dates.indexOf(programOpenDate)<0)programOpenDate=dates.indexOf(currentDate())>=0?currentDate():dates[0];
+    var first=dates[0],last=dates[dates.length-1],range=dateLabel(first)+' — '+dateLabel(last);
+    shell.innerHTML='<header class="miaProgramHead"><small>ANTRENMAN PLANI</small><h1>Program</h1><p>Haftalık antrenman planın</p><span>'+esc(range)+'</span></header><section class="miaProgramWeek" aria-label="Yedi günlük antrenman planı">'+dates.map(function(date){return programDayCard(programDayModel(date));}).join('')+'</section>';
+  }
+  function restoreDesktopProgram(){
+    var section=document.getElementById('program');if(!section||!programArchive)return;
+    if(programShell&&programShell.parentNode)programShell.remove();
+    section.appendChild(programArchive);section.classList.remove('miaMobileProgram');
+    programArchive=null;programShell=null;programOpenDate='';
+  }
+  function patchProgramNameEditor(){
+    if(window.__miaProgramNameEditorPatched||typeof window.saveProgramNameEdit!=='function')return;
+    window.__miaProgramNameEditorPatched=true;
+    ['saveProgramNameEdit','resetProgramNameEdit'].forEach(function(name){
+      var base=window[name];if(typeof base!=='function')return;
+      window[name]=function(){var result=base.apply(this,arguments);if(isMobile())renderMobileProgram();return result;};
+    });
+  }
+  window.simurgMobileProgramRename=function(day,date){programOpenDate=date;if(typeof window.openProgramNameEdit==='function')window.openProgramNameEdit(day);};
+  window.simurgMobileProgramOpenGym=function(date){
+    try{selectedDate=date;weekStart=mondayOf(date);}catch(error){}
+    if(typeof window.simurgV8Go==='function')window.simurgV8Go('gym','gym');
+  };
+
   function ensureDataHub(){
     if(!isMobile())return null;
     var data=document.getElementById('data');if(!data)return null;
@@ -336,23 +417,26 @@
       ['weeklyReport','monthlyReport'].forEach(function(reportId){var report=document.getElementById(reportId);if(report)report.replaceChildren();});
       if(id==='gym')mountGymAccordion();
       else if(id==='workout')mountJournalDashboard();
+      else if(id==='program')renderMobileProgram();
       else if(id==='data')mountDataCenter();
       else if(id==='polar'&&window.SimurgPolarBridge&&typeof window.SimurgPolarBridge.refresh==='function')window.SimurgPolarBridge.refresh('polar');
       return result;
     };
   }
   function handleResize(){
-    if(isMobile()){normalizeMobileShell();patchGymRenderer();patchJournalRenderer();mountGymAccordion();}
-    else{restoreDesktopGym();restoreDesktopDaily();}
+    if(isMobile()){normalizeMobileShell();patchGymRenderer();patchJournalRenderer();patchProgramNameEditor();mountGymAccordion();if(document.body.getAttribute('data-simurg-active-screen')==='program')renderMobileProgram();}
+    else{restoreDesktopGym();restoreDesktopDaily();restoreDesktopProgram();}
   }
   ready(function(){
     normalizeMobileShell();
     patchGymRenderer();
     patchJournalRenderer();
+    patchProgramNameEditor();
     patchRouter();
     if(document.body.getAttribute('data-simurg-active-screen')==='gym')mountGymAccordion();
     if(document.body.getAttribute('data-simurg-active-screen')==='workout')mountJournalDashboard();
+    if(document.body.getAttribute('data-simurg-active-screen')==='program')renderMobileProgram();
     window.addEventListener('resize',handleResize,{passive:true});
   });
-  window.SimurgMobileIA={renderDaily:renderMobileDaily,mountGym:mountGymAccordion,mountJournal:mountJournalDashboard,mountData:mountDataCenter,openGym:openGymAndFocus};
+  window.SimurgMobileIA={renderDaily:renderMobileDaily,mountGym:mountGymAccordion,mountJournal:mountJournalDashboard,mountProgram:renderMobileProgram,mountData:mountDataCenter,openGym:openGymAndFocus};
 })();

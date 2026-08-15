@@ -105,6 +105,44 @@
   #data .cloudSyncCard,#data .localStatusCard,#data .polarImportHelper,#data .universalImportCard,#data>.card{border-radius:20px!important;padding:13px!important;margin-bottom:9px!important;}
 }
 
+@media(max-width:900px){
+  html body main #program.miaMobileProgram{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    overflow-x:hidden!important;
+  }
+  html body main #program .miaProgramShell{width:100%!important;max-width:100%!important;min-width:0!important;padding:2px 0 12px!important;}
+  html body main #program .miaProgramHead{padding:10px 4px 16px!important;min-width:0!important;}
+  html body main #program .miaProgramHead>small{display:block!important;color:#f4a40d!important;font-size:9px!important;font-weight:950!important;letter-spacing:.16em!important;margin-bottom:7px!important;}
+  html body main #program .miaProgramHead h1{margin:0!important;color:#f8fafc!important;font-size:29px!important;line-height:1!important;letter-spacing:-.04em!important;}
+  html body main #program .miaProgramHead p{margin:7px 0 0!important;color:#a9b4c2!important;font-size:13px!important;line-height:1.35!important;}
+  html body main #program .miaProgramHead span{display:block!important;margin-top:10px!important;color:#6f7d8d!important;font-size:10px!important;font-weight:850!important;}
+  html body main #program .miaProgramWeek{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important;min-width:0!important;}
+  html body main #program .miaProgramDay{min-width:0!important;border:1px solid rgba(255,255,255,.075)!important;border-radius:18px!important;background:linear-gradient(145deg,rgba(14,23,34,.96),rgba(7,12,20,.98))!important;overflow:hidden!important;box-shadow:0 12px 28px rgba(0,0,0,.18)!important;}
+  html body main #program .miaProgramDay.isOpen{border-color:rgba(244,164,13,.30)!important;}
+  html body main #program .miaProgramDay.isRest{background:linear-gradient(145deg,rgba(12,19,28,.92),rgba(6,10,16,.98))!important;}
+  html body main #program .miaProgramDayToggle{width:100%!important;min-width:0!important;display:grid!important;grid-template-columns:82px minmax(0,1fr) 20px!important;align-items:center!important;gap:10px!important;padding:13px 12px!important;border:0!important;background:transparent!important;color:#f8fafc!important;text-align:left!important;}
+  html body main #program .miaProgramDayToggle>span{min-width:0!important;}
+  html body main #program .miaProgramDate b,.miaProgramTitle b{display:block!important;min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;}
+  html body main #program .miaProgramDate b{font-size:12px!important;color:#dce6f2!important;}
+  html body main #program .miaProgramDate small{display:block!important;margin-top:3px!important;color:#647386!important;font-size:9px!important;letter-spacing:0!important;}
+  html body main #program .miaProgramTitle b{font-size:13px!important;line-height:1.25!important;color:#f8fafc!important;}
+  html body main #program .miaProgramTitle small{display:block!important;margin-top:4px!important;color:#8795a7!important;font-size:9.5px!important;letter-spacing:0!important;white-space:normal!important;}
+  html body main #program .miaProgramDayToggle>i{font-style:normal!important;color:#718096!important;font-size:17px!important;transition:transform .16s ease!important;}
+  html body main #program .miaProgramDay.isOpen .miaProgramDayToggle>i{color:#f4a40d!important;transform:rotate(180deg)!important;}
+  html body main #program .miaProgramDetail{padding:0 12px 13px!important;border-top:1px solid rgba(255,255,255,.055)!important;min-width:0!important;}
+  html body main #program .miaProgramExercises{list-style:none!important;margin:0!important;padding:8px 0 4px!important;display:grid!important;gap:0!important;}
+  html body main #program .miaProgramExercises li{display:grid!important;grid-template-columns:28px minmax(0,1fr)!important;gap:8px!important;align-items:center!important;min-width:0!important;padding:8px 2px!important;border-bottom:1px solid rgba(255,255,255,.045)!important;}
+  html body main #program .miaProgramExercises li>span{color:#f4a40d!important;font-size:9px!important;font-weight:950!important;}
+  html body main #program .miaProgramExercises li b{display:block!important;color:#eaf1f8!important;font-size:12px!important;line-height:1.25!important;overflow-wrap:anywhere!important;}
+  html body main #program .miaProgramExercises li small{display:block!important;margin-top:3px!important;color:#728195!important;font-size:9px!important;letter-spacing:0!important;}
+  html body main #program .miaProgramEmpty{margin:12px 2px 6px!important;color:#7f8c9d!important;font-size:11px!important;}
+  html body main #program .miaProgramActions{display:flex!important;flex-wrap:wrap!important;gap:7px!important;padding-top:9px!important;}
+  html body main #program .miaProgramActions button{flex:1 1 145px!important;min-height:38px!important;min-width:0!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:12px!important;background:rgba(255,255,255,.035)!important;color:#cbd6e3!important;font-size:10.5px!important;font-weight:900!important;padding:8px 10px!important;white-space:normal!important;}
+  html body main #program .miaProgramActions button.primary{border-color:rgba(244,164,13,.30)!important;background:rgba(244,164,13,.09)!important;color:#ffd88c!important;}
+}
+
 @media(max-width:860px){
   /* Mobile Workout Journal: records first, compact controls, bounded typography. */
   #workout.section.active{padding:0 0 calc(92px + env(safe-area-inset-bottom,0px))!important;overflow-x:hidden!important;}

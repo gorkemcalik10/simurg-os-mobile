@@ -49,8 +49,8 @@ run('Gym uses a single-open-card mobile accordion without changing save contract
 run('Gym accordion restores canonical desktop cards across the 900/901 breakpoint', () => {
   assert.match(mobile, /function restoreDesktopGym\(\)/);
   assert.match(mobile, /entry\.body\.remove\(\);entry\.summary\.remove\(\)/);
-  assert.match(mobile, /if\(isMobile\(\)\)\{normalizeMobileShell\(\);patchGymRenderer\(\);patchJournalRenderer\(\);mountGymAccordion\(\);\}/);
-  assert.match(mobile, /else\{restoreDesktopGym\(\);restoreDesktopDaily\(\);\}/);
+  assert.match(mobile, /if\(isMobile\(\)\)\{normalizeMobileShell\(\);patchGymRenderer\(\);patchJournalRenderer\(\);patchProgramNameEditor\(\);mountGymAccordion\(\);/);
+  assert.match(mobile, /else\{restoreDesktopGym\(\);restoreDesktopDaily\(\);restoreDesktopProgram\(\);\}/);
 });
 
 run('Daily opens the canonical workout journal with real Gym details', () => {
