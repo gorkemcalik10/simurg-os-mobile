@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-coach-weekly-v1-2-semantic-consistency';
+const SIMURG_CACHE = 'simurg-system-semantic-consistency-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -15,7 +15,7 @@ const CORE_ASSETS = [
   './polar-workout.js?v=14',
   './workout-source-policy.js?v=3',
   './premium-standard.css?v=36',
-  './premium-standard.js?v=43',
+  './premium-standard.js?v=44',
   './simurg-signal-model.js?v=7',
   './simurg-coach-engine.js?v=4',
   './simurg-coach-client.js?v=4',

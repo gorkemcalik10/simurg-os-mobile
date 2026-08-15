@@ -6077,7 +6077,7 @@ body{background:#050607!important;}
     </div>
   </div>
 </div>
-<div class="panel"><h3>RAW PERFORMANCE</h3><div id="perfSummary"></div></div></div></div>
+<div class="panel"><h3>PERFORMANS ÖZETİ</h3><div id="perfSummary"></div></div></div></div>
 </section>
 
 <section id="gym" class="section">
@@ -7886,7 +7886,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=coach-weekly-v1-2-semantic-consistency').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=system-semantic-consistency-v1').catch(function(){});
   });
 }
 </script>
@@ -8074,7 +8074,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
       'Sea Swimming':'Sea Swimming','Pool Swimming':'Pool Swimming','Swimming':'Swimming',
       'Table Tennis':'Table Tennis','Football':'Football','Beach Volleyball':'Beach Volleyball','Volleyball':'Volleyball',
       'Tennis':'Tennis','Padel':'Padel','Basketball':'Basketball','Walking':'Walking','Walk':'Walking','Running':'Running','Run':'Running','Cycling':'Cycling',
-      'Mobility':'Mobility','Yoga':'Yoga','Pilates':'Pilates','Boxing':'Boxing','Fitness':'Fitness','Recovery':'Recovery','Other':'Other Activity'
+      'Mobility':'Mobility','Yoga':'Yoga','Pilates':'Pilates','Boxing':'Boxing','Fitness':'Fitness','Functional Training':'Fonksiyonel Antrenman','FUNCTIONAL TRAINING':'Fonksiyonel Antrenman','FUNCTIONAL_TRAINING':'Fonksiyonel Antrenman','Recovery':'Recovery','Other':'Other Activity'
     };
     return map[raw]||raw.toLowerCase().replace(/\b\p{L}/gu,function(letter){return letter.toUpperCase();})||'Other Activity';
   };
@@ -12273,7 +12273,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     var hero=document.getElementById('psLoggerHero');
     var insight=document.getElementById('psLoggerInsight');
     var context=document.getElementById('workoutContextPanel');
-    var raw=findPanelByTitle('RAW PERFORMANCE');
+    var raw=findPanelByTitle('PERFORMANS ÖZETİ')||findPanelByTitle('RAW PERFORMANCE');
     [muscle,trend,watch,hero,insight,context,raw].forEach(function(el){ if(el && el.parentNode===right) right.appendChild(el); });
   }
   function updateLoggerSummary(){
@@ -12751,7 +12751,7 @@ m Shell V4: Logger information architecture fix -->
     var trend=findPanelByTitle('HACİM TREND');
     var watch=findPanelByTitle('APPLE WATCH');
     var context=document.getElementById('workoutContextPanel');
-    var raw=findPanelByTitle('RAW PERFORMANCE');
+    var raw=findPanelByTitle('PERFORMANS ÖZETİ')||findPanelByTitle('RAW PERFORMANCE');
     [muscle,trend,watch,context,raw].forEach(function(el){if(el && el.parentNode===right) right.appendChild(el);});
   }
   function updateSummary(){
@@ -16219,7 +16219,7 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./simurg-coach.css?v=10">
 <script src="./simurg-coach-ui.js?v=9"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=36">
-<script src="./premium-standard.js?v=43"></script>
+<script src="./premium-standard.js?v=44"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=9"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=26">
