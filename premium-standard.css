@@ -852,11 +852,25 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
   #home.gp-home .gp-horizon-flow .recovery i{color:#70d28f!important}.gp-horizon-flow .sleep i{color:#bb7bf0!important}.gp-horizon-flow .load i{color:var(--hf-amber)!important}
   #home.gp-home .gp-horizon-flow b{margin-top:5px!important;color:var(--hf-text)!important;font-size:20px!important;line-height:1!important;font-weight:730!important}
   #home.gp-home .gp-horizon-flow small{margin-top:4px!important;color:#a7b0ba!important;font-size:8.5px!important}
+  #home.gp-home .gp-horizon-flow [data-coach-status]{margin-top:4px!important;color:#d7dde3!important;font-size:7.5px!important;line-height:1.15!important;font-weight:800!important}
+  #home.gp-home .gp-horizon-flow .recovery [data-coach-status]{color:#78d296!important}
+  #home.gp-home .gp-horizon-flow .sleep [data-coach-status]{color:#c391ed!important}
+  #home.gp-home .gp-horizon-flow .load [data-coach-status]{color:#ffc04a!important}
   #home.gp-home .gp-plan{display:grid!important;grid-template-columns:34px minmax(0,1fr) 12px!important;align-items:center!important;gap:10px!important;width:100%!important;text-align:left!important;color:inherit!important}
   #home.gp-home .gp-plan>i{display:grid!important;place-items:center!important;width:34px!important;min-height:34px!important;border-radius:11px!important;background:var(--hf-amber-soft)!important;color:var(--hf-amber)!important;font-style:normal!important}
   #home.gp-home .gp-plan h3{margin:4px 0 3px!important;color:var(--hf-text)!important;font-size:14px!important;line-height:1.15!important}
   #home.gp-home .gp-plan p{margin:0!important;color:#929eaa!important;font-size:8.7px!important;line-height:1.35!important}
   #home.gp-home .gp-plan>span{color:#d7dde2!important;font-size:22px!important}
+  #home.gp-home .gp-workout-title{display:flex!important;align-items:center!important;gap:7px!important;min-width:0!important;margin:4px 0 4px!important}
+  #home.gp-home .gp-workout-title h3{min-width:0!important;margin:0!important}
+  #home.gp-home .gp-workout-title em{flex:0 0 auto!important;padding:4px 6px!important;border:1px solid var(--hf-line-soft)!important;border-radius:999px!important;background:#080f16!important;color:#aab4be!important;font-size:6.5px!important;line-height:1!important;font-style:normal!important;font-weight:850!important;white-space:nowrap!important}
+  #home.gp-home .gp-workout-title em.completed{border-color:rgba(103,196,134,.28)!important;background:rgba(103,196,134,.08)!important;color:#88d7a3!important}
+  #home.gp-home .gp-workout-title em.planned{border-color:rgba(245,163,13,.27)!important;background:var(--hf-amber-soft)!important;color:#ffc04a!important}
+  #home.gp-home .gp-workout-title em.skipped,#home.gp-home .gp-workout-title em.rest{color:#9da8b2!important}
+  #home.gp-home .gp-home-activity{padding:12px!important}
+  #home.gp-home .gp-home-activity h3{margin:5px 0 5px!important;font-size:14px!important}
+  #home.gp-home .gp-home-activity p{font-size:9px!important;line-height:1.4!important}
+  #home.gp-home .gp-home-activity>span{margin-top:5px!important;font-size:7.5px!important}
   #home.gp-home .gp-recent-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-bottom:9px!important}
   #home.gp-home .gp-recent-grid .gp-card{min-width:0!important;margin:0!important;padding:11px!important;text-align:left!important;color:inherit!important}
   #home.gp-home .gp-recent-grid h3{margin:6px 0 4px!important;color:var(--hf-text)!important;font-size:12px!important;line-height:1.2!important;overflow-wrap:break-word!important}

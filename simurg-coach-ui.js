@@ -5,6 +5,7 @@
   var tabs=['daily','weekly','history'];
   var decisionLabels={progress:'Kontrollü ilerleme',normal:'Planı koru',controlled:'Kontrollü uygula',reduce:'Yükü azalt',recovery:'Toparlanma günü',rest:'Dinlen'};
   var dailyDecisionLabels={progress:'Bugün biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'};
+  var homeDecisionLabels={progress:'Biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'};
   var metricLabels={hrv:'HRV',restingHr:'Dinlenik nabız',sleepMinutes:'Uyku süresi',sleepScore:'Uyku skoru',cardioLoad:'Cardio Load'};
 
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char];});}
@@ -24,6 +25,7 @@
   function confidence(result){return Math.round(result.confidenceScore||0)+'%';}
   function decision(result){return decisionLabels[result.trainingDecision]||result.trainingDecision;}
   function dailyDecision(result){return dailyDecisionLabels[result.trainingDecision]||result.trainingDecision;}
+  function homeDecision(result){return homeDecisionLabels[result.trainingDecision]||'Temkinli başla';}
   function adjustment(result){var value=Number(result.loadAdjustmentPercent)||0;return value===0?'Yük değişikliği yok':(value>0?'+':'')+value+'% yük önerisi';}
   function preview(value){
     var sentences=String(value||'').match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[];
@@ -216,7 +218,13 @@
     var result=resolve('daily',date||selected());
     removeLegacyCoachCards(content);
     if(tab==='overview'){
-      content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-home-insight '+statusTone(result)+'" onclick="simurgCoachOpen()"><span><small>COACH INSIGHT</small><b>'+esc(result.headline)+'</b><em>'+esc(decision(result))+' · Veri güveni '+esc(confidence(result))+'</em></span><i>Detay →</i></button>');
+      if(root.innerWidth>900){
+        content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-home-insight '+statusTone(result)+'" onclick="simurgCoachOpen()"><span><small>COACH INSIGHT</small><b>'+esc(result.headline)+'</b><em>'+esc(decision(result))+' · Veri güveni '+esc(confidence(result))+'</em></span><i>Detay →</i></button>');
+        return;
+      }
+      var statuses={sleep:sleepReason(result).status,recovery:recoveryReason(result).status,load:loadReason(result).status};
+      Object.keys(statuses).forEach(function(key){var node=content.querySelector('[data-coach-status="'+key+'"]');if(node)node.textContent=statuses[key];});
+      content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-home-insight '+statusTone(result)+'" onclick="simurgCoachOpen()"><span><small>BUGÜNÜN KOÇ KARARI</small><b>'+esc(homeDecision(result))+'</b><em>'+esc(plainDecisionExplanation(result))+'</em><u>Hazırlık '+esc(score(result))+'</u></span><i>Detay →</i></button>');
     }else if(tab==='recovery'){
       var recovery=(result.recoveryActions||[])[0]||(result.keyDrivers||[])[0]||'Toparlanma için veri birikiyor.';
       content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-recovery-insight" onclick="simurgCoachOpen()"><span><small>RECOVERY INSIGHT</small><b>'+esc(recovery)+'</b><em>Koçluk detayında nedenleri gör</em></span><i>→</i></button>');

@@ -99,6 +99,16 @@
     var tag=activity.polar?'button':'div',action=activity.polar?' type="button" data-gp-polar-date="'+esc(activity.date)+'" data-gp-polar-start="'+esc(activity.startTime||'')+'"':'';
     return '<'+tag+' class="gp-card gp-activity gp-activity-detail '+(activity.polar?'tappable polar-source':'')+'"'+action+'><small class="gp-kicker">'+esc(kicker)+'</small><h3>'+esc(activity.name)+'</h3><p>'+esc(primary)+'</p>'+(heart?'<p>'+esc(heart)+'</p>':'')+'<span>'+esc(footer)+'</span></'+tag+'>';
   }
+  function mobileActivityCard(activity,date){
+    if(!activity)return '';
+    var durationMinutes=null;try{if(window.SimurgWorkoutSource&&typeof window.SimurgWorkoutSource.durationMinutes==='function')durationMinutes=window.SimurgWorkoutSource.durationMinutes(activity.duration);}catch(e){durationMinutes=null;}
+    var duration=durationMinutes>0?Math.round(durationMinutes)+' dk':activity.duration;
+    var primary=[duration,activity.cal!=null?formatLoad(activity.cal)+' kcal':''].filter(Boolean).join(' · ');
+    var heart=[activity.avgHR!=null?'Ort. HR '+formatLoad(activity.avgHR):'',activity.maxHR!=null?'Maks. HR '+formatLoad(activity.maxHR):''].filter(Boolean).join(' · ');
+    var kicker=date===today()?'BUGÜNKÜ AKTİVİTE':'SEÇİLİ GÜN AKTİVİTESİ';
+    var tag=activity.polar?'button':'div',action=activity.polar?' type="button" data-gp-polar-date="'+esc(activity.date)+'" data-gp-polar-start="'+esc(activity.startTime||'')+'"':'';
+    return '<'+tag+' class="gp-card gp-activity gp-activity-detail gp-home-activity '+(activity.polar?'tappable polar-source':'')+'"'+action+'><small class="gp-kicker">'+esc(kicker)+'</small><h3>'+esc(activity.name)+'</h3>'+(primary?'<p>'+esc(primary)+'</p>':'')+(heart?'<p>'+esc(heart)+'</p>':'')+(activity.source?'<span>'+esc(activity.source)+'</span>':'')+'</'+tag+'>';
+  }
   function recoveryInterpretation(model){
     if(!model.hasRecoverySignals&&model.readiness==null)return 'Henüz toparlanma verisi yok.';
     if(model.readiness==null&&model.hasRecoverySignals)return 'Bugünkü toparlanma verisi kısmi. Mevcut HRV, dinlenik nabız ve solunum sinyallerini kontrollü yorumla; net recovery skoru için daha fazla Polar verisi gerekiyor.';
@@ -142,6 +152,18 @@
     if(!session)return '<button type="button" class="gp-card gp-recent-card gp-recent-workout" onclick="'+action+'"><small class="gp-kicker">Seçili Gün Antrenmanı</small><h3>Kayıt bulunmuyor</h3><p>Bu tarih için Gym kaydı yok.</p></button>';
     return '<button type="button" class="gp-card gp-recent-card gp-recent-workout" onclick="'+action+'"><small class="gp-kicker">Seçili Gün Antrenmanı</small><h3>'+esc(session.name)+'</h3><span class="gp-recent-date">'+esc(activityDate(session.date,true))+'</span><div class="gp-recent-metrics"><span><b>'+esc(session.sets)+'</b><small>Set</small></span><span><b>'+esc(session.reps==null?'—':session.reps)+'</b><small>Tekrar</small></span><span><b>'+esc(session.volume==null?'—':Math.round(session.volume).toLocaleString('tr-TR'))+'</b><small>kg</small></span></div></button>';
   }
+  function workoutState(model){
+    var plan=model.gymPlan||{};
+    if(plan.skipped)return {label:'Atlandı',tone:'skipped'};
+    if(plan.mode==='rest')return {label:'Dinlenme günü',tone:'rest'};
+    if(plan.performed)return {label:'Tamamlandı',tone:'completed'};
+    return {label:'Planlandı',tone:'planned'};
+  }
+  function mobileWorkoutCard(model){
+    var plan=model.gymPlan||{},session=selectedGymSession(model),state=workoutState(model),performed=!!plan.performed,action=performed?"simurgV8Go('workout','logger')":"simurgV8Go('gym','gym')",kicker=model.selectedDate===today()?'BUGÜNKÜ ANTRENMAN':'SEÇİLİ GÜN ANTRENMANI';
+    var stats=session?[session.sets+' set',session.reps==null?'':session.reps+' tekrar',session.volume==null?'':Math.round(session.volume).toLocaleString('tr-TR')+' kg hacim'].filter(Boolean).join(' · '):'';
+    return '<button type="button" class="gp-card gp-plan gp-workout-summary" onclick="'+action+'"><i>⌘</i><div><small class="gp-kicker">'+kicker+'</small><div class="gp-workout-title"><h3>'+esc(planName(model))+'</h3><em class="'+state.tone+'">'+esc(state.label)+'</em></div>'+(stats?'<p>'+esc(stats)+'</p>':'<p>'+esc(planDescription(model))+'</p>')+'</div><span>›</span></button>';
+  }
   function weeklySnapshot(model){
     var start;
     try{start=typeof mondayOf==='function'?mondayOf(homeDateValue()):homeDateValue();}catch(e){start=homeDateValue();}
@@ -152,9 +174,9 @@
     var max=Math.max.apply(null,daily.map(function(day){return day.volume;}));
     return {days:daily,max:max||1,active:daily.filter(function(day){return day.active;}).length,sets:summary.sets||0,volume:summary.vol||0};
   }
-  function weeklyCard(model){
+  function weeklyCard(model,mobile){
     var week=weeklySnapshot(model),labels=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
-    return '<div class="gp-card gp-weekly"><div class="gp-section-title"><div><small>HAFTALIK ÖZET</small><h3>Yük akışı</h3></div><b>'+week.active+'/7 gün</b></div><div class="gp-weekly-body"><div class="gp-week-bars">'+week.days.map(function(day,index){var level=day.active?Math.max(18,Math.round(day.volume/week.max*100)):8;return '<span><i style="--gp-day:'+level+'%"></i><small>'+labels[index]+'</small></span>';}).join('')+'</div><div class="gp-week-totals"><span><b>'+Math.round(week.volume).toLocaleString('tr-TR')+'</b><small>kg hacim</small></span><span><b>'+week.sets+'</b><small>set</small></span></div></div></div>';
+    return '<div class="gp-card gp-weekly"><div class="gp-section-title"><div><small>HAFTALIK ÖZET</small><h3>Yük akışı</h3></div><b>'+(mobile?week.active+' antrenman günü':week.active+'/7 gün')+'</b></div><div class="gp-weekly-body"><div class="gp-week-bars">'+week.days.map(function(day,index){var level=day.active?Math.max(18,Math.round(day.volume/week.max*100)):8;return '<span><i style="--gp-day:'+level+'%"></i><small>'+labels[index]+'</small></span>';}).join('')+'</div><div class="gp-week-totals"><span><b>'+Math.round(week.volume).toLocaleString('tr-TR')+'</b><small>kg hacim</small></span><span><b>'+week.sets+'</b><small>set</small></span></div></div></div>';
   }
   function overviewPane(model){
     if(window.innerWidth>900){var desktopActivity=model.activity,decisionDesktop=readinessDecision(model),result=model.readinessResult||{},scoreDesktop=model.readiness==null?'—':Math.round(model.readiness),confidence=result.confidence&&result.confidence.label||'—',desktopActivityLabel=desktopActivity&&desktopActivity.polar?'Seçili Gün Polar Aktivitesi':'Seçili Gün Aktivitesi',activityHtmlDesktop=desktopActivity?activityCard(desktopActivity,desktopActivityLabel,false):'<div class="gp-card gp-activity"><small class="gp-kicker">SEÇİLİ GÜN AKTİVİTESİ</small><h3>Aktivite bulunmuyor</h3><p>Bu tarih için gerçek Polar veya eski kaynak aktivitesi kaydı yok.</p></div>';
@@ -164,15 +186,12 @@
         +'<section class="gp-desktop-session-grid"><button type="button" class="gp-card gp-plan" onclick="desktopOpen(\'program\')"><i>⌘</i><div><small class="gp-kicker">SEÇİLİ GÜN PLANI</small><h3>'+esc(planName(model))+'</h3><p>'+esc(planDescription(model))+'</p></div><span>›</span></button>'+gymSessionCard(model)+activityHtmlDesktop+'</section>'
         +'<section class="gp-card gp-coach-flow"><small class="gp-kicker">KOÇUN BUGÜN SENİN İÇİN</small><div><i>◎</i><b>Ana Hedef</b><span>'+esc(planFocus(model))+'</span></div><div><i>◇</i><b>Dikkat</b><span>'+esc(recoveryInterpretation(model))+'</span></div><div class="opportunity"><i>↗</i><b>Fırsat</b><span>'+esc(loadInterpretation(model))+'</span></div></section>'
         +weeklyCard(model)+'</div>';}
-    var activity=model.activity,decision=readinessDecision(model),score=model.readiness==null?'—':Math.round(model.readiness);
-    var activityHtml=activity?activityCard(activity,'Seçili Gün Aktivitesi',false):'<div class="gp-card gp-recent-card gp-activity"><small class="gp-kicker">Seçili Gün Aktivitesi</small><h3>Aktivite bulunmuyor</h3><p>Bu tarih için Polar veya eski kaynak aktivitesi kaydı yok.</p></div>';
+    var activityHtml=mobileActivityCard(model.activity,model.selectedDate);
     return '<div class="gp-home-pane active" data-home-pane="overview">'
-      +'<div class="gp-card gp-prime '+decision.tone+'"><div class="gp-prime-score"><small>READINESS PRIME</small><b>'+esc(score)+'</b><strong>'+esc(decision.label)+'</strong></div><p>'+esc(coachSentence(model))+'</p><span>›</span></div>'
-      +'<div class="gp-card gp-horizon"><small class="gp-kicker">HORIZON METRİKLERİ</small><div class="gp-horizon-flow"><div class="recovery"><i>♥</i><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>Recovery</small></div><div class="sleep"><i>◒</i><b>'+esc(model.sleepScore==null?'—':Math.round(model.sleepScore))+'</b><small>Sleep</small></div><div class="load"><i>⌁</i><b>'+esc(model.load==null?'—':formatLoad(model.load))+'</b><small>Load</small></div></div></div>'
-      +'<button type="button" class="gp-card gp-plan" onclick="simurgV8Go(\'gym\',\'gym\')"><i>⌘</i><div><small class="gp-kicker">BUGÜNKÜ PLAN</small><h3>'+esc(planName(model))+'</h3><p>'+esc(planDescription(model))+'</p></div><span>›</span></button>'
-      +'<div class="gp-recent-grid">'+gymSessionCard(model)+activityHtml+'</div>'
-      +'<div class="gp-card gp-coach-flow"><small class="gp-kicker">KOÇUN BUGÜN SENİN İÇİN</small><div><i>◎</i><b>Ana Hedef</b><span>'+esc(planFocus(model))+'</span></div><div><i>◇</i><b>Dikkat</b><span>'+esc(recoveryInterpretation(model))+'</span></div><div class="opportunity"><i>↗</i><b>Fırsat</b><span>'+esc(loadInterpretation(model))+'</span></div></div>'
-      +weeklyCard(model)+'</div>';
+      +'<div class="gp-card gp-horizon"><small class="gp-kicker">HORIZON METRİKLERİ</small><div class="gp-horizon-flow"><div class="recovery"><i>♥</i><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>Toparlanma</small><span data-coach-status="recovery">Veri bekleniyor</span></div><div class="sleep"><i>◒</i><b>'+esc(model.sleepScore==null?'—':Math.round(model.sleepScore))+'</b><small>Uyku</small><span data-coach-status="sleep">Veri bekleniyor</span></div><div class="load"><i>⌁</i><b>'+esc(model.load==null?'—':formatLoad(model.load))+'</b><small>Yük</small><span data-coach-status="load">Veri bekleniyor</span></div></div></div>'
+      +mobileWorkoutCard(model)
+      +activityHtml
+      +weeklyCard(model,true)+'</div>';
   }
   function recoveryPane(model){
     var title=model.readiness!=null?(model.readiness>=70?'Hazır sinyali':'Kontrollü sinyal'):(model.hasRecoverySignals?'Kısmi Toparlanma Verisi':'Henüz toparlanma verisi yok');

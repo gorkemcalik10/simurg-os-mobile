@@ -55,6 +55,7 @@
 .sci-home-insight.good{border-left-color:var(--hz-green)}.sci-home-insight.controlled{border-left-color:var(--hz-amber)}.sci-home-insight.risk{border-left-color:var(--hz-red)}
 .sci-home-insight span,.sci-recovery-insight span{display:grid;gap:3px}.sci-home-insight small,.sci-recovery-insight small{font-size:9px;letter-spacing:.12em;font-weight:900;color:var(--hz-amber)}
 .sci-home-insight b,.sci-recovery-insight b{color:var(--hz-text)!important;font-size:15px}.sci-home-insight em,.sci-recovery-insight em{font-style:normal;font-size:11px;color:var(--hz-muted)}
+.sci-home-insight u{width:max-content;margin-top:4px;padding:4px 7px;border:1px solid var(--sci-line);border-radius:999px;background:rgba(3,15,27,.55);color:#d8e1ea;font-size:9px;font-weight:850;text-decoration:none}
 .sci-home-insight>i,.sci-recovery-insight>i{font-style:normal;color:#70d8f1;font-weight:850;white-space:nowrap}
 .sci-recovery-insight{border-left-color:var(--hz-green);background:radial-gradient(circle at 100% 0%,rgba(103,196,134,.07),transparent 36%),linear-gradient(180deg,var(--hz-surface-2),var(--hz-field))}
 .sci-desktop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.sci-desktop-grid.wide{grid-template-columns:1.35fr 1fr}
@@ -87,8 +88,11 @@
   .sci-decision{display:block;padding:17px;margin-bottom:15px}.sci-decision h2{font-size:24px}.sci-decision p{font-size:13px}.sci-decision>span{display:inline-block;margin-top:13px}
   .sci-reasons>article{min-height:68px;padding:11px 13px}.sci-disclosure{margin-bottom:10px}.sci-disclosure summary{padding:15px 16px}.sci-disclosure>div{padding:15px 16px}
   .sci-history article{grid-template-columns:1fr 42px}.sci-history article span,.sci-history article small{text-align:right}
-  #home .sci-home-insight,#home .sci-recovery-insight{margin-bottom:9px;padding:13px 14px;border-radius:17px}
-  #home .sci-home-insight b,#home .sci-recovery-insight b{font-size:13px}
+  #home .sci-home-insight,#home .sci-recovery-insight{align-items:flex-start;margin-bottom:9px;padding:13px 14px;border-radius:17px}
+  #home .sci-home-insight span{gap:5px;min-width:0}
+  #home .sci-home-insight b,#home .sci-recovery-insight b{font-size:15px;line-height:1.15}
+  #home .sci-home-insight em{font-size:9.5px;line-height:1.4}
+  #home .sci-home-insight>i{align-self:center;font-size:9px}
 }
 @media(min-width:901px){
   .sci-desktop-shell{max-width:1680px;padding:0;color:var(--dl-text,var(--hz-text))}

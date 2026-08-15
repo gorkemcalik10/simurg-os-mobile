@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-coach-simplification-v1';
+const SIMURG_CACHE = 'simurg-home-simplification-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -14,13 +14,13 @@ const CORE_ASSETS = [
   './polar-workout.css?v=11',
   './polar-workout.js?v=14',
   './workout-source-policy.js?v=3',
-  './premium-standard.css?v=34',
-  './premium-standard.js?v=41',
+  './premium-standard.css?v=35',
+  './premium-standard.js?v=42',
   './simurg-signal-model.js?v=7',
   './simurg-coach-engine.js?v=4',
   './simurg-coach-client.js?v=4',
-  './simurg-coach.css?v=5',
-  './simurg-coach-ui.js?v=4',
+  './simurg-coach.css?v=6',
+  './simurg-coach-ui.js?v=5',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=9',
   './simurg-cloud-auth.js?v=4',
