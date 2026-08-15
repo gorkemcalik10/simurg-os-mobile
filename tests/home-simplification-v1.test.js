@@ -19,9 +19,9 @@ run('Home Coach card uses all six plain-language decisions without technical con
     reduce: 'Bugün biraz azalt', recovery: 'Hafif gün yap', rest: 'Bugün dinlen',
   })) assert.match(coach, new RegExp(`${key}:'${label}'`));
   const homeBlock = coach.slice(coach.indexOf("var statuses={sleep:"), coach.indexOf("}else if(tab==='recovery')"));
-  assert.match(homeBlock, /BUGÜNÜN KOÇ KARARI/);
-  assert.match(homeBlock, /plainDecisionExplanation\(result\)/);
-  assert.match(homeBlock, /Hazırlık/);
+  assert.match(coach, /BUGÜNÜN KOÇ KARARI/);
+  assert.match(coach, /plainDecisionExplanation\(result\)/);
+  assert.doesNotMatch(homeBlock, /Hazırlık/);
   assert.match(homeBlock, /Detay →/);
   assert.doesNotMatch(homeBlock, /Veri güveni|loadAdjustmentPercent|result\.headline|decision\(result\)/);
 });
@@ -30,7 +30,7 @@ run('Horizon statuses reuse the existing Coach semantic helpers', () => {
   const homeBlock = coach.slice(coach.indexOf("var statuses={sleep:"), coach.indexOf("}else if(tab==='recovery')"));
   assert.match(homeBlock, /sleep:sleepReason\(result\)\.status/);
   assert.match(homeBlock, /recovery:recoveryReason\(result\)\.status/);
-  assert.match(homeBlock, /load:loadReason\(result\)\.status/);
+  assert.match(homeBlock, /load:loadReason\(result,model&&model\.load\)\.status/);
   for (const key of ['recovery', 'sleep', 'load']) assert.match(premium, new RegExp(`data-coach-status="${key}"`));
 });
 
@@ -50,7 +50,7 @@ run('mobile overview has one workout card and omits empty activity', () => {
 run('merged workout card preserves actual day states and completed stats', () => {
   const stateBlock = premium.slice(premium.indexOf('function workoutState'), premium.indexOf('function weeklySnapshot'));
   assert.match(stateBlock, /if\(plan\.skipped\).*Atlandı/);
-  assert.match(stateBlock, /if\(plan\.mode==='rest'\).*Dinlenme günü/);
+  assert.match(stateBlock, /if\(plan\.mode==='rest'\).*Dinlenme Günü/);
   assert.match(stateBlock, /if\(plan\.performed\).*Tamamlandı/);
   assert.match(stateBlock, /Planlandı/);
   assert.match(stateBlock, /selectedGymSession\(model\)/);
@@ -69,7 +69,7 @@ run('merged workout card preserves actual day states and completed stats', () =>
   assert.match(completed, /BUGÜNKÜ ANTRENMAN/); assert.match(completed, /Tamamlandı/); assert.match(completed, /22 set · 234 tekrar · 5\.560 kg hacim/); assert.match(completed, /workout','logger/);
   assert.match(context.renderWorkout({ selectedDate: '2026-08-15', gymPlan: { label: 'Push', planned: true } }), /Planlandı/);
   assert.match(context.renderWorkout({ selectedDate: '2026-08-15', gymPlan: { label: 'Bugün Atlandı', skipped: true } }), /Atlandı/);
-  assert.match(context.renderWorkout({ selectedDate: '2026-08-15', gymPlan: { label: 'Dinlenme Günü', mode: 'rest' } }), /Dinlenme günü/);
+  assert.match(context.renderWorkout({ selectedDate: '2026-08-15', gymPlan: { label: 'Dinlenme Günü', mode: 'rest' } }), /Dinlenme Günü/);
   assert.match(context.renderWorkout({ selectedDate: '2026-08-14', gymPlan: { label: 'Pull', planned: true } }), /SEÇİLİ GÜN ANTRENMANI/);
 });
 

@@ -87,7 +87,7 @@
     if(!name){var names=model.data.programNames||{},day=new Intl.DateTimeFormat('en-US',{weekday:'long',timeZone:'UTC'}).format(new Date(date+'T12:00:00Z'));name=names[day]||'Plan verisi bekleniyor';}
     return window.SimurgLabels?window.SimurgLabels.ui(name):name;
   }
-  function planDescription(model){var plan=model.gymPlan||{};if(plan.skipped)return 'Bu gün açıkça atlandı; plan aktif antrenman olarak gösterilmiyor.';if(plan.mode==='rest')return 'Takvimde planlı Gym seansı olmayan gerçek dinlenme günü.';if(plan.performed)return 'Gerçek kaydedilmiş seans tamamlandı.';if(plan.mode==='alternate')return 'Bu tarih için seçilen alternatif program henüz kaydedilmedi.';if(plan.mode==='custom')return 'Bu tarih için seçilen serbest antrenman henüz kaydedilmedi.';return 'Planlandı; henüz kaydedilmiş bir Gym seansı yok.';}
+  function planDescription(model){var plan=model.gymPlan||{};if(plan.skipped)return 'Bu gün açıkça atlandı; plan aktif antrenman olarak gösterilmiyor.';if(plan.mode==='rest')return 'Bugün planlı antrenmanın yok.';if(plan.performed)return 'Gerçek kaydedilmiş seans tamamlandı.';if(plan.mode==='alternate')return 'Bu tarih için seçilen alternatif program henüz kaydedilmedi.';if(plan.mode==='custom')return 'Bu tarih için seçilen serbest antrenman henüz kaydedilmedi.';return 'Planlandı; henüz kaydedilmiş bir Gym seansı yok.';}
   function planFocus(model){var plan=model.gymPlan||{};if(plan.skipped)return 'Bugün Gym progresyon hedefi yok; toparlanma ve diğer gerçek aktiviteler izlenir.';if(plan.mode==='rest')return 'Dinlenme gününde yeni Gym hedefi üretilmez.';return planName(model)+' bağlamında kaliteli tekrar ve tam hareket açıklığı.';}
   function activityDate(value,withYear){if(!value)return '';try{return new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'short',year:withYear?'numeric':undefined,timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));}catch(e){return value;}}
   function zoneSummary(activity){if(!activity||!activity.zones)return '';var keys=['zone1','zone2','zone3','zone4','zone5'],seconds=keys.map(function(key){var raw=String(activity.zones[key]||''),parts=raw.split(':').map(Number);return parts.length===3?parts[0]*3600+parts[1]*60+parts[2]:parts.length===2?parts[0]*60+parts[1]:0;}),max=Math.max.apply(null,seconds);return max>0?'Bölge '+(seconds.indexOf(max)+1)+' baskın':'';}
@@ -155,7 +155,7 @@
   function workoutState(model){
     var plan=model.gymPlan||{};
     if(plan.skipped)return {label:'Atlandı',tone:'skipped'};
-    if(plan.mode==='rest')return {label:'Dinlenme günü',tone:'rest'};
+    if(plan.mode==='rest')return {label:'Dinlenme Günü',tone:'rest'};
     if(plan.performed)return {label:'Tamamlandı',tone:'completed'};
     return {label:'Planlandı',tone:'planned'};
   }
@@ -187,8 +187,9 @@
         +'<section class="gp-card gp-coach-flow"><small class="gp-kicker">KOÇUN BUGÜN SENİN İÇİN</small><div><i>◎</i><b>Ana Hedef</b><span>'+esc(planFocus(model))+'</span></div><div><i>◇</i><b>Dikkat</b><span>'+esc(recoveryInterpretation(model))+'</span></div><div class="opportunity"><i>↗</i><b>Fırsat</b><span>'+esc(loadInterpretation(model))+'</span></div></section>'
         +weeklyCard(model)+'</div>';}
     var activityHtml=mobileActivityCard(model.activity,model.selectedDate);
+    var horizonContext=model.selectedDate===today()?'Bugünkü durum':'Seçili günün durumu';
     return '<div class="gp-home-pane active" data-home-pane="overview">'
-      +'<div class="gp-card gp-horizon"><small class="gp-kicker">HORIZON METRİKLERİ</small><div class="gp-horizon-flow"><div class="recovery"><i>♥</i><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>Toparlanma</small><span data-coach-status="recovery">Veri bekleniyor</span></div><div class="sleep"><i>◒</i><b>'+esc(model.sleepScore==null?'—':Math.round(model.sleepScore))+'</b><small>Uyku</small><span data-coach-status="sleep">Veri bekleniyor</span></div><div class="load"><i>⌁</i><b>'+esc(model.load==null?'—':formatLoad(model.load))+'</b><small>Yük</small><span data-coach-status="load">Veri bekleniyor</span></div></div></div>'
+      +'<div class="gp-card gp-horizon"><div class="gp-horizon-head"><small class="gp-kicker">HORIZON</small><span>'+horizonContext+'</span></div><div class="gp-horizon-flow"><button type="button" class="gp-horizon-tile recovery" aria-label="Toparlanma detayını aç" onclick="homePremiumSetTab(\'recovery\')"><i aria-hidden="true">♥</i><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>Toparlanma</small><span data-coach-status="recovery">Veri bekleniyor</span></button><button type="button" class="gp-horizon-tile sleep" aria-label="Uyku detayını aç" onclick="homePremiumSetTab(\'sleep\')"><i aria-hidden="true">◒</i><b>'+esc(model.sleepScore==null?'—':Math.round(model.sleepScore))+'</b><small>Uyku</small><span data-coach-status="sleep">Veri bekleniyor</span></button><button type="button" class="gp-horizon-tile load" aria-label="Yük detayını aç" onclick="homePremiumSetTab(\'load\')"><i aria-hidden="true">⌁</i><b>'+esc(model.load==null?'—':formatLoad(model.load))+'</b><small>Yük</small><span data-coach-status="load">Veri bekleniyor</span></button></div></div>'
       +mobileWorkoutCard(model)
       +activityHtml
       +weeklyCard(model,true)+'</div>';
@@ -222,7 +223,7 @@
     var dateLabel=document.getElementById('gpHomeDateLabel');if(dateLabel)dateLabel.textContent=homeDateLabel();
     home.querySelectorAll('[data-home-tab]').forEach(function(button){var active=button.dataset.homeTab===homeTab;button.classList.toggle('active',active);button.setAttribute('aria-selected',active?'true':'false');});
     var content=document.getElementById('gpHomeContent');if(!content)return;
-    var model=homeModel(homeDateValue()),panes={overview:overviewPane,recovery:recoveryPane,sleep:sleepPane,load:loadPane},next=panes[homeTab](model);if(content.innerHTML!==next)content.innerHTML=next;localizeVisible();if(window.SimurgCoachUI&&typeof window.SimurgCoachUI.decorateHome==='function')window.SimurgCoachUI.decorateHome(content,homeTab,homeDateValue());
+    var model=homeModel(homeDateValue()),panes={overview:overviewPane,recovery:recoveryPane,sleep:sleepPane,load:loadPane},next=panes[homeTab](model);if(content.innerHTML!==next)content.innerHTML=next;localizeVisible();if(window.SimurgCoachUI&&typeof window.SimurgCoachUI.decorateHome==='function')window.SimurgCoachUI.decorateHome(content,homeTab,homeDateValue(),model);
   }
   window.homePremiumMove=function(delta){
     var next=addDays(selectedDate,Number(delta)||0);

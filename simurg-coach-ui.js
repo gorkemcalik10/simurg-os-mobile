@@ -91,8 +91,10 @@
     if((hdev!=null&&hdev>=8)&&(rdev==null||rdev<8))return {icon:'♥',title:'Toparlanma',status:'İyi',copy:'HRV ve dinlenik nabzın toparlanmayı destekliyor.'};
     return {icon:'♥',title:'Toparlanma',status:'Normal',copy:'HRV ve dinlenik nabzın kendi seviyelerine yakın.'};
   }
-  function loadReason(result){
+  function loadReason(result,selectedLoad){
     var load=metric(result,'cardioLoad'),ratio=metric(result,'cardioLoadRatio'),ratioValue=ratio.current;
+    var directLoad=selectedLoad==null?null:Number(selectedLoad);
+    if(directLoad!=null&&Number.isFinite(directLoad)&&directLoad===0)return {icon:'⚡',title:'Son yük',status:'Yük yok',copy:'Seçili gün için anlamlı bir antrenman yükü yok.'};
     if(load.current==null&&ratioValue==null)return {icon:'⚡',title:'Son yük',status:'Veri bekleniyor',copy:'Yakın dönem yük kaydı henüz yeterli değil.'};
     if((ratioValue!=null&&ratioValue>=1.3)||(load.deviation7!=null&&load.deviation7>=35))return {icon:'⚡',title:'Son yük',status:'Yüksek',copy:'Son günlerdeki yükün kendi alıştığın seviyenin üstünde.'};
     return {icon:'⚡',title:'Son yük',status:'Dengeli',copy:'Son günlerde aşırı yüklenme işareti görünmüyor.'};
@@ -213,7 +215,13 @@
   function removeLegacyCoachCards(content){
     content.querySelectorAll('.gp-prime,.gp-desktop-prime,.gp-coach-flow,.sci-home-insight,.sci-recovery-insight').forEach(function(node){node.remove();});
   }
-  function decorateHome(content,tab,date){
+  function homeCoachPresentation(result,model,date){
+    var plan=model&&model.gymPlan||{},historical=date&&date!==today(),kicker=historical?'SEÇİLİ GÜNÜN KOÇ KARARI':'BUGÜNÜN KOÇ KARARI';
+    if(plan.skipped)return {kicker:kicker,title:'Bugün antrenman yok',explanation:'Bu gün antrenman için atlandı; progresyon hedefi uygulama.',tone:'rest'};
+    if(plan.mode==='rest')return {kicker:kicker,title:'Bugün dinlen',explanation:'Bugün planlı antrenmanın yok; toparlanmanı koru.',tone:'rest'};
+    return {kicker:kicker,title:homeDecision(result),explanation:plainDecisionExplanation(result),tone:statusTone(result)};
+  }
+  function decorateHome(content,tab,date,model){
     if(!content||!root.SimurgCoachClient)return;
     var result=resolve('daily',date||selected());
     removeLegacyCoachCards(content);
@@ -222,9 +230,10 @@
         content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-home-insight '+statusTone(result)+'" onclick="simurgCoachOpen()"><span><small>COACH INSIGHT</small><b>'+esc(result.headline)+'</b><em>'+esc(decision(result))+' · Veri güveni '+esc(confidence(result))+'</em></span><i>Detay →</i></button>');
         return;
       }
-      var statuses={sleep:sleepReason(result).status,recovery:recoveryReason(result).status,load:loadReason(result).status};
+      var statuses={sleep:sleepReason(result).status,recovery:recoveryReason(result).status,load:loadReason(result,model&&model.load).status};
       Object.keys(statuses).forEach(function(key){var node=content.querySelector('[data-coach-status="'+key+'"]');if(node)node.textContent=statuses[key];});
-      content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-home-insight '+statusTone(result)+'" onclick="simurgCoachOpen()"><span><small>BUGÜNÜN KOÇ KARARI</small><b>'+esc(homeDecision(result))+'</b><em>'+esc(plainDecisionExplanation(result))+'</em><u>Hazırlık '+esc(score(result))+'</u></span><i>Detay →</i></button>');
+      var presentation=homeCoachPresentation(result,model,date||selected());
+      content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-home-insight '+presentation.tone+'" onclick="simurgCoachOpen()"><span><small>'+esc(presentation.kicker)+'</small><b>'+esc(presentation.title)+'</b><em>'+esc(presentation.explanation)+'</em></span><i>Detay →</i></button>');
     }else if(tab==='recovery'){
       var recovery=(result.recoveryActions||[])[0]||(result.keyDrivers||[])[0]||'Toparlanma için veri birikiyor.';
       content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-recovery-insight" onclick="simurgCoachOpen()"><span><small>RECOVERY INSIGHT</small><b>'+esc(recovery)+'</b><em>Koçluk detayında nedenleri gör</em></span><i>→</i></button>');
@@ -243,5 +252,5 @@
     target.innerHTML=kind==='technical'?technicalContent(date,results):metricsContent(date,results.daily);
     node.dataset.loaded='1';
   };
-  root.SimurgCoachUI={renderMobile:renderMobile,renderDesktop:renderDesktop,decorateHome:decorateHome,state:state,dailyDecisionLabels:dailyDecisionLabels,plainDecisionExplanation:plainDecisionExplanation,warningPresentation:warningPresentation};
+  root.SimurgCoachUI={renderMobile:renderMobile,renderDesktop:renderDesktop,decorateHome:decorateHome,state:state,dailyDecisionLabels:dailyDecisionLabels,plainDecisionExplanation:plainDecisionExplanation,homeCoachPresentation:homeCoachPresentation,loadReason:loadReason,warningPresentation:warningPresentation};
 })(typeof window!=='undefined'?window:globalThis);

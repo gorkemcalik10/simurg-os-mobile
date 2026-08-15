@@ -23,8 +23,8 @@ run('coach client and UI assets load in dependency order', () => {
   assert.ok(uiRuntime > client);
   assert.ok(uiRuntime < html.indexOf('premium-standard.js'));
   assert.match(html, /simurg-coach-client\.js\?v=4/);
-  assert.match(html, /simurg-coach\.css\?v=6/);
-  assert.match(html, /simurg-coach-ui\.js\?v=5/);
+  assert.match(html, /simurg-coach\.css\?v=7/);
+  assert.match(html, /simurg-coach-ui\.js\?v=6/);
 });
 
 run('mobile Coaching exposes daily weekly and history views', () => {
@@ -69,7 +69,7 @@ run('post-workout and pattern analyses are reached only by the Technical Details
 });
 
 run('Home has one short coach deep-link and Recovery has distinct insight', () => {
-  assert.match(premium, /SimurgCoachUI\.decorateHome\(content,homeTab,homeDateValue\(\)\)/);
+  assert.match(premium, /SimurgCoachUI\.decorateHome\(content,homeTab,homeDateValue\(\),model\)/);
   assert.match(ui, /sci-home-insight/);
   assert.match(ui, /BUGÜNÜN KOÇ KARARI/);
   assert.match(ui, /sci-recovery-insight/);
