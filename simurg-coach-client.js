@@ -252,14 +252,15 @@
       var sharedDay=root.SimurgSignalModel.day(selected);if(sharedDay)engineOptions.gymPlan=sharedDay.gymPlan;
     }
     var calculated=engine.analyze(type,data,selected,engineOptions);
-    var key=type+':'+selected+':'+calculated.inputHash;
+    var deferredTechnical=engineOptions.deferTechnical===true;
+    var key=type+':'+selected+':'+calculated.inputHash+':'+(deferredTechnical?'immediate':'full');
     if(memoryCache.has(key)){
       stats.memoryHits+=1;
       var memoryResult=decorate(memoryCache.get(key),'memory_hit');
       bridge(memoryResult,options);
       return memoryResult;
     }
-    var store=engine.ensureStore(data),stored=storedResult(store,type,selected);
+    var store=engine.ensureStore(data),stored=deferredTechnical?null:storedResult(store,type,selected);
     if(stored&&stored.inputHash===calculated.inputHash){
       stats.storeHits+=1;
       remember(key,stored);
@@ -268,7 +269,7 @@
       return storeResult;
     }
     var deterministic=decorate(calculated,'miss');
-    if(options.store!==false)engine.storeResult(data,deterministic);
+    if(!deferredTechnical&&options.store!==false)engine.storeResult(data,deterministic);
     remember(key,deterministic);
     bridge(deterministic,options);
     return clone(deterministic);

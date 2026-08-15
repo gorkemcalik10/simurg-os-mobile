@@ -22,42 +22,50 @@ run('coach client and UI assets load in dependency order', () => {
   assert.ok(engine >= 0 && client > engine);
   assert.ok(uiRuntime > client);
   assert.ok(uiRuntime < html.indexOf('premium-standard.js'));
-  assert.match(html, /simurg-coach-client\.js\?v=3/);
-  assert.match(html, /simurg-coach\.css\?v=4/);
-  assert.match(html, /simurg-coach-ui\.js\?v=3/);
+  assert.match(html, /simurg-coach-client\.js\?v=4/);
+  assert.match(html, /simurg-coach\.css\?v=5/);
+  assert.match(html, /simurg-coach-ui\.js\?v=4/);
 });
 
 run('mobile Coaching exposes daily weekly and history views', () => {
   assert.match(ui, /tabs=\['daily','weekly','history'\]/);
   assert.match(ui, /function renderMobile\(\)/);
-  assert.match(ui, /BUGÜNKÜ DURUM/);
-  assert.match(ui, /HAREKET REHBERİ/);
-  assert.match(ui, /VERİ GÜVENİ/);
-  assert.match(ui, /Detaylı gerekçe/);
-  assert.match(ui, /<details class="sci-details"><summary>Detaylı gerekçe<\/summary>/);
-  assert.match(ui, /<h3>Günlük değerlendirme<\/h3><p>'\+esc\(daily\.summary\)/);
+  assert.match(ui, /BUGÜN NE YAPAYIM\?/);
+  assert.match(ui, /<h2 id="sciReasonsTitle">Neden\?<\/h2>/);
+  assert.match(ui, /Verilerimi Göster/);
+  assert.match(ui, /Teknik Detaylar/);
+  assert.doesNotMatch(ui, /Detaylı gerekçe/);
 });
 
-run('compact Coach hero keeps decisions and safety fields unchanged', () => {
-  assert.match(ui, /function hero\(result,kicker\)/);
-  assert.match(ui, /Hazırlık '\+esc\(score\(result\)\)/);
-  assert.match(ui, /Veri güveni '\+esc\(confidence\(result\)\)/);
-  assert.match(ui, /esc\(decision\(result\)\)/);
-  assert.match(ui, /esc\(adjustment\(result\)\)/);
-  assert.match(ui, /list\(daily\.warnings,'Belirgin risk uyarısı yok\.',3\)/);
-  assert.match(ui, /function actionItems\(result\)/);
-  assert.match(ui, /\.slice\(0,3\)/);
-  assert.doesNotMatch(ui, /class="sci-score"/);
-});
-
-run('Coach movement labels are localized without changing guidance keys', () => {
-  for (const label of ['ANA HAREKET', 'TAMAMLAYICI', 'STABİLİTE / POSTÜR', 'KONDİSYON']) {
-    assert.match(ui, new RegExp(label));
+run('simplified Daily keeps the engine decision and safety values as inputs', () => {
+  const dailyBody = ui.slice(ui.indexOf('function dailyView'), ui.indexOf('function weeklyView'));
+  for (const [key, label] of Object.entries({progress:'Bugün biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'})) {
+    assert.match(ui, new RegExp(`${key}:'${label}'`));
   }
+  assert.match(ui, /dailyDecision\(pre\)/);
+  assert.match(ui, /warningsCard\(pre\)/);
+  assert.match(ui, /if\(!rows\.length\)return ''/);
+  assert.match(ui, /Hazırlık '\+esc\(score\(daily\)\)/);
+  assert.doesNotMatch(dailyBody, /Belirgin risk uyarısı yok\./);
+});
+
+run('movement categories stay in the shared engine but collapse into one Daily note', () => {
+  const dailyBody = ui.slice(ui.indexOf('function dailyView'), ui.indexOf('function weeklyView'));
   for (const key of ['mainLifts', 'accessories', 'stabilityPosture', 'conditioning']) {
     assert.match(ui, new RegExp(`value\\.${key}`));
   }
+  assert.match(ui, /BUGÜNKÜ ANTRENMAN NOTU/);
+  assert.doesNotMatch(dailyBody, /HAREKET REHBERİ/);
   assert.doesNotMatch(ui, />Readiness</);
+});
+
+run('post-workout and pattern analyses are reached only by the Technical Details loader', () => {
+  const dailyBody = ui.slice(ui.indexOf('function dailyView'), ui.indexOf('function weeklyView'));
+  assert.match(dailyBody, /resolveImmediate\('daily',date\).*resolveImmediate\('pre_workout',date\)/);
+  assert.doesNotMatch(dailyBody, /resolve\('post_workout'|resolve\('pattern'/);
+  assert.match(ui, /function technicalContent[^]*resolve\('daily',date\),pre=resolve\('pre_workout',date\),post=resolve\('post_workout',date\),pattern=resolve\('pattern',date\)/);
+  assert.match(ui, /function resolveImmediate[^]*deferTechnical:true/);
+  assert.match(ui, /if\(!node\|\|!node\.open\|\|node\.dataset\.loaded==='1'\)return/);
 });
 
 run('Home has one short coach deep-link and Recovery has distinct insight', () => {
@@ -97,7 +105,7 @@ run('mobile and desktop Coach views share the canonical selected date', () => {
 });
 
 run('Coach confidence labels are explicit for users', () => {
-  assert.match(ui, /Veri güveni/);
+  assert.match(ui, /<h3>Veri güveni<\/h3>/);
   assert.doesNotMatch(ui, /<small>Güven /);
   assert.doesNotMatch(ui, / · Güven /);
 });

@@ -38,10 +38,10 @@ run('AccessLink publishes status and refreshes existing render system', () => {
 run('changed production assets use matching cache versions', () => {
   for (const asset of [
     'simurg-volume-model.js?v=1',
-    'simurg-coach-engine.js?v=3',
-    'simurg-coach-client.js?v=3',
-    'simurg-coach.css?v=4',
-    'simurg-coach-ui.js?v=3',
+    'simurg-coach-engine.js?v=4',
+    'simurg-coach-client.js?v=4',
+    'simurg-coach.css?v=5',
+    'simurg-coach-ui.js?v=4',
     'simurg-persistence.js?v=1',
     'simurg-gym-identity.js?v=1',
     'simurg-exercise-canonicalization.js?v=1',
@@ -60,8 +60,8 @@ run('changed production assets use matching cache versions', () => {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=exercise-canonicalization-v1/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-exercise-canonicalization-v1'/);
+  assert.match(index, /sw\.js\?v=coach-simplification-v1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-coach-simplification-v1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

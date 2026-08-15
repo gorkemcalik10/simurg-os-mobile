@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-exercise-canonicalization-v1';
+const SIMURG_CACHE = 'simurg-coach-simplification-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -17,10 +17,10 @@ const CORE_ASSETS = [
   './premium-standard.css?v=34',
   './premium-standard.js?v=41',
   './simurg-signal-model.js?v=7',
-  './simurg-coach-engine.js?v=3',
-  './simurg-coach-client.js?v=3',
-  './simurg-coach.css?v=4',
-  './simurg-coach-ui.js?v=3',
+  './simurg-coach-engine.js?v=4',
+  './simurg-coach-client.js?v=4',
+  './simurg-coach.css?v=5',
+  './simurg-coach-ui.js?v=4',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=9',
   './simurg-cloud-auth.js?v=4',

@@ -578,13 +578,15 @@
     data=data||{};options=options||{};
     var day=extractDay(data,date,options),baseline=baselines(data,date,options),missing=missingData(day,baseline),confidenceResult=confidence(day,baseline,missing),readinessResult=readiness(day,baseline,confidenceResult),safetyResult=safety(day,readinessResult,data,options),output=baseOutput(options.type||'daily',date,day,baseline,readinessResult,confidenceResult,safetyResult);
     output.workoutGuidance=movementGuidance(day,safetyResult.decision,data,options);
-    output.trendInsights=['hrv','restingHr','sleepMinutes','cardioLoad'].map(function(key){return trendForMetric(data,date,key,options);}).filter(function(item){return item.qualified;}).map(function(item){
-      var insight={metric:item.metric,direction:item.direction,changePercent:item.changePercent,recentMean:item.recentMean,previousMean:item.previousMean};
-      insight.title=metricLabel(item.metric)+' trendi';
-      insight.summary=trendSentence(insight);
-      return insight;
-    });
-    output.comparisonNotes=comparableDays(data,date,day,options).map(function(item){return item.date+' tarihinde benzer sinyal profili görüldü'+(item.avgRpe!=null?' (RPE '+round(item.avgRpe,1)+').':'.');});
+    if(!options.deferTechnical){
+      output.trendInsights=['hrv','restingHr','sleepMinutes','cardioLoad'].map(function(key){return trendForMetric(data,date,key,options);}).filter(function(item){return item.qualified;}).map(function(item){
+        var insight={metric:item.metric,direction:item.direction,changePercent:item.changePercent,recentMean:item.recentMean,previousMean:item.previousMean};
+        insight.title=metricLabel(item.metric)+' trendi';
+        insight.summary=trendSentence(insight);
+        return insight;
+      });
+      output.comparisonNotes=comparableDays(data,date,day,options).map(function(item){return item.date+' tarihinde benzer sinyal profili görüldü'+(item.avgRpe!=null?' (RPE '+round(item.avgRpe,1)+').':'.');});
+    }
     if(options.gymPlan){
       output.gymPlan=clone(options.gymPlan);
       output.keyDrivers.unshift('Seçili Gym bağlamı: '+(options.gymPlan.label||options.gymPlan.mode)+'.');
