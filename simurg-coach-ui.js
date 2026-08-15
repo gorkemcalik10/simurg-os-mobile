@@ -1,11 +1,12 @@
 (function(root){
   'use strict';
 
-  var state={tab:'daily',date:null,dailyResults:null};
+  var state={tab:'daily',date:null,dailyResults:null,weeklyResults:null};
   var tabs=['daily','weekly','history'];
   var decisionLabels={progress:'Kontrollü ilerleme',normal:'Planı koru',controlled:'Kontrollü uygula',reduce:'Yükü azalt',recovery:'Toparlanma günü',rest:'Dinlen'};
   var dailyDecisionLabels={progress:'Bugün biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'};
   var homeDecisionLabels={progress:'Biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'};
+  var weeklyDecisionLabels={progress:'Biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Yükü biraz azalt',recovery:'Toparlanmayı öne al',rest:'Dinlenmeyi önceliklendir'};
   var metricLabels={hrv:'HRV',restingHr:'Dinlenik nabız',sleepMinutes:'Uyku süresi',sleepScore:'Uyku skoru',cardioLoad:'Cardio Load'};
 
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char];});}
@@ -26,6 +27,7 @@
   function decision(result){return decisionLabels[result.trainingDecision]||result.trainingDecision;}
   function dailyDecision(result){return dailyDecisionLabels[result.trainingDecision]||result.trainingDecision;}
   function homeDecision(result){return homeDecisionLabels[result.trainingDecision]||'Temkinli başla';}
+  function weeklyDecision(result){return weeklyDecisionLabels[result.trainingDecision]||'Temkinli başla';}
   function adjustment(result){var value=Number(result.loadAdjustmentPercent)||0;return value===0?'Yük değişikliği yok':(value>0?'+':'')+value+'% yük önerisi';}
   function preview(value){
     var sentences=String(value||'').match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[];
@@ -163,6 +165,92 @@
       +'<h3>Ham koç gerekçesi</h3><p>'+esc(daily.summary)+'</p><p>'+esc(pre.summary)+'</p><p>'+esc(post.summary)+'</p>'
       +'<h3>Güvenlik notu</h3><p>'+esc(daily.medicalDisclaimer)+'</p></div>';
   }
+  function weeklyHeadline(result){
+    return {
+      progress:'Hafta dengeli geçti',normal:'Hafta dengeli geçti',controlled:'Bu hafta kontrollü ilerledin',
+      reduce:'Bu hafta yükü biraz azaltmak iyi olurdu',recovery:'Toparlanma bu hafta öncelikliydi',rest:'Bu hafta dinlenme öncelikliydi'
+    }[result.trainingDecision]||'Bu haftanın verileri değerlendirildi';
+  }
+  function weeklyWorkoutDays(result){
+    var row=(result.keyDrivers||[]).filter(function(item){return /Antrenman\/aktivite günü:/i.test(String(item));})[0],match=String(row||'').match(/(\d+)/);
+    return match?Number(match[1]):null;
+  }
+  function weeklyRecoveryReason(result){
+    var value=result.readinessScore;
+    if(value==null)return {icon:'♥',title:'Toparlanma',status:'Veri sınırlı',copy:'Hafta genelini değerlendirmek için yeterli toparlanma kaydı yok.'};
+    if(value>=80)return {icon:'♥',title:'Toparlanma',status:'İyi',copy:'Hafta genelindeki toparlanma sinyallerin planını destekliyor.'};
+    if(value>=65)return {icon:'♥',title:'Toparlanma',status:'Normal',copy:'Toparlanman hafta boyunca genel olarak kendi düzenine yakın kaldı.'};
+    if(value>=50)return {icon:'♥',title:'Toparlanma',status:'Biraz düşük',copy:'Hafta içinde daha temkinli olmanı gerektiren toparlanma günleri oldu.'};
+    return {icon:'♥',title:'Toparlanma',status:'Düşük',copy:'Haftanın toparlanma sinyalleri yük yerine dinlenmeyi destekliyor.'};
+  }
+  function weeklyLoadReason(result){
+    var load=metric(result,'cardioLoad'),ratio=metric(result,'cardioLoadRatio'),warnings=(result.warnings||[]).join(' '),high=/Cardio Load|Strain|toplam yük|olumsuz toparlanma/i.test(warnings)||(ratio.current!=null&&ratio.current>=1.3)||(load.deviation7!=null&&load.deviation7>=35);
+    if(high)return {icon:'⚡',title:'Antrenman yükü',status:'Yüksek',copy:'Yakın dönem yükü birikmiş; yeni haftaya kontrollü başlamak daha güvenli.'};
+    if(load.current==null&&ratio.current==null)return {icon:'⚡',title:'Antrenman yükü',status:'Veri sınırlı',copy:'Yük dağılımını net yorumlamak için yeterli kayıt yok.'};
+    return {icon:'⚡',title:'Antrenman yükü',status:'Dengeli',copy:'Hafta sonunda belirgin bir yük birikimi işareti görünmüyor.'};
+  }
+  function weeklySleepReason(result){
+    var duration=metric(result,'sleepMinutes'),sleepScore=metric(result,'sleepScore'),minutes=duration.current,scoreValue=sleepScore.current,deviation=duration.deviation7;
+    if(minutes==null&&scoreValue==null)return {icon:'😴',title:'Uyku',status:'Veri sınırlı',copy:'Uyku desteğini değerlendirmek için yeterli kayıt yok.'};
+    if((minutes!=null&&minutes<360)||(scoreValue!=null&&scoreValue<60))return {icon:'😴',title:'Uyku',status:'Düşük',copy:'Hafta sonundaki uyku kaydı toparlanmayı sınırlayabilecek düzeyde.'};
+    if(deviation!=null&&Math.abs(deviation)>=8)return {icon:'😴',title:'Uyku',status:'Biraz dalgalı',copy:'Uyku süren yakın dönem düzeninden belirgin biçimde farklı.'};
+    return {icon:'😴',title:'Uyku',status:'İyi',copy:'Hafta sonundaki uyku kaydı normal düzenine yakın görünüyor.'};
+  }
+  function weeklyReasons(result){return [weeklyRecoveryReason(result),weeklyLoadReason(result),weeklySleepReason(result)];}
+  function weeklyReasonCards(result){
+    return weeklyReasons(result).map(function(item){return '<article><span class="sci-reason-icon" aria-hidden="true">'+item.icon+'</span><div><h3>'+esc(item.title)+' <b>· '+esc(item.status)+'</b></h3><p>'+esc(item.copy)+'</p></div></article>';}).join('');
+  }
+  function weeklySummary(result){
+    var days=weeklyWorkoutDays(result),reasons=weeklyReasons(result),start=days==null?'Haftanın kayıtları değerlendirildi.':days+' antrenman veya aktivite günü kaydedildi.';
+    var recovery=reasons[0].status==='Veri sınırlı'?'Toparlanma için veri sınırlı':'Toparlanma genel olarak '+reasons[0].status.toLocaleLowerCase('tr-TR');
+    var load=reasons[1].status==='Veri sınırlı'?'yük dağılımı için veri sınırlı':'yük dağılımı '+reasons[1].status.toLocaleLowerCase('tr-TR')+' görünüyor';
+    return start+' '+recovery+'; '+load+'.';
+  }
+  function weeklyActionExplanation(result){
+    return {
+      progress:'İlk seans iyi hissedilirse temiz ve ağrısız setlerde küçük bir ilerleme deneyebilirsin.',normal:'Mevcut planı değiştirmeden, aynı ritim ve tekrar kalitesiyle devam et.',controlled:'İlk seansa kontrollü gir; beklenenden ağır gelirse o hafta yük artırma.',reduce:'Set sayısını veya çalışma yükünü biraz düşür; tekrar kalitesini koru.',recovery:'Yoğun hedefleri geri plana alıp daha hafif ve düşük stresli seanslar seç.',rest:'Yeni yük eklemek yerine dinlenmeye ve günlük hafif harekete alan aç.'
+    }[result.trainingDecision]||'İlk seansa kontrollü başla ve nasıl hissettiğine göre ilerle.';
+  }
+  function weeklyWarningPresentation(value){
+    var text=String(value||'');
+    if(/Belirgin ağrı|Ağrı kaydı/i.test(text))return {title:'Ağrı/form uyarıları tekrar etmiş',copy:'Ağrılı hareketlerde yük artırma; ağrısız hareket aralığını koru.'};
+    if(/Form Bad|Form Okay/i.test(text))return {title:'Hareket kalitesini öne al',copy:'Yeni haftada ağırlık artırmadan önce temiz formu geri kazan.'};
+    if(/RPE 9/i.test(text))return {title:'Yüksek eforlu seanslar var',copy:'Agresif artış yapma; ilk seansın eforunu kontrollü tut.'};
+    if(/Birden fazla olumsuz|uyku/i.test(text))return {title:'Uyku toparlanmayı sınırlıyor',copy:'Yoğunluğu artırmadan önce toparlanmaya daha fazla alan aç.'};
+    if(/Cardio Load|Strain|toplam yük/i.test(text))return {title:'Yük birikiyor',copy:'Gelecek haftaya kontrollü başla ve ek kondisyon hacmi ekleme.'};
+    if(/Tenis|badminton/i.test(text))return {title:'Omuz ve önkol yükünü kontrol et',copy:'Raket sporu sonrası press ve row hareketlerine kontrollü başla.'};
+    if(/Eksik recovery/i.test(text))return {title:'Veriler tamamlanana kadar temkinli ol',copy:'Toparlanma verileri sınırlıyken agresif hedef değişikliği yapma.'};
+    return {title:'Gelecek haftaya kontrollü başla',copy:text};
+  }
+  function weeklyWarningsCard(result){
+    var rows=result.warnings||[];if(!rows.length)return '';
+    return '<section class="sci-card sci-warning sci-weekly-warning"><header><small>DİKKAT ET</small></header><div class="sci-warning-list">'+rows.slice(0,3).map(function(item){var warning=weeklyWarningPresentation(item);return '<article><h3>'+esc(warning.title)+'</h3><p>'+esc(warning.copy)+'</p></article>';}).join('')+'</div></section>';
+  }
+  function weeklyNumbers(result){
+    var days=weeklyWorkoutDays(result),rows=[];
+    if(days!=null)rows.push('<div><small>ANTRENMAN / AKTİVİTE</small><b>'+esc(days)+' gün</b></div>');
+    if(result.readinessScore!=null)rows.push('<div><small>ORTALAMA TOPARLANMA</small><b>'+esc(Math.round(result.readinessScore))+' / 100</b></div>');
+    return rows.length?'<section class="sci-weekly-numbers"><h2>Haftanın sayıları</h2><div>'+rows.join('')+'</div></section>':'';
+  }
+  function weeklyMetricsContent(date,result){
+    var sleep=metric(result,'sleepMinutes'),hrv=metric(result,'hrv'),heart=metric(result,'restingHr'),load=weeklyLoadReason(result),gym=gymSnapshot(date);
+    return '<div class="sci-metric-list">'
+      +metricRow('Uyku',weeklySleepReason(result).status,durationLabel(sleep.current))
+      +metricRow('HRV',semanticDeviation(hrv.deviation7,true),hrv.current==null?'—':roundOne(hrv.current)+' ms')
+      +metricRow('Dinlenik nabız',semanticDeviation(heart.deviation7,false),heart.current==null?'—':Math.round(heart.current)+' bpm')
+      +metricRow('Cardio Load',load.status,'')
+      +metricRow('Yakın Gym RPE',gym.rpe==null?'Kayıt yok':gym.rpe<6?'Hafif':gym.rpe<8?'Orta':'Yüksek',gym.rpe==null?'—':roundOne(gym.rpe))
+      +metricRow('Form',gym.form||'Kayıt yok','')+metricRow('Ağrı',gym.pain||'Kayıt yok','')+'</div>';
+  }
+  function weeklyTechnicalContent(result){
+    return '<div class="sci-tech-section"><h3>Veri güveni</h3><p>'+esc(confidence(result))+' · '+esc(result.confidenceLabel||'Düşük')+'</p>'+list(result.missingData,'Eksik temel veri yok.',8)
+      +'<h3>Ham haftalık sinyaller</h3>'+list(result.keyDrivers,'Haftalık sinyal yok.',8)
+      +'<h3>Yük ayarı</h3><p>'+esc(adjustment(result))+'</p><h3>Kişisel karşılaştırmalar</h3>'+baselineTable(result)
+      +'<h3>Trendler</h3>'+list(result.trendInsights,'Yeterli trend verisi yok.',6)
+      +'<h3>Ham güvenlik uyarıları</h3>'+list(result.warnings,'Belirgin risk uyarısı yok.',6)
+      +'<h3>Toparlanma aksiyonları</h3>'+list(result.recoveryActions,'Ek aksiyon yok.',6)
+      +'<h3>Ham koç gerekçesi</h3><p>'+esc(result.summary)+'</p><h3>Güvenlik notu</h3><p>'+esc(result.medicalDisclaimer)+'</p></div>';
+  }
   function dailyView(date){
     var daily=resolveImmediate('daily',date),pre=resolveImmediate('pre_workout',date);state.dailyResults={date:date,daily:daily,pre:pre};
     return '<section class="sci-decision '+statusTone(pre)+'"><div><small>BUGÜN NE YAPAYIM?</small><h2>'+esc(dailyDecision(pre))+'</h2><p>'+esc(plainDecisionExplanation(pre))+'</p></div><span>Hazırlık '+esc(score(daily))+'</span></section>'
@@ -172,11 +260,13 @@
       +'<details class="sci-details sci-disclosure" ontoggle="simurgCoachToggleDetails(this,\'technical\')"><summary>Teknik Detaylar</summary><div data-lazy-content="technical"><p class="sci-empty">Açıldığında ayrıntılı analiz hazırlanır.</p></div></details>';
   }
   function weeklyView(date){
-    var weekly=resolve('weekly',date);
-    return hero(weekly,'HAFTALIK KOÇ')
-      +'<div class="sci-mobile-grid"><section class="sci-card"><header><small>HAFTANIN SİNYALLERİ</small><h3>Öne çıkanlar</h3></header>'+list(weekly.keyDrivers,'Haftalık sinyal yok.',5)+'</section><section class="sci-card sci-action"><header><small>GELECEK KARAR</small><h3>'+esc(decision(weekly))+'</h3></header><p>'+esc(weekly.summary)+'</p><strong>'+esc(adjustment(weekly))+'</strong></section></div>'
-      +(weekly.warnings.length?'<section class="sci-card sci-warning"><header><small>HAFTALIK RİSKLER</small><h3>Koruyucu kararlar</h3></header>'+list(weekly.warnings,'Belirgin risk yok.',6)+'</section>':'')
-      +'<section class="sci-card sci-recovery"><header><small>TOPARLANMA</small><h3>Yeni haftaya hazırlık</h3></header>'+list(weekly.recoveryActions,'Ek aksiyon yok.',4)+'</section>';
+    var weekly=resolve('weekly',date);state.weeklyResults={date:date,weekly:weekly};
+    return '<section class="sci-weekly-summary '+statusTone(weekly)+'"><small>BU HAFTA NASILDI?</small><h2>'+esc(weeklyHeadline(weekly))+'</h2><p>'+esc(weeklySummary(weekly))+'</p></section>'
+      +'<section class="sci-weekly-action '+statusTone(weekly)+'"><small>GELECEK HAFTA NE YAPAYIM?</small><h2>'+esc(weeklyDecision(weekly))+'</h2><p>'+esc(weeklyActionExplanation(weekly))+'</p></section>'
+      +'<section class="sci-reasons sci-weekly-reasons" aria-labelledby="sciWeeklyReasonsTitle"><h2 id="sciWeeklyReasonsTitle">Neden?</h2>'+weeklyReasonCards(weekly)+'</section>'
+      +weeklyWarningsCard(weekly)+weeklyNumbers(weekly)
+      +'<details class="sci-details sci-disclosure" ontoggle="simurgCoachToggleDetails(this,\'weeklyMetrics\')"><summary>Verilerimi Göster</summary><div data-lazy-content="weeklyMetrics"><p class="sci-empty">Açıldığında haftalık ölçümlerin gösterilir.</p></div></details>'
+      +'<details class="sci-details sci-disclosure" ontoggle="simurgCoachToggleDetails(this,\'weeklyTechnical\')"><summary>Teknik Detaylar</summary><div data-lazy-content="weeklyTechnical"><p class="sci-empty">Açıldığında ayrıntılı haftalık analiz gösterilir.</p></div></details>';
   }
   function historyView(date){
     var rows=[];
@@ -246,11 +336,11 @@
   root.simurgCoachToday=function(){state.date=today();try{selectedDate=state.date;if(typeof mondayOf==='function')weekStart=mondayOf(state.date);}catch(error){}root.innerWidth<=900?renderMobile():renderDesktop();};
   root.simurgCoachToggleDetails=function(node,kind){
     if(!node||!node.open||node.dataset.loaded==='1')return;
-    var date=selected(),results=state.dailyResults;
+    var date=selected(),weeklyKind=kind==='weeklyMetrics'||kind==='weeklyTechnical',results=weeklyKind?state.weeklyResults:state.dailyResults;
     if(!results||results.date!==date)return;
     var target=node.querySelector('[data-lazy-content="'+kind+'"]');if(!target)return;
-    target.innerHTML=kind==='technical'?technicalContent(date,results):metricsContent(date,results.daily);
+    target.innerHTML=kind==='weeklyTechnical'?weeklyTechnicalContent(results.weekly):kind==='weeklyMetrics'?weeklyMetricsContent(date,results.weekly):kind==='technical'?technicalContent(date,results):metricsContent(date,results.daily);
     node.dataset.loaded='1';
   };
-  root.SimurgCoachUI={renderMobile:renderMobile,renderDesktop:renderDesktop,decorateHome:decorateHome,state:state,dailyDecisionLabels:dailyDecisionLabels,plainDecisionExplanation:plainDecisionExplanation,homeCoachPresentation:homeCoachPresentation,loadReason:loadReason,warningPresentation:warningPresentation};
+  root.SimurgCoachUI={renderMobile:renderMobile,renderDesktop:renderDesktop,decorateHome:decorateHome,state:state,dailyDecisionLabels:dailyDecisionLabels,weeklyDecisionLabels:weeklyDecisionLabels,plainDecisionExplanation:plainDecisionExplanation,homeCoachPresentation:homeCoachPresentation,loadReason:loadReason,warningPresentation:warningPresentation,weeklyWarningPresentation:weeklyWarningPresentation};
 })(typeof window!=='undefined'?window:globalThis);
