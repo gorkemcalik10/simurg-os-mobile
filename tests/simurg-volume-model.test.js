@@ -43,6 +43,7 @@ run('TEST 4: explicit single-side profile uses factor one', () => {
 
 run('TEST 5: stack total uses machine value once', () => {
   assert.equal(model.row({ exercise: 'Face Pull', weight: 15, reps: 15, sets: 2 }).volume, 450);
+  assert.equal(model.row({ exercise: 'Facepull', weight: 15, reps: 15, sets: 2 }).volume, 450);
 });
 
 run('TEST 6: total system override supports barbell volume', () => {

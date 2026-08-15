@@ -39,7 +39,7 @@
       'Incline DB Press','Flat DB Press','Bench Supported DB Row','Single Arm Lat Pulldown',
       'Single Arm Cable Row','Hammer Strength High Row','Rope Pushdown','Reverse Grip Pushdown'
     ],
-    stability_posture:['Prone Y Raise','Face Pull','Rear Delt Cable Fly','Lateral Raise'],
+    stability_posture:['Prone Y Raise','Facepull','Rear Delt Cable Fly','Lateral Raise'],
     accessory:['Cable Fly']
   };
 

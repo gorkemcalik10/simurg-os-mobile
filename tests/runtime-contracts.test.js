@@ -54,7 +54,7 @@ run('service worker registration and cache share one build label', () => {
 });
 
 run('index asset versions match CORE_ASSETS', () => {
-  for (const file of ['simurg-persistence.js', 'simurg-gym-identity.js', 'simurg-volume-model.js', 'simurg-data-validation.js', 'simurg-gym-flex.js', 'simurg-gym-flex.css', 'simurg-signal-model.js', 'simurg-coach-engine.js', 'simurg-coach-client.js', 'simurg-coach-ui.js', 'simurg-coach.css', 'workout-source-policy.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js']) {
+  for (const file of ['simurg-persistence.js', 'simurg-gym-identity.js', 'simurg-exercise-canonicalization.js', 'simurg-volume-model.js', 'simurg-data-validation.js', 'simurg-gym-flex.js', 'simurg-gym-flex.css', 'simurg-signal-model.js', 'simurg-coach-engine.js', 'simurg-coach-client.js', 'simurg-coach-ui.js', 'simurg-coach.css', 'workout-source-policy.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js']) {
     const escaped = file.replace('.', '\\.');
     const indexVersion = index.match(new RegExp(`${escaped}\\?v=([^"']+)`));
     const swVersion = sw.match(new RegExp(`${escaped}\\?v=([^"']+)`));
@@ -72,7 +72,7 @@ run('general render does not invalidate shared aggregates', () => {
 
 run('real mutations invalidate while secure cloud push does not', () => {
   assert.match(index, /window\.save=function\(\)\{[^]*?SimurgSignalModel\.invalidate\('local-save'\)/);
-  assert.match(cloudAuth, /function persistPulledData\(value\)\{[^]*?SimurgPersistence\.persistData\(localStorage,DATA\)/);
+  assert.match(cloudAuth, /function persistPulledData\(value,migrationOriginal,migrationReport\)\{[^]*?SimurgPersistence\.persistData\(localStorage,value\)/);
   const pushBody = cloudAuth.match(/async function pushUserData\(\)\{([^]*?)\n\s*\}/);
   assert.ok(pushBody);
   assert.doesNotMatch(pushBody[1], /SimurgSignalModel\.invalidate/);

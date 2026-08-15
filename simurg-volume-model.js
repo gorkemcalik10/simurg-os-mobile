@@ -26,7 +26,7 @@
   aliases('DUAL_DUMBBELL',['Incline DB Press','Incline Dumbbell Press','Flat DB Press','Flat Dumbbell Press','Bench Supported DB Row','Lateral Raise','Incline DB Curl','Prone Y Raise']);
   aliases('PER_SIDE_BOTH',['High Row','Hammer Strength High Row','Plate Loaded High Row','Plate Loaded Chest Press']);
   aliases('UNILATERAL_BOTH',['Single Arm Cable Row','Single Arm Lat Pulldown']);
-  aliases('STACK_TOTAL',['Face Pull','Rope Pushdown','Reverse Cable Curl','Reverse Grip Pushdown']);
+  aliases('STACK_TOTAL',['Face Pull','Facepull','Rope Pushdown','Reverse Cable Curl','Reverse Grip Pushdown']);
 
   function dataRoot(){
     try{if(root&&typeof root.simurgGetData==='function')return root.simurgGetData();}catch(error){}

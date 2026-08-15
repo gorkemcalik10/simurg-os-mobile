@@ -82,9 +82,9 @@ run('production assets exclude removed legacy scripts and retain the authenticat
   assert.match(cloud, /TABLE='simurg_user_data'/);
   assert.match(cloud, /\.eq\('user_id',context\.userId\)/);
   const pull = functionBody(cloud, 'pullUserData');
-  assert.match(pull, /normalizePulledData\(result\.data\.payload\)/);
+  assert.match(pull, /preparePulledData\(result\.data\.payload\)/);
   assert.match(pull, /downloadLocalBackup\(oldData\)/);
-  assert.match(pull, /persistPulledData\(pulled\)/);
+  assert.match(pull, /persistPulledData\(pulled,pulledPrepared\.legacyData,pulledPrepared\.canonicalizationReport\)/);
 });
 
 run('auth changes do not mutate DATA or app localStorage', () => {
@@ -131,14 +131,14 @@ run('existing push requires base and performs conditional revision update', () =
 
 run('pull confirms, backs up, validates, then persists and attempts revision metadata', () => {
   const body = functionBody(cloud, 'pullUserData');
-  const validateAt = body.indexOf('normalizePulledData(result.data.payload)');
+  const validateAt = body.indexOf('preparePulledData(result.data.payload)');
   const revisionAt = body.indexOf('setRevisionStatus(result.data.revision');
   const confirmAt = body.indexOf('window.confirm(');
   const backupAt = body.indexOf('downloadLocalBackup(oldData)');
-  const persistAt = body.indexOf('persistPulledData(pulled)');
+  const persistAt = body.indexOf('persistPulledData(pulled,');
   const metaAt = body.indexOf('tryWriteMeta(context.userId');
   assert.ok(validateAt >= 0 && revisionAt > validateAt && confirmAt > revisionAt && backupAt > confirmAt && persistAt > backupAt && metaAt > persistAt);
-  assert.match(body, /normalizePulledData\(result\.data\.payload\)/);
+  assert.match(body, /preparePulledData\(result\.data\.payload\)/);
   assert.match(body, /\.select\('payload,revision,updated_at'\)/);
   assert.match(body, /\.eq\('user_id',context\.userId\)/);
   assert.match(body, /success_with_local_metadata_warning/);

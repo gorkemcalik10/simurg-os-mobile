@@ -8,7 +8,7 @@ Purpose:
 
 Movement categories:
 - Main Lift: Incline DB Press, Flat DB Press, Bench Supported DB Row, Single Arm Lat Pulldown, Single Arm Cable Row, Hammer Strength High Row, Rope Pushdown, Reverse Grip Pushdown.
-- Stability/Posture: Prone Y Raise, Face Pull, Rear Delt Cable Fly, Lateral Raise.
+- Stability/Posture: Prone Y Raise, Facepull, Rear Delt Cable Fly, Lateral Raise.
 - Cable Fly is treated conservatively as accessory/control.
 - Extra activities: Badminton = low/medium extra load, Tennis = high cardio + forearm/shoulder load.
 

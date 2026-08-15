@@ -75,6 +75,7 @@ need to merge records.
 | `simurg_polar_accesslink_client_v1` | Browser device-capability ID/key | Separate localStorage key |
 | `simurg_cloud_meta:<user-id>` | Last known cloud revision/update for one auth user | Separate localStorage key |
 | import undo/snapshot key | One-step import restoration | Separate localStorage key |
+| `simurg_exercise_canonicalization_v1_backup` | One-time pre-canonicalization DATA snapshot used for atomic rollback | Separate localStorage key; never included in Cloud payload |
 | install/import-date hints | UI capability metadata | Separate localStorage keys |
 
 Cloud metadata intentionally does not contain the cloud payload, password, email, or

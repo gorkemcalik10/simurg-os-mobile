@@ -76,14 +76,14 @@ run('atomic commit retains exact previous DATA, storage, date and snapshot for r
 
 run('Cloud Pull validates before revision display, confirmation, backup, persist and metadata attempt', () => {
   const source = body(cloud, 'pullUserData');
-  const validateAt = source.indexOf('normalizePulledData(result.data.payload)');
+  const validateAt = source.indexOf('preparePulledData(result.data.payload)');
   const revisionAt = source.indexOf('setRevisionStatus(result.data.revision');
   const confirmAt = source.indexOf('window.confirm(');
   const backupAt = source.indexOf('downloadLocalBackup(oldData)');
-  const persistAt = source.indexOf('persistPulledData(pulled)');
+  const persistAt = source.indexOf('persistPulledData(pulled,');
   const metaAt = source.indexOf('tryWriteMeta(context.userId');
   assert.ok(validateAt >= 0 && revisionAt > validateAt && confirmAt > revisionAt && backupAt > confirmAt && persistAt > backupAt && metaAt > persistAt);
-  assert.match(body(cloud, 'normalizePulledData'), /SimurgDataValidation\.prepareFull[\s\S]*legacyAppleWatchRpe:true/);
+  assert.match(body(cloud, 'preparePulledData'), /SimurgDataValidation\.prepareFull[\s\S]*canonicalizeExercises:false[\s\S]*SimurgDataValidation\.prepareFull/);
 });
 
 run('Cloud requests, auth restore, conflict logic and Polar normalization remain intact', () => {

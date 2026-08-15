@@ -6240,7 +6240,8 @@ body{background:#050607!important;}
 <div class="modal programNameModal" id="programNameModal"><div class="modalbox"><div class="modalTop"><h2>Program İsmini Düzenle</h2><button class="btn sec" onclick="closeProgramNameModal()">Kapat</button></div><div id="programNameBody"></div><div class="actions"><button class="btn" onclick="saveProgramNameEdit()">Kaydet</button><button class="btn sec" onclick="resetProgramNameEdit()">Varsayılana Dön</button></div></div></div>
 <script src="./simurg-persistence.js?v=1"></script>
 <script src="./simurg-gym-identity.js?v=1"></script>
-<script src="./simurg-data-validation.js?v=4"></script>
+<script src="./simurg-exercise-canonicalization.js?v=1"></script>
+<script src="./simurg-data-validation.js?v=5"></script>
 <script src="./simurg-gym-flex.js?v=1"></script>
 <script src="./simurg-exercise-catalog.js?v=1"></script>
 <script>
@@ -6249,9 +6250,19 @@ window.SIMURG_INITIAL_DEFAULTS=INITIAL;
 let DATA;
 var simurgStoredDataRaw=localStorage.getItem('atlas_summary_reports');
 try{
-  DATA=simurgStoredDataRaw
-    ?SimurgDataValidation.prepareFullText(simurgStoredDataRaw,{source:'startup-local-storage'}).data
-    :SimurgDataValidation.prepareFull(INITIAL,{source:'startup-defaults'}).data;
+  if(simurgStoredDataRaw){
+    var simurgLegacyPrepared=SimurgDataValidation.prepareFullText(simurgStoredDataRaw,{source:'startup-local-storage',canonicalizeExercises:false});
+    var simurgCanonicalPrepared=SimurgDataValidation.prepareFull(simurgLegacyPrepared.data,{source:'startup-exercise-canonicalization'});
+    DATA=simurgCanonicalPrepared.data;
+    if(simurgCanonicalPrepared.canonicalizationReport&&simurgCanonicalPrepared.canonicalizationReport.changed){
+      var simurgMigrationPersist=SimurgExerciseCanonicalization.persistWithBackup(localStorage,simurgLegacyPrepared.data,DATA,SimurgPersistence,'startup-local-storage');
+      if(!simurgMigrationPersist.ok){
+        DATA=simurgLegacyPrepared.data;
+        window.__simurgExerciseCanonicalizationError=simurgMigrationPersist.error;
+        console.warn('Simurg OS: egzersiz migration yedeği veya atomik kaydı oluşturulamadı; eski DATA değiştirilmedi.');
+      }else window.__simurgExerciseCanonicalizationReport=simurgCanonicalPrepared.canonicalizationReport;
+    }
+  }else DATA=SimurgDataValidation.prepareFull(INITIAL,{source:'startup-defaults'}).data;
 }catch(simurgStartupDataError){
   DATA=SimurgDataValidation.prepareFull(INITIAL,{source:'startup-fallback'}).data;
   window.__simurgStartupDataValidationError={
@@ -6450,47 +6461,47 @@ function gymBaseTemplateForDate(date){
   const dow=parseDate(date).getDay(); // 0 Sunday, 1 Monday ... 6 Saturday
   const templates={
     1:{name:getProgramLabelForDate(date),items:[
-      ['Incline DB Press','Chest',4],
-      ['Flat DB Press','Chest',3],
-      ['Prone Y Raise','Shoulder Stability',2],
-      ['Lateral Raise','Shoulders',3],
-      ['Cable Fly','Chest',3],
+      ['Incline DB Press','Göğüs',4],
+      ['Flat DB Press','Göğüs',3],
+      ['Prone Y Raise','Arka Omuz',2],
+      ['Lateral Raise','Omuz',3],
+      ['Cable Fly','Göğüs',3],
       ['Rope Pushdown','Triceps',3],
       ['Reverse Grip Pushdown','Triceps',2]
     ]},
     2:{name:getProgramLabelForDate(date),items:[
-      ['Bench Supported DB Row','Back',4],
-      ['Single Arm Lat Pulldown','Back',4],
-      ['Single Arm Cable Row','Back',3],
-      ['Rear Delt Cable Fly','Rear Delt',3],
-      ['Face Pull','Rear Delt',2],
+      ['Bench Supported DB Row','Sırt',4],
+      ['Single Arm Lat Pulldown','Sırt',4],
+      ['Single Arm Cable Row','Sırt',3],
+      ['Rear Delt Cable Fly','Arka Omuz',3],
+      ['Facepull','Arka Omuz',2],
       ['Incline DB Curl','Biceps',3],
       ['Reverse Cable Curl','Biceps',2]
     ]},
     3:{name:getProgramLabelForDate(date),items:[
-      ['Incline DB Press','Chest',3],
-      ['Hammer Strength High Row','Back',3],
-      ['Single Arm Cable Row','Back',3],
-      ['Rear Delt Cable Fly','Rear Delt',3],
-      ['Lateral Raise','Side Delt',2],
-      ['Rope Pushdown / Incline DB Curl Superset','Arms',3],
-      ['Face Pull','Rear Delt',2]
+      ['Incline DB Press','Göğüs',3],
+      ['Hammer Strength High Row','Sırt',3],
+      ['Single Arm Cable Row','Sırt',3],
+      ['Rear Delt Cable Fly','Arka Omuz',3],
+      ['Lateral Raise','Omuz',2],
+      ['Rope Pushdown / Incline DB Curl (Superset)','Kol',3],
+      ['Facepull','Arka Omuz',2]
     ]},
     4:{name:getProgramLabelForDate(date),items:[
-      ['Incline DB Press','Chest',4],
-      ['Flat DB Press','Chest',3],
-      ['Prone Y Raise','Shoulder Stability',2],
-      ['Lateral Raise','Shoulders',3],
-      ['Cable Fly','Chest',3],
+      ['Incline DB Press','Göğüs',4],
+      ['Flat DB Press','Göğüs',3],
+      ['Prone Y Raise','Arka Omuz',2],
+      ['Lateral Raise','Omuz',3],
+      ['Cable Fly','Göğüs',3],
       ['Rope Pushdown','Triceps',3],
       ['Reverse Grip Pushdown','Triceps',2]
     ]},
     5:{name:getProgramLabelForDate(date),items:[
-      ['Bench Supported DB Row','Back',4],
-      ['Single Arm Lat Pulldown','Back',4],
-      ['Single Arm Cable Row','Back',3],
-      ['Rear Delt Cable Fly','Rear Delt',3],
-      ['Face Pull','Rear Delt',2],
+      ['Bench Supported DB Row','Sırt',4],
+      ['Single Arm Lat Pulldown','Sırt',4],
+      ['Single Arm Cable Row','Sırt',3],
+      ['Rear Delt Cable Fly','Arka Omuz',3],
+      ['Facepull','Arka Omuz',2],
       ['Incline DB Curl','Biceps',3],
       ['Reverse Cable Curl','Biceps',2]
     ]},
@@ -6531,13 +6542,14 @@ function gymItemsForDate(date){
   const baseItems=base.map(([ex,bodyPart,setCount],itemIndex)=>{
     const key='template::'+sourceDay+'::'+itemIndex;
     const ov=entry.overrides[key]||entry.overrides[ex]||{};
+    const canonical=SimurgExerciseCanonicalization.resolve(ov.name||ex);
     return {
       key,
       legacyKey:'template::'+ex,
-      exerciseId:'template_'+sourceDay.toLowerCase()+'_'+itemIndex,
+      exerciseId:canonical?canonical.exerciseId:'template_'+sourceDay.toLowerCase()+'_'+itemIndex,
       originalName:ex,
-      name:ov.name||ex,
-      bodyPart:ov.bodyPart||bodyPart,
+      name:canonical?canonical.name:(ov.name||ex),
+      bodyPart:canonical?canonical.bodyPart:(ov.bodyPart||bodyPart),
       setCount:Number(ov.setCount||setCount)||setCount,
       custom:false
     };
@@ -7804,7 +7816,7 @@ function resetProgramNameEdit(){
   closeProgramNameModal();
   save();
 }
-function save(){const result=SimurgPersistence.persistData(localStorage,DATA);if(!result.ok){SimurgPersistence.notifyFailure(result,'Değişiklikler kaydedilemedi.');return result}if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('local-save');render();return result}
+function save(){const original=DATA,prepared=SimurgExerciseCanonicalization.prepared(DATA);let result;if(prepared.report.changed){result=SimurgExerciseCanonicalization.persistWithBackup(localStorage,original,prepared.data,SimurgPersistence,'local-save');if(result.ok){DATA=prepared.data;window.__simurgExerciseCanonicalizationReport=prepared.report}}else result=SimurgPersistence.persistData(localStorage,DATA);if(!result.ok){SimurgPersistence.notifyFailure(result,'Değişiklikler kaydedilemedi.');return result}if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('local-save');render();return result}
 window.simurgGetData=function(){return DATA};
 window.simurgPersistData=function(){return save()};
 function clearManual(){['exercise','sets','reps','weight'].forEach(id=>document.getElementById(id).value='')}
@@ -7874,7 +7886,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=cloud-metadata-atomicity-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=exercise-canonicalization-v1').catch(function(){});
   });
 }
 </script>
@@ -13487,7 +13499,7 @@ m Shell V4: Logger information architecture fix -->
     var d=overallDecision();
     var html='<div id="coachV11SmartFilter"><div class="coachV11Hero"><div class="coachV11Top"><div><small>COACH LOGIC V2</small><b>Smart Target Filter</b></div><span class="coachV11Pill">'+esc(d.title)+'</span></div><p class="coachV11Text">'+esc(d.msg)+'</p><div class="coachV11Grid">'
       +'<div class="coachV11Item main"><div class="coachV11ItemHead"><b>Main Lift</b><span>progression</span></div><p>Form Good + Pain None + RPE 6-7 ise +1 tekrar/küçük artış denenebilir. RPE 8 ise hedef korunur.</p></div>'
-      +'<div class="coachV11Item protect"><div class="coachV11ItemHead"><b>Stability / Posture</b><span>protection</span></div><p>Prone Y Raise, Face Pull, Rear Delt ve Lateral Raise için ağırlık artışı öncelik değil; tempo, kontrol ve ağrısızlık öncelikli.</p></div>'
+      +'<div class="coachV11Item protect"><div class="coachV11ItemHead"><b>Stability / Posture</b><span>protection</span></div><p>Prone Y Raise, Facepull, Rear Delt ve Lateral Raise için ağırlık artışı öncelik değil; tempo, kontrol ve ağrısızlık öncelikli.</p></div>'
       +'<div class="coachV11Item caution"><div class="coachV11ItemHead"><b>Extra Activity</b><span>'+esc(d.act.label)+'</span></div><p>'+(d.act.text?esc(d.act.text):'Tenis/badminton yükü yok. Ek aktivite gelirse program aynı kalır ama hedef agresifliği düşer.')+'</p></div>'
       +'</div></div></div>';
     var anchor=document.getElementById('coachV8Premium') || sec.querySelector('.coachingGrid') || sec.firstElementChild;

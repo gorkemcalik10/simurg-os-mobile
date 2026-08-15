@@ -1,9 +1,10 @@
 (function(root,factory){
   'use strict';
-  var api=factory();
+  var canonicalizer=typeof module==='object'&&module.exports?require('./simurg-exercise-canonicalization.js'):(root&&root.SimurgExerciseCanonicalization);
+  var api=factory(canonicalizer);
   if(typeof module==='object'&&module.exports)module.exports=api;
   if(root)root.SimurgDataValidation=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+})(typeof globalThis!=='undefined'?globalThis:this,function(canonicalizer){
   'use strict';
 
   var CURRENT_SCHEMA_VERSION=1;
@@ -473,12 +474,17 @@
     var candidate=clone(value);
     var warnings=[];
     candidate=migrate(candidate,warnings,options);
+    var canonicalizationReport=null;
+    if(options.canonicalizeExercises!==false){
+      if(!canonicalizer||typeof canonicalizer.canonicalize!=='function')fail('canonicalization_unavailable','Egzersiz canonicalization katmanı yüklenemedi','$');
+      canonicalizationReport=canonicalizer.canonicalize(candidate);
+    }
     scan(candidate,options);
     validateKnown(candidate,{coerce:false});
     var known={schemaVersion:true};
     Object.keys(DEFAULTS).concat(MAP_NAMES).concat(['activityNotes','autoNextTargets','recoveryEntries','polarBridge','_meta']).forEach(function(key){known[key]=true});
     Object.keys(candidate).forEach(function(key){if(!known[key])warnings.push('Güvenli bilinmeyen alan korundu: '+key)});
-    return {data:candidate,warnings:warnings,fromVersion:value.schemaVersion==null?0:Number(value.schemaVersion),toVersion:CURRENT_SCHEMA_VERSION};
+    return {data:candidate,warnings:warnings,fromVersion:value.schemaVersion==null?0:Number(value.schemaVersion),toVersion:CURRENT_SCHEMA_VERSION,canonicalizationReport:canonicalizationReport};
   }
   function prepareFullText(raw,options){return prepareFull(parseJson(raw,options),options)}
   function stageAppend(current,mutator,options){

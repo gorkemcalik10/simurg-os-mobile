@@ -246,13 +246,17 @@ run('input hash is stable for the same normalized input and changes with feature
   assert.notEqual(engine.analyzeDaily(changed, scenario.date).inputHash, first.inputHash);
 });
 
-run('old DATA gains the store without changing existing records', () => {
+run('old DATA gains the store while approved exercise fields canonicalize without row loss', () => {
   const old = fixtures.baseData();
   delete old.coachIntelligence;
   old.workouts.push(fixtures.gymRow(fixtures.TODAY));
   const beforeWorkouts = JSON.stringify(old.workouts);
   const prepared = validation.prepareFull(old);
-  assert.equal(JSON.stringify(prepared.data.workouts), beforeWorkouts);
+  assert.equal(prepared.data.workouts.length, old.workouts.length);
+  assert.equal(prepared.data.workouts[0].exercise, old.workouts[0].exercise);
+  assert.equal(prepared.data.workouts.at(-1).exercise, 'Incline DB Press');
+  assert.equal(prepared.data.workouts.at(-1).bodyPart, 'Göğüs');
+  assert.equal(prepared.data.workouts.at(-1).exerciseId, 'simurg-exercise-v1-incline-db-press');
   assert.deepEqual(plain(prepared.data.coachIntelligence), engine.defaultStore());
   const originalKeys = Object.keys(old).sort();
   const runtimeCopy = plain(old);
