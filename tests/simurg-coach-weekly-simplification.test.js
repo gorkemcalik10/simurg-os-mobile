@@ -76,11 +76,11 @@ run('mobile Weekly first render uses one weekly result and the simplified hierar
 
 run('first Weekly card describes the week while the second preserves the next-week action', () => {
   const cases = [
-    [weeklyResult('reduce', { warnings: ['Cardio Load yakın döneme göre yüksek.'] }), 'Yük bu hafta biraz yükseldi', 'Yükü biraz azalt'],
-    [weeklyResult('reduce', { warnings: ['Birden fazla olumsuz toparlanma sinyali birlikte görülüyor.'] }), 'Toparlanma bu hafta zorlandı', 'Yükü biraz azalt'],
-    [weeklyResult('normal'), 'Hafta dengeli geçti', 'Planını aynen uygula'],
+    [weeklyResult('reduce', { readinessScore: 82, warnings: ['Cardio Load yakın döneme göre yüksek.'] }), 'Yük bu hafta biraz yükseldi', 'Yükü biraz azalt'],
+    [weeklyResult('reduce', { warnings: ['Birden fazla olumsuz toparlanma sinyali birlikte görülüyor.'] }), 'Yük bu hafta biraz yükseldi', 'Yükü biraz azalt'],
     [weeklyResult('recovery', { readinessScore: 48 }), 'Toparlanma bu hafta zorlandı', 'Toparlanmayı öne al'],
-    [weeklyResult('controlled'), 'Bu hafta kontrollü ilerledin', 'Temkinli başla']
+    [weeklyResult('normal', { baseline: { cardioLoad: { current: 70 }, sleepMinutes: { current: 430, deviation7: 2 } } }), 'Hafta dengeli geçti', 'Planını aynen uygula'],
+    [weeklyResult('controlled', { readinessScore: null }), 'Bu hafta kontrollü ilerledin', 'Temkinli başla']
   ];
 
   for (const [result, expectedSummary, expectedAction] of cases) {
@@ -94,10 +94,25 @@ run('first Weekly card describes the week while the second preserves the next-we
   }
 });
 
-run('mobile Coaching hides the legacy local-analysis badge without changing desktop badge styling', () => {
+run('good recovery plus high load uses the visible load semantic and consistent support copy', () => {
+  const result = weeklyResult('reduce', { readinessScore: 84, warnings: ['Cardio Load yakın döneme göre yüksek.'] });
+  const { context, section } = runtime(fixtures.scenarios[0], result);
+  context.simurgCoachSetTab('weekly');
+  const first = section.innerHTML.slice(section.innerHTML.indexOf('sci-weekly-summary'), section.innerHTML.indexOf('</section>', section.innerHTML.indexOf('sci-weekly-summary')));
+  const reasons = section.innerHTML.slice(section.innerHTML.indexOf('sci-weekly-reasons'), section.innerHTML.indexOf('</section>', section.innerHTML.indexOf('sci-weekly-reasons')));
+  assert.match(first, /Yük bu hafta biraz yükseldi/);
+  assert.match(first, /Toparlanman iyi kaldı ancak toplam yük yakın döneme göre yükseldi/);
+  assert.doesNotMatch(first, /Toparlanma bu hafta zorlandı/);
+  assert.match(reasons, /Toparlanma <b>· İyi<\/b>/);
+  assert.match(reasons, /Antrenman yükü <b>· Yüksek<\/b>/);
+});
+
+run('mobile Coaching hides technical header labels without changing desktop styling', () => {
   assert.match(source, /function aiBadge\(\)\{return '<span class="sci-local-badge">Yerel güvenli analiz<\/span>';\}/);
-  assert.match(css, /@media\(max-width:900px\)\{[^]*?\.sci-mobile-shell \.sci-local-badge\{display:none\}/);
+  assert.match(source, /<small class="sci-kicker">SIMURG COACH INTELLIGENCE<\/small>/);
+  assert.match(css, /@media\(max-width:900px\)\{[^]*?\.sci-mobile-shell \.sci-kicker,\.sci-mobile-shell \.sci-local-badge\{display:none\}/);
   assert.match(css, /@media\(min-width:901px\)\{/);
+  assert.doesNotMatch(css, /(?:^|\n)\.sci-kicker\{display:none\}/);
   assert.doesNotMatch(css, /(?:^|\n)\.sci-local-badge\{display:none\}/);
 });
 

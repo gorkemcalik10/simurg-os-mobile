@@ -49,7 +49,7 @@
   function aiBadge(){return '<span class="sci-local-badge">Yerel güvenli analiz</span>';}
   function nav(date){
     var dailyHead=state.tab==='daily';
-    return '<header class="sci-head"><div>'+(dailyHead?'':'<small>SIMURG COACH INTELLIGENCE</small>')+'<h1>Koçluk</h1><p>'+esc(longDate(date))+'</p></div>'+(dailyHead?'':aiBadge())+'</header>'
+    return '<header class="sci-head"><div>'+(dailyHead?'':'<small class="sci-kicker">SIMURG COACH INTELLIGENCE</small>')+'<h1>Koçluk</h1><p>'+esc(longDate(date))+'</p></div>'+(dailyHead?'':aiBadge())+'</header>'
       +'<div class="sci-date-nav"><button type="button" onclick="simurgCoachMoveDate(-1)" aria-label="Önceki gün">←</button><b>'+esc(longDate(date))+'</b><button type="button" onclick="simurgCoachMoveDate(1)" aria-label="Sonraki gün">→</button><button type="button" onclick="simurgCoachToday()">Bugün</button></div>'
       +'<div class="sci-tabs" role="tablist">'+tabs.map(function(tab){var label={daily:'Günlük',weekly:'Haftalık',history:'Geçmiş'}[tab];return '<button type="button" role="tab" aria-selected="'+(state.tab===tab?'true':'false')+'" class="'+(state.tab===tab?'active':'')+'" onclick="simurgCoachSetTab(\''+tab+'\')">'+label+'</button>';}).join('')+'</div>';
   }
@@ -166,13 +166,11 @@
       +'<h3>Güvenlik notu</h3><p>'+esc(daily.medicalDisclaimer)+'</p></div>';
   }
   function weeklyHeadline(result){
-    var recovery=weeklyRecoveryReason(result).status,load=weeklyLoadReason(result).status,warnings=(result.warnings||[]).join(' ');
-    if(result.trainingDecision==='recovery'||result.trainingDecision==='rest'||recovery==='Düşük'||/olumsuz toparlanma|uyku/i.test(warnings))return 'Toparlanma bu hafta zorlandı';
+    var reasons=weeklyReasons(result),recovery=reasons[0].status,load=reasons[1].status,sleep=reasons[2].status;
+    if(recovery==='Düşük'||(recovery==='Biraz düşük'&&load!=='Yüksek'))return 'Toparlanma bu hafta zorlandı';
     if(load==='Yüksek')return 'Yük bu hafta biraz yükseldi';
-    return {
-      progress:'Hafta dengeli geçti',normal:'Hafta dengeli geçti',controlled:'Bu hafta kontrollü ilerledin',
-      reduce:'Bu hafta kontrollü ilerledin'
-    }[result.trainingDecision]||'Bu haftanın verileri değerlendirildi';
+    if((recovery==='İyi'||recovery==='Normal')&&load==='Dengeli'&&(sleep==='İyi'||sleep==='Biraz dalgalı'))return 'Hafta dengeli geçti';
+    return 'Bu hafta kontrollü ilerledin';
   }
   function weeklyWorkoutDays(result){
     var row=(result.keyDrivers||[]).filter(function(item){return /Antrenman\/aktivite günü:/i.test(String(item));})[0],match=String(row||'').match(/(\d+)/);

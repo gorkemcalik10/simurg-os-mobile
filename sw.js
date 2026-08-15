@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-coach-weekly-v1-1-polish';
+const SIMURG_CACHE = 'simurg-coach-weekly-v1-2-semantic-consistency';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -19,8 +19,8 @@ const CORE_ASSETS = [
   './simurg-signal-model.js?v=7',
   './simurg-coach-engine.js?v=4',
   './simurg-coach-client.js?v=4',
-  './simurg-coach.css?v=9',
-  './simurg-coach-ui.js?v=8',
+  './simurg-coach.css?v=10',
+  './simurg-coach-ui.js?v=9',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=9',
   './simurg-cloud-auth.js?v=4',
