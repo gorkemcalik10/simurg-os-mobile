@@ -98,6 +98,11 @@ async function runtime(options = {}) {
   const window = {
     document, localStorage: storage, SimurgPersistence: persistence,
     SimurgDataValidation: {
+      normalizeCustomGymProgramsForSerialization(value) {
+        const result = Object.assign({}, value);
+        result.customGymPrograms = JSON.parse(JSON.stringify(value.customGymPrograms || {}));
+        return result;
+      },
       prepareFull(value) {
         if (options.validationError) throw options.validationError;
         return { data: JSON.parse(JSON.stringify(value)) };
@@ -168,6 +173,30 @@ test('Push remote failure does not advance local revision metadata', async () =>
   assert.equal(result.status, 'remote_failure');
   assert.equal(app.storage.raw(META_KEY), previousMeta);
   assert.equal(app.elements.get('cloudSyncStatus').dataset.state, 'err');
+});
+
+test('Push strips undefined custom program prefill only from the cloud payload', async () => {
+  const local = {
+    schemaVersion: 1,
+    workouts: [{ date: '2026-08-20', exercise: 'Recovered Row', sets: 1, reps: 8, weight: 30 }],
+    recovery: [{ date: '2026-08-20', sleep: '8' }],
+    customGymPrograms: { '2026-08-21': { overrides: {}, extras: [{ id: 'extra-1', name: 'Row' }] } },
+  };
+  const app = await runtime({ data: local, meta: baseMeta, lookup: { data: { revision: 2, updated_at: baseMeta.updatedAt }, error: null } });
+  const localExtra = app.context.DATA.customGymPrograms['2026-08-21'].extras[0];
+  localExtra.prefill = undefined;
+  const beforeWorkouts = JSON.stringify(app.context.DATA.workouts);
+  const beforeRecovery = JSON.stringify(app.context.DATA.recovery);
+
+  const result = await app.window.pushUserData();
+  const payload = app.calls.update[0].payload;
+
+  assert.equal(result.status, 'success');
+  assert.equal(Object.hasOwn(localExtra, 'prefill'), true);
+  assert.equal(Object.hasOwn(payload.customGymPrograms['2026-08-21'].extras[0], 'prefill'), false);
+  assert.equal(JSON.stringify(app.context.DATA.workouts), beforeWorkouts);
+  assert.equal(JSON.stringify(app.context.DATA.recovery), beforeRecovery);
+  assert.doesNotThrow(() => JSON.stringify(payload));
 });
 
 test('Push Safari Private Mode-style metadata failure is a warning after confirmed insert', async () => {

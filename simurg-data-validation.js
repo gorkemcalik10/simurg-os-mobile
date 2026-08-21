@@ -115,6 +115,21 @@
     if(typeof structuredClone==='function')return structuredClone(value);
     return JSON.parse(JSON.stringify(value));
   }
+  function normalizeCustomGymProgramsForSerialization(value){
+    if(!isPlainObject(value)||!isPlainObject(value.customGymPrograms))return value;
+    function normalize(item){
+      if(Array.isArray(item))return item.map(normalize);
+      if(!isPlainObject(item))return item;
+      var result={};
+      Object.keys(item).forEach(function(key){
+        if(item[key]!==undefined)result[key]=normalize(item[key]);
+      });
+      return result;
+    }
+    var result=Object.assign({},value);
+    result.customGymPrograms=normalize(value.customGymPrograms);
+    return result;
+  }
   function polarStableId(row){
     row=row||{};var raw=isPlainObject(row.raw)?row.raw:{};
     var value=row.polarExerciseId||row.exerciseId||row.exercise_id||row.polarId||raw.polarExerciseId||raw.exerciseId||raw.exercise_id||raw.id;
@@ -830,6 +845,7 @@
     scan:scan,
     parseJson:parseJson,
     clone:clone,
+    normalizeCustomGymProgramsForSerialization:normalizeCustomGymProgramsForSerialization,
     prepareFull:prepareFull,
     prepareFullText:prepareFullText,
     recoverWorkoutHistoryText:recoverWorkoutHistoryText,

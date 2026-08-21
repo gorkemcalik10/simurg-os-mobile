@@ -225,4 +225,34 @@ run('invalid Cloud-style payload is rejected without changing local object', () 
   assert.equal(JSON.stringify(local), before);
 });
 
+run('Cloud payload normalization removes only undefined custom program fields', () => {
+  const input = base();
+  input.workouts.push({ date: '2026-08-20', exercise: 'Recovered Row', sets: 1, reps: 8, weight: 30 });
+  input.recovery.push({ date: '2026-08-20', sleep: '8' });
+  input.customGymPrograms['2026-08-21'] = {
+    overrides: {},
+    extras: [{ id: 'extra-1', name: 'Row', bodyPart: 'Back', setCount: 3, prefill: undefined }]
+  };
+  const workouts = input.workouts;
+  const recovery = input.recovery;
+  const polarWorkouts = input.polarWorkouts;
+  const sourceExtra = input.customGymPrograms['2026-08-21'].extras[0];
+
+  const normalized = validation.normalizeCustomGymProgramsForSerialization(input);
+  const normalizedExtra = normalized.customGymPrograms['2026-08-21'].extras[0];
+
+  assert.equal(Object.hasOwn(sourceExtra, 'prefill'), true);
+  assert.equal(sourceExtra.prefill, undefined);
+  assert.equal(Object.hasOwn(normalizedExtra, 'prefill'), false);
+  assert.equal(normalized.workouts, workouts);
+  assert.equal(normalized.recovery, recovery);
+  assert.equal(normalized.polarWorkouts, polarWorkouts);
+  assert.doesNotThrow(() => JSON.stringify(normalized));
+  const prepared = validation.prepareFull(normalized, { source: 'authenticated-cloud-push', canonicalizeExercises: false }).data;
+  assert.equal(prepared.workouts.length, 1);
+  assert.equal(prepared.workouts[0].exercise, 'Recovered Row');
+  assert.equal(prepared.recovery[0].sleep, '8');
+  assert.equal(Object.hasOwn(prepared.customGymPrograms['2026-08-21'].extras[0], 'prefill'), false);
+});
+
 if (process.exitCode) process.exit(process.exitCode);

@@ -133,7 +133,9 @@
     var value=currentData();
     if(!isPlainObject(value))throw new Error('Yerel DATA geçerli bir nesne değil.');
     if(!window.SimurgDataValidation)throw new Error('DATA doğrulayıcı yüklenemedi.');
-    var legacy=window.SimurgDataValidation.prepareFull(value,{source:'authenticated-cloud-push',canonicalizeExercises:false}).data;
+    if(typeof window.SimurgDataValidation.normalizeCustomGymProgramsForSerialization!=='function')throw new Error('Cloud payload normalizasyonu yüklenemedi.');
+    var cloudValue=window.SimurgDataValidation.normalizeCustomGymProgramsForSerialization(value);
+    var legacy=window.SimurgDataValidation.prepareFull(cloudValue,{source:'authenticated-cloud-push',canonicalizeExercises:false}).data;
     var prepared=window.SimurgDataValidation.prepareFull(legacy,{source:'authenticated-cloud-push'});
     if(prepared.canonicalizationReport&&prepared.canonicalizationReport.changed){
       if(!window.SimurgExerciseCanonicalization)throw new Error('Egzersiz migration katmanı yüklenemedi.');
