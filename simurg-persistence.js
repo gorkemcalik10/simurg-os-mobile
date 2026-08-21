@@ -48,6 +48,17 @@
     if(typeof alert==='function')alert(message);
     return result;
   }
-  function persistData(storage,value){return writeJson(storage,DATA_KEY,value)}
+  function recoveryFailure(){
+    return {
+      ok:false,
+      key:DATA_KEY,
+      code:'startup_recovery_active',
+      message:'Yerel DATA doğrulanamadığı için eski depolama verisi korunuyor. Geçerli bir JSON yedeği veya Cloud Pull uygulanmadan kayıt yapılmadı.'
+    };
+  }
+  function persistData(storage,value){
+    if(typeof globalThis!=='undefined'&&globalThis.__simurgStartupDataRecoveryActive)return recoveryFailure();
+    return writeJson(storage,DATA_KEY,value);
+  }
   return {DATA_KEY:DATA_KEY,writeRaw:writeRaw,writeJson:writeJson,remove:remove,requireSuccess:requireSuccess,notifyFailure:notifyFailure,persistData:persistData};
 });

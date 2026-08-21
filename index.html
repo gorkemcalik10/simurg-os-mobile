@@ -6254,10 +6254,10 @@ body{background:#050607!important;}
 <div class="modal" id="editModal"><div class="modalbox"><div class="modalTop"><h2 id="modalTitle">Düzenle</h2><button class="btn sec" onclick="closeModal()">Kapat</button></div><div id="modalBody"></div><div class="actions"><button class="btn" onclick="saveEdit()">Kaydet</button><button class="btn danger" onclick="deleteEditing()">Sil</button></div></div></div>
 <div class="modal programNameModal" id="programNameModal"><div class="modalbox"><div class="modalTop"><h2>Program İsmini Düzenle</h2><button class="btn sec" onclick="closeProgramNameModal()">Kapat</button></div><div id="programNameBody"></div><div class="actions"><button class="btn" onclick="saveProgramNameEdit()">Kaydet</button><button class="btn sec" onclick="resetProgramNameEdit()">Varsayılana Dön</button></div></div></div>
 <div class="modal exerciseLibraryModal" id="exerciseLibraryModal" role="dialog" aria-modal="true" aria-labelledby="exerciseLibraryTitle"><div class="modalbox"><div class="modalTop"><h2 id="exerciseLibraryTitle">Hareket Kütüphanesi</h2><button class="btn sec" type="button" onclick="closeExerciseLibrary()">Kapat</button></div><p class="exerciseLibraryIntro">Makine, dambıl ve yaygın salon hareketlerinden seç. Türkçe veya İngilizce adla arayabilirsin; istersen özel hareket oluşturmaya devam edebilirsin.</p><div class="exerciseLibraryTools"><input id="exerciseLibrarySearch" type="search" placeholder="Ara: incline press, göğüs, tek kol…" autocomplete="off"><select id="exerciseLibraryCategory" aria-label="Hareket kategorisi"></select></div><div class="exerciseLibraryCount" id="exerciseLibraryCount"></div><div class="exerciseLibraryResults" id="exerciseLibraryResults"></div><div class="actions"><button class="btn sec" type="button" onclick="addCustomGymExerciseFromLibrary()">+ Özel Hareket Oluştur</button></div></div></div>
-<script src="./simurg-persistence.js?v=1"></script>
+<script src="./simurg-persistence.js?v=2"></script>
 <script src="./simurg-gym-identity.js?v=1"></script>
 <script src="./simurg-exercise-canonicalization.js?v=2"></script>
-<script src="./simurg-data-validation.js?v=6"></script>
+<script src="./simurg-data-validation.js?v=7"></script>
 <script src="./simurg-gym-flex.js?v=1"></script>
 <script src="./simurg-exercise-catalog.js?v=1"></script>
 <script>
@@ -6280,12 +6280,25 @@ try{
     }
   }else DATA=SimurgDataValidation.prepareFull(INITIAL,{source:'startup-defaults'}).data;
 }catch(simurgStartupDataError){
-  DATA=SimurgDataValidation.prepareFull(INITIAL,{source:'startup-fallback'}).data;
+  var simurgStartupRecovery=null;
+  try{
+    if(simurgStoredDataRaw)simurgStartupRecovery=SimurgDataValidation.recoverWorkoutHistoryText(simurgStoredDataRaw,{source:'startup-workout-recovery'});
+  }catch(simurgStartupRecoveryError){
+    window.__simurgStartupDataRecoveryError={
+      code:simurgStartupRecoveryError&&simurgStartupRecoveryError.code||'startup_recovery_failed',
+      message:simurgStartupRecoveryError&&simurgStartupRecoveryError.message||'Workout geçmişi güvenli biçimde kurtarılamadı.'
+    };
+  }
+  DATA=simurgStartupRecovery&&simurgStartupRecovery.data||SimurgDataValidation.prepareFull(INITIAL,{source:'startup-fallback'}).data;
+  window.__simurgStartupDataRecoveryActive=!!(simurgStartupRecovery&&simurgStartupRecovery.recoveredWorkoutRows);
+  if(window.__simurgStartupDataRecoveryActive)window.__simurgStartupDataRecovery={recoveredWorkoutRows:simurgStartupRecovery.recoveredWorkoutRows,warnings:simurgStartupRecovery.warnings||[]};
   window.__simurgStartupDataValidationError={
     code:simurgStartupDataError&&simurgStartupDataError.code||'startup_validation_failed',
     message:simurgStartupDataError&&simurgStartupDataError.message||'Yerel DATA doğrulanamadı.'
   };
-  console.warn('Simurg OS: geçersiz yerel DATA değiştirilmeden güvenli başlangıç verisi kullanıldı.');
+  console.warn(window.__simurgStartupDataRecoveryActive
+    ?'Simurg OS: DATA doğrulaması başarısız; yerel veri değiştirilmeden workout geçmişi salt okunur kurtarma modunda yüklendi.'
+    :'Simurg OS: geçersiz yerel DATA değiştirilmeden güvenli başlangıç verisi kullanıldı.');
 }
 if(!DATA.appleWatch) DATA.appleWatch=[];
 if(!DATA.dailyNotes) DATA.dailyNotes=[];
@@ -7873,7 +7886,8 @@ function resetProgramNameEdit(){
   closeProgramNameModal();
   save();
 }
-function save(){const original=DATA,prepared=SimurgExerciseCanonicalization.prepared(DATA);let result;if(prepared.report.changed){result=SimurgExerciseCanonicalization.persistWithBackup(localStorage,original,prepared.data,SimurgPersistence,'local-save');if(result.ok){DATA=prepared.data;window.__simurgExerciseCanonicalizationReport=prepared.report}}else result=SimurgPersistence.persistData(localStorage,DATA);if(!result.ok){SimurgPersistence.notifyFailure(result,'Değişiklikler kaydedilemedi.');return result}if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('local-save');render();return result}
+function startupRecoveryWriteBlocked(){return window.__simurgStartupDataRecoveryActive?{ok:false,key:SimurgPersistence.DATA_KEY,code:'startup_recovery_active',message:'Yerel DATA doğrulanamadığı için eski depolama verisi korunuyor. Geçerli bir JSON yedeği veya Cloud Pull uygulanmadan kayıt yapılmadı.'}:null}
+function save(){const blocked=startupRecoveryWriteBlocked();if(blocked)return blocked;const original=DATA,prepared=SimurgExerciseCanonicalization.prepared(DATA);let result;if(prepared.report.changed){result=SimurgExerciseCanonicalization.persistWithBackup(localStorage,original,prepared.data,SimurgPersistence,'local-save');if(result.ok){DATA=prepared.data;window.__simurgExerciseCanonicalizationReport=prepared.report}}else result=SimurgPersistence.persistData(localStorage,DATA);if(!result.ok){SimurgPersistence.notifyFailure(result,'Değişiklikler kaydedilemedi.');return result}if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('local-save');render();return result}
 window.simurgGetData=function(){return DATA};
 window.simurgPersistData=function(){return save()};
 function clearManual(){['exercise','sets','reps','weight'].forEach(id=>document.getElementById(id).value='')}
@@ -8685,6 +8699,8 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
 
   const oldSave=window.save;
   window.save=function(){
+    const blocked=startupRecoveryWriteBlocked();
+    if(blocked)return blocked;
     const hadMeta=!!(DATA&&Object.prototype.hasOwnProperty.call(DATA,'_meta'));
     const previousMeta=hadMeta?JSON.parse(JSON.stringify(DATA._meta)):null;
     markLocalUpdate();
@@ -16290,7 +16306,7 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./simurg-gym-flex.css?v=2">
 <script src="./mobile-ia-premium.js?v=6"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
-<script src="./simurg-cloud-auth.js?v=5" defer></script>
+<script src="./simurg-cloud-auth.js?v=6" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
   if(!window.SimurgDataValidation)return;

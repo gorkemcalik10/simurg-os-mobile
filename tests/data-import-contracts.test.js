@@ -40,6 +40,9 @@ run('startup validates stored DATA before the DATA assignment', () => {
   const fallbackAt = index.indexOf('__simurgStartupDataValidationError');
   assert.ok(readAt >= 0 && validateAt > readAt && fallbackAt > validateAt);
   assert.doesNotMatch(index, /DATA=JSON\.parse\(simurgStoredDataRaw/);
+  assert.match(index, /recoverWorkoutHistoryText\(simurgStoredDataRaw/);
+  assert.match(index, /__simurgStartupDataRecoveryActive/);
+  assert.match(index, /startupRecoveryWriteBlocked\(\)/);
 });
 
 run('full file restore enforces size, detached validation, backup and atomic commit', () => {

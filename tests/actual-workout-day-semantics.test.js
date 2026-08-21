@@ -4,6 +4,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const coach = require('../simurg-coach-engine.js');
 const validation = require('../simurg-data-validation.js');
+const history = require('../simurg-exercise-history.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const volumeSource = fs.readFileSync(path.join(ROOT, 'simurg-volume-model.js'), 'utf8');
@@ -90,6 +91,23 @@ run('validated startup history remains identical for Gym and Daily date views', 
   assert.equal(gymRows.length, 2);
   assert.equal(dailyRows.length, gymRows.length);
   assert.deepEqual(dailyRows.map(item => item.exercise), gymRows.map(item => item.exercise));
+});
+
+run('degraded startup recovery feeds existing rows to Gym History and Daily Summary', () => {
+  const date = '2026-08-10';
+  const input = { schemaVersion: 1,
+    workouts: Array.from({ length: 708 }, (_, index) => row(date, {
+      exercise: 'Bench Press', exerciseId: 'legacy-bench', reps: 5 + index % 5,
+    })),
+    polarWorkouts: { daily: { [date]: [{ date, type: 'polar_flow_workout', activityType: 'Fitness', muscleLoad: -2 }] }, latest: null },
+  };
+  const recovered = validation.recoverWorkoutHistoryText(JSON.stringify(input), { source: 'startup-workout-recovery' }).data;
+  const gymHistory = history.sessions(recovered.workouts, { exerciseId: 'legacy-bench', name: 'Bench Press' }, { beforeDate: '2026-08-11' });
+  const dailyRows = runtime(recovered).day(date).gym.rows;
+  assert.equal(recovered.workouts.length, 708);
+  assert.equal(gymHistory.length, 1);
+  assert.equal(gymHistory[0].rows.length, 708);
+  assert.equal(dailyRows.length, 708);
 });
 
 run('explicit skip stays distinct and suppresses Coach progression context', () => {

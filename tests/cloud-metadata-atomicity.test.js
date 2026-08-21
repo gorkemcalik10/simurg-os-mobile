@@ -181,11 +181,15 @@ test('Push Safari Private Mode-style metadata failure is a warning after confirm
 test('Pull valid payload and local metadata success returns normal success', async () => {
   const incoming = { schemaVersion: 1, workouts: [{ date: '2026-08-14', exercise: 'New' }] };
   const app = await runtime({ lookup: { data: { payload: incoming, revision: 7, updated_at: '2026-08-14T11:00:00.000Z' }, error: null } });
+  app.window.__simurgStartupDataRecoveryActive = true;
+  app.window.__simurgStartupDataRecovery = { recoveredWorkoutRows: 708 };
   const result = await app.window.pullUserData();
   assert.equal(result.status, 'success');
   assert.equal(result.dataApplied, true);
   assert.equal(app.context.DATA.workouts[0].exercise, 'New');
   assert.equal(JSON.parse(app.storage.raw(META_KEY)).revision, 7);
+  assert.equal(app.window.__simurgStartupDataRecoveryActive, false);
+  assert.equal(app.window.__simurgStartupDataRecovery, undefined);
 });
 
 test('Pull warns and preserves local workouts when a reducing cloud overwrite is declined', async () => {
@@ -222,13 +226,19 @@ test('Pull metadata failure keeps applied DATA and reports a clear warning', asy
 });
 
 test('Pull validation failure leaves DATA and storage unchanged', async () => {
-  const app = await runtime({ lookup: { data: { payload: { corrupt: true }, revision: 9, updated_at: '2026-08-14T11:00:00.000Z' }, error: null }, validationError: new Error('invalid payload') });
+  const local = { schemaVersion: 1, workouts: Array.from({ length: 708 }, (_, index) => ({ date: '2026-08-10', exercise: `Existing ${index}` })) };
+  const app = await runtime({ data: local, lookup: { data: { payload: { corrupt: true }, revision: 9, updated_at: '2026-08-14T11:00:00.000Z' }, error: null }, validationError: new Error('invalid payload') });
+  app.window.__simurgStartupDataRecoveryActive = true;
+  app.window.__simurgStartupDataRecovery = { recoveredWorkoutRows: 708 };
   const previousData = app.context.DATA;
   const previousRaw = app.storage.raw(DATA_KEY);
   const result = await app.window.pullUserData();
   assert.equal(result.status, 'validation_failure');
   assert.equal(app.context.DATA, previousData);
   assert.equal(app.storage.raw(DATA_KEY), previousRaw);
+  assert.equal(app.context.DATA.workouts.length, 708);
+  assert.equal(app.window.__simurgStartupDataRecoveryActive, true);
+  assert.equal(app.window.__simurgStartupDataRecovery.recoveredWorkoutRows, 708);
 });
 
 test('Pull DATA persistence quota failure rolls back the application', async () => {

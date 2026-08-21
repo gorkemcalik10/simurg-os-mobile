@@ -520,6 +520,25 @@
     return {data:candidate,warnings:warnings,fromVersion:value.schemaVersion==null?0:Number(value.schemaVersion),toVersion:CURRENT_SCHEMA_VERSION,canonicalizationReport:canonicalizationReport};
   }
   function prepareFullText(raw,options){return prepareFull(parseJson(raw,options),options)}
+  function recoverWorkoutHistoryText(raw,options){
+    options=options||{};
+    var parsed=parseJson(raw,options);
+    if(!isPlainObject(parsed))fail('invalid_root','Tam DATA restore kökü düz bir JSON nesnesi olmalı','$');
+    Object.keys(parsed).forEach(function(key){
+      if(RESERVED_ROOTS[key])fail('reserved_namespace','Uygulama kontrol/gizli bilgi namespace alanı DATA içine alınamaz',pathFor('$',key));
+    });
+    var rows=array(parsed.workouts,'$.workouts').map(function(row,index){
+      return validateWorkoutRecord(row,'$.workouts['+index+']',{coerce:true});
+    });
+    var recovered=clone(DEFAULTS);
+    recovered.workouts=rows;
+    var prepared=prepareFull(recovered,{source:options.source||'startup-workout-recovery'});
+    return {
+      data:prepared.data,
+      recoveredWorkoutRows:prepared.data.workouts.length,
+      warnings:['Tam DATA doğrulanamadı; güvenli workout geçmişi salt okunur kurtarma modunda yüklendi.']
+    };
+  }
   function stageAppend(current,mutator,options){
     var candidate=prepareFull(current,options).data;
     var result=mutator(candidate);
@@ -648,7 +667,11 @@
       var previousRaw=localStorage.getItem(DATA_KEY);
       var previousDate=selected();
       var previousSnapshot=localStorage.getItem(SNAP_KEY);
+      var previousRecoveryActive=!!window.__simurgStartupDataRecoveryActive;
+      var previousRecovery=window.__simurgStartupDataRecovery;
       try{
+        window.__simurgStartupDataRecoveryActive=false;
+        delete window.__simurgStartupDataRecovery;
         if(options.downloadBackup)backupDownload(previous,options.backupLabel);
         if(options.snapshot){
           window.SimurgPersistence.requireSuccess(window.SimurgPersistence.writeJson(localStorage,SNAP_KEY,{meta:{at:new Date().toISOString(),source:options.source||'import',selectedDate:previousDate},data:clone(previous)}));
@@ -660,6 +683,8 @@
         return prepared;
       }catch(error){
         adapter.setData(previous);
+        window.__simurgStartupDataRecoveryActive=previousRecoveryActive;
+        if(previousRecovery===undefined)delete window.__simurgStartupDataRecovery;else window.__simurgStartupDataRecovery=previousRecovery;
         if(previousRaw===null)window.SimurgPersistence.remove(localStorage,DATA_KEY);else window.SimurgPersistence.writeRaw(localStorage,DATA_KEY,previousRaw);
         if(previousSnapshot===null)window.SimurgPersistence.remove(localStorage,SNAP_KEY);else window.SimurgPersistence.writeRaw(localStorage,SNAP_KEY,previousSnapshot);
         setSelected(previousDate);
@@ -807,6 +832,7 @@
     clone:clone,
     prepareFull:prepareFull,
     prepareFullText:prepareFullText,
+    recoverWorkoutHistoryText:recoverWorkoutHistoryText,
     stageAppend:stageAppend,
     routeImport:routeImport,
     validateWorkoutRecord:validateWorkoutRecord,

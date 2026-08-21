@@ -194,7 +194,11 @@
   function persistPulledData(value,migrationOriginal,migrationReport){
     var previousData=DATA;
     var previousRaw=localStorage.getItem(LOCAL_DATA_KEY);
+    var previousRecoveryActive=!!window.__simurgStartupDataRecoveryActive;
+    var previousRecovery=window.__simurgStartupDataRecovery;
     try{
+      window.__simurgStartupDataRecoveryActive=false;
+      delete window.__simurgStartupDataRecovery;
       if(migrationReport&&migrationReport.changed){
         if(!window.SimurgExerciseCanonicalization)throw new Error('Egzersiz migration katmanı yüklenemedi.');
         var migrated=window.SimurgExerciseCanonicalization.persistWithBackup(localStorage,migrationOriginal,value,window.SimurgPersistence,'authenticated-cloud-pull');
@@ -206,6 +210,8 @@
       if(typeof window.renderDataLocalStatus==='function')window.renderDataLocalStatus();
     }catch(error){
       DATA=previousData;
+      window.__simurgStartupDataRecoveryActive=previousRecoveryActive;
+      if(previousRecovery===undefined)delete window.__simurgStartupDataRecovery;else window.__simurgStartupDataRecovery=previousRecovery;
       if(previousRaw===null)window.SimurgPersistence.remove(localStorage,LOCAL_DATA_KEY);
       else window.SimurgPersistence.writeRaw(localStorage,LOCAL_DATA_KEY,previousRaw);
       try{if(typeof render==='function')render();}catch(rollbackError){}

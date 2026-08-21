@@ -197,6 +197,25 @@ run('negative Polar loads other than the unavailable sentinel remain invalid', (
   rejects(() => validation.prepareFull(input), 'number_too_small');
 });
 
+run('startup recovery preserves 708 valid workout rows when another Polar optional load is invalid', () => {
+  const input = base();
+  input.workouts = Array.from({ length: 708 }, (_, index) => ({
+    date: `2026-08-${String(index % 20 + 1).padStart(2, '0')}`,
+    exercise: `Legacy Exercise ${index % 12}`,
+    exerciseId: `legacy-exercise-${index % 12}`,
+    sets: 1, reps: 8 + index % 5, weight: 20 + index % 10,
+  }));
+  input.polarWorkouts.daily['2026-08-20'] = [{
+    date: '2026-08-20', type: 'polar_flow_workout', activityType: 'Fitness', muscleLoad: -2,
+  }];
+  const raw = JSON.stringify(input);
+  rejects(() => validation.prepareFullText(raw), 'number_too_small');
+  const recovered = validation.recoverWorkoutHistoryText(raw, { source: 'startup-workout-recovery' });
+  assert.equal(recovered.recoveredWorkoutRows, 708);
+  assert.equal(recovered.data.workouts.length, 708);
+  assert.equal(raw, JSON.stringify(input));
+});
+
 run('invalid Cloud-style payload is rejected without changing local object', () => {
   const local = base();
   local.workouts.push({ date: '2026-07-23', exercise: 'Row', sets: 3, reps: 8, weight: 20 });

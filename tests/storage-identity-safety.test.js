@@ -19,6 +19,17 @@ run('local persistence success returns an explicit success result', () => {
   assert.equal(result.ok,true);assert.deepEqual(JSON.parse(storage.getItem(persistence.DATA_KEY)),data);
 });
 
+run('startup recovery mode preserves the original stored DATA against every centralized write', () => {
+  const storage=memoryStorage(),original={workouts:[{date:'2026-08-14',exercise:'Original Row'}]};
+  storage.setItem(persistence.DATA_KEY,JSON.stringify(original));
+  global.__simurgStartupDataRecoveryActive=true;
+  try{
+    const result=persistence.persistData(storage,{workouts:[]});
+    assert.equal(result.ok,false);assert.equal(result.code,'startup_recovery_active');
+    assert.deepEqual(JSON.parse(storage.getItem(persistence.DATA_KEY)),original);
+  }finally{delete global.__simurgStartupDataRecoveryActive;}
+});
+
 run('quota exceptions return a Turkish failure without claiming success', () => {
   const error=Object.assign(new Error('full'),{name:'QuotaExceededError'});
   const result=persistence.persistData({setItem(){throw error;}},{workouts:[]});
