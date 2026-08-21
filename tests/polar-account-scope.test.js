@@ -83,7 +83,8 @@ test('signed-out clients cannot sync and disconnected clients get connect action
 });
 
 test('existing normalized merge remains idempotent', () => {
-  assert.match(client, /findIndex\(function\(item\)\{return String\(item&&item\.startTime/);
+  assert.match(client, /findIndex\(function\(item\)\{return samePolarWorkout\(item,workout\)/);
+  assert.match(client, /SimurgPolarWorkoutIdentity\.same/);
   assert.match(client, /data\.polarActivity\.daily\[activity\.date\]=Object\.assign/);
   assert.match(client, /mergeDailyStore\(data\.polarSleep/);
   assert.match(sync, /upsert\(rawRows, \{ onConflict: "connection_id,data_type,polar_id" \}\)/);

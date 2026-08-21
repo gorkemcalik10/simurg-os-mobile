@@ -253,7 +253,7 @@ run('shared load resolves same-date Polar Cardio Load fields', () => {
   assert.deepEqual(JSON.parse(JSON.stringify(model.load(date))), {
     date, value: 42.6, cardioLoad: 42.6, strain: 38.2, tolerance: 30.1,
     ratio: 1.27, statusRaw: 'PRODUCTIVE', statusLabel: 'Üretken',
-    available: true, source: 'Polar Cardio Load', sourceDate: date,
+    available: true, source: 'Polar Cardio Load', sourceType: 'official', sourceDate: date,
   });
 });
 
@@ -289,6 +289,82 @@ run('same-date Polar workout is the first fallback', () => {
   assert.equal(load.strain, null);
   assert.equal(load.tolerance, null);
   assert.equal(load.ratio, null);
+});
+
+run('one-session Polar day keeps exact daily metrics and official load', () => {
+  const date = '2026-08-18';
+  const data = {
+    polarWorkouts: { daily: { [date]: [polar(date, {
+      polarExerciseId: 'one', duration: '00:45:52', activeCalories: 372,
+      avgHR: 116, maxHR: 147, cardioLoad: 30.4994, trainingLoad: null,
+    })] } },
+    polarCardioLoad: { daily: { [date]: { date, cardioLoad: 30.4994, cardioLoadStatus: 'MAINTAINING' } } },
+  };
+  const runtime = makeRuntime(data);
+  const day = runtime.model.day(date);
+  const month = runtime.model.month('2026-08');
+  assert.equal(day.polarAggregate.sessionCount, 1);
+  assert.ok(Math.abs(day.polarAggregate.durationMinutes - (45 + 52 / 60)) < 0.0001);
+  assert.equal(day.polarAggregate.activeCalories, 372);
+  assert.equal(day.polarAggregate.avgHR, 116);
+  assert.equal(day.polarAggregate.maxHR, 147);
+  assert.equal(day.polarAggregate.cardioLoad, 30.4994);
+  assert.equal(day.polarAggregate.loadSourceType, 'official');
+  assert.equal(month.activityDays, 1);
+});
+
+run('three-session Polar day aggregates metrics once and preserves every session', () => {
+  const date = '2026-08-16';
+  const rows = [
+    polar(date, { polarExerciseId: 'a', startTime: '08:00', duration: '00:08:08', activeCalories: 80, avgHR: 124, maxHR: 144, cardioLoad: 7.038 }),
+    polar(date, { polarExerciseId: 'b', startTime: '12:00', duration: '00:35:24', activeCalories: 320, avgHR: 123, maxHR: 146, cardioLoad: 28.383 }),
+    polar(date, { polarExerciseId: 'c', startTime: '18:00', duration: '00:28:23', activeCalories: 276, avgHR: 126, maxHR: 163, cardioLoad: 25.687 }),
+  ];
+  const data = {
+    polarWorkouts: { daily: { [date]: rows } },
+    polarCardioLoad: { daily: { [date]: { date, cardioLoad: 61.108, cardioLoadStatus: 'PRODUCTIVE' } } },
+  };
+  const runtime = makeRuntime(data);
+  const day = runtime.model.day(date);
+  const month = runtime.model.month('2026-08');
+  assert.equal(day.polarAggregate.sessionCount, 3);
+  assert.equal(day.polarSessions.length, 3);
+  assert.ok(Math.abs(day.polarAggregate.durationMinutes - (71 + 55 / 60)) < 0.0001);
+  assert.equal(day.polarAggregate.activeCalories, 676);
+  assert.ok(Math.abs(day.polarAggregate.avgHR - 124.2971) < 0.001);
+  assert.equal(day.polarAggregate.maxHR, 163);
+  assert.equal(day.polarAggregate.cardioLoad, 61.108);
+  assert.equal(month.activityDays, 1);
+  assert.equal(month.polarWorkoutCount, 3);
+});
+
+run('official daily load wins; absent official load sums distinct session loads', () => {
+  const date = '2026-08-16';
+  const rows = [
+    polar(date, { polarExerciseId: 'a', startTime: '08:00', cardioLoad: 7.038 }),
+    polar(date, { polarExerciseId: 'b', startTime: '09:00', cardioLoad: 28.383 }),
+    polar(date, { polarExerciseId: 'b', startTime: '09:01', cardioLoad: 28.383 }),
+    polar(date, { polarExerciseId: 'c', startTime: '10:00', cardioLoad: null, trainingLoad: null }),
+  ];
+  const official = makeRuntime({
+    polarWorkouts: { daily: { [date]: rows } },
+    polarCardioLoad: { daily: { [date]: { date, cardioLoad: 61.108, cardioLoadStatus: 'PRODUCTIVE' } } },
+  }).model;
+  assert.equal(official.load(date).value, 61.108);
+  assert.equal(official.day(date).polarAggregate.cardioLoad, 61.108);
+  const fallback = makeRuntime({ polarWorkouts: { daily: { [date]: rows } } }).model;
+  assert.ok(Math.abs(fallback.load(date).value - 35.421) < 0.0001);
+  assert.equal(fallback.load(date).sourceType, 'workout-derived');
+  assert.equal(fallback.day(date).polarAggregate.sessionLoadCount, 2);
+});
+
+run('same start time remains distinct when stable Polar IDs differ', () => {
+  const date = '2026-08-16';
+  const rows = [
+    polar(date, { polarExerciseId: 'a', startTime: '08:00' }),
+    polar(date, { polarExerciseId: 'b', startTime: '08:00' }),
+  ];
+  assert.equal(makeRuntime({ polarWorkouts: { daily: { [date]: rows } } }).model.day(date).polarSessions.length, 2);
 });
 
 run('same-date Polar Bridge is used after workout', () => {

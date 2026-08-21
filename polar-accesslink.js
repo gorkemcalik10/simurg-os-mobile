@@ -92,6 +92,12 @@
     var all=[];Object.keys(daily||{}).forEach(function(date){var value=daily[date];(Array.isArray(value)?value:[value]).filter(Boolean).forEach(function(item){all.push(item);});});
     all.sort(function(a,b){return (String(a.date||'')+'T'+String(a.startTime||'')).localeCompare(String(b.date||'')+'T'+String(b.startTime||''));});return all.length?all[all.length-1]:null;
   }
+  function samePolarWorkout(a,b){
+    if(window.SimurgPolarWorkoutIdentity&&typeof window.SimurgPolarWorkoutIdentity.same==='function')return window.SimurgPolarWorkoutIdentity.same(a,b);
+    function stable(row){row=row||{};var raw=row.raw||{};return String(row.polarExerciseId||row.exerciseId||row.exercise_id||row.polarId||raw.id||'').trim();}
+    function fallback(row){row=row||{};return [row.date||'',row.startTime||row.start_time||'',row.durationSeconds||row.durationMinutes||row.duration||'',String(row.workoutType||row.activityType||row.sport||row.type||'').toLowerCase()].join('|');}
+    var aId=stable(a),bId=stable(b);return aId&&bId?aId===bId:fallback(a)===fallback(b);
+  }
   function newestDaily(daily){var dates=Object.keys(daily||{}).filter(Boolean).sort();return dates.length?daily[dates[dates.length-1]]:null;}
   function mergeDailyStore(store,records,lastSyncAt,status,error){
     (Array.isArray(records)?records:[]).forEach(function(record){if(record&&record.date)store.daily[record.date]=Object.assign({},store.daily[record.date]||{},record);});
@@ -108,7 +114,7 @@
     workouts.forEach(function(workout){
       if(!workout||!workout.date)return;var current=data.polarWorkouts.daily[workout.date];var list=Array.isArray(current)?current.slice():(current?[current]:[]);
       workout.type='polar_flow_workout';workout.source='Polar Flow';
-      var index=list.findIndex(function(item){return String(item&&item.startTime||'')===String(workout.startTime||'');});
+      var index=list.findIndex(function(item){return samePolarWorkout(item,workout);});
       if(index>=0)list[index]=Object.assign({},list[index],workout);else list.push(workout);
       list.sort(function(a,b){return String(a.startTime||'').localeCompare(String(b.startTime||''));});data.polarWorkouts.daily[workout.date]=list;
     });

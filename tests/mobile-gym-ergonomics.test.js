@@ -53,7 +53,7 @@ run('Gym save parsing and set actions retain their existing contracts', () => {
 run('Mobile program editing remains available in a compact presentation', () => {
   assert.match(index, /#gym \.gymAddCard\{padding:9px 10px!important/);
   assert.match(index, /#gym \.gymAddCard span\{display:-webkit-box!important/);
-  assert.match(index, /onclick="addGymExercise\(\)">\+ Hareket Ekle<\/button>/);
+  assert.match(index, /onclick="openExerciseLibrary\(\)">\+ Hareket Ekle<\/button>/);
 });
 
 process.stdout.write(`${passed} mobile Gym ergonomics tests passed.\n`);

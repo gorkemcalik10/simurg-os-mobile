@@ -29,7 +29,8 @@ test('mobile home and readiness consume the shared resolver', () => {
 });
 
 test('desktop load views consume exact-date shared results', () => {
-  assert.match(desktop, /function primaryMetrics\(session\).*load=sharedLoad\(session\.date\)/s);
+  assert.match(desktop, /function dailyMetrics\(date,session\).*polarAggregate/s);
+  assert.match(desktop, /function primaryMetrics\(session\).*cardio:workoutCardioLoad\(p\)/s);
   assert.match(desktop, /function polarOverview\(\).*loadDate=polarSelectedDate\(\),load=sharedLoad\(loadDate\)/s);
   assert.match(desktop, /function polarLoad\(\).*date=polarSelectedDate\(\),load=sharedLoad\(date\)/s);
   assert.match(desktop, /function dailySummary\(\).*load=sharedLoad\(date\)/s);

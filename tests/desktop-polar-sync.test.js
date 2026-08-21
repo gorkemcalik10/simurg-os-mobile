@@ -38,6 +38,9 @@ run('AccessLink publishes status and refreshes existing render system', () => {
 run('changed production assets use matching cache versions', () => {
   for (const asset of [
     'simurg-volume-model.js?v=1',
+    'simurg-exercise-library.js?v=1',
+    'simurg-exercise-history.js?v=1',
+    'simurg-next-session-target.js?v=1',
     'simurg-coach-engine.js?v=4',
     'simurg-coach-client.js?v=4',
     'simurg-coach.css?v=10',
@@ -60,8 +63,8 @@ run('changed production assets use matching cache versions', () => {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=system-semantic-consistency-v1/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-system-semantic-consistency-v1'/);
+  assert.match(index, /sw\.js\?v=next-session-target-v1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-next-session-target-v1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

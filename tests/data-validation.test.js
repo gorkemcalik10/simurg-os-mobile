@@ -121,6 +121,37 @@ run('valid append routes preserve Polar and workout history', () => {
   assert.equal(original.polarWorkouts.daily['2026-07-23'], undefined);
 });
 
+run('Polar append upserts stable IDs and preserves collision-safe legacy fallback', () => {
+  const candidate = base();
+  const first = { type: 'polar_flow_workout', date: '2026-08-16', polarExerciseId: 'polar-a', startTime: '08:00', duration: '00:08:08', activityType: 'Fitness', cardioLoad: 7 };
+  validation.appendPolarWorkout(candidate, first);
+  validation.appendPolarWorkout(candidate, { ...first, startTime: '08:00:00', cardioLoad: 8 });
+  let rows = candidate.polarWorkouts.daily['2026-08-16'];
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].cardioLoad, 8);
+  validation.appendPolarWorkout(candidate, { ...first, polarExerciseId: 'polar-b', cardioLoad: 9 });
+  rows = candidate.polarWorkouts.daily['2026-08-16'];
+  assert.equal(rows.length, 2);
+
+  const legacy = { type: 'polar_flow_workout', date: '2026-08-17', startTime: '09:30', duration: '00:45:00', activityType: 'Running', avgHR: 120 };
+  validation.appendPolarWorkout(candidate, legacy);
+  validation.appendPolarWorkout(candidate, { ...legacy, avgHR: 125 });
+  assert.equal(candidate.polarWorkouts.daily['2026-08-17'].length, 1);
+  assert.equal(candidate.polarWorkouts.daily['2026-08-17'][0].avgHR, 125);
+});
+
+run('Polar workout validation preserves normalized loads, interpretations and raw payload', () => {
+  const row = validation.validatePolarWorkoutRecord({
+    type: 'polar_flow_workout', date: '2026-08-18', polarExerciseId: 'polar-load', activityType: 'Fitness',
+    cardioLoad: 0, muscleLoad: 12.5, perceivedLoad: 7,
+    cardioLoadInterpretation: 'low', muscleLoadInterpretation: 'moderate', perceivedLoadInterpretation: 'high',
+    raw: { id: 'polar-load', training_load_pro: { 'cardio-load': 0, muscle_load: 12.5 } },
+  }, '$.polar', { coerce: true });
+  assert.equal(row.cardioLoad, 0);
+  assert.equal(row.muscleLoad, 12.5);
+  assert.equal(row.raw.training_load_pro['cardio-load'], 0);
+});
+
 run('invalid Cloud-style payload is rejected without changing local object', () => {
   const local = base();
   local.workouts.push({ date: '2026-07-23', exercise: 'Row', sets: 3, reps: 8, weight: 20 });

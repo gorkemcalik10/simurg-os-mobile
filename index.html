@@ -4,6 +4,9 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Simurg OS Cloud Sync</title>
 <script src="./simurg-volume-model.js?v=1"></script>
+<script src="./simurg-exercise-library.js?v=1"></script>
+<script src="./simurg-exercise-history.js?v=1"></script>
+<script src="./simurg-next-session-target.js?v=1"></script>
 <script src="./simurg-signal-model.js?v=7"></script>
 <script src="./simurg-coach-engine.js?v=4"></script>
 <script src="./simurg-coach-client.js?v=4"></script>
@@ -947,6 +950,16 @@ aside{
   padding:20px;
   color:#9fb7d5;
 }
+.exerciseLibraryModal .modalbox{width:min(920px,100%);max-height:min(820px,92vh);display:flex;flex-direction:column}
+.exerciseLibraryIntro{color:#9fb7d5;font-size:13px;line-height:1.5;margin:-5px 0 14px}
+.exerciseLibraryTools{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:10px}
+.exerciseLibraryResults{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;overflow:auto;padding:2px;margin-top:4px}
+.exerciseLibraryItem{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;background:var(--hz-field);border:1px solid rgba(148,163,184,.15);border-radius:14px;padding:12px;color:#f8fbff;cursor:pointer}
+.exerciseLibraryItem:hover,.exerciseLibraryItem:focus{border-color:rgba(245,163,13,.55);outline:none;background:var(--hz-amber-soft)}
+.exerciseLibraryItem b{display:block;font-size:14px}.exerciseLibraryItem span{display:block;color:#8fa6c2;font-size:11px;margin-top:4px;line-height:1.35}
+.exerciseLibraryItem em{font-style:normal;color:var(--hz-amber);font-size:11px;font-weight:800;white-space:nowrap}
+.exerciseLibraryCount{color:#8fa6c2;font-size:12px;margin:0 0 8px}
+.exerciseLibraryEmpty{grid-column:1/-1;padding:24px;text-align:center;color:#9fb7d5;border:1px dashed rgba(148,163,184,.2);border-radius:14px}
 @media(max-width:820px){
   .gymModeList{
     grid-template-columns:1fr;
@@ -964,6 +977,8 @@ aside{
   .gymCard{
     padding:14px;
   }
+  .exerciseLibraryTools,.exerciseLibraryResults{grid-template-columns:1fr}
+  .exerciseLibraryModal .modalbox{max-height:94vh;padding:16px}
 }
 
 
@@ -6238,6 +6253,7 @@ body{background:#050607!important;}
 </main></div>
 <div class="modal" id="editModal"><div class="modalbox"><div class="modalTop"><h2 id="modalTitle">Düzenle</h2><button class="btn sec" onclick="closeModal()">Kapat</button></div><div id="modalBody"></div><div class="actions"><button class="btn" onclick="saveEdit()">Kaydet</button><button class="btn danger" onclick="deleteEditing()">Sil</button></div></div></div>
 <div class="modal programNameModal" id="programNameModal"><div class="modalbox"><div class="modalTop"><h2>Program İsmini Düzenle</h2><button class="btn sec" onclick="closeProgramNameModal()">Kapat</button></div><div id="programNameBody"></div><div class="actions"><button class="btn" onclick="saveProgramNameEdit()">Kaydet</button><button class="btn sec" onclick="resetProgramNameEdit()">Varsayılana Dön</button></div></div></div>
+<div class="modal exerciseLibraryModal" id="exerciseLibraryModal" role="dialog" aria-modal="true" aria-labelledby="exerciseLibraryTitle"><div class="modalbox"><div class="modalTop"><h2 id="exerciseLibraryTitle">Hareket Kütüphanesi</h2><button class="btn sec" type="button" onclick="closeExerciseLibrary()">Kapat</button></div><p class="exerciseLibraryIntro">Makine, dambıl ve yaygın salon hareketlerinden seç. Türkçe veya İngilizce adla arayabilirsin; istersen özel hareket oluşturmaya devam edebilirsin.</p><div class="exerciseLibraryTools"><input id="exerciseLibrarySearch" type="search" placeholder="Ara: incline press, göğüs, tek kol…" autocomplete="off"><select id="exerciseLibraryCategory" aria-label="Hareket kategorisi"></select></div><div class="exerciseLibraryCount" id="exerciseLibraryCount"></div><div class="exerciseLibraryResults" id="exerciseLibraryResults"></div><div class="actions"><button class="btn sec" type="button" onclick="addCustomGymExerciseFromLibrary()">+ Özel Hareket Oluştur</button></div></div></div>
 <script src="./simurg-persistence.js?v=1"></script>
 <script src="./simurg-gym-identity.js?v=1"></script>
 <script src="./simurg-exercise-canonicalization.js?v=1"></script>
@@ -6566,7 +6582,8 @@ function gymItemsForDate(date){
     setCount:Number(x.setCount||3)||3,
     custom:true,
     prefill:x.prefill,
-    sessionOnly:x.sessionOnly
+    sessionOnly:x.sessionOnly,
+    library:!!x.exerciseId
   }));
   return baseItems.concat(extras);
 }
@@ -6678,6 +6695,7 @@ function saveGymExercise(key){
         date:selectedDate,
         day:dayName(selectedDate),
         exercise:meta.name,
+        exerciseId:meta.exerciseId||undefined,
         bodyPart:meta.bodyPart||part(meta.name),
         exerciseType:meta.exerciseType||'',
         sets:1,
@@ -6810,6 +6828,55 @@ function createGymExerciseFromPicker(){
   return addGymExerciseFromChoice({exerciseId:SimurgGymIdentity.id('exercise'),name,bodyPart,exerciseType:''});
 }
 function addGymExercise(){openGymExercisePicker()}
+function openExerciseLibrary(){
+  const modal=document.getElementById('exerciseLibraryModal');
+  const category=document.getElementById('exerciseLibraryCategory');
+  const search=document.getElementById('exerciseLibrarySearch');
+  const library=window.SimurgExerciseLibrary;
+  if(!modal||!category||!search||!library){addGymExercise();return;}
+  if(!category.options.length){
+    category.innerHTML='<option value="All">Tüm kategoriler</option>'+library.categories.map(value=>`<option value="${gymSafe(value)}">${gymSafe(value)}</option>`).join('');
+  }
+  search.value='';
+  category.value='All';
+  renderExerciseLibrary();
+  modal.classList.add('active');
+  setTimeout(()=>search.focus(),0);
+}
+function closeExerciseLibrary(){
+  document.getElementById('exerciseLibraryModal')?.classList.remove('active');
+}
+function renderExerciseLibrary(){
+  const library=window.SimurgExerciseLibrary;
+  const results=document.getElementById('exerciseLibraryResults');
+  const count=document.getElementById('exerciseLibraryCount');
+  if(!library||!results) return;
+  const items=library.query({
+    search:document.getElementById('exerciseLibrarySearch')?.value||'',
+    category:document.getElementById('exerciseLibraryCategory')?.value||'All'
+  });
+  if(count) count.textContent=`${items.length} hareket gösteriliyor · toplam ${library.exercises.length}`;
+  results.innerHTML=items.length?items.map(item=>`<button type="button" class="exerciseLibraryItem" data-library-exercise-id="${gymSafe(item.id)}"><span><b>${gymSafe(item.name)}</b><span>${gymSafe(item.primaryMuscle)} · ${gymSafe(item.equipment)} · ${gymSafe(item.movementType)}</span></span><em>${gymSafe(item.difficulty)}</em></button>`).join(''):'<div class="exerciseLibraryEmpty">Aramana uyan hareket bulunamadı. Filtreyi temizleyebilir veya özel hareket oluşturabilirsin.</div>';
+}
+function selectLibraryExercise(exerciseId){
+  const item=window.SimurgExerciseLibrary?.getById(exerciseId);
+  if(!item) return;
+  closeExerciseLibrary();
+  addGymExerciseFromChoice({exerciseId:item.id,name:item.name,bodyPart:item.category,exerciseType:item.movementType||''});
+}
+function addCustomGymExerciseFromLibrary(){
+  closeExerciseLibrary();
+  addGymExercise();
+}
+const exerciseLibrarySearch=document.getElementById('exerciseLibrarySearch');
+const exerciseLibraryCategory=document.getElementById('exerciseLibraryCategory');
+const exerciseLibraryResults=document.getElementById('exerciseLibraryResults');
+if(exerciseLibrarySearch) exerciseLibrarySearch.addEventListener('input',renderExerciseLibrary);
+if(exerciseLibraryCategory) exerciseLibraryCategory.addEventListener('change',renderExerciseLibrary);
+if(exerciseLibraryResults) exerciseLibraryResults.addEventListener('click',event=>{
+  const button=event.target.closest('[data-library-exercise-id]');
+  if(button) selectLibraryExercise(button.dataset.libraryExerciseId);
+});
 function deleteGymExercise(key){
   const card=gymCardEl(key);
   if(!card) return;
@@ -6838,13 +6905,18 @@ function gymCoachForExercise(date,ex,item){
   const row=DATA.workouts.find(w=>w.date===date && (item?gymRowMatches(item,w,ex):w.exercise===ex) && (w.rpe || w.form || w.pain));
   return {rpe:row?.rpe||'',form:row?.form||'',pain:row?.pain||'None'};
 }
-function exerciseSessions(ex,exerciseId){
-  const byDate={};
-  DATA.workouts.filter(w=>exerciseId?(w.exerciseId===exerciseId||(!w.exerciseId&&w.exercise===ex)):w.exercise===ex).forEach(w=>{
-    if(!byDate[w.date]) byDate[w.date]=[];
-    byDate[w.date].push(w);
-  });
-  return Object.keys(byDate).sort((a,b)=>parseDate(b)-parseDate(a)).map(date=>({date,rows:byDate[date]}));
+function exerciseHistoryIdentity(value){
+  const input=typeof value==='string'?{name:value}:(value||{});
+  const libraryItem=input.exerciseId?window.SimurgExerciseLibrary?.getById(input.exerciseId):null;
+  return {
+    exerciseId:input.exerciseId||'',
+    name:input.name||libraryItem?.name||'',
+    originalName:input.originalName||'',
+    aliases:libraryItem?.aliases||[]
+  };
+}
+function exerciseSessions(value,options){
+  return window.SimurgExerciseHistory?.sessions(DATA.workouts,exerciseHistoryIdentity(value),options)||[];
 }
 function exerciseSessionStats(rows){
   const summary=SimurgVolumeModel.summary(rows);
@@ -6861,32 +6933,17 @@ function exerciseSessionStats(rows){
   const pain=rows.find(w=>w.pain)?.pain||'None';
   return {sets,reps,vol,best,rpe,form,pain};
 }
-function buildNextTarget(ex,exerciseId){
-  const previous=exerciseSessions(ex,exerciseId).filter(s=>parseDate(s.date)<parseDate(selectedDate));
-  if(!previous.length) return {level:'',text:'Bu hareket için önceki kayıt yok. Bugün kontrollü başlangıç yap ve temiz formu referans al.'};
-  const last=previous[0];
-  const st=exerciseSessionStats(last.rows);
-  const rpe=Number(st.rpe)||0;
-  const badPain=st.pain==='Warning' || st.pain==='Mild';
-  const badForm=st.form==='Bad';
-  if(st.pain==='Warning' || badForm || rpe>=9){
-    return {level:'danger',text:`Son kayıt ${trDate(last.date)}: ${st.sets} set, ${st.reps} tekrar, ${Math.round(st.vol)} kg. Ağrı/form/yük sinyali var. Bugün kilo artırma; temiz form, kontrollü tempo ve gerekirse %10-20 daha az hacim.`};
-  }
-  if(badPain || st.form==='Okay' || rpe>=8){
-    return {level:'warning',text:`Son kayıt ${trDate(last.date)}: ${st.sets} set, ${st.reps} tekrar, en iyi ${st.best.weight}kg x ${st.best.reps}. Bugün aynı kiloda kal; hedef formu korumak ve tekrarları eşitlemek.`};
-  }
-  if(st.best.reps>=10 && st.best.weight>0){
-    return {level:'',text:`Son kayıt ${trDate(last.date)}: en iyi ${st.best.weight}kg x ${st.best.reps}. Form temizse ilk sette küçük kilo artışı deneyebilirsin; zorlanırsa aynı kiloya dön.`};
-  }
-  return {level:'',text:`Son kayıt ${trDate(last.date)}: ${st.sets} set, ${st.reps} tekrar, en iyi ${st.best.weight}kg x ${st.best.reps}. Güvenli hedef: aynı kiloda ilk sete +1 tekrar veya tüm setleri daha temiz tamamla.`};
+function buildNextTarget(value){
+  const sessions=exerciseSessions(value,{beforeDate:selectedDate,limit:3});
+  return window.SimurgNextSessionTarget?.recommend(sessions)||{level:'',text:'Hedef hesaplanamadı.'};
 }
-function renderHistoryHtml(ex,exerciseId){
-  const sessions=exerciseSessions(ex,exerciseId).slice(0,5);
+function renderHistoryHtml(value){
+  const sessions=exerciseSessions(value,{beforeDate:selectedDate,limit:5});
   if(!sessions.length) return '<div class="gymEmpty">Bu hareket için geçmiş kayıt yok.</div>';
   return '<div class="historyList">'+sessions.map(s=>{
     const st=exerciseSessionStats(s.rows);
-    const setText=s.rows.map(w=>`${gymSafe(w.weight)}kg x ${gymSafe(w.reps)}`).join(' / ');
-    return `<div class="historyItem"><b>${gymSafe(trDate(s.date))} • ${st.sets} set • ${Math.round(st.vol).toLocaleString('tr-TR')} kg</b><span>${setText}</span><div class="historyBadges"><em>En iyi ${st.best.weight}kg x ${st.best.reps}</em>${st.rpe?`<em>RPE ${gymSafe(st.rpe)}</em>`:''}${st.form?`<em>Form ${gymSafe(st.form)}</em>`:''}${st.pain?`<em>Ağrı ${gymSafe(st.pain)}</em>`:''}</div></div>`;
+    const setText=s.rows.map(w=>`${gymSafe(w.weight)}kg x ${gymSafe(w.reps)}${Number(w.sets)>1?` x ${gymSafe(w.sets)} set`:''}`).join(' / ');
+    return `<div class="historyItem"><b>${gymSafe(trDate(s.date))} • ${st.sets} set • ${Math.round(st.vol).toLocaleString('tr-TR')} kg</b><span>${setText}</span><div class="historyBadges"><em>Best ${st.best.weight}kg x ${st.best.reps}</em>${st.rpe?`<em>RPE ${gymSafe(st.rpe)}</em>`:''}${st.form?`<em>Form ${gymSafe(st.form)}</em>`:''}${st.pain?`<em>Pain ${gymSafe(st.pain)}</em>`:''}</div></div>`;
   }).join('')+'</div>';
 }
 function toggleGymHistory(key){
@@ -6895,8 +6952,7 @@ function toggleGymHistory(key){
   const panel=card.querySelector('.gymHistoryPanel');
   if(!panel) return;
   const meta=readGymMetaFromCard(card);
-  const item=gymItemsForDate(selectedDate).find(value=>value.key===key);
-  panel.innerHTML=renderHistoryHtml(meta.name,item&&item.exerciseId);
+  panel.innerHTML=renderHistoryHtml(meta);
   panel.classList.toggle('active');
 }
 function handleGymModeAction(target){
@@ -6997,7 +7053,7 @@ function renderGymMode(){
   if(meta) meta.textContent=`${trDate(selectedDate)} • ${c.sets} kayıtlı set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg hacim`;
   const addCard=`<div class="gymAddCard">
     <div><b>Programı düzenle</b><span>Hareket adını değiştir, vücut bölgesi/set planını düzenle veya bu güne ekstra hareket ekle.</span></div>
-    <button class="btn" onclick="addGymExercise()">+ Hareket Ekle</button>
+    <button class="btn" onclick="openExerciseLibrary()">+ Hareket Ekle</button>
   </div>`;
   if(template.mode==='skipped'){
     list.innerHTML=`<div class="gymEmpty">${trDate(selectedDate)} günü açıkça atlandı olarak işaretlendi. Bu tarihteki mevcut set kayıtları korunur.</div>`;
@@ -7015,7 +7071,7 @@ function renderGymMode(){
     let rows=gymRowsForExercise(item,ex,bodyPart,setCount,item.prefill);
     let savedCount=DATA.workouts.filter(w=>gymRowMatches(item,w,ex)).length;
     let coach=gymCoachForExercise(selectedDate,ex,item);
-    let target=buildNextTarget(ex,item.exerciseId);
+    let target=buildNextTarget(item);
     let rowHtml=rows.map(r=>`<div class="gymSetInputRow">
       <strong>#${r.index}</strong>
       <label class="gymInputBox"><small>Kilo · ${gymSafe(loadProfile.weightLabel)}</small><input class="gymWeight" inputmode="decimal" enterkeyhint="next" placeholder="kg" value="${gymSafe(r.weight)}"></label>
@@ -7030,7 +7086,7 @@ function renderGymMode(){
             <label class="gymMetaInput"><small>Planlanan Set</small><input class="gymExerciseSets" inputmode="numeric" enterkeyhint="next" value="${gymSafe(setCount)}"></label>
             <label class="gymMetaInput"><small>Yük Tipi</small><select class="gymExerciseLoadPreset">${loadOptions}</select></label>
           </div>
-          <div class="gymProgramNote">${item.custom?'Özel egzersiz':'Şablon egzersizi'} • ${gymSafe(loadProfile.weightLabel)}${loadProfile.factor===2?' • Hacim ×2':''} • Kaydetme sonrası bulut senkronizasyonu verisine dahil olur.</div>
+          <div class="gymProgramNote">${item.library?'Kütüphane egzersizi':item.custom?'Özel egzersiz':'Şablon egzersizi'} • ${gymSafe(loadProfile.weightLabel)}${loadProfile.factor===2?' • Hacim ×2':''} • Kaydetme sonrası bulut senkronizasyonu verisine dahil olur.</div>
           ${loadProfile.preset==='UNASSIGNED'?'<span class="gymLoadProfileNote warn">Yük tipi seçilmedi; hacim ×1 hesaplanır.</span>':''}
           <span class="gymLoadProfileNote">Bu değişiklik geçmiş hacim değerlerini de yeniden hesaplar.</span>
         </div>
@@ -7886,7 +7942,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=system-semantic-consistency-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=next-session-target-v1').catch(function(){});
   });
 }
 </script>
@@ -12436,14 +12492,15 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   function patchHistory(){
     if(window.__simurgV7HistoryPatched) return;
     window.__simurgV7HistoryPatched=true;
-    window.renderHistoryHtml=function(ex){
+    window.renderHistoryHtml=function(identity){
       try{
-        var sessions=exerciseSessions(ex).slice(0,1);
+        var sessions=exerciseSessions(identity,{beforeDate:selectedDate,limit:5});
         if(!sessions.length) return '<div class="gymEmpty">Bu hareket için geçmiş kayıt yok.</div>';
-        var s=sessions[0];
-        var st=exerciseSessionStats(s.rows);
-        var setText=s.rows.map(function(w){return gymSafe(w.weight)+'kg x '+gymSafe(w.reps);}).join(' / ');
-        return '<div class="historyList"><div class="historyItem"><b>Son antrenman • '+trDate(s.date)+' • '+st.sets+' set • '+Math.round(st.vol).toLocaleString('tr-TR')+' kg</b><span>'+setText+'</span><div class="historyBadges"><em>Best '+st.best.weight+'kg x '+st.best.reps+'</em>'+(st.rpe?'<em>RPE '+gymSafe(st.rpe)+'</em>':'')+(st.form?'<em>Form '+gymSafe(st.form)+'</em>':'')+(st.pain?'<em>Pain '+gymSafe(st.pain)+'</em>':'')+'</div></div></div>';
+        return '<div class="historyList">'+sessions.map(function(s,index){
+          var st=exerciseSessionStats(s.rows);
+          var setText=s.rows.map(function(w){return gymSafe(w.weight)+'kg x '+gymSafe(w.reps)+(Number(w.sets)>1?' x '+gymSafe(w.sets)+' set':'');}).join(' / ');
+          return '<div class="historyItem"><b>'+(index===0?'Son antrenman • ':'')+trDate(s.date)+' • '+st.sets+' set • '+Math.round(st.vol).toLocaleString('tr-TR')+' kg</b><span>'+setText+'</span><div class="historyBadges"><em>Best '+st.best.weight+'kg x '+st.best.reps+'</em>'+(st.rpe?'<em>RPE '+gymSafe(st.rpe)+'</em>':'')+(st.form?'<em>Form '+gymSafe(st.form)+'</em>':'')+(st.pain?'<em>Pain '+gymSafe(st.pain)+'</em>':'')+'</div></div>';
+        }).join('')+'</div>';
       }catch(e){
         return '<div class="gymEmpty">Son antrenman verisi okunamadı.</div>';
       }
@@ -13445,22 +13502,26 @@ m Shell V4: Logger information architecture fix -->
   window.simurgSmartExerciseDecision=smartDecision;
 
   var oldBuild=window.buildNextTarget;
-  window.buildNextTarget=function(ex){
-    var previous=sessionsBefore(ex,selDate());
-    if(!previous.length){var cat=exerciseCategory(ex); if(!cat.aggressive)return {level:'',text:'Bu hareket koruma/postür odaklı. İlk kayıt için ağırlık değil, tempo ve ağrısız kontrol referans alınsın.'}; return {level:'',text:'Önceki kayıt yok. İlk hedef: temiz form, kontrollü RPE ve güvenli başlangıç.'};}
-    var d=smartDecision(ex,previous[0].rows,selDate());
-    return {level:d.level,text:d.text};
+  window.buildNextTarget=function(value){
+    var identity=typeof value==='string'?{name:value}:(value||{});
+    var ex=identity.name||identity.originalName||'';
+    var cat=exerciseCategory(ex);
+    var sessions=exerciseSessions(identity,{beforeDate:selDate(),limit:3});
+    var act=activityContext(selDate());
+    return window.SimurgNextSessionTarget.recommend(sessions,{allowProgression:cat.aggressive&&act.level==='normal',reason:cat.aggressive?'Ek aktivite yükü nedeniyle progresyon sınırlandı.':'Bu hareket türünde ağırlık progresyonu öncelikli değil.'});
   };
 
   function applyGymSmartDOM(){
     document.querySelectorAll('.gymCard').forEach(function(card){
       var ex=card.getAttribute('data-current-name')||card.getAttribute('data-original-name')||''; if(!ex) return;
-      var prev=sessionsBefore(ex,selDate())[0];
+      var identity={exerciseId:card.getAttribute('data-exercise-id')||'',name:ex,originalName:card.getAttribute('data-original-name')||''};
+      var prev=exerciseSessions(identity,{beforeDate:selDate(),limit:1})[0];
       var d=prev?smartDecision(ex,prev.rows,selDate()):smartDecision(ex,[],selDate());
+      var target=window.buildNextTarget(identity);
       card.classList.remove('smartMainLift','smartProtection','smartCaution');
       card.classList.add(d.category.aggressive?'smartMainLift':(d.tone==='protect'?'smartProtection':'smartCaution'));
       var box=card.querySelector('.gymTargetBox');
-      if(box){box.className='gymTargetBox '+(d.level||''); box.innerHTML='<b>Akıllı Hedef</b>'+esc(d.text)+'<br><span class="smartCoachTag '+(d.category.aggressive?'main':d.tone)+'">'+esc(d.category.label)+' · Otomatik hedef yardımcısı</span>';}
+      if(box){box.className='gymTargetBox '+(target.level||''); box.innerHTML='<b>Next Session Target</b>'+esc(target.text)+'<br><span class="smartCoachTag '+(d.category.aggressive?'main':d.tone)+'">'+esc(target.label)+' · '+esc(target.reason)+'</span>';}
       var premium=card.querySelector('.premiumCoachTarget');
       if(premium){premium.innerHTML='<small>Akıllı Hedef Filtresi</small><b>'+esc(d.label)+'</b><span>'+esc(d.category.aggressive?'Progresyon takip edilir':'Agresif hedef baskılandı')+'</span>';}
     });

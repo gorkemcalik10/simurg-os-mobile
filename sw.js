@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-system-semantic-consistency-v1';
+const SIMURG_CACHE = 'simurg-next-session-target-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -7,6 +7,9 @@ const CORE_ASSETS = [
   './simurg-gym-identity.js?v=1',
   './simurg-exercise-canonicalization.js?v=1',
   './simurg-volume-model.js?v=1',
+  './simurg-exercise-library.js?v=1',
+  './simurg-exercise-history.js?v=1',
+  './simurg-next-session-target.js?v=1',
   './simurg-data-validation.js?v=5',
   './simurg-gym-flex.js?v=1',
   './simurg-exercise-catalog.js?v=1',

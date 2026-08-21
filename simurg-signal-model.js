@@ -43,6 +43,15 @@
     var raw=firstText(row.duration,row.durationText,row.elapsedTime,row.trainingTime);
     return raw==null?null:duration(raw);
   }
+  function rawLoadPro(row){
+    row=row||{};var raw=row.raw&&typeof row.raw==='object'?row.raw:row;
+    return raw.training_load_pro||raw['training-load-pro']||{};
+  }
+  function workoutCardioLoad(row){
+    row=row||{};var raw=row.raw&&typeof row.raw==='object'?row.raw:row,pro=rawLoadPro(row);
+    return firstNumber(row.cardioLoad,pro['cardio-load'],pro.cardio_load,row.trainingLoad,raw.trainingLoad,raw.training_load,raw['training-load']);
+  }
+  function polarId(row){row=row&&row.raw||row||{};return firstText(row.polarExerciseId,row.exerciseId,row.exercise_id,row.polarId,row.id,row.raw&&row.raw.id);}
   function dateValue(value){return /^\d{4}-\d{2}-\d{2}$/.test(String(value||''))?String(value):null;}
   function parse(value){var p=String(value).split('-').map(Number);return new Date(p[0],p[1]-1,p[2]||1);}
   function dateString(value){return value.getFullYear()+'-'+String(value.getMonth()+1).padStart(2,'0')+'-'+String(value.getDate()).padStart(2,'0');}
@@ -71,7 +80,7 @@
   function normalizePhysical(row,source,date){
     row=row||{};
     var rawActivity=firstText(row.workoutType,row.activityType,row.sport,row.name,row.type);
-    return {date:dateValue(row.date)||date,startTime:firstText(row.startTime,row.start_time,row.startedAt,row.time),startMinute:startMinute(firstText(row.startTime,row.start_time,row.startedAt,row.time)),durationMinutes:resolveDuration(row),activeCalories:firstPositive(row.activeCalories,row.activeCal,row.activeEnergy,row.calories,row.kilocalories),totalCalories:firstPositive(row.totalCalories,row.totalCal,row.totalEnergy),avgHR:firstPositive(row.avgHR,row.avgHr,row.averageHeartRate),maxHR:firstPositive(row.maxHR,row.maxHr,row.maximumHeartRate),cardioLoad:firstPositive(row.cardioLoad,row.trainingLoad),activityName:activity(rawActivity),activityKey:activityKey(rawActivity),genericActivity:isGenericActivity(rawActivity),source:source,isPartial:false,raw:row};
+    return {date:dateValue(row.date)||date,startTime:firstText(row.startTime,row.start_time,row.startedAt,row.time),startMinute:startMinute(firstText(row.startTime,row.start_time,row.startedAt,row.time)),durationMinutes:resolveDuration(row),activeCalories:firstPositive(row.activeCalories,row.activeCal,row.activeEnergy,row.calories,row.kilocalories),totalCalories:firstPositive(row.totalCalories,row.totalCal,row.totalEnergy),avgHR:firstPositive(row.avgHR,row.avgHr,row.averageHeartRate),maxHR:firstPositive(row.maxHR,row.maxHr,row.maximumHeartRate),cardioLoad:workoutCardioLoad(row),activityName:activity(rawActivity),activityKey:activityKey(rawActivity),genericActivity:isGenericActivity(rawActivity),source:source,isPartial:false,raw:row};
   }
   function startMinute(value){var match=String(value||'').match(/(?:^|T)(\d{1,2}):(\d{2})/);return match?Number(match[1])*60+Number(match[2]):null;}
   function activityKey(value){var key=String(firstText(value)||'aktivite').toLocaleLowerCase('tr-TR').replace(/[^a-z0-9çğıöşü]+/g,' ').trim();if(/functional|strength training|gym|weight|resistance|kuvvet|ağırlık/.test(key))return 'strength';if(/run|running|koş/.test(key))return 'running';if(/walk|walking|yürüy/.test(key))return 'walking';if(/cycl|bike|bisiklet/.test(key))return 'cycling';if(/swim|yüz/.test(key))return 'swimming';return key||'aktivite';}
@@ -79,7 +88,7 @@
   function closeCalories(a,b){var av=firstPositive(a&&a.activeCalories,a&&a.totalCalories),bv=firstPositive(b&&b.activeCalories,b&&b.totalCalories);if(av==null||bv==null)return false;return Math.abs(av-bv)/Math.max(av,bv)<=.15;}
   function compatibleActivity(a,b){if(!a||!b)return false;if(a.activityKey===b.activityKey&&!a.genericActivity&&!b.genericActivity)return true;if(!a.genericActivity&&!b.genericActivity)return false;if(a.genericActivity&&b.genericActivity)return true;var hrCompatible=a.avgHR!=null&&b.avgHR!=null&&Math.abs(a.avgHR-b.avgHR)<=5;return hrCompatible||closeCalories(a,b);}
   function tolerantDuplicate(a,b){return !!(a&&b&&a.source!==b.source&&((a.source==='Polar'&&b.source==='Apple Health')||(a.source==='Apple Health'&&b.source==='Polar'))&&a.date===b.date&&a.startMinute!=null&&b.startMinute!=null&&a.durationMinutes>0&&b.durationMinutes>0&&Math.abs(a.startMinute-b.startMinute)<=5&&Math.abs(a.durationMinutes-b.durationMinutes)<=2&&compatibleActivity(a,b));}
-  function uniqueExact(items){var out=[];items.forEach(function(item){var duplicate=out.some(function(current){return current.date===item.date&&current.startMinute===item.startMinute&&current.durationMinutes!=null&&item.durationMinutes!=null&&Math.abs(current.durationMinutes-item.durationMinutes)<.01&&current.activityKey===item.activityKey;});if(!duplicate)out.push(item);});return out;}
+  function uniqueExact(items){var out=[];items.forEach(function(item){var duplicate=out.some(function(current){var currentId=polarId(current),itemId=polarId(item);if(currentId&&itemId)return currentId===itemId;return current.date===item.date&&current.startMinute===item.startMinute&&current.durationMinutes!=null&&item.durationMinutes!=null&&Math.abs(current.durationMinutes-item.durationMinutes)<.01&&current.activityKey===item.activityKey;});if(!duplicate)out.push(item);});return out;}
   function gymRows(date){return (root().workouts||[]).filter(function(row){return row&&row.date===date;});}
   function englishDay(date){return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][parse(date).getDay()];}
   function plannedTemplate(data,date){
@@ -134,24 +143,46 @@
     var rows=list(data.polarWorkouts&&data.polarWorkouts.daily&&data.polarWorkouts.daily[date]).filter(function(row){return sameDateRecord(row,date);});
     return rows[0]||null;
   }
-  function loadAt(date){
-    date=dateValue(date);if(!date)return null;
-    var data=root(),entry=sameDateRecord(daily(data.polarCardioLoad,date),date)||{},statusRaw=rawLoadStatus(entry);
+  function officialLoad(data,date){
+    var entry=sameDateRecord(daily(data.polarCardioLoad,date),date)||{},statusRaw=rawLoadStatus(entry);
     var cardioLoad=firstNumber(entry.cardioLoad,entry.load),strain=firstNumber(entry.strain),tolerance=firstNumber(entry.tolerance),ratio=firstNumber(entry.cardioLoadRatio,entry.ratio,entry.strainToleranceRatio);
     if(ratio==null&&strain!=null&&tolerance>0)ratio=strain/tolerance;
-    var cardioNumbers=[cardioLoad,strain,tolerance,ratio].filter(function(value){return value!=null;}),onlyZeroSentinels=cardioNumbers.length>0&&cardioNumbers.every(function(value){return value===0;}),meaningfulStatus=statusRaw!=null&&!/^(?:0|null|undefined|nan)$/i.test(String(statusRaw).trim());
-    var cardioRecordAvailable=cardioLoad!=null&&!unavailableLoadStatus(statusRaw)&&!(!meaningfulStatus&&onlyZeroSentinels);
+    var numbers=[cardioLoad,strain,tolerance,ratio].filter(function(value){return value!=null;}),onlyZeroSentinels=numbers.length>0&&numbers.every(function(value){return value===0;}),meaningfulStatus=statusRaw!=null&&!/^(?:0|null|undefined|nan)$/i.test(String(statusRaw).trim());
+    var available=cardioLoad!=null&&!unavailableLoadStatus(statusRaw)&&!(!meaningfulStatus&&onlyZeroSentinels);
+    return {entry:entry,statusRaw:statusRaw,cardioLoad:cardioLoad,strain:strain,tolerance:tolerance,ratio:ratio,available:available,fieldsAvailable:!unavailableLoadStatus(statusRaw)&&!(!meaningfulStatus&&onlyZeroSentinels)};
+  }
+  function distinctSessionLoads(sessions){
+    var seen={},values=[];
+    list(sessions).forEach(function(session){
+      var value=number(session&&session.cardioLoad);if(value==null)return;
+      var id=polarId(session),key=id?'polar:'+id:['fallback',session.date,session.startMinute,session.durationMinutes,session.activityKey].join('|');
+      if(seen[key])return;seen[key]=true;values.push(value);
+    });
+    return values;
+  }
+  function polarDayAggregate(date,sessions,official){
+    var normalized=list(sessions).filter(Boolean).map(function(session){return session.source==='Polar'&&session.raw?session:normalizePhysical(session,'Polar',date);});
+    var validSessions=normalized.filter(function(session){return session&&session.date===date&&session.durationMinutes>0;}),durationMinutes=validSessions.reduce(function(sum,session){return sum+session.durationMinutes;},0);
+    var calorieValues=validSessions.map(function(session){return number(session.activeCalories);}).filter(function(value){return value!=null;}),totalCalorieValues=validSessions.map(function(session){return number(session.totalCalories);}).filter(function(value){return value!=null;});
+    var hrSessions=validSessions.filter(function(session){return number(session.avgHR)!=null&&session.durationMinutes>0;}),hrMinutes=hrSessions.reduce(function(sum,session){return sum+session.durationMinutes;},0),loads=distinctSessionLoads(validSessions);
+    var officialAvailable=!!(official&&official.available),loadAvailable=officialAvailable||loads.length>0,loadValue=officialAvailable?official.cardioLoad:(loads.length?loads.reduce(function(sum,value){return sum+value;},0):null);
+    return {date:date,sessionCount:validSessions.length,sessions:validSessions,durationMinutes:durationMinutes,activeCalories:calorieValues.length?calorieValues.reduce(function(sum,value){return sum+value;},0):null,totalCalories:totalCalorieValues.length?totalCalorieValues.reduce(function(sum,value){return sum+value;},0):null,avgHR:hrSessions.length===1?hrSessions[0].avgHR:(hrMinutes?hrSessions.reduce(function(sum,session){return sum+session.avgHR*session.durationMinutes;},0)/hrMinutes:null),maxHR:validSessions.reduce(function(max,session){var value=number(session.maxHR);return value==null?max:(max==null||value>max?value:max);},null),cardioLoad:loadValue,loadAvailable:loadAvailable,loadSource:officialAvailable?'Polar Cardio Load':(loads.length?'Polar Workouts':'None'),loadSourceType:officialAvailable?'official':(loads.length?'workout-derived':null),sessionLoadCount:loads.length};
+  }
+  function loadAt(date){
+    date=dateValue(date);if(!date)return null;
+    var data=root(),official=officialLoad(data,date),entry=official.entry,statusRaw=official.statusRaw,cardioLoad=official.cardioLoad,strain=official.strain,tolerance=official.tolerance,ratio=official.ratio;
+    var workoutRows=uniqueExact(list(data.polarWorkouts&&data.polarWorkouts.daily&&data.polarWorkouts.daily[date]).filter(Boolean).map(function(row){return normalizePhysical(row,'Polar',date);})).filter(function(row){return row.durationMinutes>0;}),workoutLoads=distinctSessionLoads(workoutRows),workoutLoad=workoutLoads.length?workoutLoads.reduce(function(sum,value){return sum+value;},0):null;
     var workout=primaryPolarWorkout(data,date),bridge=sameDateRecord(daily(data.polarBridge,date),date),recovery=sameDateRecord(daily({daily:data.recoveryEntries||{}},date),date),legacy=sameDateRecord((data.recovery||[]).filter(function(row){return row&&row.date===date;}).slice(-1)[0],date);
     var candidates=[
-      {value:cardioRecordAvailable?cardioLoad:null,source:'Polar Cardio Load',record:entry},
-      {value:firstNumber(workout&&workout.cardioLoad,workout&&workout.trainingLoad),source:'Polar Workout',record:workout},
+      {value:official.available?cardioLoad:null,source:'Polar Cardio Load',record:entry},
+      {value:workoutLoad,source:workoutLoads.length>1?'Polar Workouts':'Polar Workout',record:workout},
       {value:firstNumber(bridge&&bridge.cardioLoad),source:'Polar Bridge',record:bridge},
       {value:firstNumber(recovery&&recovery.activityLoad,recovery&&recovery.physicalLoad),source:'Recovery',record:recovery},
       {value:firstNumber(legacy&&legacy.activityLoad,legacy&&legacy.physicalLoad,legacy&&legacy.cardioLoad,legacy&&legacy.load),source:'Recovery',record:legacy}
     ],selected=null;
     for(var i=0;i<candidates.length;i++){if(candidates[i].value!=null){selected=candidates[i];break;}}
-    var available=!!selected,cardioFieldsAvailable=!unavailableLoadStatus(statusRaw)&&!(!meaningfulStatus&&onlyZeroSentinels);
-    return {date:date,value:available?selected.value:null,cardioLoad:cardioFieldsAvailable?cardioLoad:null,strain:cardioFieldsAvailable?strain:null,tolerance:cardioFieldsAvailable?tolerance:null,ratio:cardioFieldsAvailable?ratio:null,statusRaw:statusRaw,statusLabel:loadStatusLabel(statusRaw,available,selected&&selected.source),available:available,source:available?selected.source:'None',sourceDate:available?(dateValue(selected.record&&selected.record.date)||date):null};
+    var available=!!selected;
+    return {date:date,value:available?selected.value:null,cardioLoad:official.fieldsAvailable?cardioLoad:null,strain:official.fieldsAvailable?strain:null,tolerance:official.fieldsAvailable?tolerance:null,ratio:official.fieldsAvailable?ratio:null,statusRaw:statusRaw,statusLabel:loadStatusLabel(statusRaw,available,selected&&selected.source),available:available,source:available?selected.source:'None',sourceType:!selected?null:(selected.source==='Polar Cardio Load'?'official':(/^Polar Workout/.test(selected.source)?'workout-derived':'fallback')),sourceDate:available?(dateValue(selected.record&&selected.record.date)||date):null};
   }
   function hasValues(object){return Object.keys(object||{}).some(function(key){return key!=='rows'&&valid(object[key]);});}
   function day(date){
@@ -163,9 +194,9 @@
     var polar=allPolar.filter(function(item){return item.durationMinutes>0;}),apple=allApple.filter(function(item){return item.durationMinutes>0;});
     apple=apple.filter(function(item){return !polar.some(function(polarItem){return tolerantDuplicate(polarItem,item);});});
     var sessions=polar.concat(apple),primary=null;if(polar.length)primary=Object.assign({},polar[0],{source:gym.rows.length?'Polar + Gym':'Polar'});else if(gym.rows.length)primary={date:date,startTime:firstText(gym.rows[0]&&gym.rows[0].startTime),durationMinutes:resolveDuration(gym.rows[0]),activeCalories:null,totalCalories:null,avgHR:null,maxHR:null,cardioLoad:null,activityName:activity(firstText(gym.rows[0]&&gym.rows[0].activityName,gym.rows[0]&&gym.rows[0].program,'Gym')),source:'Gym',raw:null};else if(apple.length)primary=apple[0];if(primary){primary.polar=polar.map(function(x){return x.raw;});primary.gym=gym.rows;primary.primaryPolar=polar[0]&&polar[0].raw||null;primary.appleLegacy=!polar.length&&apple[0]&&apple[0].raw||null;}
-    var recovery=recoveryAt(date),sleep=sleepAt(date),load=loadAt(date),readiness=null;
+    var official=officialLoad(data,date),polarAggregate=polarDayAggregate(date,polar,official),recovery=recoveryAt(date),sleep=sleepAt(date),load=loadAt(date),readiness=null;
     if(window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function')try{readiness=window.SimurgReadiness.resolve(date);}catch(e){}
-    return {date:date,session:primary,sessions:sessions,partialSessions:partialSessions,polarSessions:polar,appleSessions:apple,recovery:recovery,sleep:sleep,load:load,gym:gym,gymPlan:gymPlan(data,date,gym.rows),readiness:readiness,hasReadinessSignal:hasValues(recovery)||hasValues(sleep)||load.available,hasWorkout:!!(gym.rows.length||sessions.length),hasActivity:!!sessions.length,hasData:!!(gym.rows.length||sessions.length||partialSessions.length||hasValues(recovery)||hasValues(sleep)||load.available)};
+    return {date:date,session:primary,sessions:sessions,partialSessions:partialSessions,polarSessions:polar,polarAggregate:polarAggregate,appleSessions:apple,recovery:recovery,sleep:sleep,load:load,gym:gym,gymPlan:gymPlan(data,date,gym.rows),readiness:readiness,hasReadinessSignal:hasValues(recovery)||hasValues(sleep)||load.available,hasWorkout:!!(gym.rows.length||sessions.length),hasActivity:!!sessions.length,hasData:!!(gym.rows.length||sessions.length||partialSessions.length||hasValues(recovery)||hasValues(sleep)||load.available)};
   }
   function bodyGroups(rows){var groups={};rows.forEach(function(row){var key=firstText(row.bodyPart,row.category,row.classification)||'Diğer';(groups[key]=groups[key]||[]).push(row);});return groups;}
   function prSummary(rows,start,end){
@@ -201,5 +232,5 @@
   }
   function invalidate(reason){revision+=1;weekCache.clear();monthCache.clear();debug.invalidations+=1;debug.lastInvalidation=reason||'unspecified';}
   function debugStats(){return Object.assign({revision:revision,weekSize:weekCache.size,monthSize:monthCache.size},debug);}
-  window.SimurgSignalModel={day:day,load:loadAt,week:week,month:month,invalidate:invalidate,debugStats:debugStats,safeTarget:safeTarget,targetClass:targetClass,labels:window.SimurgLabels};
+  window.SimurgSignalModel={day:day,load:loadAt,polarDayAggregate:polarDayAggregate,week:week,month:month,invalidate:invalidate,debugStats:debugStats,safeTarget:safeTarget,targetClass:targetClass,labels:window.SimurgLabels};
 })();
