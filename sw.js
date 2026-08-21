@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-exercise-history-v1';
+const SIMURG_CACHE = 'simurg-next-session-target-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const CORE_ASSETS = [
   './simurg-volume-model.js?v=1',
   './simurg-exercise-library.js?v=1',
   './simurg-exercise-history.js?v=1',
+  './simurg-next-session-target.js?v=1',
   './simurg-data-validation.js?v=4',
   './polar-workout.css?v=11',
   './polar-workout.js?v=15',

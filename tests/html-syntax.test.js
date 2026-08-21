@@ -4,7 +4,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const root = path.resolve(__dirname, '..');
-for (const file of ['simurg-volume-model.js', 'simurg-exercise-library.js', 'simurg-exercise-history.js', 'simurg-data-validation.js', 'simurg-signal-model.js', 'simurg-coach-engine.js', 'simurg-coach-client.js', 'simurg-coach-ui.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js', 'sw.js']) {
+for (const file of ['simurg-volume-model.js', 'simurg-exercise-library.js', 'simurg-exercise-history.js', 'simurg-next-session-target.js', 'simurg-data-validation.js', 'simurg-signal-model.js', 'simurg-coach-engine.js', 'simurg-coach-client.js', 'simurg-coach-ui.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js', 'sw.js']) {
   new vm.Script(fs.readFileSync(path.join(root, file), 'utf8'), { filename: file });
 }
 

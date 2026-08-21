@@ -6,6 +6,7 @@
 <script src="./simurg-volume-model.js?v=1"></script>
 <script src="./simurg-exercise-library.js?v=1"></script>
 <script src="./simurg-exercise-history.js?v=1"></script>
+<script src="./simurg-next-session-target.js?v=1"></script>
 <script src="./simurg-signal-model.js?v=7"></script>
 <script src="./simurg-coach-engine.js?v=2"></script>
 <script src="./simurg-coach-client.js?v=2"></script>
@@ -6758,24 +6759,9 @@ function exerciseSessionStats(rows){
   const pain=rows.find(w=>w.pain)?.pain||'None';
   return {sets,reps,vol,best,rpe,form,pain};
 }
-function buildNextTarget(ex){
-  const previous=exerciseSessions(ex).filter(s=>parseDate(s.date)<parseDate(selectedDate));
-  if(!previous.length) return {level:'',text:'Bu hareket için önceki kayıt yok. Bugün kontrollü başlangıç yap ve temiz formu referans al.'};
-  const last=previous[0];
-  const st=exerciseSessionStats(last.rows);
-  const rpe=Number(st.rpe)||0;
-  const badPain=st.pain==='Warning' || st.pain==='Mild';
-  const badForm=st.form==='Bad';
-  if(st.pain==='Warning' || badForm || rpe>=9){
-    return {level:'danger',text:`Son kayıt ${trDate(last.date)}: ${st.sets} set, ${st.reps} tekrar, ${Math.round(st.vol)} kg. Ağrı/form/yük sinyali var. Bugün kilo artırma; temiz form, kontrollü tempo ve gerekirse %10-20 daha az hacim.`};
-  }
-  if(badPain || st.form==='Okay' || rpe>=8){
-    return {level:'warning',text:`Son kayıt ${trDate(last.date)}: ${st.sets} set, ${st.reps} tekrar, en iyi ${st.best.weight}kg x ${st.best.reps}. Bugün aynı kiloda kal; hedef formu korumak ve tekrarları eşitlemek.`};
-  }
-  if(st.best.reps>=10 && st.best.weight>0){
-    return {level:'',text:`Son kayıt ${trDate(last.date)}: en iyi ${st.best.weight}kg x ${st.best.reps}. Form temizse ilk sette küçük kilo artışı deneyebilirsin; zorlanırsa aynı kiloya dön.`};
-  }
-  return {level:'',text:`Son kayıt ${trDate(last.date)}: ${st.sets} set, ${st.reps} tekrar, en iyi ${st.best.weight}kg x ${st.best.reps}. Güvenli hedef: aynı kiloda ilk sete +1 tekrar veya tüm setleri daha temiz tamamla.`};
+function buildNextTarget(value){
+  const sessions=exerciseSessions(value,{beforeDate:selectedDate,limit:3});
+  return window.SimurgNextSessionTarget?.recommend(sessions)||{level:'',text:'Hedef hesaplanamadı.'};
 }
 function renderHistoryHtml(value){
   const sessions=exerciseSessions(value,{beforeDate:selectedDate,limit:5});
@@ -6840,7 +6826,7 @@ function renderGymMode(){
     let rows=gymRowsForExercise(ex,bodyPart,setCount);
     let savedCount=DATA.workouts.filter(w=>w.date===selectedDate && w.exercise===ex).length;
     let coach=gymCoachForExercise(selectedDate,ex);
-    let target=buildNextTarget(ex);
+    let target=buildNextTarget(item);
     let rowHtml=rows.map(r=>`<div class="gymSetInputRow">
       <strong>#${r.index}</strong>
       <label class="gymInputBox"><small>Weight · ${gymSafe(loadProfile.weightLabel)}</small><input class="gymWeight" inputmode="decimal" placeholder="kg" value="${gymSafe(r.weight)}"></label>
@@ -7708,7 +7694,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=exercise-history-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=next-session-target-v1').catch(function(){});
   });
 }
 </script>
@@ -13243,22 +13229,26 @@ m Shell V4: Logger information architecture fix -->
   window.simurgSmartExerciseDecision=smartDecision;
 
   var oldBuild=window.buildNextTarget;
-  window.buildNextTarget=function(ex){
-    var previous=sessionsBefore(ex,selDate());
-    if(!previous.length){var cat=exerciseCategory(ex); if(!cat.aggressive)return {level:'',text:'Bu hareket koruma/postür odaklı. İlk kayıt için ağırlık değil, tempo ve ağrısız kontrol referans alınsın.'}; return {level:'',text:'Önceki kayıt yok. İlk hedef: temiz form, kontrollü RPE ve güvenli başlangıç.'};}
-    var d=smartDecision(ex,previous[0].rows,selDate());
-    return {level:d.level,text:d.text};
+  window.buildNextTarget=function(value){
+    var identity=typeof value==='string'?{name:value}:(value||{});
+    var ex=identity.name||identity.originalName||'';
+    var cat=exerciseCategory(ex);
+    var sessions=exerciseSessions(identity,{beforeDate:selDate(),limit:3});
+    var act=activityContext(selDate());
+    return window.SimurgNextSessionTarget.recommend(sessions,{allowProgression:cat.aggressive&&act.level==='normal',reason:cat.aggressive?'Ek aktivite yükü nedeniyle progresyon sınırlandı.':'Bu hareket türünde ağırlık progresyonu öncelikli değil.'});
   };
 
   function applyGymSmartDOM(){
     document.querySelectorAll('.gymCard').forEach(function(card){
       var ex=card.getAttribute('data-current-name')||card.getAttribute('data-original-name')||''; if(!ex) return;
-      var prev=sessionsBefore(ex,selDate())[0];
+      var identity={exerciseId:card.getAttribute('data-exercise-id')||'',name:ex,originalName:card.getAttribute('data-original-name')||''};
+      var prev=exerciseSessions(identity,{beforeDate:selDate(),limit:1})[0];
       var d=prev?smartDecision(ex,prev.rows,selDate()):smartDecision(ex,[],selDate());
+      var target=window.buildNextTarget(identity);
       card.classList.remove('smartMainLift','smartProtection','smartCaution');
       card.classList.add(d.category.aggressive?'smartMainLift':(d.tone==='protect'?'smartProtection':'smartCaution'));
       var box=card.querySelector('.gymTargetBox');
-      if(box){box.className='gymTargetBox '+(d.level||''); box.innerHTML='<b>Smart Target</b>'+esc(d.text)+'<br><span class="smartCoachTag '+(d.category.aggressive?'main':d.tone)+'">'+esc(d.category.label)+' · Auto Target helper</span>';}
+      if(box){box.className='gymTargetBox '+(target.level||''); box.innerHTML='<b>Next Session Target</b>'+esc(target.text)+'<br><span class="smartCoachTag '+(d.category.aggressive?'main':d.tone)+'">'+esc(target.label)+' · '+esc(target.reason)+'</span>';}
       var premium=card.querySelector('.premiumCoachTarget');
       if(premium){premium.innerHTML='<small>Smart Target Filter</small><b>'+esc(d.label)+'</b><span>'+esc(d.category.aggressive?'Progresyon takip edilir':'Agresif target baskılandı')+'</span>';}
     });
