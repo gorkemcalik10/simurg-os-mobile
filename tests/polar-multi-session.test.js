@@ -54,6 +54,22 @@ run('hyphenated and underscored raw Cardio Load fallbacks both work', () => {
   assert.equal(window.SimurgPolarWorkoutLoads.resolve({ raw: { training_load_pro: { cardio_load: 28.383 } } }).cardio.value, 28.383);
 });
 
+run('legacy trainingLoad remains separate from Cardio Load', () => {
+  const window = runtime();
+  const resolved = window.SimurgPolarWorkoutLoads.resolve({ trainingLoad: 41, raw: { training_load: 41 } });
+  assert.equal(resolved.cardio.value, null);
+  assert.match(window.SimurgPolarWorkoutLoads.render({ trainingLoad: 41, trainingImpact: {} }), /Antrenman yükü mevcut değil/);
+});
+
+run('Cardio Load status uses Polar interpretation without numeric thresholds', () => {
+  const window = runtime();
+  const interpreted = window.SimurgPolarWorkoutLoads.render({ cardioLoad: 95, cardioLoadInterpretation: 'low', trainingImpact: {} });
+  const unclassified = window.SimurgPolarWorkoutLoads.render({ cardioLoad: 95, trainingImpact: {} });
+  assert.match(interpreted, /Low/);
+  assert.doesNotMatch(interpreted, />Yüksek</);
+  assert.match(unclassified, />Mevcut</);
+});
+
 run('missing muscle and perceived load never blank available Cardio Load', () => {
   const window = runtime();
   const html = window.SimurgPolarWorkoutLoads.render({ cardioLoad: 0, muscleLoad: null, perceivedLoad: null, trainingImpact: {} });

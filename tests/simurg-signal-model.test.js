@@ -271,6 +271,22 @@ run('unavailable next-day load never leaks across dates or becomes zero', () => 
   assert.equal(model.load(next).statusLabel, 'Henüz hesaplanmadı');
 });
 
+run('NOT_AVAILABLE status preserves real numeric Cardio Load fields', () => {
+  const date = '2026-07-25';
+  const load = makeRuntime({ polarCardioLoad: { daily: { [date]: {
+    date, cardioLoad: 30.4, strain: 28.2, tolerance: 26.1,
+    cardioLoadRatio: 1.08, cardioLoadStatus: 'LOAD_STATUS_NOT_AVAILABLE',
+  } } } }).model.load(date);
+  assert.equal(load.available, true);
+  assert.equal(load.value, 30.4);
+  assert.equal(load.cardioLoad, 30.4);
+  assert.equal(load.strain, 28.2);
+  assert.equal(load.tolerance, 26.1);
+  assert.equal(load.ratio, 1.08);
+  assert.equal(load.statusLabel, 'Durum mevcut değil');
+  assert.equal(load.source, 'Polar Cardio Load');
+});
+
 run('real available zero is preserved', () => {
   const date = '2026-07-26';
   const load = makeRuntime({ polarCardioLoad: { daily: { [date]: {
@@ -281,9 +297,17 @@ run('real available zero is preserved', () => {
   assert.equal(load.source, 'Polar Cardio Load');
 });
 
-run('same-date Polar workout is the first fallback', () => {
+run('legacy trainingLoad is never relabeled as workout Cardio Load', () => {
   const date = '2026-07-27';
   const load = makeRuntime({ polarWorkouts: { daily: { [date]: [polar(date, { trainingLoad: 18 })] } } }).model.load(date);
+  assert.equal(load.value, null);
+  assert.equal(load.source, 'None');
+  assert.equal(load.available, false);
+});
+
+run('same-date session cardioLoad is the first workout fallback', () => {
+  const date = '2026-07-27';
+  const load = makeRuntime({ polarWorkouts: { daily: { [date]: [polar(date, { cardioLoad: 18, trainingLoad: 99 })] } } }).model.load(date);
   assert.equal(load.value, 18);
   assert.equal(load.source, 'Polar Workout');
   assert.equal(load.strain, null);

@@ -6,6 +6,8 @@ const root = path.join(__dirname, '..');
 const premium = fs.readFileSync(path.join(root, 'premium-standard.js'), 'utf8');
 const desktop = fs.readFileSync(path.join(root, 'desktop-alignment.js'), 'utf8');
 const model = fs.readFileSync(path.join(root, 'simurg-signal-model.js'), 'utf8');
+const coachClient = fs.readFileSync(path.join(root, 'simurg-coach-client.js'), 'utf8');
+const coachEngine = fs.readFileSync(path.join(root, 'simurg-coach-engine.js'), 'utf8');
 
 function test(name, fn) {
   try {
@@ -26,6 +28,13 @@ test('mobile home and readiness consume the shared resolver', () => {
   assert.match(premium, /function homeModel\(date\).*loadResult=sharedLoad\(date\)/s);
   assert.match(premium, /function homeModelSignals\(date\).*loadResult=sharedLoad\(date\)/s);
   assert.doesNotMatch(premium, /polarLatest\(data,'polarCardioLoad',date\)/);
+});
+
+test('coach consumes the shared daily signal model', () => {
+  assert.match(coachClient, /engineOptions\.signalDay=function\(signalDate\)\{return root\.SimurgSignalModel\.day\(signalDate\);\}/);
+  assert.match(coachEngine, /sharedDay=options\.signalDay\(date\)/);
+  assert.match(coachEngine, /aggregate=sharedDay&&sharedDay\.polarAggregate/);
+  assert.doesNotMatch(coachEngine, /row\.cardioLoad,row\.trainingLoad/);
 });
 
 test('desktop load views consume exact-date shared results', () => {

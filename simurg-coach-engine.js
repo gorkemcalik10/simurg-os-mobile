@@ -337,7 +337,9 @@
   }
   function extractDay(data,date,options){
     data=data||{};options=options||{};
-    var sleep=daily(data.polarSleep,date)||{},night=daily(data.polarNightlyRecharge,date)||{},load=daily(data.polarCardioLoad,date)||{},activity=daily(data.polarActivity,date)||{},rows=workoutRows(data,date),polar=polarRows(data,date),profile=data.polarProfile&&data.polarProfile.latest||{};
+    var sharedDay=null;
+    if(typeof options.signalDay==='function')try{sharedDay=options.signalDay(date)||null;}catch(error){sharedDay=null;}
+    var sleep=daily(data.polarSleep,date)||{},night=daily(data.polarNightlyRecharge,date)||{},load=daily(data.polarCardioLoad,date)||{},sharedLoad=sharedDay&&sharedDay.load||{},aggregate=sharedDay&&sharedDay.polarAggregate||{},activity=daily(data.polarActivity,date)||{},rows=workoutRows(data,date),polar=polarRows(data,date),profile=data.polarProfile&&data.polarProfile.latest||{};
     var rpes=rows.map(function(row){return number(row.rpe);}).filter(function(value){return value!=null;});
     var sleepSeconds=number(sleep.durationSeconds),sleepMinutes=firstNumber(sleep.durationMinutes,sleepSeconds==null?null:sleepSeconds/60,durationMinutes(sleep.duration));
     var categories={main_lift:[],accessory:[],stability_posture:[],conditioning:[]};
@@ -369,11 +371,11 @@
         lightSleepMinutes:firstNumber(sleep.lightSleepMinutes,number(sleep.lightSleep)==null?null:number(sleep.lightSleep)/60)
       },
       load:{
-        cardioLoad:firstNumber(load.cardioLoad,load.load),
-        strain:firstNumber(load.strain),
-        tolerance:firstNumber(load.tolerance),
-        cardioLoadRatio:firstNumber(load.cardioLoadRatio,load.ratio,number(load.strain)!=null&&number(load.tolerance)>0?number(load.strain)/number(load.tolerance):null),
-        status:firstText(load.cardioLoadStatus,load.loadStatus,load.status),
+        cardioLoad:firstNumber(sharedLoad.value,sharedLoad.cardioLoad,load.cardioLoad,load.load),
+        strain:firstNumber(sharedLoad.strain,load.strain),
+        tolerance:firstNumber(sharedLoad.tolerance,load.tolerance),
+        cardioLoadRatio:firstNumber(sharedLoad.ratio,load.cardioLoadRatio,load.ratio,number(load.strain)!=null&&number(load.tolerance)>0?number(load.strain)/number(load.tolerance):null),
+        status:firstText(sharedLoad.statusRaw,load.cardioLoadStatus,load.loadStatus,load.status),
         steps:firstNumber(activity.steps),
         activeCalories:firstNumber(activity.activeCalories,activity.activeCal),
         dailyActivity:firstNumber(activity.dailyActivity)
@@ -391,11 +393,11 @@
       physical:{
         workouts:polar,
         names:names,
-        durationMinutes:round(workoutMinutes,1),
-        activeCalories:round(activeCalories,0),
-        avgHr:average(polar.map(function(row){return firstNumber(row.avgHR,row.averageHeartRate);})),
-        maxHr:polar.reduce(function(max,row){return Math.max(max,firstNumber(row.maxHR,row.maximumHeartRate)||0);},0)||null,
-        cardioLoad:average(polar.map(function(row){return firstNumber(row.cardioLoad,row.trainingLoad);})),
+        durationMinutes:round(aggregate.sessionCount?aggregate.durationMinutes:workoutMinutes,1),
+        activeCalories:round(aggregate.sessionCount?aggregate.activeCalories:activeCalories,0),
+        avgHr:aggregate.sessionCount?firstNumber(aggregate.avgHR):average(polar.map(function(row){return firstNumber(row.avgHR,row.averageHeartRate);})),
+        maxHr:aggregate.sessionCount?firstNumber(aggregate.maxHR):(polar.reduce(function(max,row){return Math.max(max,firstNumber(row.maxHR,row.maximumHeartRate)||0);},0)||null),
+        cardioLoad:aggregate.sessionCount?firstNumber(aggregate.cardioLoad):average(polar.map(function(row){return firstNumber(row.cardioLoad);})),
         racketSport:racket
       }
     };

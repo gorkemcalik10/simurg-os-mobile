@@ -148,17 +148,14 @@
   function resolveWorkoutLoads(workout){
     workout=workout||{};var raw=workout.raw&&typeof workout.raw==='object'?workout.raw:workout,pro=rawLoadPro(workout);
     return {
-      cardio:{value:firstOptional(workout.cardioLoad,pro['cardio-load'],pro.cardio_load,workout.trainingLoad,raw.trainingLoad,raw.training_load,raw['training-load']),interpretation:firstInterpretation(workout.cardioLoadInterpretation,pro['cardio-load-interpretation'],pro.cardio_load_interpretation,raw.cardioLoadInterpretation,raw.cardio_load_interpretation,raw['cardio-load-interpretation'])},
+      cardio:{value:firstOptional(workout.cardioLoad,pro['cardio-load'],pro.cardio_load),interpretation:firstInterpretation(workout.cardioLoadInterpretation,pro['cardio-load-interpretation'],pro.cardio_load_interpretation,raw.cardioLoadInterpretation,raw.cardio_load_interpretation,raw['cardio-load-interpretation'])},
       muscle:{value:firstOptional(workout.muscleLoad,pro['muscle-load'],pro.muscle_load,raw.muscleLoad,raw.muscle_load,raw['muscle-load']),interpretation:firstInterpretation(workout.muscleLoadInterpretation,pro['muscle-load-interpretation'],pro.muscle_load_interpretation,raw.muscleLoadInterpretation,raw.muscle_load_interpretation,raw['muscle-load-interpretation'])},
       perceived:{value:firstOptional(workout.perceivedLoad,pro['perceived-load'],pro.perceived_load,raw.perceivedLoad,raw.perceived_load,raw['perceived-load']),interpretation:firstInterpretation(workout.perceivedLoadInterpretation,pro['perceived-load-interpretation'],pro.perceived_load_interpretation,raw.perceivedLoadInterpretation,raw.perceived_load_interpretation,raw['perceived-load-interpretation'])}
     };
   }
   function loadStatus(workout){
-    var value=resolveWorkoutLoads(workout).cardio.value;if(value==null) return 'Mevcut Değil';
-    var load=num(value,0);
-    if(load<=39) return 'Kontrollü';
-    if(load<=69) return 'Orta';
-    return 'Yüksek';
+    var load=resolveWorkoutLoads(workout).cardio;if(load.value==null)return 'Mevcut Değil';
+    return load.interpretation?impactLabel(load.interpretation):'Mevcut';
   }
   function impactLabel(value){var result=text(value,'Mevcut Değil').split('_').filter(function(part){return part.toLowerCase()!=='to';}).map(function(part){return part?part.charAt(0).toUpperCase()+part.slice(1):'';}).join(' - ');return window.SimurgLabels?window.SimurgLabels.ui(result):result;}
   function dateLabel(workout){
@@ -196,11 +193,8 @@
     return '<div class="pw-card pw-hero '+(hasLoad?'':'no-load')+'"><div class="pw-hero-grid">'+ringHtml+'<div class="pw-metrics">'+metrics.join('')+'</div></div>'+(hasLoad?'<div class="pw-interpret"><i>⌁</i><span>'+esc(overviewInterpretation(workout))+'</span></div>':'')+'</div>';
   }
   function overviewInterpretation(workout){
-    var low=pctFor(workout,'zone1')+pctFor(workout,'zone2');
     if(resolveWorkoutLoads(workout).cardio.value==null) return hasZoneData(workout)?'Nabız zone detayları Polar’dan geldi; antrenman yükü değeri mevcut değil.':'Antrenman yükü ve sınıflandırılmış nabız zone detayı mevcut değil.';
-    if(loadStatus(workout)==='Kontrollü' && low>=50) return 'Seans kontrollü ilerlemiş. Düşük-orta yoğunluk dağılımı toparlanma maliyetini yönetilebilir tutuyor.';
-    if(loadStatus(workout)==='Yüksek') return 'Antrenman yükü yüksek. Sonraki seansa kontrollü başla ve toparlanma sinyallerini izle.';
-    return 'Mevcut yük yönetilebilir görünüyor. Sonraki çalışma setlerine kontrollü başla.';
+    return resolveWorkoutLoads(workout).cardio.interpretation?'Polar Cardio Load yorumu: '+loadStatus(workout)+'.':'Polar Cardio Load değeri mevcut; bu seans için Polar yorum sınıfı bulunmuyor.';
   }
   function fuelCard(workout){
     var fuel=workout.fuel,available=fuel&&[fuel.carbohydrate,fuel.protein,fuel.fat].some(function(value){return value!=null&&value!=='';});
@@ -271,7 +265,7 @@
     var loads=resolveWorkoutLoads(workout),available=[loads.cardio,loads.muscle,loads.perceived].some(function(load){return load.value!=null;});
     if(!available)return '<div class="pw-card pw-compact-note"><div class="pw-card-title"><h2>Antrenman yükü mevcut değil</h2></div><p>Polar bu antrenman için Cardio, kas veya algılanan yük değeri göndermedi.</p></div>';
     function card(title,load,subtitle,status){if(load.value==null)return '';return '<div class="pw-card"><div class="pw-card-title"><h2>'+esc(title)+'</h2></div><div class="pw-load-pro"><div class="pw-load-number"><b>'+esc(formattedNumber(load.value))+'</b><span>'+esc(status||'Mevcut')+'</span></div><div class="pw-load-copy"><small>'+esc(subtitle)+'</small>'+(load.interpretation?'<p>'+esc(impactLabel(load.interpretation))+'</p>':'')+'</div></div></div>';}
-    return card('Cardio Load',loads.cardio,workout.trainingLoadType||'Kardiyo yükü TRIMP',loadStatus(workout))+card('Kas Yükü',loads.muscle,'Polar Muscle Load','Mevcut')+card('Algılanan Yük',loads.perceived,'Polar Perceived Load','Mevcut');
+    return card('Cardio Load',loads.cardio,'Polar Training Load Pro',loadStatus(workout))+card('Kas Yükü',loads.muscle,'Polar Muscle Load','Mevcut')+card('Algılanan Yük',loads.perceived,'Polar Perceived Load','Mevcut');
   }
   function hasImpactData(workout){var impact=workout.trainingImpact||{};return [impact.loadLevel,impact.recoveryEffect,impact.nextSessionAggressiveness].some(function(value){return text(value,'')!=='';});}
   function loadImpactCard(workout){

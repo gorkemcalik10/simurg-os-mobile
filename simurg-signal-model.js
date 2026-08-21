@@ -49,7 +49,7 @@
   }
   function workoutCardioLoad(row){
     row=row||{};var raw=row.raw&&typeof row.raw==='object'?row.raw:row,pro=rawLoadPro(row);
-    return firstNumber(row.cardioLoad,pro['cardio-load'],pro.cardio_load,row.trainingLoad,raw.trainingLoad,raw.training_load,raw['training-load']);
+    return firstNumber(row.cardioLoad,pro['cardio-load'],pro.cardio_load);
   }
   function polarId(row){row=row&&row.raw||row||{};return firstText(row.polarExerciseId,row.exerciseId,row.exercise_id,row.polarId,row.id,row.raw&&row.raw.id);}
   function dateValue(value){return /^\d{4}-\d{2}-\d{2}$/.test(String(value||''))?String(value):null;}
@@ -133,6 +133,7 @@
   function loadStatusLabel(value,available,source){
     if(!available)return 'Henüz hesaplanmadı';
     if(source!=='Polar Cardio Load')return 'Mevcut';
+    if(unavailableLoadStatus(value))return 'Durum mevcut değil';
     var key=String(value==null?'':value).trim().replace(/^LOAD_STATUS_/i,'').toUpperCase(),labels={PRODUCTIVE:'Üretken',MAINTAINING:'Dengeli',DETRAINING:'Yük Azalıyor',OVERREACHING:'Yüksek',STRAINED:'Yüksek',BALANCED:'Dengeli'};
     return labels[key]||text(value)||'Mevcut';
   }
@@ -148,8 +149,9 @@
     var cardioLoad=firstNumber(entry.cardioLoad,entry.load),strain=firstNumber(entry.strain),tolerance=firstNumber(entry.tolerance),ratio=firstNumber(entry.cardioLoadRatio,entry.ratio,entry.strainToleranceRatio);
     if(ratio==null&&strain!=null&&tolerance>0)ratio=strain/tolerance;
     var numbers=[cardioLoad,strain,tolerance,ratio].filter(function(value){return value!=null;}),onlyZeroSentinels=numbers.length>0&&numbers.every(function(value){return value===0;}),meaningfulStatus=statusRaw!=null&&!/^(?:0|null|undefined|nan)$/i.test(String(statusRaw).trim());
-    var available=cardioLoad!=null&&!unavailableLoadStatus(statusRaw)&&!(!meaningfulStatus&&onlyZeroSentinels);
-    return {entry:entry,statusRaw:statusRaw,cardioLoad:cardioLoad,strain:strain,tolerance:tolerance,ratio:ratio,available:available,fieldsAvailable:!unavailableLoadStatus(statusRaw)&&!(!meaningfulStatus&&onlyZeroSentinels)};
+    var numericEvidence=numbers.some(function(value){return value!==0;}),fieldsAvailable=numericEvidence||(!unavailableLoadStatus(statusRaw)&&!(!meaningfulStatus&&onlyZeroSentinels));
+    var available=cardioLoad!=null&&(cardioLoad!==0||fieldsAvailable);
+    return {entry:entry,statusRaw:statusRaw,cardioLoad:cardioLoad,strain:strain,tolerance:tolerance,ratio:ratio,available:available,fieldsAvailable:fieldsAvailable};
   }
   function distinctSessionLoads(sessions){
     var seen={},values=[];

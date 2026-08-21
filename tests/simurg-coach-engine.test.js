@@ -76,6 +76,27 @@ run('high cardio load lowers aggressiveness without inventing pain', () => {
   assert.ok(output.warnings.every(item => !/ağrı kaydı/i.test(item)));
 });
 
+run('coach physical metrics use the injected canonical Polar daily aggregate', () => {
+  const date = '2026-08-16';
+  const data = { polarWorkouts: { daily: { [date]: [
+    { date, durationMinutes: 10, activeCal: 100, avgHR: 100, maxHR: 120, cardioLoad: 10 },
+    { date, durationMinutes: 30, activeCal: 300, avgHR: 140, maxHR: 170, cardioLoad: 30 },
+  ] } } };
+  const canonical = {
+    polarAggregate: { sessionCount: 2, durationMinutes: 40, activeCalories: 400, avgHR: 130, maxHR: 170, cardioLoad: 44 },
+    load: { value: 44, cardioLoad: 44, strain: 40, tolerance: 35, ratio: 1.14, statusRaw: 'PRODUCTIVE' },
+  };
+  const day = engine.extractDay(data, date, { signalDay: () => canonical });
+  assert.equal(day.physical.durationMinutes, 40);
+  assert.equal(day.physical.activeCalories, 400);
+  assert.equal(day.physical.avgHr, 130);
+  assert.equal(day.physical.maxHr, 170);
+  assert.equal(day.physical.cardioLoad, 44);
+  assert.equal(day.load.cardioLoad, 44);
+  assert.equal(day.load.strain, 40);
+  assert.equal(day.load.tolerance, 35);
+});
+
 run('pain and bad form override high readiness independently', () => {
   const scenario = byId.pain_bad_form;
   const output = engine.analyzePreWorkout(scenario.data, scenario.date);
