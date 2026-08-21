@@ -20,19 +20,28 @@ function run(name, fn) {
 run('signal model loads before dependent runtimes', () => {
   const volumePos = index.indexOf('simurg-volume-model.js');
   const modelPos = index.indexOf('simurg-signal-model.js');
+  const sleepPos = index.indexOf('simurg-sleep-intelligence.js');
+  const recoveryPos = index.indexOf('simurg-recovery-intelligence.js');
+  const energyPos = index.indexOf('simurg-energy-engine.js');
   assert.ok(volumePos >= 0);
   assert.ok(modelPos >= 0);
   assert.ok(volumePos < modelPos);
+  assert.ok(sleepPos > modelPos && sleepPos < recoveryPos && recoveryPos < energyPos);
   assert.ok(modelPos < index.indexOf('premium-standard.js'));
   assert.ok(modelPos < index.indexOf('desktop-alignment.js'));
 });
 
 run('coach engine loads as an independent runtime before presentation layers', () => {
+  const modelPos = index.indexOf('simurg-signal-model.js');
+  const sleepPos = index.indexOf('simurg-sleep-intelligence.js');
+  const recoveryPos = index.indexOf('simurg-recovery-intelligence.js');
+  const energyPos = index.indexOf('simurg-energy-engine.js');
   const enginePos = index.indexOf('simurg-coach-engine.js');
   const clientPos = index.indexOf('simurg-coach-client.js');
   const uiPos = index.indexOf('simurg-coach-ui.js');
   assert.ok(enginePos >= 0);
   assert.ok(enginePos > index.indexOf('simurg-signal-model.js'));
+  assert.ok(sleepPos > modelPos && sleepPos < recoveryPos && recoveryPos < energyPos && energyPos < enginePos);
   assert.ok(clientPos > enginePos);
   assert.ok(uiPos > clientPos);
   assert.ok(enginePos < index.indexOf('premium-standard.js'));
@@ -54,7 +63,7 @@ run('service worker registration and cache share one build label', () => {
 });
 
 run('index asset versions match CORE_ASSETS', () => {
-  for (const file of ['simurg-persistence.js', 'simurg-gym-identity.js', 'simurg-exercise-canonicalization.js', 'simurg-volume-model.js', 'simurg-data-validation.js', 'simurg-workout-recovery.js', 'simurg-gym-flex.js', 'simurg-gym-flex.css', 'simurg-signal-model.js', 'simurg-coach-engine.js', 'simurg-coach-client.js', 'simurg-coach-ui.js', 'simurg-coach.css', 'workout-source-policy.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js']) {
+  for (const file of ['simurg-persistence.js', 'simurg-gym-identity.js', 'simurg-exercise-canonicalization.js', 'simurg-volume-model.js', 'simurg-data-validation.js', 'simurg-workout-recovery.js', 'simurg-gym-flex.js', 'simurg-gym-flex.css', 'simurg-signal-model.js', 'simurg-sleep-intelligence.js', 'simurg-recovery-intelligence.js', 'simurg-energy-engine.js', 'simurg-coach-engine.js', 'simurg-coach-client.js', 'simurg-coach-ui.js', 'simurg-coach.css', 'workout-source-policy.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js']) {
     const escaped = file.replace('.', '\\.');
     const indexVersion = index.match(new RegExp(`${escaped}\\?v=([^"']+)`));
     const swVersion = sw.match(new RegExp(`${escaped}\\?v=([^"']+)`));

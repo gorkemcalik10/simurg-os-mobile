@@ -80,6 +80,9 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
 .gp-home-pane{display:none;animation:gpFade .16s ease}.gp-home-pane.active{display:block}
 @keyframes gpFade{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:none}}
 .gp-card{margin:0 0 9px;padding:14px;border-radius:17px;border:1px solid var(--hz-line);background:linear-gradient(180deg,var(--hz-surface-2),var(--hz-field));box-shadow:0 15px 36px rgba(0,0,0,.23),inset 0 1px 0 rgba(255,255,255,.025);overflow:hidden}
+.gp-energy-card{display:grid;grid-template-columns:120px minmax(0,1fr);align-items:center;gap:14px;border-color:rgba(245,163,13,.25);background:radial-gradient(circle at 10% 15%,rgba(245,163,13,.09),transparent 44%),linear-gradient(180deg,var(--hz-surface-2),var(--hz-field))}
+.gp-energy-score{padding-right:14px;border-right:1px solid var(--hz-line)}.gp-energy-score>b{display:block;margin:5px 0 2px;color:#ffc04a;font-size:38px;line-height:.9}.gp-energy-score>strong{display:block;font-size:11px}.gp-energy-score>span{display:block;margin-top:5px;color:var(--hz-muted);font-size:8px}
+.gp-energy-copy{min-width:0}.gp-energy-copy>p{margin:0;color:#b5c0cb;font-size:10px;line-height:1.45}.gp-energy-contributors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}.gp-energy-contributors>span{padding:7px 5px;border:1px solid var(--hz-line);border-radius:10px;background:var(--hz-field);color:var(--hz-muted);font-size:8px;text-align:center}.gp-energy-contributors b{display:block;margin-top:2px;font-size:12px}.gp-energy-card.low .gp-energy-score>b{color:#ec7a83}
 .gp-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:11px}.gp-card-head h2{margin:0!important;font-size:14px!important;color:#f8fbff!important}.gp-card-head span{color:var(--gp-blue);font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.7px}
 .gp-ring-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .gp-ring-card{padding:11px 6px 10px;border-radius:16px;border:1px solid var(--hz-line);background:var(--hz-surface);text-align:center}
@@ -857,6 +860,16 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
   #home.gp-home .gp-horizon-flow .recovery [data-coach-status]{color:#78d296!important}
   #home.gp-home .gp-horizon-flow .sleep [data-coach-status]{color:#c391ed!important}
   #home.gp-home .gp-horizon-flow .load [data-coach-status]{color:#ffc04a!important}
+  #home.gp-home .gp-energy-card{display:grid!important;grid-template-columns:92px minmax(0,1fr)!important;align-items:center!important;gap:12px!important;padding:13px!important;border-color:rgba(245,163,13,.25)!important;background:radial-gradient(circle at 10% 15%,rgba(245,163,13,.09),transparent 44%),linear-gradient(180deg,#0d161f,#080e14)!important}
+  #home.gp-home .gp-energy-score{padding-right:11px!important;border-right:1px solid var(--hf-line-soft)!important}
+  #home.gp-home .gp-energy-score>b{display:block!important;margin:4px 0 2px!important;color:#ffc04a!important;font-size:34px!important;line-height:.9!important;font-weight:760!important}
+  #home.gp-home .gp-energy-score>strong{display:block!important;color:#eef1f4!important;font-size:9px!important;line-height:1.2!important}
+  #home.gp-home .gp-energy-score>span{display:block!important;margin-top:4px!important;color:#8995a1!important;font-size:7px!important}
+  #home.gp-home .gp-energy-copy{min-width:0!important}.gp-energy-copy>p{margin:0!important;color:#b5bec7!important;font-size:9px!important;line-height:1.42!important;overflow-wrap:anywhere!important}
+  #home.gp-home .gp-energy-contributors{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;margin-top:9px!important}
+  #home.gp-home .gp-energy-contributors>span{min-width:0!important;padding:6px 4px!important;border:1px solid var(--hf-line-soft)!important;border-radius:9px!important;background:#080f16!important;color:#8995a1!important;font-size:7px!important;text-align:center!important;overflow-wrap:anywhere!important}
+  #home.gp-home .gp-energy-contributors b{display:block!important;margin-top:2px!important;color:#eef1f4!important;font-size:11px!important}
+  #home.gp-home .gp-energy-card.low{border-color:rgba(216,95,104,.30)!important}.gp-energy-card.low .gp-energy-score>b{color:#ec7a83!important}
   #home.gp-home .gp-plan{display:grid!important;grid-template-columns:34px minmax(0,1fr) 12px!important;align-items:center!important;gap:10px!important;width:100%!important;text-align:left!important;color:inherit!important}
   #home.gp-home .gp-plan>i{display:grid!important;place-items:center!important;width:34px!important;min-height:34px!important;border-radius:11px!important;background:var(--hf-amber-soft)!important;color:var(--hf-amber)!important;font-style:normal!important}
   #home.gp-home .gp-plan h3{margin:4px 0 3px!important;color:var(--hf-text)!important;font-size:14px!important;line-height:1.15!important}

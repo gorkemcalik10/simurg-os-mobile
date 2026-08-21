@@ -335,6 +335,18 @@
     (data.appleWatch||[]).filter(function(row){return row&&row.date===date;}).forEach(function(row){names.push(firstText(row.activityType,row.workoutType,row.type,row.activity));});
     return unique(names.filter(Boolean));
   }
+  function resolveEnergyContext(data,date,options){
+    options=options||{};var result=options.energyContext;
+    try{if(typeof options.energyResolver==='function')result=options.energyResolver(date,{data:data,signalDay:options.signalDay});else if(!result&&typeof window!=='undefined'&&window.SimurgEnergyEngine&&typeof window.SimurgEnergyEngine.resolve==='function')result=window.SimurgEnergyEngine.resolve(date,{data:data,signalDay:options.signalDay});}catch(error){result=null;}
+    result=result&&typeof result==='object'?result:{};
+    return {score:number(result.score),status:text(result.status)||'insufficient',confidence:text(result.confidence)||'insufficient',reasons:list(result.reasons).map(text).filter(Boolean).slice(0,8),action:{trainingRecommendation:text(result.action&&result.action.trainingRecommendation),caution:text(result.action&&result.action.caution)}};
+  }
+  function resolveRecoveryContext(data,date,options){
+    options=options||{};var result=options.recoveryIntelligence;
+    try{if(typeof options.recoveryIntelligenceResolver==='function')result=options.recoveryIntelligenceResolver(date,{data:data,signalDay:options.signalDay});else if(!result&&typeof window!=='undefined'&&window.SimurgRecoveryIntelligence&&typeof window.SimurgRecoveryIntelligence.resolve==='function')result=window.SimurgRecoveryIntelligence.resolve(date,{data:data,signalDay:options.signalDay});}catch(error){result=null;}
+    result=result&&typeof result==='object'?result:{};
+    return {score:number(result.score),status:text(result.status)||'insufficient',reasons:unique(list(result.signals&&result.signals.positive).concat(list(result.signals&&result.signals.negative),list(result.reasons))).map(text).filter(Boolean).slice(0,8),action:{recommendation:text(result.action&&result.action.recommendation),caution:text(result.action&&result.action.caution)}};
+  }
   function extractDay(data,date,options){
     data=data||{};options=options||{};
     var sharedDay=null;
@@ -554,7 +566,7 @@
     }).filter(Boolean).sort(function(a,b){return a.distance-b.distance;});
     return scored.filter(function(item){return item.distance<=0.18;}).slice(0,3);
   }
-  function baseOutput(type,date,features,baseline,readinessResult,confidenceResult,safetyResult){
+  function baseOutput(type,date,features,baseline,readinessResult,confidenceResult,safetyResult,recoveryContext,energy){
     var status=readinessResult.status,decision=safetyResult.decision;
     var headline=readinessResult.score==null?'Veri eksik — kontrollü karar':decision==='progress'?'Kontrollü progresyon değerlendirilebilir':decision==='normal'?'Plan korunabilir':decision==='controlled'?'Kontrollü ilerle':decision==='reduce'?'Yükü azalt':'Toparlanmayı önceliklendir';
     var summary=readinessResult.score==null?'Toparlanma verisi kesin bir hazırlık skoru için yetersiz; güvenlik kuralları yine de uygulanıyor.':'Hazırlık skoru kişisel baseline sapmalarıyla, antrenman kararı ise bağımsız güvenlik kurallarıyla oluşturuldu.';
@@ -562,11 +574,13 @@
       type:type,date:date,localNarrativeVersion:LOCAL_NARRATIVE_VERSION,recovery:features.recovery,load:features.load,
       gym:{setCount:features.gym.setCount,volume:features.gym.volume,avgRpe:features.gym.avgRpe,painLevel:features.gym.painLevel,formLevel:features.gym.formLevel},
       physical:{names:features.physical.names,durationMinutes:features.physical.durationMinutes,avgHr:features.physical.avgHr,maxHr:features.physical.maxHr,racketSport:features.physical.racketSport},
-      baselines:baseline,decision:decision
+      baselines:baseline,decision:decision,recoveryIntelligence:recoveryContext,energy:energy
     };
     return {
       schemaVersion:OUTPUT_SCHEMA_VERSION,type:type,date:date,generatedAt:new Date().toISOString(),inputHash:inputHash(safeFeatures),
       readinessScore:readinessResult.score,readinessStatus:status,confidenceScore:confidenceResult.score,confidenceLabel:confidenceResult.label,
+      recoveryScore:recoveryContext.score,recoveryStatus:recoveryContext.status,recoveryReasons:recoveryContext.reasons,recoveryAction:recoveryContext.action,
+      energyScore:energy.score,energyStatus:energy.status,energyConfidence:energy.confidence,energyReasons:energy.reasons,energyAction:energy.action,
       headline:headline,summary:summary,keyDrivers:unique(readinessResult.drivers.concat(safetyResult.drivers)).slice(0,6),
       trainingDecision:decision,loadAdjustmentPercent:safetyResult.loadAdjustmentPercent,
       workoutGuidance:movementGuidance(features,decision),
@@ -578,7 +592,7 @@
   function analyzeDaily(data,date,options){
     if(!validDate(date))throw new Error('SimurgCoachEngine date must use YYYY-MM-DD.');
     data=data||{};options=options||{};
-    var day=extractDay(data,date,options),baseline=baselines(data,date,options),missing=missingData(day,baseline),confidenceResult=confidence(day,baseline,missing),readinessResult=readiness(day,baseline,confidenceResult),safetyResult=safety(day,readinessResult,data,options),output=baseOutput(options.type||'daily',date,day,baseline,readinessResult,confidenceResult,safetyResult);
+    var day=extractDay(data,date,options),baseline=baselines(data,date,options),missing=missingData(day,baseline),confidenceResult=confidence(day,baseline,missing),readinessResult=readiness(day,baseline,confidenceResult),safetyResult=safety(day,readinessResult,data,options),recoveryContext=resolveRecoveryContext(data,date,options),energy=resolveEnergyContext(data,date,options),output=baseOutput(options.type||'daily',date,day,baseline,readinessResult,confidenceResult,safetyResult,recoveryContext,energy);
     output.workoutGuidance=movementGuidance(day,safetyResult.decision,data,options);
     if(!options.deferTechnical){
       output.trendInsights=['hrv','restingHr','sleepMinutes','cardioLoad'].map(function(key){return trendForMetric(data,date,key,options);}).filter(function(item){return item.qualified;}).map(function(item){

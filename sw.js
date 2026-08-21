@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-exercise-compatibility-v1';
+const SIMURG_CACHE = 'simurg-recovery-intelligence-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -18,9 +18,12 @@ const CORE_ASSETS = [
   './polar-workout.css?v=11',
   './polar-workout.js?v=14',
   './workout-source-policy.js?v=3',
-  './premium-standard.css?v=36',
-  './premium-standard.js?v=44',
+  './premium-standard.css?v=37',
+  './premium-standard.js?v=45',
   './simurg-signal-model.js?v=7',
+  './simurg-sleep-intelligence.js?v=1',
+  './simurg-recovery-intelligence.js?v=1',
+  './simurg-energy-engine.js?v=1',
   './simurg-coach-engine.js?v=4',
   './simurg-coach-client.js?v=4',
   './simurg-coach.css?v=10',

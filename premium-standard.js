@@ -62,6 +62,9 @@
     var label=text(loadResult.statusLabel,'');
     return label&&label!=='Mevcut'&&label!=='Henüz hesaplanmadı'?label:null;
   }
+  function resolveEnergy(date){
+    try{return window.SimurgEnergyEngine&&typeof window.SimurgEnergyEngine.resolve==='function'?window.SimurgEnergyEngine.resolve(date):null;}catch(error){return null;}
+  }
   function homeModel(date){
     var data=dataRoot(),bridge=bridgeEntry(data,date)||{},recovery=recoveryEntry(data,date)||{},chosen=window.SimurgWorkoutSource&&window.SimurgWorkoutSource.day?window.SimurgWorkoutSource.day(date):null,polar=chosen&&chosen.primaryPolar||null,apple=chosen&&chosen.appleLegacy||appleAt(data,date),gym=chosen&&chosen.gym||((data.workouts||[]).filter(function(row){return row&&row.date===date;}));
     var signalDay=window.SimurgSignalModel&&typeof window.SimurgSignalModel.day==='function'?window.SimurgSignalModel.day(date):null,polarAggregate=signalDay&&signalDay.polarAggregate,polarSleep=polarLatest(data,'polarSleep',date),polarNightly=polarLatest(data,'polarNightlyRecharge',date),loadResult=sharedLoad(date);
@@ -84,7 +87,7 @@
     var hasRecoverySignals=[hrv,rhr,respiratory,nightlyDisplay].some(function(value){return value!=null&&value!=='';});
     var readinessResult=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):resolveReadiness(date,{recovery:recovery,hasActivity:!!(polar||apple||gym.length),signals:{hrv:hrv,rhr:rhr,respiratory:respiratory,sleepScore:sleepScore,cardioLoad:load}}),readiness=readinessResult.score;
     var sharedDay=window.SimurgSignalModel&&typeof window.SimurgSignalModel.day==='function'?window.SimurgSignalModel.day(date):null;
-    return {selectedDate:date,data:data,bridge:bridge,recovery:recovery,polar:polar,polarAggregate:polarAggregate,apple:apple,gym:gym,gymPlan:sharedDay&&sharedDay.gymPlan||null,workoutSource:chosen&&chosen.source,polarSleep:polarSleep,polarNightly:polarNightly,loadResult:loadResult,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,readinessResult:readinessResult,hasRecoverySignals:hasRecoverySignals,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
+    return {selectedDate:date,data:data,bridge:bridge,recovery:recovery,polar:polar,polarAggregate:polarAggregate,apple:apple,gym:gym,gymPlan:sharedDay&&sharedDay.gymPlan||null,workoutSource:chosen&&chosen.source,polarSleep:polarSleep,polarNightly:polarNightly,loadResult:loadResult,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,readinessResult:readinessResult,energy:resolveEnergy(date),hasRecoverySignals:hasRecoverySignals,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
   }
   function metric(label,value,unit){var textValue=label==='Latest Activity'||label==='Aggressiveness';return '<div class="gp-metric '+(textValue?'gp-metric-text':'')+'"><small>'+esc(label)+'</small><b>'+esc(value==null?'—':value)+(value==null?'':'<em>'+esc(unit||'')+'</em>')+'</b></div>';}
   function ring(label,value,color,stateLabel){var safeValue=number(value),pct=safeValue==null?0:clamp(safeValue,0,100);return '<div class="gp-ring-card '+(stateLabel?'partial':'')+'"><div class="gp-ring" style="--gp-value:'+pct+'%;--gp-ring-color:'+color+'"><div><b>'+esc(safeValue==null?'—':Math.round(safeValue))+'</b><small>'+esc(stateLabel||'/100')+'</small></div></div><small>'+esc(label)+'</small>'+(stateLabel?'<span>Kısmi veri</span>':'')+'</div>';}
@@ -187,10 +190,29 @@
     var week=weeklySnapshot(model),labels=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
     return '<div class="gp-card gp-weekly"><div class="gp-section-title"><div><small>HAFTALIK ÖZET</small><h3>Yük akışı</h3></div><b>'+(mobile?week.active+' antrenman günü':week.active+'/7 gün')+'</b></div><div class="gp-weekly-body"><div class="gp-week-bars">'+week.days.map(function(day,index){var level=day.active?Math.max(18,Math.round(day.volume/week.max*100)):8;return '<span><i style="--gp-day:'+level+'%"></i><small>'+labels[index]+'</small></span>';}).join('')+'</div><div class="gp-week-totals"><span><b>'+Math.round(week.volume).toLocaleString('tr-TR')+'</b><small>kg hacim</small></span><span><b>'+week.sets+'</b><small>set</small></span></div></div></div>';
   }
+  function energyLabel(value){return {high:'Yüksek kapasite',medium:'Orta kapasite',low:'Düşük kapasite',insufficient:'Veri yetersiz'}[value]||'Veri yetersiz';}
+  function energyConfidence(value){return {high:'Yüksek',medium:'Orta',low:'Düşük',insufficient:'Yetersiz'}[value]||'Yetersiz';}
+  function energyContributor(value){var score=number(value&&value.score);return score==null?'—':Math.round(score);}
+  function energyExplanation(energy){
+    var contributors=energy&&energy.contributors||{},sleep=contributors.sleep&&contributors.sleep.reasons||[],recovery=contributors.recovery&&contributors.recovery.reasons||[],activity=contributors.activityLoad&&contributors.activityLoad.reasons||[],selected=[];
+    if(energy&&energy.status==='high')selected=[sleep[0],recovery[0]];
+    else if(energy&&energy.status==='medium')selected=[recovery[0],activity[0]];
+    else if(energy&&energy.status==='low')selected=[energy.action&&energy.action.trainingRecommendation,sleep[0]||activity[0]];
+    selected=selected.filter(Boolean);
+    if(selected.length)return selected.join(' ');
+    var reasons=Array.isArray(energy&&energy.reasons)?energy.reasons.filter(Boolean):[];
+    if(reasons.length)return reasons.slice(0,2).join(' ');
+    return text(energy&&energy.action&&energy.action.trainingRecommendation,'Energy için yeterli güvenilir sinyal yok.');
+  }
+  function energyCard(model){
+    var energy=model.energy||{},contributors=energy.contributors||{},activityScore=number(contributors.activityLoad&&contributors.activityLoad.score),trainingScore=number(contributors.trainingLoad&&contributors.trainingLoad.score),loadScore=activityScore==null||trainingScore==null?null:(activityScore*.12+trainingScore*.08)/.20;
+    return '<section class="gp-card gp-energy-card '+esc(energy.status||'insufficient')+'"><div class="gp-energy-score"><small class="gp-kicker">ENERGY</small><b>'+esc(number(energy.score)==null?'—':Math.round(energy.score))+'</b><strong>'+esc(energyLabel(energy.status))+'</strong><span>Güven · '+esc(energyConfidence(energy.confidence))+'</span></div><div class="gp-energy-copy"><p>'+esc(energyExplanation(energy))+'</p><div class="gp-energy-contributors"><span>Uyku <b>'+esc(energyContributor(contributors.sleep))+'</b></span><span>Recovery <b>'+esc(energyContributor(contributors.recovery))+'</b></span><span>Yük <b>'+esc(loadScore==null?'—':Math.round(loadScore))+'</b></span></div></div></section>';
+  }
   function overviewPane(model){
     if(window.innerWidth>900){var desktopActivity=model.activity,decisionDesktop=readinessDecision(model),result=model.readinessResult||{},scoreDesktop=model.readiness==null?'—':Math.round(model.readiness),confidence=result.confidence&&result.confidence.label||'—',desktopActivityLabel=desktopActivity&&desktopActivity.polar?'Seçili Gün Polar Aktivitesi':'Seçili Gün Aktivitesi',activityHtmlDesktop=desktopActivity?activityCard(desktopActivity,desktopActivityLabel,false):'<div class="gp-card gp-activity"><small class="gp-kicker">SEÇİLİ GÜN AKTİVİTESİ</small><h3>Aktivite bulunmuyor</h3><p>Bu tarih için gerçek Polar veya eski kaynak aktivitesi kaydı yok.</p></div>';
       return '<div class="gp-home-pane active gp-desktop-overview" data-home-pane="overview">'
         +'<section class="gp-desktop-prime gp-card '+decisionDesktop.tone+'"><div><small class="gp-kicker">READINESS PRIME</small><b>'+esc(scoreDesktop)+'</b><strong>'+esc(decisionDesktop.label)+'</strong></div><div><span>Güven · '+esc(confidence)+'</span><p>'+esc(coachSentence(model))+'</p></div><button type="button" onclick="simurgOpenAlert()">Simurg Uyarısı →</button></section>'
+        +energyCard(model)
         +'<section class="gp-desktop-signals">'+ring('Toparlanma',model.readiness,recoveryRingColor(model.readiness),model.readiness==null&&model.hasRecoverySignals?'SİNYALLER':'')+ring('Uyku',model.sleepScore,'#9b6be8')+ring('Yük',model.load,loadRingColor(model.load))+'</section>'
         +'<section class="gp-desktop-session-grid"><button type="button" class="gp-card gp-plan" onclick="desktopOpen(\'program\')"><i>⌘</i><div><small class="gp-kicker">SEÇİLİ GÜN PLANI</small><h3>'+esc(planName(model))+'</h3><p>'+esc(planDescription(model))+'</p></div><span>›</span></button>'+gymSessionCard(model)+activityHtmlDesktop+'</section>'
         +'<section class="gp-card gp-coach-flow"><small class="gp-kicker">KOÇUN BUGÜN SENİN İÇİN</small><div><i>◎</i><b>Ana Hedef</b><span>'+esc(planFocus(model))+'</span></div><div><i>◇</i><b>Dikkat</b><span>'+esc(recoveryInterpretation(model))+'</span></div><div class="opportunity"><i>↗</i><b>Fırsat</b><span>'+esc(loadInterpretation(model))+'</span></div></section>'
@@ -199,6 +221,7 @@
     var horizonContext=model.selectedDate===today()?'Bugünkü durum':'Seçili günün durumu';
     return '<div class="gp-home-pane active" data-home-pane="overview">'
       +'<div class="gp-card gp-horizon"><div class="gp-horizon-head"><small class="gp-kicker">HORIZON</small><span>'+horizonContext+'</span></div><div class="gp-horizon-flow"><button type="button" class="gp-horizon-tile recovery" aria-label="Toparlanma detayını aç" onclick="homePremiumSetTab(\'recovery\')"><i aria-hidden="true">♥</i><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>Toparlanma</small><span data-coach-status="recovery">Veri bekleniyor</span></button><button type="button" class="gp-horizon-tile sleep" aria-label="Uyku detayını aç" onclick="homePremiumSetTab(\'sleep\')"><i aria-hidden="true">◒</i><b>'+esc(model.sleepScore==null?'—':Math.round(model.sleepScore))+'</b><small>Uyku</small><span data-coach-status="sleep">Veri bekleniyor</span></button><button type="button" class="gp-horizon-tile load" aria-label="Yük detayını aç" onclick="homePremiumSetTab(\'load\')"><i aria-hidden="true">⌁</i><b>'+esc(loadValueLabel(model.loadResult))+'</b><small>Günlük yük</small><span data-coach-status="load">Veri bekleniyor</span></button></div></div>'
+      +energyCard(model)
       +mobileWorkoutCard(model)
       +activityHtml
       +weeklyCard(model,true)+'</div>';
