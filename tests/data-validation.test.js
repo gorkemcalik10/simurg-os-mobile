@@ -152,6 +152,51 @@ run('Polar workout validation preserves normalized loads, interpretations and ra
   assert.equal(row.raw.training_load_pro['cardio-load'], 0);
 });
 
+run('Polar unavailable load sentinels normalize without discarding startup workout history', () => {
+  const input = base();
+  const date = '2026-08-20';
+  input.workouts.push(
+    { date, exercise: 'Incline DB Press', sets: 1, reps: 8, weight: 20 },
+    { date, exercise: 'Single Arm Cable Row', sets: 1, reps: 10, weight: 25 },
+  );
+  input.polarWorkouts.daily[date] = [{
+    date, type: 'polar_flow_workout', source: 'Polar Flow', activityType: 'Fitness', muscleLoad: -1,
+  }];
+  input.polarWorkouts.latest = input.polarWorkouts.daily[date][0];
+
+  const startup = validation.prepareFullText(JSON.stringify(input), { source: 'startup-local-storage' }).data;
+  assert.equal(startup.polarWorkouts.daily[date][0].muscleLoad, null);
+  assert.equal(startup.polarWorkouts.latest.muscleLoad, null);
+  assert.equal(startup.workouts.length, 2);
+  assert.deepEqual(startup.workouts.map(row => row.exercise), input.workouts.map(row => row.exercise));
+});
+
+run('Cloud Pull and JSON restore share the Polar sentinel normalization', () => {
+  const input = base();
+  input.workouts.push({ date: '2026-08-20', exercise: 'Face Pull', sets: 1, reps: 12, weight: 15 });
+  input.polarWorkouts.daily['2026-08-20'] = [{
+    date: '2026-08-20', type: 'polar_flow_workout', source: 'Polar Flow', activityType: 'Fitness',
+    cardioLoad: -1, muscleLoad: -1, perceivedLoad: -1,
+  }];
+
+  for (const source of ['authenticated-cloud-pull', 'full-file-restore']) {
+    const restored = validation.prepareFull(JSON.parse(JSON.stringify(input)), { source }).data;
+    const row = restored.polarWorkouts.daily['2026-08-20'][0];
+    assert.equal(row.cardioLoad, null, source);
+    assert.equal(row.muscleLoad, null, source);
+    assert.equal(row.perceivedLoad, null, source);
+    assert.equal(restored.workouts.length, 1, source);
+  }
+});
+
+run('negative Polar loads other than the unavailable sentinel remain invalid', () => {
+  const input = base();
+  input.polarWorkouts.daily['2026-08-20'] = [{
+    date: '2026-08-20', type: 'polar_flow_workout', source: 'Polar Flow', activityType: 'Fitness', muscleLoad: -2,
+  }];
+  rejects(() => validation.prepareFull(input), 'number_too_small');
+});
+
 run('invalid Cloud-style payload is rejected without changing local object', () => {
   const local = base();
   local.workouts.push({ date: '2026-07-23', exercise: 'Row', sets: 3, reps: 8, weight: 20 });

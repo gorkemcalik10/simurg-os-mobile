@@ -77,6 +77,21 @@ run('saved workout rows alone determine performed state', () => {
   assert.equal(custom.mode, 'custom'); assert.equal(custom.performed, true);
 });
 
+run('validated startup history remains identical for Gym and Daily date views', () => {
+  const date = '2026-08-10';
+  const input = {
+    schemaVersion: 1,
+    workouts: [row(date), row(date, { exercise: 'Cable Row', reps: 8 })],
+    polarWorkouts: { daily: { [date]: [{ date, type: 'polar_flow_workout', activityType: 'Fitness', muscleLoad: -1 }] }, latest: null },
+  };
+  const startup = validation.prepareFullText(JSON.stringify(input), { source: 'startup-local-storage' }).data;
+  const gymRows = startup.workouts.filter(item => item.date === date);
+  const dailyRows = runtime(startup).day(date).gym.rows;
+  assert.equal(gymRows.length, 2);
+  assert.equal(dailyRows.length, gymRows.length);
+  assert.deepEqual(dailyRows.map(item => item.exercise), gymRows.map(item => item.exercise));
+});
+
 run('explicit skip stays distinct and suppresses Coach progression context', () => {
   const plan = { mode: 'skipped', label: 'Bugün Atlandı', sourceDay: null, sourceDate: null, planned: true, skipped: true, performed: false };
   const data = { workouts: [row('2026-08-03', { rpe: 6, form: 'Good', pain: 'None' })], gymDayState: { '2026-08-10': plan } };

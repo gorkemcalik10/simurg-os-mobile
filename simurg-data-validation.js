@@ -23,6 +23,7 @@
   var ARRAY_NAMES=['workouts','metrics','nutrition','recovery','appleWatch','dailyNotes','weeklyNotes'];
   var MAP_NAMES=['customGymPrograms','programNames','gymDayState','activityNotes','autoNextTargets','recoveryEntries','exerciseLoadProfiles','exerciseCatalog'];
   var POLAR_HISTORY_NAMES=['polarSleep','polarNightlyRecharge','polarContinuousHr','polarCardioLoad'];
+  var POLAR_OPTIONAL_LOAD_NAMES=['cardioLoad','muscleLoad','perceivedLoad'];
   var RESERVED_ROOTS={auth:true,session:true,supabase:true,cloudAuth:true,cloudSession:true,simurg_cloud_meta:true,simurg_polar_accesslink_client_v1:true};
   var DEFAULTS={
     schemaVersion:CURRENT_SCHEMA_VERSION,
@@ -273,10 +274,15 @@
     scan(row);
     return row;
   }
+  function normalizePolarOptionalLoadSentinels(row){
+    if(!isPlainObject(row))return row;
+    POLAR_OPTIONAL_LOAD_NAMES.forEach(function(key){if(row[key]===-1)row[key]=null});
+    return row;
+  }
   function validatePolarWorkoutRecord(input,path,options){
     options=options||{};
     plain(input,path);
-    var row=clone(input);
+    var row=normalizePolarOptionalLoadSentinels(clone(input));
     date(row.date,path+'.date');
     ['type','source','name','activity','activityType','workoutType','sport','device','duration','notes','rpeLabel','trainingLoadType','polarExerciseId','exerciseId','exercise_id','polarId','cardioLoadInterpretation','muscleLoadInterpretation','perceivedLoadInterpretation'].forEach(function(key){
       if(row[key]!=null)text(row[key],path+'.'+key,key==='notes'?LIMITS.maxString:2048,true);
@@ -401,6 +407,14 @@
     ['polarWorkouts','polarActivity','polarSleep','polarNightlyRecharge','polarContinuousHr','polarCardioLoad'].forEach(function(key){
       fillDailyDates(candidate[key],'$.'+key);
     });
+    if(isPlainObject(candidate.polarWorkouts)&&isPlainObject(candidate.polarWorkouts.daily)){
+      Object.keys(candidate.polarWorkouts.daily).forEach(function(key){
+        var value=candidate.polarWorkouts.daily[key];
+        if(Array.isArray(value))value.forEach(normalizePolarOptionalLoadSentinels);
+        else normalizePolarOptionalLoadSentinels(value);
+      });
+      normalizePolarOptionalLoadSentinels(candidate.polarWorkouts.latest);
+    }
     if(isPlainObject(candidate.recoveryEntries)){
       Object.keys(candidate.recoveryEntries).forEach(function(key){
         date(key,pathFor('$.recoveryEntries',key));
