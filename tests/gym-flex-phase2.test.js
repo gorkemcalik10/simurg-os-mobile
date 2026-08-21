@@ -69,8 +69,16 @@ run('existing-row skip protection warns and never deletes rows', () => {
 });
 run('save and next preserves other drafts and uses card identity for duplicate names', () => {
   assert.match(index,/const gymSessionDrafts=new Map\(\)/); assert.match(index,/captureGymDrafts\(\)/); assert.match(index,/restoreGymDrafts\(selectedDate\)/);
-  assert.match(index,/gymEntryKey:key/); assert.match(index,/function gymRowMatches\(item,row,ex\)/); assert.match(index,/row\.exerciseId===item\.exerciseId/); assert.match(index,/SimurgMobileIA\?\.openGym\(nextKey/);
+  assert.match(index,/gymEntryKey:key/); assert.match(index,/function gymRowMatches\(item,row,ex\)/); assert.match(index,/SimurgExerciseCanonicalization\.idsMatch\(row\.exerciseId,item\.exerciseId\)/); assert.match(index,/SimurgMobileIA\?\.openGym\(nextKey/);
   assert.match(index,/Kaydet ve Sonrakine Geç/);
+});
+
+run('Gym loads and replaces legacy-ID sets through the canonical identity resolver', () => {
+  const body=index.match(/function gymRowMatches\(item,row,ex\)\{([\s\S]*?)\n\}/)[1];
+  assert.match(body,/SimurgExerciseCanonicalization\.idsMatch/);
+  const saveBody=index.match(/function saveGymExercise\(key\)\{([\s\S]*?)\n\}/)[1];
+  assert.ok(saveBody.indexOf('existingRows=DATA.workouts.filter') < saveBody.indexOf('DATA.workouts=DATA.workouts.filter'));
+  assert.match(saveBody,/!gymRowMatches\(item,w,meta\.name\)/);
 });
 
 process.stdout.write(`${passed} Phase 2 flexible Gym tests passed.\n`);

@@ -31,6 +31,28 @@ run('approved map has 29 unique canonical names and stable IDs', () => {
   canonical.definitions.forEach(item => assert.match(item.exerciseId, /^simurg-exercise-v1-[a-z0-9-]+$/));
 });
 
+run('approved Library IDs resolve to the same canonical identity without fuzzy inference', () => {
+  assert.equal(Object.keys(canonical.libraryIdAliases).length, 22);
+  Object.entries(canonical.libraryIdAliases).forEach(([libraryId, legacyId]) => {
+    assert.equal(canonical.canonicalId(libraryId), legacyId);
+    assert.equal(canonical.idsMatch(libraryId, legacyId), true);
+    assert.deepEqual(new Set(canonical.identityIds(libraryId)), new Set([legacyId, libraryId]));
+  });
+  assert.equal(canonical.idsMatch('machine_chest_press', 'incline_machine_press'), false);
+  assert.equal(canonical.idsMatch('single_arm_cable_row', 'seated_cable_row'), false);
+  assert.equal(canonical.canonicalId('unmapped_custom_id'), 'unmapped_custom_id');
+});
+
+run('Library ID workout rows canonicalize without changing row count or unrelated fields', () => {
+  const data = { workouts: [row('2026-08-01', 'Incline Dumbbell Press', 'incline_dumbbell_press', 'Chest', 'library')] };
+  const report = canonical.canonicalize(data);
+  assert.equal(report.rowCountBefore, 1);
+  assert.equal(report.rowCountAfter, 1);
+  assert.equal(data.workouts[0].exerciseId, 'simurg-exercise-v1-incline-db-press');
+  assert.equal(data.workouts[0].exercise, 'Incline DB Press');
+  assert.equal(data.workouts[0].customMetadata.marker, 'library');
+});
+
 run('every approved alias maps exactly and no spelling similarity is inferred', () => {
   canonical.definitions.forEach(definition => definition.aliases.forEach(alias => assert.equal(canonical.resolve(alias), definition)));
   for (const value of ['face pull', 'Face  Pull', 'Saeted Cable Row', 'Chest Press', 'Hammer Strength Row']) assert.equal(canonical.resolve(value), null);

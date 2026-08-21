@@ -82,7 +82,7 @@ async function runtime(options = {}) {
   const storage = makeStorage(initial, options.failStorage);
   const elements = new Map();
   const callbacks = {};
-  const calls = { from: 0, insert: [], update: [], render: 0 };
+  const calls = { from: 0, insert: [], update: [], render: 0, confirms: [] };
   const config = {
     lookup: options.lookup || { data: null, error: null },
     insert: options.insert || { data: [{ revision: 1, updated_at: '2026-08-14T10:00:00.000Z' }], error: null },
@@ -104,7 +104,7 @@ async function runtime(options = {}) {
       },
     },
     supabase: { createClient() { return client; } },
-    confirm: () => options.confirm !== false,
+    confirm: message => { calls.confirms.push(message); return typeof options.confirm === 'function' ? options.confirm(message) : options.confirm !== false; },
     renderDataLocalStatus() {},
   };
   window.window = window;
@@ -186,6 +186,27 @@ test('Pull valid payload and local metadata success returns normal success', asy
   assert.equal(result.dataApplied, true);
   assert.equal(app.context.DATA.workouts[0].exercise, 'New');
   assert.equal(JSON.parse(app.storage.raw(META_KEY)).revision, 7);
+});
+
+test('Pull warns and preserves local workouts when a reducing cloud overwrite is declined', async () => {
+  const local = { schemaVersion: 1, _meta: { lastLocalUpdate: '2026-08-15T12:00:00.000Z' }, workouts: [
+    { date: '2026-08-14', exercise: 'Cloud Copy' },
+    { date: '2026-08-15', exercise: 'Local Only' }
+  ] };
+  const incoming = { schemaVersion: 1, _meta: { lastLocalUpdate: '2026-08-14T12:00:00.000Z' }, workouts: [{ date: '2026-08-14', exercise: 'Cloud Copy' }] };
+  const app = await runtime({ data: local, confirm: false, lookup: { data: { payload: incoming, revision: 12, updated_at: '2026-08-14T13:00:00.000Z' }, error: null } });
+  const previousRaw = app.storage.raw(DATA_KEY);
+  const result = await app.window.pullUserData();
+  assert.equal(result.status, 'local_workout_conflict');
+  assert.equal(result.dataApplied, false);
+  assert.equal(result.workoutSafety.localCount, 2);
+  assert.equal(result.workoutSafety.cloudCount, 1);
+  assert.equal(result.workoutSafety.localOnlyCount, 1);
+  assert.equal(result.workoutSafety.localNewer, true);
+  assert.equal(app.storage.raw(DATA_KEY), previousRaw);
+  assert.equal(app.context.DATA.workouts.length, 2);
+  assert.match(app.calls.confirms[0], /UYARI/);
+  assert.match(app.calls.confirms[0], /Bulutta bulunmayan yerel workout: 1/);
 });
 
 test('Pull metadata failure keeps applied DATA and reports a clear warning', async () => {

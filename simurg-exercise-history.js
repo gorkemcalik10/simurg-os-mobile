@@ -16,14 +16,15 @@
   function normalizeIdentity(identity){
     const input=typeof identity==='string'?{name:identity}:(identity||{});
     const names=[input.name,input.originalName].concat(input.aliases||[]).map(normalizeName).filter(Boolean);
-    return {exerciseId:String(input.exerciseId||input.id||'').trim(),names:new Set(names)};
+    const ids=[input.exerciseId,input.id].concat(input.exerciseIds||[]).map(value=>String(value||'').trim()).filter(Boolean);
+    return {exerciseIds:new Set(ids),names:new Set(names)};
   }
 
   function matches(row,identity){
     if(!row||typeof row!=='object') return false;
     const target=normalizeIdentity(identity);
     const rowId=String(row.exerciseId||'').trim();
-    if(target.exerciseId&&rowId) return target.exerciseId===rowId;
+    if(target.exerciseIds.size&&rowId) return target.exerciseIds.has(rowId);
     return target.names.has(normalizeName(row.exercise));
   }
 

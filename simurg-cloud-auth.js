@@ -151,6 +151,34 @@
     return {data:prepared.data,legacyData:legacy,canonicalizationReport:prepared.canonicalizationReport};
   }
   function normalizePulledData(value){return preparePulledData(value).data}
+  function stableValue(value){
+    if(Array.isArray(value))return '['+value.map(stableValue).join(',')+']';
+    if(isPlainObject(value))return '{'+Object.keys(value).sort().map(function(key){return JSON.stringify(key)+':'+stableValue(value[key])}).join(',')+'}';
+    return JSON.stringify(value);
+  }
+  function workoutSafety(localData,cloudData,remoteUpdatedAt){
+    var localRows=Array.isArray(localData&&localData.workouts)?localData.workouts:[];
+    var cloudRows=Array.isArray(cloudData&&cloudData.workouts)?cloudData.workouts:[];
+    var cloudCounts=Object.create(null);
+    cloudRows.forEach(function(row){var key=stableValue(row);cloudCounts[key]=(cloudCounts[key]||0)+1});
+    var localOnly=0;
+    localRows.forEach(function(row){var key=stableValue(row);if(cloudCounts[key])cloudCounts[key]-=1;else localOnly+=1});
+    function latestDate(rows){return rows.reduce(function(latest,row){var date=String(row&&row.date||'');return date>latest?date:latest},'')}
+    var localUpdated=String(localData&&localData._meta&&localData._meta.lastLocalUpdate||'');
+    var cloudUpdated=String(cloudData&&cloudData._meta&&cloudData._meta.lastLocalUpdate||remoteUpdatedAt||'');
+    var localLatestDate=latestDate(localRows),cloudLatestDate=latestDate(cloudRows);
+    var localNewer=!!localUpdated&&!!cloudUpdated&&localUpdated>cloudUpdated;
+    var hasRisk=localRows.length>cloudRows.length||localOnly>0||localLatestDate>cloudLatestDate||localNewer;
+    return {hasRisk:hasRisk,localCount:localRows.length,cloudCount:cloudRows.length,localOnlyCount:localOnly,localLatestDate:localLatestDate,cloudLatestDate:cloudLatestDate,localNewer:localNewer};
+  }
+  function pullConfirmation(safety){
+    if(!safety.hasRisk)return 'Buluttan Al, mevcut yerel DATA verisini değiştirecek. Önce otomatik JSON yedeği indirilecek. Devam edilsin mi?';
+    var details=['Yerel workout: '+safety.localCount,'Bulut workout: '+safety.cloudCount];
+    if(safety.localOnlyCount)details.push('Bulutta bulunmayan yerel workout: '+safety.localOnlyCount);
+    if(safety.localNewer)details.push('Yerel DATA bulut kopyasından daha yeni görünüyor.');
+    if(safety.localLatestDate>safety.cloudLatestDate)details.push('Yerel en son workout tarihi: '+safety.localLatestDate+' · Bulut: '+(safety.cloudLatestDate||'-'));
+    return 'UYARI: Buluttan Al yerel workout verilerini kaldırabilir veya eski sürümle değiştirebilir.\n\n'+details.join('\n')+'\n\nYerel JSON yedeği indirildikten sonra yine de bulut verisiyle değiştirmek istiyor musunuz?';
+  }
   function downloadLocalBackup(value){
     var stamp=new Date().toISOString().replace(/[:.]/g,'-');
     var blob=new Blob([JSON.stringify(value,null,2)],{type:'application/json'});
@@ -337,12 +365,13 @@
       stage='validation';
       var pulledPrepared=preparePulledData(result.data.payload),pulled=pulledPrepared.data;
       setRevisionStatus(result.data.revision,result.data.updated_at);
-      if(!window.confirm('Buluttan Al, mevcut yerel DATA verisini değiştirecek. Önce otomatik JSON yedeği indirilecek. Devam edilsin mi?')){
-        return finishOperation('pull','cancelled','Alım iptal edildi. Yerel veri değiştirilmedi.','');
-      }
-      setStatus('Alınıyor… Yerel yedek hazırlanıyor.','');
       stage='local_preparation';
       var oldData=requireCurrentData();
+      var safety=workoutSafety(oldData,pulled,result.data.updated_at);
+      if(!window.confirm(pullConfirmation(safety))){
+        return finishOperation('pull',safety.hasRisk?'local_workout_conflict':'cancelled',safety.hasRisk?'Alım durduruldu: bulut kopyası yerel workout verilerini azaltabilir. Yerel veri değiştirilmedi.':'Alım iptal edildi. Yerel veri değiştirilmedi.',safety.hasRisk?'conflict':'',{workoutSafety:safety,dataApplied:false});
+      }
+      setStatus('Alınıyor… Yerel yedek hazırlanıyor.','');
       stage='backup';
       downloadLocalBackup(oldData);
       stage='data_application';
@@ -412,7 +441,7 @@
   window.checkUserCloudStatus=checkUserCloudStatus;
   window.pushUserData=pushUserData;
   window.pullUserData=pullUserData;
-  window.SimurgCloudAuth={initialize:initialize,getClient:getClient,getSession:getSession,getLastOperationResult:function(){return state.lastResult}};
+  window.SimurgCloudAuth={initialize:initialize,getClient:getClient,getSession:getSession,workoutSafety:workoutSafety,getLastOperationResult:function(){return state.lastResult}};
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
   else initialize();

@@ -41,15 +41,54 @@
   ].map(function(row){
     return {exerciseId:'simurg-exercise-v1-'+row[0],name:row[1],bodyPart:row[2],aliases:row[3].slice()};
   });
-  var BY_NAME=Object.create(null),BY_ID=Object.create(null),BY_PROFILE_KEY=Object.create(null);
+  var LIBRARY_ID_ALIASES={
+    chest_supported_dumbbell_row:'simurg-exercise-v1-bench-supported-db-row',
+    cable_fly:'simurg-exercise-v1-cable-fly',
+    machine_chest_press:'simurg-exercise-v1-chest-press-machine',
+    incline_machine_press:'simurg-exercise-v1-incline-machine-press',
+    dumbbell_curl:'simurg-exercise-v1-db-curl',
+    face_pull:'simurg-exercise-v1-facepull',
+    flat_dumbbell_press:'simurg-exercise-v1-flat-db-press',
+    hammer_curl:'simurg-exercise-v1-hammer-curl',
+    hammer_strength_high_row:'simurg-exercise-v1-hammer-strength-high-row',
+    incline_dumbbell_curl:'simurg-exercise-v1-incline-db-curl',
+    incline_dumbbell_press:'simurg-exercise-v1-incline-db-press',
+    lat_pulldown:'simurg-exercise-v1-lat-pulldown',
+    dumbbell_lateral_raise:'simurg-exercise-v1-lateral-raise',
+    machine_row:'simurg-exercise-v1-machine-row',
+    prone_y_raise:'simurg-exercise-v1-prone-y-raise',
+    rear_delt_cable_fly:'simurg-exercise-v1-rear-delt-cable-fly',
+    reverse_cable_curl:'simurg-exercise-v1-reverse-cable-curl',
+    reverse_grip_pushdown:'simurg-exercise-v1-reverse-grip-pushdown',
+    rope_pushdown:'simurg-exercise-v1-rope-pushdown',
+    seated_cable_row:'simurg-exercise-v1-seated-cable-row',
+    single_arm_cable_row:'simurg-exercise-v1-single-arm-cable-row',
+    single_arm_lat_pulldown:'simurg-exercise-v1-single-arm-lat-pulldown'
+  };
+  var BY_NAME=Object.create(null),BY_ID=Object.create(null),BY_COMPAT_ID=Object.create(null),BY_PROFILE_KEY=Object.create(null);
 
   function clean(value){return String(value==null?'':value).trim()}
   function profileKey(value){return clean(value).toLowerCase().replace(/\s+/g,' ')}
   DEFINITIONS.forEach(function(definition){
     BY_ID[definition.exerciseId]=definition;
+    BY_COMPAT_ID[definition.exerciseId]=definition;
     definition.aliases.forEach(function(alias){BY_NAME[alias]=definition;BY_PROFILE_KEY[profileKey(alias)]=definition});
   });
+  Object.keys(LIBRARY_ID_ALIASES).forEach(function(libraryId){
+    var definition=BY_ID[LIBRARY_ID_ALIASES[libraryId]];
+    if(!definition)throw new Error('Unknown canonical exercise ID for Library alias: '+libraryId);
+    BY_COMPAT_ID[libraryId]=definition;
+  });
   function resolve(value){return BY_NAME[clean(value)]||null}
+  function resolveId(value){return BY_COMPAT_ID[clean(value)]||null}
+  function canonicalId(value){var definition=resolveId(value);return definition?definition.exerciseId:clean(value)}
+  function identityIds(value){
+    var id=clean(value),definition=resolveId(id);if(!definition)return id?[id]:[];
+    var ids=[definition.exerciseId];
+    Object.keys(LIBRARY_ID_ALIASES).forEach(function(libraryId){if(LIBRARY_ID_ALIASES[libraryId]===definition.exerciseId)ids.push(libraryId)});
+    return ids;
+  }
+  function idsMatch(left,right){return !!clean(left)&&!!clean(right)&&canonicalId(left)===canonicalId(right)}
   function clone(value){return JSON.parse(JSON.stringify(value))}
   function own(object,key){return Object.prototype.hasOwnProperty.call(object,key)}
   function laterValue(a,b){
@@ -86,7 +125,7 @@
   }
   function canonicalizeWorkoutRows(data,report){
     (data.workouts||[]).forEach(function(row){
-      var definition=resolve(row&&row.exercise);if(!definition)return;
+      var definition=resolveId(row&&row.exerciseId)||resolve(row&&row.exercise);if(!definition)return;
       if(row.exercise!==definition.name||row.bodyPart!==definition.bodyPart||row.exerciseId!==definition.exerciseId)report.workoutRowsChanged+=1;
       row.exercise=definition.name;row.bodyPart=definition.bodyPart;row.exerciseId=definition.exerciseId;
     });
@@ -95,7 +134,7 @@
     if(!data.exerciseCatalog||typeof data.exerciseCatalog!=='object'||Array.isArray(data.exerciseCatalog))return;
     var source=data.exerciseCatalog,result={},groups=Object.create(null);
     Object.keys(source).sort().forEach(function(key){
-      var item=source[key]||{},definition=resolve(item.name);
+      var item=source[key]||{},definition=resolveId(item.exerciseId)||resolveId(key)||resolve(item.name);
       if(!definition){result[key]=item;return}
       if(key!==definition.exerciseId||item.exerciseId!==definition.exerciseId||item.name!==definition.name||item.bodyPart!==definition.bodyPart)report.catalogEntriesChanged+=1;
       (groups[definition.exerciseId]=groups[definition.exerciseId]||[]).push({key:key,item:item,canonical:item.name===definition.name});
@@ -115,8 +154,8 @@
       item[0]=tupleDefinition.name;item[1]=tupleDefinition.bodyPart;return;
     }
     if(!item||typeof item!=='object')return;
-    var field=own(item,'name')?'name':(own(item,'exercise')?'exercise':null),definition=field&&resolve(item[field]);
-    if(definition){
+    var field=own(item,'name')?'name':(own(item,'exercise')?'exercise':null),definition=resolveId(item.exerciseId)||(field&&resolve(item[field]));
+    if(definition&&field){
       if(item[field]!==definition.name||item.bodyPart!==definition.bodyPart||item.exerciseId!==definition.exerciseId)report.programReferencesChanged+=1;
       item[field]=definition.name;if(own(item,'name')&&field!=='name')item.name=definition.name;if(own(item,'exercise'))item.exercise=definition.name;
       item.bodyPart=definition.bodyPart;item.exerciseId=definition.exerciseId;
@@ -194,5 +233,5 @@
     }
   }
 
-  return {VERSION:VERSION,BACKUP_KEY:BACKUP_KEY,definitions:DEFINITIONS,resolve:resolve,canonicalize:canonicalize,prepared:prepared,persistWithBackup:persistWithBackup,profileKey:profileKey};
+  return {VERSION:VERSION,BACKUP_KEY:BACKUP_KEY,definitions:DEFINITIONS,libraryIdAliases:Object.assign({},LIBRARY_ID_ALIASES),resolve:resolve,resolveId:resolveId,canonicalId:canonicalId,identityIds:identityIds,idsMatch:idsMatch,canonicalize:canonicalize,prepared:prepared,persistWithBackup:persistWithBackup,profileKey:profileKey};
 });

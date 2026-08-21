@@ -5,7 +5,7 @@
 <title>Simurg OS Cloud Sync</title>
 <script src="./simurg-volume-model.js?v=1"></script>
 <script src="./simurg-exercise-library.js?v=1"></script>
-<script src="./simurg-exercise-history.js?v=1"></script>
+<script src="./simurg-exercise-history.js?v=2"></script>
 <script src="./simurg-next-session-target.js?v=1"></script>
 <script src="./simurg-signal-model.js?v=7"></script>
 <script src="./simurg-coach-engine.js?v=4"></script>
@@ -6256,7 +6256,7 @@ body{background:#050607!important;}
 <div class="modal exerciseLibraryModal" id="exerciseLibraryModal" role="dialog" aria-modal="true" aria-labelledby="exerciseLibraryTitle"><div class="modalbox"><div class="modalTop"><h2 id="exerciseLibraryTitle">Hareket Kütüphanesi</h2><button class="btn sec" type="button" onclick="closeExerciseLibrary()">Kapat</button></div><p class="exerciseLibraryIntro">Makine, dambıl ve yaygın salon hareketlerinden seç. Türkçe veya İngilizce adla arayabilirsin; istersen özel hareket oluşturmaya devam edebilirsin.</p><div class="exerciseLibraryTools"><input id="exerciseLibrarySearch" type="search" placeholder="Ara: incline press, göğüs, tek kol…" autocomplete="off"><select id="exerciseLibraryCategory" aria-label="Hareket kategorisi"></select></div><div class="exerciseLibraryCount" id="exerciseLibraryCount"></div><div class="exerciseLibraryResults" id="exerciseLibraryResults"></div><div class="actions"><button class="btn sec" type="button" onclick="addCustomGymExerciseFromLibrary()">+ Özel Hareket Oluştur</button></div></div></div>
 <script src="./simurg-persistence.js?v=1"></script>
 <script src="./simurg-gym-identity.js?v=1"></script>
-<script src="./simurg-exercise-canonicalization.js?v=1"></script>
+<script src="./simurg-exercise-canonicalization.js?v=2"></script>
 <script src="./simurg-data-validation.js?v=5"></script>
 <script src="./simurg-gym-flex.js?v=1"></script>
 <script src="./simurg-exercise-catalog.js?v=1"></script>
@@ -6626,7 +6626,7 @@ function gymCanUseLegacyRows(){const state=SimurgGymFlex.stateFor(DATA,selectedD
 function gymOwnsLegacyName(item,ex){return gymItemsForDate(selectedDate).find(value=>value.name===ex)?.key===item.key}
 function gymRowMatches(item,row,ex){
   if(!row||row.date!==selectedDate)return false;
-  if(row.exerciseId)return row.exerciseId===item.exerciseId;
+  if(row.exerciseId)return SimurgExerciseCanonicalization.idsMatch(row.exerciseId,item.exerciseId);
   if(row.gymEntryKey)return row.gymEntryKey===item.key||row.gymEntryKey===item.legacyKey;
   return gymCanUseLegacyRows()&&gymOwnsLegacyName(item,ex)&&row.exercise===ex;
 }
@@ -6910,6 +6910,7 @@ function exerciseHistoryIdentity(value){
   const libraryItem=input.exerciseId?window.SimurgExerciseLibrary?.getById(input.exerciseId):null;
   return {
     exerciseId:input.exerciseId||'',
+    exerciseIds:SimurgExerciseCanonicalization.identityIds(input.exerciseId),
     name:input.name||libraryItem?.name||'',
     originalName:input.originalName||'',
     aliases:libraryItem?.aliases||[]
@@ -7942,7 +7943,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=next-session-target-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=exercise-compatibility-v1').catch(function(){});
   });
 }
 </script>
@@ -16289,7 +16290,7 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./simurg-gym-flex.css?v=2">
 <script src="./mobile-ia-premium.js?v=6"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
-<script src="./simurg-cloud-auth.js?v=4" defer></script>
+<script src="./simurg-cloud-auth.js?v=5" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
   if(!window.SimurgDataValidation)return;
