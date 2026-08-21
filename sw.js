@@ -11,6 +11,7 @@ const CORE_ASSETS = [
   './simurg-exercise-history.js?v=2',
   './simurg-next-session-target.js?v=1',
   './simurg-data-validation.js?v=7',
+  './simurg-workout-recovery.js?v=1',
   './simurg-gym-flex.js?v=1',
   './simurg-exercise-catalog.js?v=1',
   './simurg-gym-flex.css?v=2',

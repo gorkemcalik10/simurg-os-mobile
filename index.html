@@ -6248,6 +6248,18 @@ body{background:#050607!important;}
 
 <!-- Legacy dedicated Workout / Apple Watch import cards intentionally hidden. Universal Import is the single entry point. -->
 <textarea id="workoutJsonBox" style="display:none"></textarea><textarea id="watchJsonBox" style="display:none"></textarea>
+<div class="card workoutRecoveryCard">
+  <h2>Workout Recovery</h2>
+  <div class="sub">Güncel DATA'yı koruyarak bir yedekteki yalnızca eksik workout kayıtlarını analiz et ve geri ekle. Analiz hiçbir veriyi değiştirmez; merge açık onay ister ve bulut işlemi başlatmaz.</div>
+  <div class="actions">
+    <button class="btn" type="button" onclick="document.getElementById('workoutRecoveryFile').click()">Backup Analiz Et</button>
+    <input type="file" id="workoutRecoveryFile" accept="application/json,.json,.txt" style="display:none" onchange="analyzeWorkoutRecovery(event)">
+    <button class="btn" type="button" onclick="mergeWorkoutRecovery()">Eksik Workout'ları Birleştir</button>
+    <button class="btn sec" type="button" onclick="exportRecoveredData()">Kurtarılan DATA'yı Dışa Aktar</button>
+    <button class="btn sec" type="button" onclick="rollbackWorkoutRecovery()">Recovery Öncesine Dön</button>
+  </div>
+  <div id="workoutRecoveryStatus" class="syncStatus" data-state="idle">Workout backup seçilmedi. Önce yazmasız analiz çalıştır.</div>
+</div>
 <div class="card"><h2>Genel veri</h2><div class="actions"><button class="btn" onclick="exportJSON()">JSON Yedekle</button><button class="btn" onclick="exportCSV()">CSV Dışa Aktar</button><button class="btn sec" onclick="document.getElementById('importFile').click()">JSON İçe Aktar</button><input type="file" id="importFile" style="display:none" onchange="importJSON(event)"></div></div>
 <div class="versionBadgeCard"><div><b>Simurg OS Mobile V8</b><span>Stable Mode Ready · Universal Import Only · Quick Notes · Cloud Summary</span></div><div class="versionBadgePill">Stable Mode Ready</div></div></section>
 </main></div>
@@ -6258,6 +6270,7 @@ body{background:#050607!important;}
 <script src="./simurg-gym-identity.js?v=1"></script>
 <script src="./simurg-exercise-canonicalization.js?v=2"></script>
 <script src="./simurg-data-validation.js?v=7"></script>
+<script src="./simurg-workout-recovery.js?v=1"></script>
 <script src="./simurg-gym-flex.js?v=1"></script>
 <script src="./simurg-exercise-catalog.js?v=1"></script>
 <script>
@@ -16310,7 +16323,7 @@ m Shell V4: Logger information architecture fix -->
 <script>
 document.addEventListener('DOMContentLoaded',function(){
   if(!window.SimurgDataValidation)return;
-  window.SimurgDataValidation.installRuntime({
+  var atomic=window.SimurgDataValidation.installRuntime({
     getData:function(){return DATA;},
     setData:function(value){DATA=value;},
     getSelectedDate:function(){return selectedDate;},
@@ -16318,5 +16331,12 @@ document.addEventListener('DOMContentLoaded',function(){
     render:function(){render();},
     download:function(name,text){download(name,text);}
   });
+  if(window.SimurgWorkoutRecovery&&atomic){
+    window.SimurgWorkoutRecovery.installRuntime({
+      getData:function(){return DATA;},
+      commit:atomic.commit,
+      download:function(name,text){download(name,text);}
+    });
+  }
 });
 </script>
