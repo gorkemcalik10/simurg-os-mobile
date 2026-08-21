@@ -113,6 +113,25 @@
     if(typeof structuredClone==='function')return structuredClone(value);
     return JSON.parse(JSON.stringify(value));
   }
+  function polarStableId(row){
+    row=row||{};var raw=isPlainObject(row.raw)?row.raw:{};
+    var value=row.polarExerciseId||row.exerciseId||row.exercise_id||row.polarId||raw.polarExerciseId||raw.exerciseId||raw.exercise_id||raw.id;
+    return value==null?'':String(value).trim();
+  }
+  function polarDurationSeconds(row){
+    row=row||{};var seconds=Number(row.durationSeconds);if(Number.isFinite(seconds)&&seconds>=0)return Math.round(seconds*1000)/1000;
+    var minutes=Number(row.durationMinutes);if(Number.isFinite(minutes)&&minutes>=0)return Math.round(minutes*60000)/1000;
+    var parts=String(row.duration||'').trim().split(':').map(Number);if(parts.length===3&&parts.every(Number.isFinite))return parts[0]*3600+parts[1]*60+parts[2];if(parts.length===2&&parts.every(Number.isFinite))return parts[0]*60+parts[1];return 0;
+  }
+  function polarFallbackIdentity(row){
+    row=row||{};var date=String(row.date||'').slice(0,10),start=String(row.startTime||row.start_time||row.startedAt||'').trim(),match=start.match(/(?:T)?(\d{1,2}):(\d{2})(?::(\d{2}))?/),time=match?[String(Number(match[1])).padStart(2,'0'),match[2],match[3]||'00'].join(':'):start.toLowerCase();
+    var type=String(row.workoutType||row.activityType||row.sport||row.type||'').trim().toLowerCase().replace(/[_\s-]+/g,' ');
+    return ['polar-fallback',date,time,polarDurationSeconds(row),type].join('|');
+  }
+  function polarWorkoutIdentity(row){var id=polarStableId(row);return id?'polar-id|'+id:polarFallbackIdentity(row);}
+  function samePolarWorkout(a,b){var aId=polarStableId(a),bId=polarStableId(b);return aId&&bId?aId===bId:polarFallbackIdentity(a)===polarFallbackIdentity(b);}
+  var polarIdentityApi={key:polarWorkoutIdentity,fallbackKey:polarFallbackIdentity,stableId:polarStableId,same:samePolarWorkout};
+  if(typeof globalThis!=='undefined')globalThis.SimurgPolarWorkoutIdentity=polarIdentityApi;
   function text(value,path,max,allowEmpty){
     if(value==null)return '';
     if(typeof value!=='string')fail('invalid_string','Metin alanı bekleniyor',path);
@@ -257,17 +276,17 @@
     plain(input,path);
     var row=clone(input);
     date(row.date,path+'.date');
-    ['type','source','name','activity','activityType','workoutType','sport','device','duration','notes','rpeLabel','trainingLoadType'].forEach(function(key){
+    ['type','source','name','activity','activityType','workoutType','sport','device','duration','notes','rpeLabel','trainingLoadType','polarExerciseId','exerciseId','exercise_id','polarId','cardioLoadInterpretation','muscleLoadInterpretation','perceivedLoadInterpretation'].forEach(function(key){
       if(row[key]!=null)text(row[key],path+'.'+key,key==='notes'?LIMITS.maxString:2048,true);
     });
     if(row.startTime!=null)optionalStartTime(row.startTime,path+'.startTime');
     if(!['type','source','name','activity','activityType','workoutType','sport'].some(function(key){return typeof row[key]==='string'&&row[key].trim()})){
       fail('invalid_polar_record','Polar workout kimliği/türü eksik',path);
     }
-    ['durationSeconds','activeCal','activeCalories','totalCal','totalCalories','avgHR','minHR','maxHR','rpe','trainingLoad'].forEach(function(key){
+    ['durationSeconds','durationMinutes','activeCal','activeCalories','totalCal','totalCalories','avgHR','minHR','maxHR','rpe','trainingLoad','cardioLoad','muscleLoad','perceivedLoad'].forEach(function(key){
       if(row[key]!=null&&row[key]!=='')row[key]=number(row[key],path+'.'+key,{coerce:options.coerce,min:0,max:10000000});
     });
-    ['zones','zoneSummary','fuel','trainingImpact'].forEach(function(key){if(row[key]!=null)plain(row[key],path+'.'+key)});
+    ['zones','zoneSummary','fuel','trainingImpact','raw','training_load_pro','training-load-pro'].forEach(function(key){if(row[key]!=null)plain(row[key],path+'.'+key)});
     if(row.heartRateSeries!=null){
       array(row.heartRateSeries,path+'.heartRateSeries');
       row.heartRateSeries.forEach(function(point,index){
@@ -509,7 +528,7 @@
     row.source='Polar Flow';
     var daily=candidate.polarWorkouts.daily[row.date];
     if(!Array.isArray(daily))daily=daily?[daily]:[];
-    var index=daily.findIndex(function(item){return String(item&&item.startTime||'')===String(row.startTime||'')});
+    var index=daily.findIndex(function(item){return samePolarWorkout(item,row)});
     if(index>=0)daily[index]=Object.assign({},daily[index],row);
     else daily.push(row);
     candidate.polarWorkouts.daily[row.date]=daily;
@@ -759,6 +778,8 @@
     validateActivityRecord:validateActivityRecord,
     validatePolarWorkoutRecord:validatePolarWorkoutRecord,
     validatePolarRecoveryRecord:validatePolarRecoveryRecord,
+    polarWorkoutIdentity:polarWorkoutIdentity,
+    samePolarWorkout:samePolarWorkout,
     appendPolarWorkout:appendPolarWorkout,
     appendPolarRecovery:appendPolarRecovery,
     installRuntime:installRuntime
