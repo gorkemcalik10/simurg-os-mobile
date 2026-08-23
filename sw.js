@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-recovery-intelligence-v1';
+const SIMURG_CACHE = 'simurg-training-lab-v1-correction-1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const CORE_ASSETS = [
   './simurg-persistence.js?v=2',
   './simurg-gym-identity.js?v=1',
   './simurg-exercise-canonicalization.js?v=2',
+  './simurg-training-lab-analysis.js?v=2',
   './simurg-volume-model.js?v=1',
   './simurg-exercise-library.js?v=1',
   './simurg-exercise-history.js?v=2',
@@ -32,9 +33,11 @@ const CORE_ASSETS = [
   './polar-accesslink.js?v=9',
   './simurg-cloud-auth.js?v=7',
   './desktop-alignment.css?v=26',
-  './desktop-alignment.js?v=34',
-  './mobile-ia-premium.css?v=10',
+  './desktop-alignment.js?v=35',
+  './mobile-ia-premium.css?v=11',
   './mobile-ia-premium.js?v=6',
+  './simurg-training-lab.css?v=1',
+  './simurg-training-lab-ui.js?v=2',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

@@ -1,5 +1,5 @@
 @media(max-width:900px){
-  #simurgV8Nav{grid-template-columns:repeat(4,1fr)!important;}
+  #simurgV8Nav{grid-template-columns:repeat(5,1fr)!important;}
   #simurgV8Sheet{padding:16px!important;}
   #simurgV8Sheet .simurgV8Grid{grid-template-columns:1fr!important;gap:9px!important;}
   #simurgV8Sheet .simurgV8Grid button{min-height:64px!important;display:grid!important;grid-template-columns:42px 1fr!important;text-align:left!important;padding:10px 14px!important;}

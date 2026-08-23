@@ -5982,6 +5982,7 @@ body{background:#050607!important;}
 <button onclick="window.innerWidth<=900?simurgV8Go('program','menu'):show('program',this)">🧭 Program Intelligence</button>
 <button onclick="window.innerWidth<=900?simurgV8Go('monthly','menu'):show('monthly',this)">🗓️ Monthly Review</button>
 <button onclick="window.innerWidth<=900?simurgV8Go('coaching','menu'):show('coaching',this)">🧠 Coaching</button>
+<button onclick="SimurgTrainingLabUI.open(this)">◫ Training Lab</button>
 <button onclick="window.innerWidth<=900?simurgV8Go('reports','menu'):show('reports',this)">📈 Progress & Analytics</button>
 <button onclick="window.innerWidth<=900?simurgV8Go('data','menu'):show('data',this)">💾 Data Center</button>
 </div>
@@ -6186,6 +6187,8 @@ body{background:#050607!important;}
   </div>
 </section>
 
+<section id="training-lab" class="section" aria-label="Training Lab"></section>
+
 <section id="data" class="section"><div class="topbar"><h1>Veri Merkezi</h1></div>
 
 <div class="card cloudSyncCard">
@@ -6272,6 +6275,7 @@ body{background:#050607!important;}
 <script src="./simurg-persistence.js?v=2"></script>
 <script src="./simurg-gym-identity.js?v=1"></script>
 <script src="./simurg-exercise-canonicalization.js?v=2"></script>
+<script src="./simurg-training-lab-analysis.js?v=2"></script>
 <script src="./simurg-data-validation.js?v=8"></script>
 <script src="./simurg-workout-recovery.js?v=1"></script>
 <script src="./simurg-gym-flex.js?v=1"></script>
@@ -7973,7 +7977,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=recovery-intelligence-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=training-lab-v1-correction-1').catch(function(){});
   });
 }
 </script>
@@ -11141,7 +11145,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   #weeklyReport p,#programReport p,#monthlyReport p{font-size:15px!important;line-height:1.4!important;}
 
   /* New hard bottom nav: clean and always accessible */
-  #simurgV8Nav{display:grid!important;grid-template-columns:repeat(4,1fr)!important;position:fixed!important;left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;height:68px!important;z-index:2147483000!important;padding:7px!important;gap:5px!important;background:rgba(12,17,24,.94)!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:27px!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;box-shadow:0 18px 52px rgba(0,0,0,.55)!important;}
+  #simurgV8Nav{display:grid!important;grid-template-columns:repeat(5,1fr)!important;position:fixed!important;left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;height:68px!important;z-index:2147483000!important;padding:7px!important;gap:5px!important;background:rgba(12,17,24,.94)!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:27px!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;box-shadow:0 18px 52px rgba(0,0,0,.55)!important;}
   #simurgV8Nav button{border:0!important;background:transparent!important;color:#8f9aaa!important;border-radius:20px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;font-size:10px!important;font-weight:900!important;line-height:1.05!important;padding:4px 2px!important;min-width:0!important;}
   #simurgV8Nav button i{font-style:normal!important;font-size:17px!important;line-height:1!important;}
   #simurgV8Nav button.active{background:#f3f7fb!important;color:#05070b!important;}
@@ -11208,7 +11212,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   window.simurgV8Go=go; window.simurgV8OpenMenu=openMenu; window.simurgV8CloseMenu=closeMenu;
   ready(function(){
     if(!document.getElementById('simurgV8Nav')){
-      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Üç temel merkez</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('program','menu')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go('data','menu')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedekleme</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Günlük</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
+      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Üç temel merkez</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('program','menu')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go('data','menu')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedekleme</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Günlük</button><button data-key="training-lab" onclick="SimurgTrainingLabUI.open()"><i>◫</i>Lab</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
     }
     var loggerButton=document.querySelector('#simurgV8Nav button[data-key="logger"]');
     if(loggerButton)loggerButton.setAttribute('onclick',"simurgV8Go('workout','logger')");
@@ -16317,10 +16321,12 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=9"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=26">
-<script src="./desktop-alignment.js?v=34"></script>
-<link rel="stylesheet" href="./mobile-ia-premium.css?v=10">
+<script src="./desktop-alignment.js?v=35"></script>
+<link rel="stylesheet" href="./mobile-ia-premium.css?v=11">
 <link rel="stylesheet" href="./simurg-gym-flex.css?v=2">
+<link rel="stylesheet" href="./simurg-training-lab.css?v=1">
 <script src="./mobile-ia-premium.js?v=6"></script>
+<script src="./simurg-training-lab-ui.js?v=2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
 <script src="./simurg-cloud-auth.js?v=7" defer></script>
 <script>

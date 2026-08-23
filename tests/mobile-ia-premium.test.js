@@ -5,6 +5,7 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8').replace(/<template\b[\s\S]*?<\/template>/gi, '');
 const mobile = fs.readFileSync(path.join(root, 'mobile-ia-premium.js'), 'utf8');
+const trainingLabUi = fs.readFileSync(path.join(root, 'simurg-training-lab-ui.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'mobile-ia-premium.css'), 'utf8');
 const polar = fs.readFileSync(path.join(root, 'polar-accesslink.js'), 'utf8');
 
@@ -13,19 +14,22 @@ function run(name, fn) {
   process.stdout.write(`✓ ${name}\n`);
 }
 
-run('mobile bottom navigation exposes exactly four primary routes', () => {
+run('mobile bottom navigation exposes Training Lab as a fifth primary route', () => {
   const shell = html.match(/<nav id="simurgV8Nav"[\s\S]*?<\/nav>/);
   assert.ok(shell);
-  assert.deepEqual([...shell[0].matchAll(/data-key="([^"]+)"/g)].map(match => match[1]), ['home', 'gym', 'logger', 'menu']);
+  assert.deepEqual([...shell[0].matchAll(/data-key="([^"]+)"/g)].map(match => match[1]), ['home', 'gym', 'logger', 'training-lab', 'menu']);
+  assert.match(shell[0], /data-key="training-lab" onclick="SimurgTrainingLabUI\.open\(\)"/);
   assert.doesNotMatch(shell[0], /polar|weekly|monthly/i);
-  assert.match(css, /#simurgV8Nav\{grid-template-columns:repeat\(4,1fr\)!important/);
+  assert.match(css, /#simurgV8Nav\{grid-template-columns:repeat\(5,1fr\)!important/);
 });
 
-run('mobile menu exposes only Coaching, Program and Data Center', () => {
+run('mobile menu keeps only its core entries while Training Lab stays primary', () => {
   const grid = html.match(/<div class="simurgV8Grid simurgPremiumMenuGrid">([\s\S]*?)<\/div><\/div><nav id="simurgV8Nav"/);
   assert.ok(grid);
   for (const label of ['Koçluk', 'Program', 'Veri Merkezi']) assert.match(grid[1], new RegExp(label));
-  assert.doesNotMatch(grid[1], /Haftalık|Aylık|<b>Polar<\/b>/);
+  assert.doesNotMatch(grid[1], /Training Lab|Haftalık|Aylık|<b>Polar<\/b>/);
+  assert.match(trainingLabUi, /data-key','training-lab'/);
+  assert.match(trainingLabUi, /simurgV8Go\('training-lab','training-lab'\)/);
 });
 
 run('mobile render lifecycle is route-aware while desktop keeps the full renderer', () => {
