@@ -4,7 +4,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const root = path.resolve(__dirname, '..');
-for (const file of ['simurg-volume-model.js', 'simurg-exercise-library.js', 'simurg-exercise-history.js', 'simurg-training-lab-analysis.js', 'simurg-training-lab-ui.js', 'simurg-next-session-target.js', 'simurg-data-validation.js', 'simurg-workout-recovery.js', 'simurg-signal-model.js', 'simurg-sleep-intelligence.js', 'simurg-recovery-intelligence.js', 'simurg-energy-engine.js', 'simurg-coach-engine.js', 'simurg-coach-client.js', 'simurg-coach-ui.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js', 'sw.js']) {
+for (const file of ['simurg-volume-model.js', 'simurg-exercise-library.js', 'simurg-muscle-anatomy.js', 'simurg-exercise-history.js', 'simurg-training-lab-analysis.js', 'simurg-training-lab-ui.js', 'simurg-next-session-target.js', 'simurg-data-validation.js', 'simurg-workout-recovery.js', 'simurg-signal-model.js', 'simurg-sleep-intelligence.js', 'simurg-recovery-intelligence.js', 'simurg-energy-engine.js', 'simurg-coach-engine.js', 'simurg-coach-client.js', 'simurg-coach-ui.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js', 'sw.js']) {
   new vm.Script(fs.readFileSync(path.join(root, file), 'utf8'), { filename: file });
 }
 

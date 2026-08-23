@@ -452,6 +452,12 @@ export function normalizeSleep(input: Record<string, unknown>) {
   const startMs = startTime ? Date.parse(String(startTime)) : NaN;
   const endMs = endTime ? Date.parse(String(endTime)) : NaN;
   const seconds = Number.isFinite(startMs) && Number.isFinite(endMs) && endMs >= startMs ? Math.round((endMs - startMs) / 1000) : null;
+  const deepSleep = numeric(pick(input, ["deep_sleep", "deep-sleep"]));
+  const lightSleep = numeric(pick(input, ["light_sleep", "light-sleep"]));
+  const remSleep = numeric(pick(input, ["rem_sleep", "rem-sleep"]));
+  const unrecognizedSleepStage = numeric(pick(input, ["unrecognized_sleep_stage", "unrecognized-sleep-stage"]));
+  const sleepStageValues = [deepSleep, lightSleep, remSleep, unrecognizedSleepStage].filter((value): value is number => value !== null);
+  const sleepDurationSeconds = sleepStageValues.length ? sleepStageValues.reduce((sum, value) => sum + value, 0) : null;
   return {
     date,
     source: "Polar Flow",
@@ -459,16 +465,18 @@ export function normalizeSleep(input: Record<string, unknown>) {
     endTime: endTime || null,
     duration: seconds === null ? null : durationText(seconds),
     durationSeconds: seconds,
+    timeInBedSeconds: seconds,
+    sleepDurationSeconds,
     sleepScore: numeric(pick(input, ["sleep_score", "sleep-score"])),
     continuity: numeric(pick(input, ["continuity"])),
     continuityClass: numeric(pick(input, ["continuity_class", "continuity-class"])),
     sleepCycles: numeric(pick(input, ["sleep_cycles", "sleep-cycles"])),
     interruptions: numeric(pick(input, ["total_interruption_duration", "total-interruption-duration"])),
-    deepSleep: numeric(pick(input, ["deep_sleep", "deep-sleep"])),
-    lightSleep: numeric(pick(input, ["light_sleep", "light-sleep"])),
-    remSleep: numeric(pick(input, ["rem_sleep", "rem-sleep"])),
+    deepSleep,
+    lightSleep,
+    remSleep,
     awakeTime: numeric(pick(input, ["awake_time", "awake-time"])),
-    unrecognizedSleepStage: numeric(pick(input, ["unrecognized_sleep_stage", "unrecognized-sleep-stage"])),
+    unrecognizedSleepStage,
     sleepGoal: numeric(pick(input, ["sleep_goal", "sleep-goal"])),
     sleepCharge: numeric(pick(input, ["sleep_charge", "sleep-charge"])),
     syncedAt: new Date().toISOString(),

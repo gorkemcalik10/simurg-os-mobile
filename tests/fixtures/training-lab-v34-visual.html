@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="../../">
+  <title>Training Lab v3.4 Visual QA</title>
+  <link rel="stylesheet" href="simurg-training-lab.css">
+  <style>html,body{margin:0;min-height:100%;background:#050a10;font-family:Inter,system-ui,sans-serif}#training-lab{display:block;padding:16px}</style>
+</head>
+<body>
+  <section id="training-lab"></section>
+  <script>
+    window.selectedDate='2026-08-17';
+    window.DATA={workouts:[
+      {date:'2026-08-17',exercise:'Lat Pulldown',exerciseId:'lat_pulldown',sets:4,reps:10,weight:45},
+      {date:'2026-08-18',exercise:'Leg Extension',exerciseId:'leg_extension',sets:3,reps:15,weight:35},
+      {date:'2026-08-19',exercise:'Incline Machine Press',exerciseId:'incline_machine_press',sets:3,reps:10,weight:30}
+    ]};
+  </script>
+  <script src="simurg-exercise-library.js"></script>
+  <script src="simurg-exercise-canonicalization.js"></script>
+  <script src="simurg-volume-model.js"></script>
+  <script src="simurg-muscle-anatomy.js"></script>
+  <script src="simurg-training-lab-analysis.js"></script>
+  <script src="simurg-training-lab-ui.js"></script>
+  <script>SimurgTrainingLabUI.render();</script>
+</body>
+</html>
