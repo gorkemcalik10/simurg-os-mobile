@@ -311,7 +311,7 @@
   }
   function normalizeNav(){
     var nav=document.getElementById('simurgV8Nav');if(!nav)return;
-    var order=['home','gym','logger','polar','menu'];
+    var order=['home','gym','logger','training-lab','menu'];
     var current=Array.from(nav.children).filter(function(item){return item.matches('button[data-key]');}).map(function(item){return item.dataset.key;});
     var expected=order.filter(function(key){return nav.querySelector('[data-key="'+key+'"]');});
     if(current.join('|')!==expected.join('|'))expected.forEach(function(key){var item=nav.querySelector('[data-key="'+key+'"]');if(item)nav.appendChild(item);});

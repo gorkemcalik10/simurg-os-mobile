@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-training-lab-v1-correction-1';
+const SIMURG_CACHE = 'simurg-training-lab-anatomy-v2';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -20,7 +20,7 @@ const CORE_ASSETS = [
   './polar-workout.js?v=14',
   './workout-source-policy.js?v=3',
   './premium-standard.css?v=37',
-  './premium-standard.js?v=45',
+  './premium-standard.js?v=46',
   './simurg-signal-model.js?v=7',
   './simurg-sleep-intelligence.js?v=1',
   './simurg-recovery-intelligence.js?v=1',
@@ -36,8 +36,9 @@ const CORE_ASSETS = [
   './desktop-alignment.js?v=35',
   './mobile-ia-premium.css?v=11',
   './mobile-ia-premium.js?v=6',
-  './simurg-training-lab.css?v=1',
-  './simurg-training-lab-ui.js?v=2',
+  './simurg-training-lab.css?v=4',
+  './simurg-training-lab-ui.js?v=6',
+  './assets/simurg-anatomy-base-v1.png',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
