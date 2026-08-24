@@ -65,6 +65,9 @@
   function resolveEnergy(date){
     try{return window.SimurgEnergyEngine&&typeof window.SimurgEnergyEngine.resolve==='function'?window.SimurgEnergyEngine.resolve(date):null;}catch(error){return null;}
   }
+  function resolveRecoveryIntelligence(date,data,canonicalRecovery){
+    try{return window.SimurgRecoveryIntelligence&&typeof window.SimurgRecoveryIntelligence.resolve==='function'?window.SimurgRecoveryIntelligence.resolve(date,{data:data,canonicalRecovery:canonicalRecovery,signalDay:window.SimurgSignalModel&&window.SimurgSignalModel.day}):null;}catch(error){return null;}
+  }
   function homeModel(date){
     var data=dataRoot(),bridge=bridgeEntry(data,date)||{},recovery=recoveryEntry(data,date)||{},chosen=window.SimurgWorkoutSource&&window.SimurgWorkoutSource.day?window.SimurgWorkoutSource.day(date):null,polar=chosen&&chosen.primaryPolar||null,apple=chosen&&chosen.appleLegacy||appleAt(data,date),gym=chosen&&chosen.gym||((data.workouts||[]).filter(function(row){return row&&row.date===date;}));
     var signalDay=window.SimurgSignalModel&&typeof window.SimurgSignalModel.day==='function'?window.SimurgSignalModel.day(date):null,polarAggregate=signalDay&&signalDay.polarAggregate,polarSleep=polarLatest(data,'polarSleep',date),polarNightly=polarLatest(data,'polarNightlyRecharge',date),loadResult=sharedLoad(date);
@@ -87,12 +90,10 @@
     var hasRecoverySignals=[hrv,rhr,respiratory,nightlyDisplay].some(function(value){return value!=null&&value!=='';});
     var readinessResult=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):resolveReadiness(date,{recovery:recovery,hasActivity:!!(polar||apple||gym.length),signals:{hrv:hrv,rhr:rhr,respiratory:respiratory,sleepScore:sleepScore,cardioLoad:load}}),readiness=readinessResult.score;
     var sharedDay=window.SimurgSignalModel&&typeof window.SimurgSignalModel.day==='function'?window.SimurgSignalModel.day(date):null;
-    return {selectedDate:date,data:data,bridge:bridge,recovery:recovery,polar:polar,polarAggregate:polarAggregate,apple:apple,gym:gym,gymPlan:sharedDay&&sharedDay.gymPlan||null,workoutSource:chosen&&chosen.source,polarSleep:polarSleep,polarNightly:polarNightly,loadResult:loadResult,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,readinessResult:readinessResult,energy:resolveEnergy(date),hasRecoverySignals:hasRecoverySignals,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
+    return {selectedDate:date,data:data,bridge:bridge,recovery:recovery,polar:polar,polarAggregate:polarAggregate,apple:apple,gym:gym,gymPlan:sharedDay&&sharedDay.gymPlan||null,workoutSource:chosen&&chosen.source,polarSleep:polarSleep,polarNightly:polarNightly,loadResult:loadResult,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,readinessResult:readinessResult,recoveryIntelligence:resolveRecoveryIntelligence(date,data,readinessResult),energy:resolveEnergy(date),hasRecoverySignals:hasRecoverySignals,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
   }
   function metric(label,value,unit){var textValue=label==='Latest Activity'||label==='Aggressiveness';return '<div class="gp-metric '+(textValue?'gp-metric-text':'')+'"><small>'+esc(label)+'</small><b>'+esc(value==null?'—':value)+(value==null?'':'<em>'+esc(unit||'')+'</em>')+'</b></div>';}
-  function ring(label,value,color,stateLabel){var safeValue=number(value),pct=safeValue==null?0:clamp(safeValue,0,100);return '<div class="gp-ring-card '+(stateLabel?'partial':'')+'"><div class="gp-ring" style="--gp-value:'+pct+'%;--gp-ring-color:'+color+'"><div><b>'+esc(safeValue==null?'—':Math.round(safeValue))+'</b><small>'+esc(stateLabel||'/100')+'</small></div></div><small>'+esc(label)+'</small>'+(stateLabel?'<span>Kısmi veri</span>':'')+'</div>';}
   function recoveryRingColor(value){if(value==null||value>=60)return '#80c72e';if(value>=40)return '#f1b721';return '#e33a46';}
-  function loadRingColor(value){if(value==null||value<55)return '#168ed5';if(value<70)return '#f1b721';if(value<85)return '#e77d18';return '#e33a46';}
   function planName(model){
     if(model.gymPlan&&model.gymPlan.label)return window.SimurgLabels?window.SimurgLabels.sentence(model.gymPlan.label):model.gymPlan.label;
     var date=model.selectedDate||today(),name=null;try{if(typeof dayName==='function'&&typeof getProgramType==='function')name=getProgramType(dayName(date));}catch(e){}
@@ -100,7 +101,6 @@
     return window.SimurgLabels?window.SimurgLabels.ui(name):name;
   }
   function planDescription(model){var plan=model.gymPlan||{};if(plan.skipped)return 'Bu gün açıkça atlandı; plan aktif antrenman olarak gösterilmiyor.';if(plan.mode==='rest')return 'Bugün planlı antrenmanın yok.';if(plan.performed)return 'Gerçek kaydedilmiş seans tamamlandı.';if(plan.mode==='alternate')return 'Bu tarih için seçilen alternatif program henüz kaydedilmedi.';if(plan.mode==='custom')return 'Bu tarih için seçilen serbest antrenman henüz kaydedilmedi.';return 'Planlandı; henüz kaydedilmiş bir Gym seansı yok.';}
-  function planFocus(model){var plan=model.gymPlan||{};if(plan.skipped)return 'Bugün Gym progresyon hedefi yok; toparlanma ve diğer gerçek aktiviteler izlenir.';if(plan.mode==='rest')return 'Dinlenme gününde yeni Gym hedefi üretilmez.';return planName(model)+' bağlamında kaliteli tekrar ve tam hareket açıklığı.';}
   function activityDate(value,withYear){if(!value)return '';try{return new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'short',year:withYear?'numeric':undefined,timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));}catch(e){return value;}}
   function zoneSummary(activity){if(!activity||!activity.zones)return '';var keys=['zone1','zone2','zone3','zone4','zone5'],seconds=keys.map(function(key){var raw=String(activity.zones[key]||''),parts=raw.split(':').map(Number);return parts.length===3?parts[0]*3600+parts[1]*60+parts[2]:parts.length===2?parts[0]*60+parts[1]:0;}),max=Math.max.apply(null,seconds);return max>0?'Bölge '+(seconds.indexOf(max)+1)+' baskın':'';}
   function activityCard(activity,kicker,withYear){
@@ -120,12 +120,6 @@
     var kicker=date===today()?'BUGÜNKÜ AKTİVİTE':'SEÇİLİ GÜN AKTİVİTESİ';
     var tag=activity.polar?'button':'div',action=activity.polar?' type="button" data-gp-polar-date="'+esc(activity.date)+'" data-gp-polar-start="'+esc(activity.startTime||'')+'"':'';
     return '<'+tag+' class="gp-card gp-activity gp-activity-detail gp-home-activity '+(activity.polar?'tappable polar-source':'')+'"'+action+'><small class="gp-kicker">'+esc(kicker)+'</small><h3>'+esc(activity.name)+'</h3>'+(primary?'<p>'+esc(primary)+'</p>':'')+(heart?'<p>'+esc(heart)+'</p>':'')+(activity.source?'<span>'+esc(activity.source)+'</span>':'')+'</'+tag+'>';
-  }
-  function recoveryInterpretation(model){
-    if(!model.hasRecoverySignals&&model.readiness==null)return 'Henüz toparlanma verisi yok.';
-    if(model.readiness==null&&model.hasRecoverySignals)return 'Bugünkü toparlanma verisi kısmi. Mevcut HRV, dinlenik nabız ve solunum sinyallerini kontrollü yorumla; net recovery skoru için daha fazla Polar verisi gerekiyor.';
-    if((model.readiness!=null&&model.readiness<60)||(model.hrv!=null&&model.hrv<45)||(model.rhr!=null&&model.rhr>60))return 'Toparlanma sinyalleri kontrollü bir başlangıç öneriyor. Planı koru, agresif progresyondan kaçın.';
-    return 'Mevcut toparlanma sinyalleri bugünkü planı destekliyor. Çalışma setlerine kontrollü başla.';
   }
   function sleepInterpretation(model){
     if(model.sleepMinutes==null&&model.sleepScore==null)return 'Henüz uyku detayı yok.';
@@ -208,27 +202,62 @@
     var energy=model.energy||{},contributors=energy.contributors||{},activityScore=number(contributors.activityLoad&&contributors.activityLoad.score),trainingScore=number(contributors.trainingLoad&&contributors.trainingLoad.score),loadScore=activityScore==null||trainingScore==null?null:(activityScore*.12+trainingScore*.08)/.20;
     return '<section class="gp-card gp-energy-card '+esc(energy.status||'insufficient')+'"><div class="gp-energy-score"><small class="gp-kicker">ENERGY</small><b>'+esc(number(energy.score)==null?'—':Math.round(energy.score))+'</b><strong>'+esc(energyLabel(energy.status))+'</strong><span>Güven · '+esc(energyConfidence(energy.confidence))+'</span></div><div class="gp-energy-copy"><p>'+esc(energyExplanation(energy))+'</p><div class="gp-energy-contributors"><span>Uyku <b>'+esc(energyContributor(contributors.sleep))+'</b></span><span>Recovery <b>'+esc(energyContributor(contributors.recovery))+'</b></span><span>Yük <b>'+esc(loadScore==null?'—':Math.round(loadScore))+'</b></span></div></div></section>';
   }
+  function dailyStatusCard(model){
+    var decision=readinessDecision(model),context=model.selectedDate===today()?'Bugünkü durum':'Seçili günün durumu',confidence=model.readinessResult&&model.readinessResult.confidence&&model.readinessResult.confidence.label||'Bekleniyor';
+    return '<section class="gp-card gp-daily-status"><div><small class="gp-kicker">GÜNLÜK DURUM</small><h2>'+esc(decision.label)+'</h2><p>'+esc(context)+' · Veri güveni '+esc(confidence)+'</p></div><div class="gp-daily-status-tags"><span>Uyku <b data-coach-status="sleep">Veri bekleniyor</b></span><span>Toparlanma <b data-coach-status="recovery">Veri bekleniyor</b></span><span>Yük <b data-coach-status="load">Veri bekleniyor</b></span></div></section>';
+  }
+  function evidenceItem(tab,label,value,unit,caption,tone){
+    return '<button type="button" class="gp-evidence-item '+esc(tone||'')+'" onclick="homePremiumSetTab(\''+esc(tab)+'\')"><small>'+esc(label)+'</small><b>'+esc(value==null?'—':value)+(value==null?'':'<em>'+esc(unit||'')+'</em>')+'</b><span>'+esc(caption)+'</span></button>';
+  }
+  function dailyEvidenceCard(model){
+    var sleepValue=model.sleepScore==null?(model.sleepMinutes==null?null:formatSleep(model.sleepMinutes)):Math.round(model.sleepScore),sleepUnit=model.sleepScore==null?'':'/100',sleepCaption=model.sleepScore==null?'Uyku süresi':'Uyku skoru';
+    var hrLabel=model.polarNightly?'Night HR':'Resting HR';
+    return '<section class="gp-card gp-daily-evidence"><div class="gp-card-head"><h2>Günlük Kanıtlar</h2><span>'+esc(model.selectedDate===today()?'Bugün':'Seçili gün')+'</span></div><div class="gp-evidence-strip">'
+      +evidenceItem('sleep','Sleep',sleepValue,sleepUnit,sleepCaption,'sleep')
+      +evidenceItem('recovery','HRV',model.hrv==null?null:formatLoad(model.hrv),'ms','Gece ortalaması','hrv')
+      +evidenceItem('recovery',hrLabel,model.rhr==null?null:formatLoad(model.rhr),'bpm',model.polarNightly?'Polar gece verisi':'Mevcut kayıt','heart')
+      +evidenceItem('load','Cardio Load',loadValueLabel(model.loadResult),'',model.loadResult&&model.loadResult.available?text(model.loadResult.statusLabel,'Mevcut'):'Veri bekleniyor','load')
+      +'</div></section>';
+  }
   function overviewPane(model){
-    if(window.innerWidth>900){var desktopActivity=model.activity,decisionDesktop=readinessDecision(model),result=model.readinessResult||{},scoreDesktop=model.readiness==null?'—':Math.round(model.readiness),confidence=result.confidence&&result.confidence.label||'—',desktopActivityLabel=desktopActivity&&desktopActivity.polar?'Seçili Gün Polar Aktivitesi':'Seçili Gün Aktivitesi',activityHtmlDesktop=desktopActivity?activityCard(desktopActivity,desktopActivityLabel,false):'<div class="gp-card gp-activity"><small class="gp-kicker">SEÇİLİ GÜN AKTİVİTESİ</small><h3>Aktivite bulunmuyor</h3><p>Bu tarih için gerçek Polar veya eski kaynak aktivitesi kaydı yok.</p></div>';
+    if(window.innerWidth>900){var desktopActivity=model.activity,desktopActivityLabel=desktopActivity&&desktopActivity.polar?'Seçili Gün Polar Aktivitesi':'Seçili Gün Aktivitesi',activityHtmlDesktop=desktopActivity?activityCard(desktopActivity,desktopActivityLabel,false):'<div class="gp-card gp-activity"><small class="gp-kicker">SEÇİLİ GÜN AKTİVİTESİ</small><h3>Aktivite bulunmuyor</h3><p>Bu tarih için gerçek Polar veya eski kaynak aktivitesi kaydı yok.</p></div>';
       return '<div class="gp-home-pane active gp-desktop-overview" data-home-pane="overview">'
-        +'<section class="gp-desktop-prime gp-card '+decisionDesktop.tone+'"><div><small class="gp-kicker">READINESS PRIME</small><b>'+esc(scoreDesktop)+'</b><strong>'+esc(decisionDesktop.label)+'</strong></div><div><span>Güven · '+esc(confidence)+'</span><p>'+esc(coachSentence(model))+'</p></div><button type="button" onclick="simurgOpenAlert()">Simurg Uyarısı →</button></section>'
+        +dailyStatusCard(model)
+        +dailyEvidenceCard(model)
         +energyCard(model)
-        +'<section class="gp-desktop-signals">'+ring('Toparlanma',model.readiness,recoveryRingColor(model.readiness),model.readiness==null&&model.hasRecoverySignals?'SİNYALLER':'')+ring('Uyku',model.sleepScore,'#9b6be8')+ring('Yük',model.load,loadRingColor(model.load))+'</section>'
         +'<section class="gp-desktop-session-grid"><button type="button" class="gp-card gp-plan" onclick="desktopOpen(\'program\')"><i>⌘</i><div><small class="gp-kicker">SEÇİLİ GÜN PLANI</small><h3>'+esc(planName(model))+'</h3><p>'+esc(planDescription(model))+'</p></div><span>›</span></button>'+gymSessionCard(model)+activityHtmlDesktop+'</section>'
-        +'<section class="gp-card gp-coach-flow"><small class="gp-kicker">KOÇUN BUGÜN SENİN İÇİN</small><div><i>◎</i><b>Ana Hedef</b><span>'+esc(planFocus(model))+'</span></div><div><i>◇</i><b>Dikkat</b><span>'+esc(recoveryInterpretation(model))+'</span></div><div class="opportunity"><i>↗</i><b>Fırsat</b><span>'+esc(loadInterpretation(model))+'</span></div></section>'
         +weeklyCard(model)+'</div>';}
     var activityHtml=mobileActivityCard(model.activity,model.selectedDate);
-    var horizonContext=model.selectedDate===today()?'Bugünkü durum':'Seçili günün durumu';
     return '<div class="gp-home-pane active" data-home-pane="overview">'
-      +'<div class="gp-card gp-horizon"><div class="gp-horizon-head"><small class="gp-kicker">HORIZON</small><span>'+horizonContext+'</span></div><div class="gp-horizon-flow"><button type="button" class="gp-horizon-tile recovery" aria-label="Toparlanma detayını aç" onclick="homePremiumSetTab(\'recovery\')"><i aria-hidden="true">♥</i><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>Toparlanma</small><span data-coach-status="recovery">Veri bekleniyor</span></button><button type="button" class="gp-horizon-tile sleep" aria-label="Uyku detayını aç" onclick="homePremiumSetTab(\'sleep\')"><i aria-hidden="true">◒</i><b>'+esc(model.sleepScore==null?'—':Math.round(model.sleepScore))+'</b><small>Uyku</small><span data-coach-status="sleep">Veri bekleniyor</span></button><button type="button" class="gp-horizon-tile load" aria-label="Yük detayını aç" onclick="homePremiumSetTab(\'load\')"><i aria-hidden="true">⌁</i><b>'+esc(loadValueLabel(model.loadResult))+'</b><small>Günlük yük</small><span data-coach-status="load">Veri bekleniyor</span></button></div></div>'
+      +dailyStatusCard(model)
+      +dailyEvidenceCard(model)
       +energyCard(model)
       +mobileWorkoutCard(model)
       +activityHtml
       +weeklyCard(model,true)+'</div>';
   }
+  function recoveryStatusLabel(status){return {positive:'Baseline Üzeri',balanced:'Baseline Dengeli',strained:'Toparlanma Baskı Altında',insufficient:'Baseline Birikiyor'}[status]||'Baseline Birikiyor';}
+  function recoveryConfidenceLabel(value){var score=number(value);if(score==null||score<=0)return 'Yetersiz';if(score>=85)return 'Yüksek';if(score>=65)return 'Orta';return 'Düşük';}
+  function recoveryMetricCard(label,metricValue,unit,detail){
+    metricValue=metricValue||{};var value=number(metricValue.value),baseline=number(metricValue.baseline),deviation=number(metricValue.deviationPercent),comparison=metricValue.qualified?'Kişisel baseline '+(baseline==null?'—':formatLoad(baseline)+(unit?' '+unit:''))+(deviation==null?'':' · '+(deviation>0?'+':'')+formatLoad(deviation)+'%'):'Kişisel baseline için veri birikiyor';
+    return '<article class="gp-recovery-evidence '+esc(metricValue.status||'insufficient')+'"><small>'+esc(label)+'</small><b>'+esc(value==null?'—':formatLoad(value))+(value==null?'':'<em>'+esc(unit||'')+'</em>')+'</b><span>'+esc(comparison)+'</span>'+(detail?'<p>'+esc(detail)+'</p>':'')+'</article>';
+  }
+  function recoveryEvidence(model){
+    var intelligence=model.recoveryIntelligence||{},contributors=intelligence.contributors||{},ans=contributors.ansCharge||{},sleep=contributors.sleepCharge||{},sleepContext=sleep.sleepIntelligence||{},load=contributors.recentLoad||{},nightly=ans.nightlyRecharge||{};
+    var ansDetail=nightly.value==null?'Nightly Recharge verisi bekleniyor':'Nightly Recharge '+formatLoad(nightly.value)+(nightly.qualified&&nightly.baseline!=null?' · baseline '+formatLoad(nightly.baseline):'');
+    var sleepDetail=sleepContext.actualSleepMinutes==null?'Sleep Intelligence verisi bekleniyor':'Gerçek uyku '+formatSleep(sleepContext.actualSleepMinutes);
+    var loadDetail=load.value==null?'Önceki gün Cardio Load verisi yok':'Önceki günün mevcut Cardio Load değeri';
+    return '<section class="gp-card gp-recovery-context"><div class="gp-card-head"><h2>Kişisel Baseline Karşılaştırması</h2><span>'+esc(recoveryConfidenceLabel(intelligence.confidence))+' güven</span></div><div class="gp-recovery-evidence-grid">'
+      +recoveryMetricCard('HRV',contributors.hrv,'ms','Gece kalp hızı değişkenliği')
+      +recoveryMetricCard('Night HR',contributors.nightHr,'bpm','Polar gece nabzı')
+      +recoveryMetricCard('ANS Charge',ans,'',ansDetail)
+      +recoveryMetricCard('Sleep Charge',sleep,'',sleepDetail)
+      +recoveryMetricCard('Previous-day Load',load,'',loadDetail)
+      +'</div></section>';
+  }
   function recoveryPane(model){
-    var title=model.readiness!=null?(model.readiness>=70?'Hazır sinyali':'Kontrollü sinyal'):(model.hasRecoverySignals?'Kısmi Toparlanma Verisi':'Henüz toparlanma verisi yok');
-    return '<div class="gp-home-pane active" data-home-pane="recovery"><div class="gp-card"><div class="gp-hero-row"><div class="gp-ring gp-hero-ring" style="--gp-value:'+(model.readiness==null?0:clamp(model.readiness,0,100))+'%;--gp-ring-color:'+(model.readiness==null?'#64748b':'#80c72e')+'"><div><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>'+(model.readiness==null&&model.hasRecoverySignals?'SİNYALLER':'Toparlanma')+'</small></div></div><div class="gp-hero-copy"><small class="gp-kicker">TOPARLANMA NOTU</small><h2>'+esc(title)+'</h2><p>'+esc(recoveryInterpretation(model))+'</p></div></div></div>'+(model.hasRecoverySignals||model.readiness!=null?'<div class="gp-card"><div class="gp-card-head"><h2>Toparlanma Metrikleri</h2><span>'+(model.polarNightly?'POLAR VERİSİ':'Polar')+'</span></div><div class="gp-metric-grid">'+metric('Gece Toparlanması',model.nightlyDisplay,'')+metric('HRV',model.hrv,'ms')+metric('Dinlenik HR',model.rhr,'bpm')+metric('Solunum Hızı',model.respiratory,'/dk')+metric('Uyku HR',model.sleepHr,'bpm')+metric('Toparlanma Skoru',model.readiness,'/100')+'</div></div>':'')+'</div>';
+    var intelligence=model.recoveryIntelligence||{},status=intelligence.status||'insufficient',title=recoveryStatusLabel(status),action=intelligence.action||{},copy=text(action.recommendation,status==='insufficient'?'Recovery Intelligence için kişisel baseline verisi birikiyor.':'Toparlanma bağlamı mevcut kişisel baseline ile karşılaştırıldı.'),missing=Array.isArray(intelligence.missingData)?intelligence.missingData.length:0;
+    return '<div class="gp-home-pane active" data-home-pane="recovery"><section class="gp-card gp-recovery-hero '+esc(status)+'"><div class="gp-hero-row"><div class="gp-ring gp-hero-ring" style="--gp-value:'+(model.readiness==null?0:clamp(model.readiness,0,100))+'%;--gp-ring-color:'+recoveryRingColor(model.readiness)+'"><div><b>'+esc(model.readiness==null?'—':Math.round(model.readiness))+'</b><small>'+esc(model.readiness==null?'Bekleniyor':'Readiness')+'</small></div></div><div class="gp-hero-copy"><small class="gp-kicker">RECOVERY STATUS</small><h2>'+esc(title)+'</h2><p>'+esc(copy)+'</p><div class="gp-recovery-meta"><span>Güven <b>'+esc(recoveryConfidenceLabel(intelligence.confidence))+'</b></span><span>Veri durumu <b>'+esc(missing?'Kısmi':'Tam')+'</b></span></div></div></div></section>'+recoveryEvidence(model)+'</div>';
   }
   function stageBar(stages){
     if(!stages)return '<div class="gp-empty compact">Uyku evreleri henüz mevcut değil.</div>';

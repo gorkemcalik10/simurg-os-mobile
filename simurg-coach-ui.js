@@ -317,17 +317,13 @@
     var result=resolve('daily',date||selected());
     removeLegacyCoachCards(content);
     if(tab==='overview'){
-      if(root.innerWidth>900){
-        content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-home-insight '+statusTone(result)+'" onclick="simurgCoachOpen()"><span><small>COACH INSIGHT</small><b>'+esc(result.headline)+'</b><em>'+esc(decision(result))+' · Veri güveni '+esc(confidence(result))+'</em></span><i>Detay →</i></button>');
-        return;
-      }
       var statuses={sleep:sleepReason(result).status,recovery:recoveryReason(result).status,load:loadReason(result,model&&model.load).status};
       Object.keys(statuses).forEach(function(key){var node=content.querySelector('[data-coach-status="'+key+'"]');if(node)node.textContent=statuses[key];});
       var presentation=homeCoachPresentation(result,model,date||selected());
-      content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-home-insight '+presentation.tone+'" onclick="simurgCoachOpen()"><span><small>'+esc(presentation.kicker)+'</small><b>'+esc(presentation.title)+'</b><em>'+esc(presentation.explanation)+'</em></span><i>Detay →</i></button>');
+      content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-home-insight '+presentation.tone+'" aria-label="Koç kararının detayını aç" onclick="simurgCoachOpen()"><span><small>'+esc(presentation.kicker)+'</small><b>'+esc(presentation.title)+'</b><em>'+esc(presentation.explanation)+'</em></span><i>Detay →</i></button>');
     }else if(tab==='recovery'){
       var recovery=(result.recoveryActions||[])[0]||(result.keyDrivers||[])[0]||'Toparlanma için veri birikiyor.';
-      content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-recovery-insight" onclick="simurgCoachOpen()"><span><small>RECOVERY INSIGHT</small><b>'+esc(recovery)+'</b><em>Koçluk detayında nedenleri gör</em></span><i>→</i></button>');
+      content.insertAdjacentHTML('afterbegin','<button type="button" class="sci-recovery-insight" aria-label="Toparlanma koçluğunun detayını aç" onclick="simurgCoachOpen()"><span><small>RECOVERY INSIGHT</small><b>'+esc(recovery)+'</b><em>Koçluk detayında nedenleri gör</em></span><i>→</i></button>');
     }
   }
 

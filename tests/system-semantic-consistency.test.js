@@ -22,8 +22,8 @@ test('Home subtitle distinguishes today from a historical selection', () => {
   assert.match(premium, /subtitle\.textContent=homeSubtitle\(\)/);
 });
 
-test('daily load, near-term load and plan aggressiveness are named separately', () => {
-  assert.match(premium, /<small>Günlük yük<\/small>/);
+test('Cardio Load evidence, near-term load and plan aggressiveness are named separately', () => {
+  assert.match(premium, /evidenceItem\('load','Cardio Load'/);
   assert.match(premium, /metric\('Günlük Aktivite Yükü',loadValueLabel\(loadResult\),''\)/);
   assert.match(premium, /metric\('Yakın Dönem Yük Durumu',nearTerm,''\)/);
   assert.match(premium, /metric\('Plan Agresifliği',statusLabel,''\)/);
@@ -34,12 +34,13 @@ test('zero load keeps the Yük yok presentation', () => {
   assert.match(premium, /number\(loadResult\.value\)===0\?'Yük yok':formatLoad\(loadResult\.value\)/);
 });
 
-test('Recovery keeps one guidance rendering and Turkish presentation labels', () => {
+test('Recovery renders one baseline-aware intelligence recommendation', () => {
   const recoveryPane = premium.match(/function recoveryPane\(model\)\{([\s\S]*?)\n  \}/);
   assert.ok(recoveryPane);
-  assert.equal((recoveryPane[1].match(/recoveryInterpretation\(model\)/g) || []).length, 1);
-  assert.match(recoveryPane[1], /TOPARLANMA NOTU/);
-  assert.match(recoveryPane[1], /POLAR VERİSİ/);
+  assert.equal((recoveryPane[1].match(/action\.recommendation/g) || []).length, 1);
+  assert.match(recoveryPane[1], /RECOVERY STATUS/);
+  assert.match(recoveryPane[1], /recoveryEvidence\(model\)/);
+  assert.doesNotMatch(recoveryPane[1], /recoveryInterpretation/);
 });
 
 test('Sleep durations use Turkish units', () => {

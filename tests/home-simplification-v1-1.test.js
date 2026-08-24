@@ -55,16 +55,14 @@ run('zero load has a distinct semantic label while meaningful non-zero load keep
   assert.equal(ui.loadReason({ baseline: { cardioLoad: {}, cardioLoadRatio: {} } }, null).status, 'Veri bekleniyor');
 });
 
-run('Horizon is three accessible quick-navigation tiles without a connector line', () => {
-  const overview = premium.slice(premium.indexOf("var horizonContext="), premium.indexOf('function recoveryPane'));
-  for (const [tab, label] of [['recovery', 'Toparlanma'], ['sleep', 'Uyku'], ['load', 'Yük']]) {
-    assert.ok(overview.includes(`class="gp-horizon-tile ${tab}" aria-label="${label} detayını aç" onclick="homePremiumSetTab(\\'${tab}\\')"`));
-  }
-  assert.equal((overview.match(/class="gp-horizon-tile/g) || []).length, 3);
+run('Home v2 keeps one compact daily summary and four evidence links', () => {
+  const overview = premium.slice(premium.indexOf('function dailyStatusCard'), premium.indexOf('function recoveryStatusLabel'));
+  assert.match(overview, /GÜNLÜK DURUM/);
   assert.match(overview, /Bugünkü durum.*Seçili günün durumu/);
-  assert.match(css, /grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
-  assert.match(css, /\.gp-horizon-tile\{[^}]*min-width:0!important;[^}]*min-height:104px!important/);
-  assert.doesNotMatch(css, /\.gp-horizon-flow:before/);
+  for (const label of ['Sleep', 'HRV', 'Night HR', 'Resting HR', 'Cardio Load']) assert.ok(overview.includes(label));
+  assert.equal((overview.match(/evidenceItem\('/g) || []).length, 4);
+  assert.match(css, /\.gp-evidence-strip\{[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.doesNotMatch(overview, /gp-horizon/);
 });
 
 run('rest-day workout copy is plain and the status title remains canonical', () => {

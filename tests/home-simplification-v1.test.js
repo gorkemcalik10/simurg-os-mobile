@@ -26,7 +26,7 @@ run('Home Coach card uses all six plain-language decisions without technical con
   assert.doesNotMatch(homeBlock, /Veri güveni|loadAdjustmentPercent|result\.headline|decision\(result\)/);
 });
 
-run('Horizon statuses reuse the existing Coach semantic helpers', () => {
+run('daily status tags reuse the existing Coach semantic helpers', () => {
   const homeBlock = coach.slice(coach.indexOf("var statuses={sleep:"), coach.indexOf("}else if(tab==='recovery')"));
   assert.match(homeBlock, /sleep:sleepReason\(result\)\.status/);
   assert.match(homeBlock, /recovery:recoveryReason\(result\)\.status/);
