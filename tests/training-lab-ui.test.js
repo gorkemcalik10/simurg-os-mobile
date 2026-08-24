@@ -69,8 +69,8 @@ assert.match(css, /\.tlAnatomyStage\{[^}]*aspect-ratio:2\/3;overflow:hidden;cont
 assert.match(css, /\.tlAnatomyStage img\{object-fit:contain/);
 assert.doesNotMatch(css, /mix-blend-mode/);
 assert.match(css, /--tl-active:#e12d3f/);
-assert.match(css, /\.tlRegion\.primary\{[^}]*stroke:transparent;filter:none/);
-assert.match(css, /\.tlRegion\.secondary\{[^}]*stroke:transparent;filter:none/);
+assert.match(css, /\.tlRegion\.primary\{[^}]*fill-opacity:\.72;stroke:rgba\(255,110,124,\.2\);filter:none/);
+assert.match(css, /\.tlRegion\.secondary\{[^}]*fill-opacity:\.4;stroke:rgba\(255,157,119,\.14\);filter:none/);
 assert.match(css, /\.tlRegion\.primary\{[^}]*fill:var\(--tl-active\)/);
 assert.match(css, /\.tlRegion\.secondary\{[^}]*fill:#eb7041/);
 assert.doesNotMatch(css, /\.tlRegion\.active/);
@@ -105,5 +105,15 @@ assert.ok(quadBounds.rectus_femoris[0].maxX < quadBounds.vastus_medialis[0].minX
 assert.ok(quadBounds.vastus_medialis[1].maxX < quadBounds.rectus_femoris[1].minX);
 assert.ok(quadBounds.rectus_femoris[1].maxX < quadBounds.vastus_lateralis[1].minX);
 assert.ok(quadBounds.vastus_medialis[0].minY > 840 && quadBounds.vastus_medialis[1].minY > 840, 'vastus medialis must remain a distal teardrop region');
+
+assert.equal(regionSubpaths('abs').length, 10, 'abs highlight must follow the individual abdominal segments');
+assert.equal(regionSubpaths('quads').length, 6, 'quads highlight must follow the three visible heads on both legs');
+assert.equal(regionSubpaths('calves').length, 4, 'calves highlight must follow the visible gastrocnemius and soleus tissue');
+const detailedLowerTraps = regionSubpaths('lower_traps');
+assert.equal(detailedLowerTraps.length, 2, 'lower traps must preserve the central spine channel');
+assert.ok(detailedLowerTraps[0].maxX <= 758 && detailedLowerTraps[1].minX >= 764, 'lower traps must not paint across the spine');
+const detailedErectors = regionSubpaths('spinal_erectors');
+assert.equal(detailedErectors.length, 2, 'spinal erectors must be rendered as two narrow lumbar columns');
+assert.ok(detailedErectors[0].maxX - detailedErectors[0].minX <= 50 && detailedErectors[1].maxX - detailedErectors[1].minX <= 50, 'spinal erectors must not cover the full lower back');
 assert.doesNotMatch(index.match(/<section id="gym"[\s\S]*?<section id="daily"/)?.[0] || '', /Training Lab|tlMuscle|tlDistribution/);
 process.stdout.write('✓ Training Lab is a separate read-only responsive app section\n');
