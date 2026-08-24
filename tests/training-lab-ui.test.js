@@ -17,6 +17,17 @@ assert.match(index, /data-key="training-lab" onclick="SimurgTrainingLabUI\.open\
 assert.match(ui, /simurgV8Go\('training-lab','training-lab'\)/);
 assert.match(ui, /function anatomy\(selected,exercise\)/);
 assert.match(ui, /Training Lab · v3\.5/);
+assert.match(ui, /VISUAL_ROLE_OVERRIDES/);
+for (const mapping of [
+  "prone_y_raise:{primary:['trapezius_lower'],secondary:['trapezius_middle','rhomboid_major','posterior_deltoid']}",
+  "face_pull:{primary:['posterior_deltoid'],secondary:['trapezius_middle','rhomboid_major']}",
+  "straight_arm_pulldown:{primary:['latissimus_dorsi'],secondary:['teres_major','triceps_long_head']}",
+  "reverse_cable_curl:{primary:['brachialis'],secondary:[]}",
+  "romanian_deadlift:{primary:['hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus'],secondary:['gluteus_maximus']}",
+  "dumbbell_romanian_deadlift:{primary:['hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus'],secondary:['gluteus_maximus']}",
+  "conventional_deadlift:{primary:['gluteus_maximus','hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus'],secondary:['latissimus_dorsi','trapezius_upper','trapezius_middle']}",
+  "sumo_deadlift:{primary:['gluteus_maximus'],secondary:['hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus','rectus_femoris','vastus_lateralis','vastus_medialis']}"
+]) assert.ok(ui.includes(mapping), `${mapping.split(':')[0]} must keep its visual-only anatomy mapping`);
 assert.match(ui, /assets\/simurg-anatomy-base-v1\.png/);
 assert.ok(fs.existsSync(anatomyAsset), 'original local anatomy artwork must exist');
 assert.ok(fs.statSync(anatomyAsset).size < 1024 * 1024, 'anatomy artwork must stay below 1 MB');

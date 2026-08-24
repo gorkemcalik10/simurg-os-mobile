@@ -36,6 +36,16 @@
     internal_oblique:'M184 574 C202 561 217 576 220 601 L215 680 C201 700 182 686 177 661 Z M356 574 C338 561 323 576 320 601 L325 680 C339 700 358 686 363 661 Z',
     transverse_abdominis:'M193 627 C218 615 241 622 264 642 L264 697 C238 710 211 699 190 674 Z M276 642 C299 622 322 615 347 627 L350 674 C329 699 302 710 276 697 Z'
   };
+  var VISUAL_ROLE_OVERRIDES={
+    prone_y_raise:{primary:['trapezius_lower'],secondary:['trapezius_middle','rhomboid_major','posterior_deltoid']},
+    face_pull:{primary:['posterior_deltoid'],secondary:['trapezius_middle','rhomboid_major']},
+    straight_arm_pulldown:{primary:['latissimus_dorsi'],secondary:['teres_major','triceps_long_head']},
+    reverse_cable_curl:{primary:['brachialis'],secondary:[]},
+    romanian_deadlift:{primary:['hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus'],secondary:['gluteus_maximus']},
+    dumbbell_romanian_deadlift:{primary:['hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus'],secondary:['gluteus_maximus']},
+    conventional_deadlift:{primary:['gluteus_maximus','hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus'],secondary:['latissimus_dorsi','trapezius_upper','trapezius_middle']},
+    sumo_deadlift:{primary:['gluteus_maximus'],secondary:['hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus','rectus_femoris','vastus_lateralis','vastus_medialis']}
+  };
   function ready(fn){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn()}
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]})}
   function data(){try{return typeof root.simurgGetData==='function'?root.simurgGetData():(typeof DATA!=='undefined'?DATA:root.DATA||{workouts:[]})}catch(error){return root.DATA||{workouts:[]}}}
@@ -53,6 +63,8 @@
   function muscleCard(item){return '<button type="button" class="tlMuscle '+(state.muscle===item.id?'active':'')+'" data-tl-muscle="'+esc(item.id)+'" aria-pressed="'+(state.muscle===item.id)+'"><span><b>'+esc(item.label)+'</b><small>'+number(item.sets,1)+' set</small></span>'+trend(item)+'</button>'}
   function exerciseSelection(exercise){
     var anatomy=root.SimurgMuscleAnatomy,selected=Object.create(null),resolved=exercise&&Array.isArray(exercise.muscles)?exercise.muscles:null,mapping=!resolved&&exercise&&anatomy&&anatomy.getExerciseMapping(exercise.exerciseId);
+    var visualOverride=exercise&&VISUAL_ROLE_OVERRIDES[exercise.exerciseId];
+    if(visualOverride){visualOverride.secondary.forEach(function(id){selected[id]='secondary'});visualOverride.primary.forEach(function(id){selected[id]='primary'});return selected}
     if(resolved)resolved.forEach(function(item){if(anatomy.getVisualRegion(item.muscleId)&&(item.role==='primary'||!selected[item.muscleId]))selected[item.muscleId]=item.role==='primary'?'primary':'secondary'});
     else if(mapping){mapping.secondaryMuscles.forEach(function(item){if(anatomy.getVisualRegion(item.muscleId))selected[item.muscleId]='secondary'});mapping.primaryMuscles.forEach(function(item){if(anatomy.getVisualRegion(item.muscleId))selected[item.muscleId]='primary'})}
     return selected;

@@ -32,7 +32,8 @@ global.DATA = { workouts: [
   { date: '2026-08-18', exercise: 'Lat Pulldown', exerciseId: 'lat_pulldown', sets: 4, reps: 10, weight: 45 },
   { date: '2026-08-19', exercise: 'Leg Extension', exerciseId: 'leg_extension', sets: 2, reps: 15, weight: 35 },
   { date: '2026-08-20', exercise: 'Lateral Raise', exerciseId: 'dumbbell_lateral_raise', sets: 3, reps: 12, weight: 8 },
-  { date: '2026-08-21', exercise: 'Biceps Curl', exerciseId: 'dumbbell_curl', sets: 3, reps: 12, weight: 10 }
+  { date: '2026-08-21', exercise: 'Biceps Curl', exerciseId: 'dumbbell_curl', sets: 3, reps: 12, weight: 10 },
+  { date: '2026-08-21', exercise: 'Prone Y Raise', exerciseId: 'prone_y_raise', sets: 3, reps: 12, weight: 5 }
 ] };
 
 require('../simurg-training-lab-ui.js');
@@ -66,6 +67,13 @@ assert.match(section.innerHTML, /Rectus Femoris · Hareket Katkısı/);
 section.controls['data-tl-exercise:leg_extension'].handlers.click();
 for (const muscleId of ['rectus_femoris', 'vastus_lateralis', 'vastus_medialis']) assert.match(section.innerHTML, new RegExp(`class="tlRegion primary" data-tl-region="${muscleId}"`));
 for (const muscleId of ['hamstring_biceps_femoris', 'hamstring_semitendinosus', 'hamstring_semimembranosus', 'gastrocnemius', 'soleus']) assert.doesNotMatch(section.innerHTML, new RegExp(`class="tlRegion primary" data-tl-region="${muscleId}"`));
+
+section.controls['data-tl-group:Shoulders'].handlers.click();
+section.controls['data-tl-muscle:posterior_deltoid'].handlers.click();
+section.controls['data-tl-exercise:prone_y_raise'].handlers.click();
+assert.match(section.innerHTML, /class="tlRegion primary" data-tl-region="trapezius_lower"/);
+for (const muscleId of ['trapezius_middle', 'rhomboid_major', 'posterior_deltoid']) assert.match(section.innerHTML, new RegExp(`class="tlRegion secondary" data-tl-region="${muscleId}"`));
+assert.doesNotMatch(section.innerHTML, /class="tlRegion (?:primary|secondary)" data-tl-region="trapezius_upper"/);
 
 section.controls['data-tl-group:Shoulders'].handlers.click();
 section.controls['data-tl-muscle:lateral_deltoid'].handlers.click();
