@@ -16,35 +16,40 @@ assert.match(ui, /SimurgTrainingLabAnalysis\.analyze\(source,start\)/);
 assert.match(index, /data-key="training-lab" onclick="SimurgTrainingLabUI\.open\(\)"/);
 assert.match(ui, /simurgV8Go\('training-lab','training-lab'\)/);
 assert.match(ui, /function anatomy\(selected,exercise\)/);
-assert.match(ui, /Training Lab · v3\.5/);
+assert.match(ui, /Training Lab · v3\.6/);
 assert.match(ui, /VISUAL_ROLE_OVERRIDES/);
 for (const mapping of [
-  "prone_y_raise:{primary:['trapezius_lower'],secondary:['trapezius_middle','rhomboid_major','posterior_deltoid']}",
-  "face_pull:{primary:['posterior_deltoid'],secondary:['trapezius_middle','rhomboid_major']}",
-  "straight_arm_pulldown:{primary:['latissimus_dorsi'],secondary:['teres_major','triceps_long_head']}",
-  "reverse_cable_curl:{primary:['brachialis'],secondary:[]}",
-  "romanian_deadlift:{primary:['hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus'],secondary:['gluteus_maximus']}",
-  "dumbbell_romanian_deadlift:{primary:['hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus'],secondary:['gluteus_maximus']}",
-  "conventional_deadlift:{primary:['gluteus_maximus','hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus'],secondary:['latissimus_dorsi','trapezius_upper','trapezius_middle']}",
-  "sumo_deadlift:{primary:['gluteus_maximus'],secondary:['hamstring_biceps_femoris','hamstring_semitendinosus','hamstring_semimembranosus','rectus_femoris','vastus_lateralis','vastus_medialis']}"
+  "prone_y_raise:{primary:['lower_traps'],secondary:['rotator_cuff','posterior_deltoid']}",
+  "face_pull:{primary:['posterior_deltoid'],secondary:['rotator_cuff','lower_traps']}",
+  "straight_arm_pulldown:{primary:['lats'],secondary:['triceps_long']}",
+  "reverse_cable_curl:{primary:['forearms'],secondary:['biceps']}",
+  "romanian_deadlift:{primary:['hams'],secondary:['glutes','spinal_erectors']}",
+  "dumbbell_romanian_deadlift:{primary:['hams'],secondary:['glutes','spinal_erectors']}",
+  "conventional_deadlift:{primary:['glutes','hams'],secondary:['spinal_erectors','lats','upper_traps']}",
+  "sumo_deadlift:{primary:['glutes'],secondary:['hams','quads','adductors','spinal_erectors']}"
 ]) assert.ok(ui.includes(mapping), `${mapping.split(':')[0]} must keep its visual-only anatomy mapping`);
+assert.match(ui, /radialGradient id="tlPrimaryFill"/);
+assert.match(ui, /radialGradient id="tlSecondaryFill"/);
 assert.match(ui, /assets\/simurg-anatomy-base-v1\.png/);
 assert.ok(fs.existsSync(anatomyAsset), 'original local anatomy artwork must exist');
 assert.ok(fs.statSync(anatomyAsset).size < 1024 * 1024, 'anatomy artwork must stay below 1 MB');
 assert.match(sw, /assets\/simurg-anatomy-base-v1\.png/);
 assert.doesNotMatch(ui, /tlBodyShade|class="tlBody"|class="tlContours"/);
-for (const muscle of muscleAnatomy.muscles) assert.match(ui, new RegExp(`\\b${muscle.id}:`), `${muscle.id} must have a dedicated visual region`);
+const visualRegions = ['pectoralis_sternal','pectoralis_clavicular','abs','obliques','anterior_deltoid','middle_deltoid','biceps','forearms','quads','hip_flexors','adductors','upper_traps','lower_traps','spinal_erectors','lats','rotator_cuff','posterior_deltoid','triceps_long','triceps_lateral','glutes','hams','calves'];
+assert.equal(visualRegions.length, 22);
+for (const id of visualRegions) assert.match(ui, new RegExp(`\\b${id}:`), `${id} must have a visual region`);
 assert.match(ui, /data-tl-region/);
 assert.match(ui, /data-tl-group/);
 assert.match(ui, /data-selected-muscle=/);
 assert.match(ui, /data-selected-exercise=/);
 assert.match(ui, /data-tl-exercise/);
-assert.match(ui, /getVisualRegion\(item\.muscleId\)/);
+assert.match(ui, /function visualId\(id\)/);
+assert.match(ui, /function visualAnatomy\(result\)/);
 assert.match(ui, /Array\.isArray\(exercise\.muscles\)/);
 assert.match(ui, /mapping\.primaryMuscles/);
 assert.match(ui, /mapping\.secondaryMuscles/);
 assert.match(ui, /state\.muscle=id/);
-assert.match(ui, /result\.anatomy\.muscleMap\[state\.muscle\]/);
+assert.match(ui, /VISUAL_REGION_MAP\[id\]/);
 assert.match(ui, /Haftalık Anatomik Dağılım/);
 for (const label of ['Pectoralis Major Clavicular', 'Pectoralis Major Sternal', 'Latissimus Dorsi', 'Anterior Deltoid', 'Posterior Deltoid', 'Vastus Lateralis', 'Rectus Femoris']) assert.ok(muscleAnatomy.muscles.some(item => item.label === label), label);
 assert.match(ui, /<details class="tlCalculation"><summary>Hesaplama Notu/);
@@ -68,7 +73,7 @@ assert.doesNotMatch(css, /\.tlRegion\.active/);
 assert.doesNotMatch(ui, /tlGlow|feGaussianBlur/);
 
 function regionSubpaths(id) {
-  const match = ui.match(new RegExp(`\\b${id}:'([^']+)'`));
+  const match = ui.match(new RegExp(`\\n\\s+${id}:'(M[^']+)'`));
   assert.ok(match, `${id} SVG path must exist`);
   return match[1].split(/\s+Z\s*/).filter(Boolean).map(pathData => {
     const values = [...pathData.matchAll(/-?\d+(?:\.\d+)?/g)].map(item => Number(item[0]));
