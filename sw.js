@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-training-lab-anatomy-v3-9';
+const SIMURG_CACHE = 'simurg-training-lab-anatomy-v3-16';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,8 @@ const CORE_ASSETS = [
   './simurg-volume-model.js?v=1',
   './simurg-exercise-library.js?v=1',
   './simurg-muscle-anatomy.js?v=4',
+  './simurg-training-lab-anatomy-assets.js?v=6',
+  './simurg-training-lab-anatomy-renderer.js?v=5',
   './simurg-exercise-history.js?v=2',
   './simurg-next-session-target.js?v=1',
   './simurg-data-validation.js?v=8',
@@ -38,7 +40,7 @@ const CORE_ASSETS = [
   './mobile-ia-premium.css?v=11',
   './mobile-ia-premium.js?v=6',
   './simurg-training-lab.css?v=11',
-  './simurg-training-lab-ui.js?v=14',
+  './simurg-training-lab-ui.js?v=17',
   './assets/simurg-anatomy-base-v1.png',
   './assets/anatomy-masks/pectoralis_sternal.png',
   './assets/anatomy-masks/pectoralis_clavicular.png',
@@ -112,6 +114,18 @@ self.addEventListener('fetch', event => {
     return;
   }
   if (url.origin === location.origin) {
+    const trainingLabV2Asset = url.pathname.includes('/assets/training-lab-v2/');
+    if (trainingLabV2Asset) {
+      const isManifest = url.pathname.endsWith('/anatomy-manifest.json');
+      const hasAssetVersion = Boolean(url.searchParams.get('assetVersion'));
+      event.respondWith(fetch(req).then(res => {
+        if (!res.ok) throw new Error('training_lab_v2_asset_http_' + res.status);
+        const copy = res.clone();
+        if (isManifest || hasAssetVersion) caches.open(SIMURG_CACHE).then(cache => cache.put(req, copy));
+        return res;
+      }).catch(() => (isManifest || hasAssetVersion) ? caches.match(req) : undefined));
+      return;
+    }
     const localDev = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || /^192\.168\./.test(url.hostname);
     const liveAsset = req.destination === 'script' || req.destination === 'style' || /\.(?:js|css|html)$/.test(url.pathname);
     if (localDev && liveAsset) {

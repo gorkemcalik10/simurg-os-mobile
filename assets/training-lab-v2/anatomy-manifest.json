@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 2,
+  "assetVersion": "training-lab-v2-pending-source",
+  "status": "blocked_missing_validated_source",
+  "activation": {
+    "status": "pending_visual_approval",
+    "approvedBy": null,
+    "approvedAt": null,
+    "visualRegressionFixture": null
+  },
+  "coordinateSpace": "combined-atlas-pixels",
+  "origin": "top-left",
+  "formats": { "baseImage": "png-rgba-8", "mask": "png-alpha-8", "contour": "json-svg-path-v1" },
+  "canvas": { "width": 1024, "height": 1536, "aspectRatio": "2:3" },
+  "views": {
+    "front": { "x": 0, "y": 0, "width": 512, "height": 1536 },
+    "back": { "x": 512, "y": 0, "width": 512, "height": 1536 }
+  },
+  "quality": {
+    "alphaThreshold": 0,
+    "minAlphaCoverage": 0.0001,
+    "maxAlphaCoverage": 0.25,
+    "minBaseOverlap": 0.98,
+    "boundsTolerance": 1,
+    "minAtlasViewCoverage": 0.01,
+    "minAtlasRgbDynamicRange": 8,
+    "minAtlasSampledColors": 2,
+    "maxContourCount": 128,
+    "maxContourPoints": 50000
+  },
+  "baseImage": "./assets/training-lab-v2/anatomy-base.png",
+  "source": {
+    "validationStatus": "unverified",
+    "sourceUrl": null,
+    "license": null,
+    "author": null,
+    "sha256": null,
+    "notes": "A real anatomy master image must be approved and its usage rights verified before v2 can be activated."
+  },
+  "regions": [
+    { "regionId": "pectoralis_sternal", "view": "front", "canonicalMuscleIds": ["pectoralis_major_sternal", "pectoralis_minor"], "mask": "./assets/training-lab-v2/masks/pectoralis_sternal.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "pectoralis_clavicular", "view": "front", "canonicalMuscleIds": ["pectoralis_major_clavicular"], "mask": "./assets/training-lab-v2/masks/pectoralis_clavicular.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "abs", "view": "front", "canonicalMuscleIds": ["rectus_abdominis", "transverse_abdominis"], "mask": "./assets/training-lab-v2/masks/abs.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "obliques", "view": "front", "canonicalMuscleIds": ["obliques", "external_oblique", "internal_oblique"], "mask": "./assets/training-lab-v2/masks/obliques.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "anterior_deltoid", "view": "front", "canonicalMuscleIds": ["anterior_deltoid"], "mask": "./assets/training-lab-v2/masks/anterior_deltoid.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "middle_deltoid", "view": "front", "canonicalMuscleIds": ["lateral_deltoid"], "mask": "./assets/training-lab-v2/masks/middle_deltoid.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "posterior_deltoid", "view": "back", "canonicalMuscleIds": ["posterior_deltoid"], "mask": "./assets/training-lab-v2/masks/posterior_deltoid.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "biceps", "view": "front", "canonicalMuscleIds": ["biceps_brachii", "brachialis"], "mask": "./assets/training-lab-v2/masks/biceps.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "forearms", "view": "front", "canonicalMuscleIds": [], "mask": "./assets/training-lab-v2/masks/forearms.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "triceps_long", "view": "back", "canonicalMuscleIds": ["triceps_long_head"], "mask": "./assets/training-lab-v2/masks/triceps_long.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "triceps_lateral", "view": "back", "canonicalMuscleIds": ["triceps_lateral_head", "triceps_medial_head"], "mask": "./assets/training-lab-v2/masks/triceps_lateral.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "quads", "view": "front", "canonicalMuscleIds": ["rectus_femoris", "vastus_lateralis", "vastus_medialis"], "mask": "./assets/training-lab-v2/masks/quads.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "hip_flexors", "view": "front", "canonicalMuscleIds": [], "mask": "./assets/training-lab-v2/masks/hip_flexors.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "adductors", "view": "front", "canonicalMuscleIds": [], "mask": "./assets/training-lab-v2/masks/adductors.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "glutes", "view": "back", "canonicalMuscleIds": ["gluteus_maximus", "gluteus_medius"], "mask": "./assets/training-lab-v2/masks/glutes.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "hams", "view": "back", "canonicalMuscleIds": ["hamstring_biceps_femoris", "hamstring_semitendinosus", "hamstring_semimembranosus"], "mask": "./assets/training-lab-v2/masks/hams.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "calves", "view": "back", "canonicalMuscleIds": ["gastrocnemius", "soleus"], "mask": "./assets/training-lab-v2/masks/calves.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "upper_traps", "view": "back", "canonicalMuscleIds": ["trapezius_upper"], "mask": "./assets/training-lab-v2/masks/upper_traps.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "lower_traps", "view": "back", "canonicalMuscleIds": ["trapezius_middle", "trapezius_lower"], "mask": "./assets/training-lab-v2/masks/lower_traps.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "spinal_erectors", "view": "back", "canonicalMuscleIds": [], "mask": "./assets/training-lab-v2/masks/spinal_erectors.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "lats", "view": "back", "canonicalMuscleIds": ["rhomboid_major", "latissimus_dorsi", "teres_major"], "mask": "./assets/training-lab-v2/masks/lats.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" },
+    { "regionId": "rotator_cuff", "view": "back", "canonicalMuscleIds": [], "mask": "./assets/training-lab-v2/masks/rotator_cuff.png", "contour": null, "bounds": null, "canvas": { "width": 1024, "height": 1536 }, "status": "missing" }
+  ],
+  "activationRequirements": [
+    "verified anatomy source and usage license",
+    "non-empty base image matching the 1024x1536 canvas",
+    "22 non-empty alpha masks generated from that exact base image",
+    "region and canonical reference validation",
+    "pixel alignment and interaction regression tests"
+  ]
+}

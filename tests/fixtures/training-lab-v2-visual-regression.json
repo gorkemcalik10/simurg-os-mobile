@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "status": "pending_real_assets",
+  "renderers": ["legacy-v1", "v2"],
+  "viewports": [
+    { "id": "desktop", "width": 1280, "height": 900, "deviceScaleFactor": 1 },
+    { "id": "mobile", "width": 390, "height": 844, "deviceScaleFactor": 2 }
+  ],
+  "thresholds": { "maxPixelDiffRatio": 0.005, "maxDimensionDelta": 0 },
+  "scenarios": [
+    { "id": "neutral", "primary": [], "secondary": [] },
+    { "id": "chest_press", "primary": ["pectoralis_sternal", "pectoralis_clavicular"], "secondary": ["anterior_deltoid", "triceps_lateral"] },
+    { "id": "lat_pulldown", "primary": ["lats"], "secondary": ["biceps", "forearms"] },
+    { "id": "face_pull", "primary": ["posterior_deltoid"], "secondary": ["rotator_cuff", "lower_traps"] },
+    { "id": "prone_y_raise", "primary": ["lower_traps"], "secondary": ["rotator_cuff", "posterior_deltoid"] },
+    { "id": "squat", "primary": ["quads", "glutes"], "secondary": ["hams", "adductors"] },
+    { "id": "deadlift", "primary": ["glutes", "hams"], "secondary": ["spinal_erectors", "lats", "upper_traps"] }
+  ]
+}

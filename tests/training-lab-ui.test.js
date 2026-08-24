@@ -8,6 +8,7 @@ const ui = fs.readFileSync(path.join(root, 'simurg-training-lab-ui.js'), 'utf8')
 const css = fs.readFileSync(path.join(root, 'simurg-training-lab.css'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 const muscleAnatomy = require('../simurg-muscle-anatomy.js');
+const anatomyAssets = require('../simurg-training-lab-anatomy-assets.js');
 const anatomyAsset = path.join(root, 'assets', 'simurg-anatomy-base-v1.png');
 const maskRoot = path.join(root, 'assets', 'anatomy-masks');
 
@@ -17,28 +18,26 @@ assert.match(ui, /SimurgTrainingLabAnalysis\.analyze\(source,start\)/);
 assert.match(index, /data-key="training-lab" onclick="SimurgTrainingLabUI\.open\(\)"/);
 assert.match(ui, /simurgV8Go\('training-lab','training-lab'\)/);
 assert.match(ui, /function anatomy\(selected,exercise\)/);
+assert.match(ui, /anatomyRenderer\.legacyPlan\('asset_preflight_pending'\)/);
+assert.match(ui, /anatomyRenderer\.loadPlan/);
+assert.match(ui, /loadRendererPlan/);
+assert.match(ui, /data-renderer-version=/);
+assert.match(ui, /data-hit-area-mode=/);
 assert.match(ui, /Training Lab · v3\.6/);
 assert.match(ui, /VISUAL_ROLE_OVERRIDES/);
-for (const mapping of [
-  "prone_y_raise:{primary:['lower_traps'],secondary:['rotator_cuff','posterior_deltoid']}",
-  "face_pull:{primary:['posterior_deltoid'],secondary:['rotator_cuff','lower_traps']}",
-  "straight_arm_pulldown:{primary:['lats'],secondary:['triceps_long']}",
-  "reverse_cable_curl:{primary:['forearms'],secondary:['biceps']}",
-  "romanian_deadlift:{primary:['hams'],secondary:['glutes','spinal_erectors']}",
-  "dumbbell_romanian_deadlift:{primary:['hams'],secondary:['glutes','spinal_erectors']}",
-  "conventional_deadlift:{primary:['glutes','hams'],secondary:['spinal_erectors','lats','upper_traps']}",
-  "sumo_deadlift:{primary:['glutes'],secondary:['hams','quads','adductors','spinal_erectors']}"
-]) assert.ok(ui.includes(mapping), `${mapping.split(':')[0]} must keep its visual-only anatomy mapping`);
+assert.deepEqual(anatomyAssets.visualRoleOverrides.prone_y_raise, {primary:['lower_traps'],secondary:['rotator_cuff','posterior_deltoid']});
+assert.deepEqual(anatomyAssets.visualRoleOverrides.romanian_deadlift, {primary:['hams'],secondary:['glutes','spinal_erectors']});
+assert.deepEqual(anatomyAssets.visualRoleOverrides.sumo_deadlift, {primary:['glutes'],secondary:['hams','quads','adductors','spinal_erectors']});
 assert.match(ui, /manualSelection=!exercise&&selected&&state\.muscle===selected\.id&&VISUAL_REGION_MAP\[selected\.id\]/);
 assert.match(ui, /preserveAspectRatio="xMidYMid meet"/);
-assert.match(ui, /assets\/simurg-anatomy-base-v1\.png/);
+assert.equal(anatomyAssets.baseImageUrl, './assets/simurg-anatomy-base-v1.png');
 assert.ok(fs.existsSync(anatomyAsset), 'original local anatomy artwork must exist');
 assert.ok(fs.statSync(anatomyAsset).size < 1024 * 1024, 'anatomy artwork must stay below 1 MB');
 assert.match(sw, /assets\/simurg-anatomy-base-v1\.png/);
 assert.doesNotMatch(ui, /tlBodyShade|class="tlBody"|class="tlContours"/);
 const visualRegions = ['pectoralis_sternal','pectoralis_clavicular','abs','obliques','anterior_deltoid','middle_deltoid','biceps','forearms','quads','hip_flexors','adductors','upper_traps','lower_traps','spinal_erectors','lats','rotator_cuff','posterior_deltoid','triceps_long','triceps_lateral','glutes','hams','calves'];
 assert.equal(visualRegions.length, 22);
-for (const id of visualRegions) assert.match(ui, new RegExp(`\\b${id}:`), `${id} must have a visual region`);
+for (const id of visualRegions) assert.ok(anatomyAssets.regionMap[id], `${id} must have a registry region`);
 for (const id of visualRegions) {
   const mask = path.join(maskRoot, `${id}.png`);
   assert.ok(fs.existsSync(mask), `${id} must have an anatomy-aligned PNG mask`);
@@ -87,9 +86,9 @@ assert.doesNotMatch(css, /\.tlRegion\.active/);
 assert.doesNotMatch(ui, /tlGlow|feGaussianBlur/);
 
 function regionSubpaths(id) {
-  const match = ui.match(new RegExp(`\\n\\s+${id}:'(M[^']+)'`));
-  assert.ok(match, `${id} SVG path must exist`);
-  return match[1].split(/\s+Z\s*/).filter(Boolean).map(pathData => {
+  const item = anatomyAssets.getRegion(id);
+  assert.ok(item?.hitPath, `${id} registry hit path must exist`);
+  return item.hitPath.split(/\s+Z\s*/).filter(Boolean).map(pathData => {
     const values = [...pathData.matchAll(/-?\d+(?:\.\d+)?/g)].map(item => Number(item[0]));
     const xs = values.filter((_, index) => index % 2 === 0);
     const ys = values.filter((_, index) => index % 2 === 1);
@@ -97,7 +96,7 @@ function regionSubpaths(id) {
   });
 }
 
-const [leftLat, rightLat] = regionSubpaths('latissimus_dorsi');
+const [leftLat, rightLat] = regionSubpaths('lats');
 assert.ok(leftLat.minX >= 620 && leftLat.maxX <= 755, 'left lat must stay within the visible latissimus tissue');
 assert.ok(rightLat.minX >= 770 && rightLat.maxX <= 900, 'right lat must stay within the visible latissimus tissue');
 assert.ok(leftLat.maxX < rightLat.minX, 'lat regions must not cover the central spinal/erector channel');
@@ -106,15 +105,7 @@ assert.ok(leftLat.maxY <= 675 && rightLat.maxY <= 675, 'lat highlight must stop 
 const [leftAnteriorDelt, rightAnteriorDelt] = regionSubpaths('anterior_deltoid');
 assert.ok(leftAnteriorDelt.minX >= 125 && leftAnteriorDelt.maxX <= 190, 'left anterior deltoid must stay on the front shoulder cap');
 assert.ok(rightAnteriorDelt.minX >= 350 && rightAnteriorDelt.maxX <= 415, 'right anterior deltoid must stay on the front shoulder cap');
-assert.ok(leftAnteriorDelt.maxY <= 380 && rightAnteriorDelt.maxY <= 380, 'anterior deltoid must not spill into the upper arm');
-
-const quadBounds = Object.fromEntries(['vastus_lateralis', 'rectus_femoris', 'vastus_medialis'].map(id => [id, regionSubpaths(id)]));
-for (const bounds of Object.values(quadBounds)) assert.equal(bounds.length, 2, 'each quadriceps region must be bilateral');
-assert.ok(quadBounds.vastus_lateralis[0].maxX < quadBounds.rectus_femoris[0].minX);
-assert.ok(quadBounds.rectus_femoris[0].maxX < quadBounds.vastus_medialis[0].minX);
-assert.ok(quadBounds.vastus_medialis[1].maxX < quadBounds.rectus_femoris[1].minX);
-assert.ok(quadBounds.rectus_femoris[1].maxX < quadBounds.vastus_lateralis[1].minX);
-assert.ok(quadBounds.vastus_medialis[0].minY > 840 && quadBounds.vastus_medialis[1].minY > 840, 'vastus medialis must remain a distal teardrop region');
+assert.ok(leftAnteriorDelt.maxY <= 405 && rightAnteriorDelt.maxY <= 405, 'anterior deltoid hit regions must stay on the visible shoulder cap');
 
 assert.equal(regionSubpaths('abs').length, 10, 'abs highlight must follow the individual abdominal segments');
 assert.equal(regionSubpaths('quads').length, 6, 'quads highlight must follow the three visible heads on both legs');

@@ -43,6 +43,9 @@ global.DATA = { workouts: [
 
 require('../simurg-training-lab-ui.js');
 global.SimurgTrainingLabUI.render();
+assert.equal(global.SimurgTrainingLabUI.rendererPlan.activeVersion, 'legacy-v1');
+assert.match(section.innerHTML, /data-renderer-version="legacy-v1"/);
+assert.equal([...section.innerHTML.matchAll(/data-hit-area-mode="legacy-svg-path"/g)].length, 22);
 
 function assertMask(role, muscleId) {
   assert.match(section.innerHTML, new RegExp(`class="tlMask ${role}"[^>]+anatomy-masks/${muscleId}\\.png`));
