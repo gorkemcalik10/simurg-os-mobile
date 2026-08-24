@@ -16,7 +16,7 @@ assert.match(ui, /SimurgTrainingLabAnalysis\.analyze\(source,start\)/);
 assert.match(index, /data-key="training-lab" onclick="SimurgTrainingLabUI\.open\(\)"/);
 assert.match(ui, /simurgV8Go\('training-lab','training-lab'\)/);
 assert.match(ui, /function anatomy\(selected,exercise\)/);
-assert.match(ui, /Training Lab · v3\.4/);
+assert.match(ui, /Training Lab · v3\.5/);
 assert.match(ui, /assets\/simurg-anatomy-base-v1\.png/);
 assert.ok(fs.existsSync(anatomyAsset), 'original local anatomy artwork must exist');
 assert.ok(fs.statSync(anatomyAsset).size < 1024 * 1024, 'anatomy artwork must stay below 1 MB');
@@ -46,15 +46,15 @@ assert.match(css, /\.tlSummary\{display:grid;grid-template-columns:repeat\(4/);
 assert.match(css, /\.tlMuscleGrid\{display:grid;grid-template-columns:repeat\(3/);
 assert.match(css, /@media\(max-width:900px\)[\s\S]*?\.tlMuscleGrid\{grid-template-columns:repeat\(2/);
 assert.match(css, /@media\(max-width:900px\)[\s\S]*?\.tlMuscle b\{font-size:9px;white-space:normal;overflow:visible;text-overflow:clip/);
-assert.match(css, /\.tlRegion\.active/);
 assert.match(css, /\.tlRegion\.primary/);
 assert.match(css, /\.tlRegion\.secondary/);
 assert.match(css, /\.tlAnatomyStage\{position:relative/);
-assert.match(css, /mix-blend-mode:screen/);
+assert.match(css, /mix-blend-mode:color/);
 assert.match(css, /--tl-active:#e12d3f/);
 assert.match(css, /\.tlRegion\.primary\{[^}]*stroke:transparent;filter:none/);
 assert.match(css, /\.tlRegion\.secondary\{[^}]*stroke:transparent;filter:none/);
-assert.match(css, /\.tlRegion\.active\{[^}]*stroke:transparent;filter:none/);
+assert.doesNotMatch(css, /\.tlRegion\.active/);
+assert.doesNotMatch(ui, /tlGlow|feGaussianBlur/);
 
 function regionSubpaths(id) {
   const match = ui.match(new RegExp(`\\b${id}:'([^']+)'`));
@@ -68,9 +68,15 @@ function regionSubpaths(id) {
 }
 
 const [leftLat, rightLat] = regionSubpaths('latissimus_dorsi');
-assert.ok(leftLat.minX <= 600 && leftLat.maxX <= 714, 'left lat must stay lateral and outside the central back');
-assert.ok(rightLat.minX >= 808 && rightLat.maxX >= 922, 'right lat must stay lateral and outside the central back');
-assert.ok(leftLat.maxY <= 660 && rightLat.maxY <= 660, 'lat highlight must stop above the lumbar/erector region');
+assert.ok(leftLat.minX >= 620 && leftLat.maxX <= 755, 'left lat must stay within the visible latissimus tissue');
+assert.ok(rightLat.minX >= 770 && rightLat.maxX <= 900, 'right lat must stay within the visible latissimus tissue');
+assert.ok(leftLat.maxX < rightLat.minX, 'lat regions must not cover the central spinal/erector channel');
+assert.ok(leftLat.maxY <= 675 && rightLat.maxY <= 675, 'lat highlight must stop above the lumbar/hip region');
+
+const [leftAnteriorDelt, rightAnteriorDelt] = regionSubpaths('anterior_deltoid');
+assert.ok(leftAnteriorDelt.minX >= 125 && leftAnteriorDelt.maxX <= 190, 'left anterior deltoid must stay on the front shoulder cap');
+assert.ok(rightAnteriorDelt.minX >= 350 && rightAnteriorDelt.maxX <= 415, 'right anterior deltoid must stay on the front shoulder cap');
+assert.ok(leftAnteriorDelt.maxY <= 380 && rightAnteriorDelt.maxY <= 380, 'anterior deltoid must not spill into the upper arm');
 
 const quadBounds = Object.fromEntries(['vastus_lateralis', 'rectus_femoris', 'vastus_medialis'].map(id => [id, regionSubpaths(id)]));
 for (const bounds of Object.values(quadBounds)) assert.equal(bounds.length, 2, 'each quadriceps region must be bilateral');
