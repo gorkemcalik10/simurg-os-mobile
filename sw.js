@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-training-lab-anatomy-v3-6';
+const SIMURG_CACHE = 'simurg-training-lab-anatomy-v3-7';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -37,8 +37,8 @@ const CORE_ASSETS = [
   './desktop-alignment.js?v=35',
   './mobile-ia-premium.css?v=11',
   './mobile-ia-premium.js?v=6',
-  './simurg-training-lab.css?v=8',
-  './simurg-training-lab-ui.js?v=11',
+  './simurg-training-lab.css?v=9',
+  './simurg-training-lab-ui.js?v=12',
   './assets/simurg-anatomy-base-v1.png',
   './icons/icon-192.png',
   './icons/icon-512.png'

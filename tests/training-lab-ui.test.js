@@ -28,8 +28,8 @@ for (const mapping of [
   "conventional_deadlift:{primary:['glutes','hams'],secondary:['spinal_erectors','lats','upper_traps']}",
   "sumo_deadlift:{primary:['glutes'],secondary:['hams','quads','adductors','spinal_erectors']}"
 ]) assert.ok(ui.includes(mapping), `${mapping.split(':')[0]} must keep its visual-only anatomy mapping`);
-assert.match(ui, /radialGradient id="tlPrimaryFill"/);
-assert.match(ui, /radialGradient id="tlSecondaryFill"/);
+assert.match(ui, /manualSelection=!exercise&&selected&&state\.muscle===selected\.id&&VISUAL_REGION_MAP\[selected\.id\]/);
+assert.match(ui, /preserveAspectRatio="xMidYMid meet"/);
 assert.match(ui, /assets\/simurg-anatomy-base-v1\.png/);
 assert.ok(fs.existsSync(anatomyAsset), 'original local anatomy artwork must exist');
 assert.ok(fs.statSync(anatomyAsset).size < 1024 * 1024, 'anatomy artwork must stay below 1 MB');
@@ -65,10 +65,14 @@ assert.match(css, /@media\(max-width:900px\)[\s\S]*?\.tlMuscle b\{font-size:9px;
 assert.match(css, /\.tlRegion\.primary/);
 assert.match(css, /\.tlRegion\.secondary/);
 assert.match(css, /\.tlAnatomyStage\{position:relative/);
-assert.match(css, /mix-blend-mode:color/);
+assert.match(css, /\.tlAnatomyStage\{[^}]*aspect-ratio:2\/3;overflow:hidden;contain:layout paint/);
+assert.match(css, /\.tlAnatomyStage img\{object-fit:contain/);
+assert.doesNotMatch(css, /mix-blend-mode/);
 assert.match(css, /--tl-active:#e12d3f/);
 assert.match(css, /\.tlRegion\.primary\{[^}]*stroke:transparent;filter:none/);
 assert.match(css, /\.tlRegion\.secondary\{[^}]*stroke:transparent;filter:none/);
+assert.match(css, /\.tlRegion\.primary\{[^}]*fill:var\(--tl-active\)/);
+assert.match(css, /\.tlRegion\.secondary\{[^}]*fill:#eb7041/);
 assert.doesNotMatch(css, /\.tlRegion\.active/);
 assert.doesNotMatch(ui, /tlGlow|feGaussianBlur/);
 

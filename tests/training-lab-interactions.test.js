@@ -46,6 +46,7 @@ global.SimurgTrainingLabUI.render();
 
 section.controls['data-tl-muscle:pectoralis_clavicular'].handlers.click();
 assert.match(section.innerHTML, /data-selected-muscle="pectoralis_clavicular"/);
+assert.match(section.innerHTML, /class="tlRegion primary" data-tl-region="pectoralis_clavicular"/);
 assert.match(section.innerHTML, /Pectoralis Clavicular · Hareket Katkısı/);
 assert.match(section.innerHTML, /Incline Dumbbell Press/);
 assert.match(section.innerHTML, /<strong>4 efektif set<\/strong>/);
@@ -53,6 +54,7 @@ section.controls['data-tl-exercise:incline_dumbbell_press'].handlers.click();
 assert.match(section.innerHTML, /data-selected-exercise="incline_dumbbell_press"/);
 assert.match(section.innerHTML, /class="tlRegion primary" data-tl-region="pectoralis_clavicular"/);
 assert.match(section.innerHTML, /class="tlRegion secondary" data-tl-region="anterior_deltoid"/);
+for (const muscleId of ['triceps_long', 'triceps_lateral']) assert.match(section.innerHTML, new RegExp(`class="tlRegion secondary" data-tl-region="${muscleId}"`));
 assert.doesNotMatch(section.innerHTML, /class="tlRegion primary" data-tl-region="pectoralis_sternal"/);
 
 section.controls['data-tl-region:posterior_deltoid'].handlers.click();
@@ -65,6 +67,7 @@ section.controls['data-tl-muscle:lats'].handlers.click();
 assert.match(section.innerHTML, /data-selected-muscle="lats"/);
 section.controls['data-tl-exercise:lat_pulldown'].handlers.click();
 assert.match(section.innerHTML, /class="tlRegion primary" data-tl-region="lats"/);
+assert.match(section.innerHTML, /class="tlRegion secondary" data-tl-region="biceps"/);
 assert.doesNotMatch(section.innerHTML, /class="tlRegion primary" data-tl-region="lower_traps"/);
 assert.doesNotMatch(section.innerHTML, /class="tlRegion (?:primary|secondary)" data-tl-region="rotator_cuff"/);
 
