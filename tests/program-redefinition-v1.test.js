@@ -23,6 +23,8 @@ test('mobile Program is a seven-day training plan with Turkish product copy', ()
 test('Program reuses canonical plan and exercise data already in memory', () => {
   assert.match(mobile, /window\.SimurgSignalModel\.day\(date\)/);
   assert.match(mobile, /gymItemsForDate\(date\)/);
+  assert.match(mobile, /SimurgCoachClient\.resolveDecision\(date/);
+  assert.match(mobile, /model\.coach\.workoutGuidance/);
   assert.match(mobile, /data-exercise-id/);
   assert.doesNotMatch(mobile.match(/function renderMobileProgram\(\)\{([\s\S]*?)\n  \}/)[1], /Coach|resolve\(|setInterval|setTimeout|MutationObserver/);
 });

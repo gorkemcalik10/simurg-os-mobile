@@ -17,6 +17,11 @@
   function longDate(value){try{return new Intl.DateTimeFormat('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));}catch(error){return value;}}
   function resolve(type,date){return root.SimurgCoachClient.resolve(type,date,{data:data()});}
   function resolveImmediate(type,date){return root.SimurgCoachClient.resolve(type,date,{data:data(),store:false,engineOptions:{deferTechnical:true}});}
+  function resolveDecision(date,immediate){
+    var options={data:data()};
+    if(immediate){options.store=false;options.engineOptions={deferTechnical:true};}
+    return root.SimurgCoachClient.resolveDecision(date,options);
+  }
   function list(items,emptyText,limit){
     var rows=(items||[]).slice(0,limit||4);
     return rows.length?'<ul>'+rows.map(function(item){var text=typeof item==='string'?item:(item.summary||item.title||'');return '<li>'+esc(text)+'</li>';}).join('')+'</ul>':'<p class="sci-empty">'+esc(emptyText)+'</p>';
@@ -257,10 +262,10 @@
       +'<h3>Ham koç gerekçesi</h3><p>'+esc(result.summary)+'</p><h3>Güvenlik notu</h3><p>'+esc(result.medicalDisclaimer)+'</p></div>';
   }
   function dailyView(date){
-    var daily=resolveImmediate('daily',date),pre=resolveImmediate('pre_workout',date);state.dailyResults={date:date,daily:daily,pre:pre};
-    return '<section class="sci-decision '+statusTone(pre)+'"><div><small>BUGÜN NE YAPAYIM?</small><h2>'+esc(dailyDecision(pre))+'</h2><p>'+esc(plainDecisionExplanation(pre))+'</p></div><span>Hazırlık '+esc(score(daily))+'</span></section>'
-      +'<section class="sci-reasons" aria-labelledby="sciReasonsTitle"><h2 id="sciReasonsTitle">Neden?</h2>'+reasonCards(daily)+'</section>'
-      +warningsCard(pre)+workoutNote(pre)
+    var canonical=resolveDecision(date,true);state.dailyResults={date:date,daily:canonical,pre:canonical};
+    return '<section class="sci-decision '+statusTone(canonical)+'"><div><small>BUGÜN NE YAPAYIM?</small><h2>'+esc(dailyDecision(canonical))+'</h2><p>'+esc(plainDecisionExplanation(canonical))+'</p></div><span>Hazırlık '+esc(score(canonical))+'</span></section>'
+      +'<section class="sci-reasons" aria-labelledby="sciReasonsTitle"><h2 id="sciReasonsTitle">Neden?</h2>'+reasonCards(canonical)+'</section>'
+      +warningsCard(canonical)+workoutNote(canonical)
       +'<details class="sci-details sci-disclosure" ontoggle="simurgCoachToggleDetails(this,\'metrics\')"><summary>Verilerimi Göster</summary><div data-lazy-content="metrics"><p class="sci-empty">Açıldığında günlük ölçümlerin gösterilir.</p></div></details>'
       +'<details class="sci-details sci-disclosure" ontoggle="simurgCoachToggleDetails(this,\'technical\')"><summary>Teknik Detaylar</summary><div data-lazy-content="technical"><p class="sci-empty">Açıldığında ayrıntılı analiz hazırlanır.</p></div></details>';
   }
@@ -296,15 +301,15 @@
     if(root.innerWidth<=900)return false;
     section=section||document.getElementById('coaching');if(!section)return false;
     date=date||selected();state.date=date;
-    var daily=resolve('daily',date),pre=resolve('pre_workout',date),weekly=resolve('weekly',date),pattern=resolve('pattern',date);
+    var canonical=resolveDecision(date),weekly=resolve('weekly',date),pattern=resolve('pattern',date);
     section.classList.remove('gp-coaching-empty');section.classList.add('sci-coaching');
     section.innerHTML='<div id="desktopLegacyCoaching" class="sci-desktop-shell" data-coach-intelligence="1">'+nav(date)
-      +hero(daily,'BUGÜNKÜ KARAR')
-      +'<div class="sci-priority-grid"><section class="sci-card"><header><small>NEDEN?</small><h3>Diğer sinyaller</h3></header>'+list((daily.keyDrivers||[]).slice(2),'Ana nedenler üst özette gösteriliyor.',4)+'</section><section class="sci-card sci-action"><header><small>BUGÜN YAP</small><h3>'+esc(decision(pre))+'</h3></header>'+list(actionItems(pre),'Programı koru ve ilk sette formu kontrol et.',3)+'<strong>'+esc(adjustment(pre))+'</strong></section><section class="sci-card sci-warning"><header><small>SAFETY</small><h3>AI’dan bağımsız koruma</h3></header>'+list(daily.warnings,'Belirgin risk uyarısı yok.',4)+'</section></div>'
-      +'<section class="sci-card"><header><small>HAREKET REHBERİ</small><h3>Ana Hareket / Tamamlayıcı / Stabilite / Kondisyon</h3></header>'+guidance(pre)+'</section>'
+      +hero(canonical,'BUGÜNKÜ KARAR')
+      +'<div class="sci-priority-grid"><section class="sci-card"><header><small>NEDEN?</small><h3>Diğer sinyaller</h3></header>'+list((canonical.keyDrivers||[]).slice(2),'Ana nedenler üst özette gösteriliyor.',4)+'</section><section class="sci-card sci-action"><header><small>BUGÜN YAP</small><h3>'+esc(decision(canonical))+'</h3></header>'+list(actionItems(canonical),'Programı koru ve ilk sette formu kontrol et.',3)+'<strong>'+esc(adjustment(canonical))+'</strong></section><section class="sci-card sci-warning"><header><small>SAFETY</small><h3>AI’dan bağımsız koruma</h3></header>'+list(canonical.warnings,'Belirgin risk uyarısı yok.',4)+'</section></div>'
+      +'<section class="sci-card"><header><small>HAREKET REHBERİ</small><h3>Ana Hareket / Tamamlayıcı / Stabilite / Kondisyon</h3></header>'+guidance(canonical)+'</section>'
       +'<div class="sci-desktop-grid wide"><section class="sci-card"><header><small>7 GÜNLÜK KARŞILAŞTIRMA</small><h3>Baseline ve sapmalar</h3></header>'+historyComparison(date)+'</section><section class="sci-card"><header><small>HAFTALIK COACH</small><h3>'+esc(weekly.headline)+'</h3></header><p>'+esc(weekly.summary)+'</p>'+list(weekly.keyDrivers,'Haftalık veri birikiyor.',4)+'</section></div>'
-      +'<div class="sci-desktop-grid wide"><section class="sci-card"><header><small>PATTERN COACH</small><h3>'+esc(pattern.headline)+'</h3></header><p>'+esc(pattern.summary)+'</p>'+list(pattern.trendInsights,'Minimum örnek eşiği henüz aşılmadı.',5)+'</section><section class="sci-card sci-recovery"><header><small>RECOVERY ACTIONS</small><h3>Bugün uygulanabilir</h3></header>'+list(daily.recoveryActions,'Ek aksiyon yok.',5)+'</section></div>'
-      +'<footer class="sci-disclaimer">'+esc(daily.medicalDisclaimer)+'</footer></div>';
+      +'<div class="sci-desktop-grid wide"><section class="sci-card"><header><small>PATTERN COACH</small><h3>'+esc(pattern.headline)+'</h3></header><p>'+esc(pattern.summary)+'</p>'+list(pattern.trendInsights,'Minimum örnek eşiği henüz aşılmadı.',5)+'</section><section class="sci-card sci-recovery"><header><small>RECOVERY ACTIONS</small><h3>Bugün uygulanabilir</h3></header>'+list(canonical.recoveryActions,'Ek aksiyon yok.',5)+'</section></div>'
+      +'<footer class="sci-disclaimer">'+esc(canonical.medicalDisclaimer)+'</footer></div>';
     return true;
   }
   function removeLegacyCoachCards(content){
@@ -318,7 +323,7 @@
   }
   function decorateHome(content,tab,date,model){
     if(!content||!root.SimurgCoachClient)return;
-    var result=resolve('daily',date||selected());
+    var result=resolveDecision(date||selected());
     removeLegacyCoachCards(content);
     if(tab==='overview'){
       var statuses={sleep:sleepReason(result).status,recovery:recoveryReason(result).status,load:loadReason(result,model&&model.load).status};

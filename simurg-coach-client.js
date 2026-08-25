@@ -287,6 +287,9 @@
       aiStatus:AI_STATUS
     };
   }
+  function resolveDecision(date,options){
+    return resolve('pre_workout',date,options||{});
+  }
   function invalidate(options){
     memoryCache.clear();
     if(options&&options.remote){
@@ -299,9 +302,10 @@
   }
 
   return {
-    VERSION:2,
+    VERSION:3,
     AI_STATUS:AI_STATUS,
     resolve:resolve,
+    resolveDecision:resolveDecision,
     resolveBundle:resolveBundle,
     buildPayload:coachPayload,
     syncRemote:syncRemote,

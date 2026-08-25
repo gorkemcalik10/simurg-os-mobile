@@ -617,9 +617,9 @@
       output.keyDrivers.unshift('Seçili Gym bağlamı: '+(options.gymPlan.label||options.gymPlan.mode)+'.');
       output.keyDrivers=unique(output.keyDrivers).slice(0,6);
       output.inputHash=inputHash({base:output.inputHash,gymPlan:options.gymPlan});
-      if(options.gymPlan.skipped){
-        output.trainingDecision='rest';output.loadAdjustmentPercent=-100;output.headline='Gym günü açıkça atlandı';
-        output.summary='Bu tarih açıkça atlandı; planlanan seans için progresyon veya hedef mesajı üretilmedi.';
+      if(options.gymPlan.skipped||options.gymPlan.mode==='rest'){
+        output.trainingDecision='rest';output.loadAdjustmentPercent=-100;output.headline=options.gymPlan.skipped?'Gym günü açıkça atlandı':'Planlı dinlenme günü';
+        output.summary=options.gymPlan.skipped?'Bu tarih açıkça atlandı; planlanan seans için progresyon veya hedef mesajı üretilmedi.':'Bu tarih planlı dinlenme günü; Gym progresyonu veya seans hedefi üretilmedi.';
         output.workoutGuidance={mainLifts:'Bu gün için Gym progresyon hedefi yok.',accessories:'Bu gün için Gym progresyon hedefi yok.',stabilityPosture:'Toparlanma ve ağrısız günlük hareket öncelikli.',conditioning:'Yalnızca gerçekten kaydedilmiş aktiviteler değerlendirilir.'};
       }
     }

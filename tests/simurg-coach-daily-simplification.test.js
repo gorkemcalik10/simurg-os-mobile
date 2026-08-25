@@ -24,6 +24,10 @@ function runtime(scenario) {
       resolve(type, date, options) {
         calls.push({ type, deferred: !!(options.engineOptions && options.engineOptions.deferTechnical === true) });
         return client.resolve(type, date, { ...options, data, store: false, remote: false });
+      },
+      resolveDecision(date, options) {
+        calls.push({ type:'pre_workout', deferred: !!(options.engineOptions && options.engineOptions.deferTechnical === true) });
+        return client.resolveDecision(date, { ...options, data, store: false, remote: false });
       }
     }
   };
@@ -45,10 +49,10 @@ run('all six internal decisions have the exact plain-language Daily label', () =
   );
 });
 
-run('mobile Daily first render resolves only daily and pre-workout', () => {
+run('mobile Daily first render resolves only the canonical pre-workout decision', () => {
   const { context, calls, section } = runtime(fixtures.scenarios[0]);
   context.SimurgCoachUI.renderMobile();
-  assert.deepEqual(calls, [{ type:'daily', deferred:true }, { type:'pre_workout', deferred:true }]);
+  assert.deepEqual(calls, [{ type:'pre_workout', deferred:true }]);
   assert.match(section.innerHTML, /BUGÜN NE YAPAYIM\?/);
   assert.match(section.innerHTML, /Bugün biraz ilerleyebilirsin/);
   assert.doesNotMatch(section.innerHTML, /SAFETY|TREND &amp; PATTERN|VERİ GÜVENİ/);
@@ -61,13 +65,13 @@ run('Technical Details resolves deferred analyses once when opened', () => {
   const details = { open: true, dataset: {}, querySelector: () => target };
   context.simurgCoachToggleDetails(details, 'technical');
   assert.deepEqual(calls, [
-    { type:'daily', deferred:true }, { type:'pre_workout', deferred:true },
+    { type:'pre_workout', deferred:true },
     { type:'daily', deferred:false }, { type:'pre_workout', deferred:false },
     { type:'post_workout', deferred:false }, { type:'pattern', deferred:false }
   ]);
   assert.match(target.innerHTML, /Kişisel karşılaştırmalar/);
   context.simurgCoachToggleDetails(details, 'technical');
-  assert.equal(calls.length, 6);
+  assert.equal(calls.length, 5);
 });
 
 run('immediate results skip heavy fields without polluting the full-result cache', () => {

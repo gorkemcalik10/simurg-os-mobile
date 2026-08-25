@@ -58,8 +58,9 @@ run('empty history requests a controlled baseline instead of inventing a target'
 
 run('Gym Mode uses exercise identity and the single target runtime', () => {
   const index = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-  assert.ok(index.indexOf('simurg-exercise-history.js?v=1') < index.indexOf('simurg-next-session-target.js?v=1'));
+  assert.ok(index.indexOf('simurg-exercise-history.js?v=2') < index.indexOf('simurg-next-session-target.js?v=2'));
   assert.match(index, /let target=buildNextTarget\(item\)/);
   assert.match(index, /exerciseSessions\(identity,\{beforeDate:selDate\(\),limit:3\}\)/);
+  assert.match(index, /coachDecision:canonicalDecision\(selDate\(\)\),requireCoachDecision:true/);
   assert.match(index, /<b>Next Session Target<\/b>/);
 });

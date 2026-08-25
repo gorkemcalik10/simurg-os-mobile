@@ -9,13 +9,13 @@
 <script src="./simurg-training-lab-anatomy-assets.js?v=6"></script>
 <script src="./simurg-training-lab-anatomy-renderer.js?v=5"></script>
 <script src="./simurg-exercise-history.js?v=2"></script>
-<script src="./simurg-next-session-target.js?v=1"></script>
+<script src="./simurg-next-session-target.js?v=2"></script>
 <script src="./simurg-signal-model.js?v=7"></script>
 <script src="./simurg-sleep-intelligence.js?v=1"></script>
 <script src="./simurg-recovery-intelligence.js?v=1"></script>
 <script src="./simurg-energy-engine.js?v=1"></script>
-<script src="./simurg-coach-engine.js?v=5"></script>
-<script src="./simurg-coach-client.js?v=4"></script>
+<script src="./simurg-coach-engine.js?v=6"></script>
+<script src="./simurg-coach-client.js?v=5"></script>
 <style>
 :root{
   --bg:#04070a;--panel:#0a1118;--panel2:#0d161e;--line:rgba(166,180,194,.15);--text:#eef1f4;--muted:#8e99a5;
@@ -7980,7 +7980,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=polar-premium-redesign-1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=coach-single-decision-1').catch(function(){});
   });
 }
 </script>
@@ -13151,22 +13151,19 @@ m Shell V4: Logger information architecture fix -->
     return {pain:pain,formBad:formBad,rpeHigh:rpeHigh};
   }
   function recommendation(){
-    var rec=score(), c=calcs(), risk=lastPainRisk();
-    if(rec==null) return {tone:'',label:'Veri bekleniyor',title:'Kayıt bulunmuyor',msg:'Seçili tarih için recovery verisi bekleniyor.'};
-    if(risk.pain>0) return {tone:'risk',label:'Risk kontrollü',title:'Pain sinyali var',msg:'Bugün ağrı girilen hareketlerde ekstra set ekleme. Form kalitesi ve hareket açıklığı öncelik.'};
-    if(rec<55) return {tone:'risk',label:'Deload',title:'Yükü azalt',msg:'Recovery düşük. Ana planı %20-30 hacim kırparak uygula; failure yok.'};
-    if(rec<70) return {tone:'warn',label:'Kontrollü',title:'Planı koru, agresifleşme',msg:'Hazırlık orta. Ana hareketlerde teknik setleri koru, RPE 8 üstüne çıkma.'};
-    if(c.sets>=24) return {tone:'warn',label:'Yük takibi',title:'Hacim yüksek',msg:'Son seans hacmi yüksek görünüyor. Bugün ekstra set yerine kaliteli tekrar hedefle.'};
-    return {tone:'good',label:'Hazır',title:'Planı koru',msg:'Recovery uygun. Ana hareketlerde normal yükleme yapabilir, son sette kontrollü zorlayabilirsin.'};
+    var coach=null;try{coach=window.SimurgCoachClient.resolveDecision(selected(),{data:DATA,store:false,engineOptions:{deferTechnical:true}});}catch(e){}
+    if(!coach)return {tone:'',label:'Veri bekleniyor',title:'Kayıt bulunmuyor',msg:'Canonical Coach kararı bekleniyor.'};
+    var labels={progress:'Kontrollü ilerleme',normal:'Planı koru',controlled:'Kontrollü başla',reduce:'Yükü azalt',recovery:'Toparlanmayı önceliklendir',rest:'Dinlen'};
+    return {tone:coach.trainingDecision==='progress'||coach.trainingDecision==='normal'?'good':coach.trainingDecision==='controlled'?'warn':'risk',label:labels[coach.trainingDecision],title:coach.headline,msg:coach.workoutGuidance.mainLifts,warnings:coach.warnings||[]};
   }
   function alertData(){
-    var rec=score(), c=calcs(), a=activity(), risk=lastPainRisk(), reco=recommendation();
+    var rec=score(), c=calcs(), a=activity(), reco=recommendation();
     var items=[];
     items.push({icon:'🎯',tone:reco.tone,title:'Bugünün kararı',body:reco.msg});
     items.push({icon:'💠',tone:rec==null?'':rec>=70?'good':rec>=55?'warn':'risk',title:'Recovery sinyali',body:rec==null?'Seçili tarih için recovery verisi bekleniyor.':'Hazırlık '+rec+'/100 · HRV '+text('homeHrv','-')+' · RHR '+text('homeRhr','-')+' · Sleep '+text('homeSleep','-')+'.'});
     items.push({icon:'🏋️',tone:c.sets>=24?'warn':'',title:'Son seans yükü',body:(c.sets||0)+' set · '+fmt(c.vol)+' kg hacim · '+(c.reps||0)+' tekrar. Yük toleransını buna göre değerlendir.'});
-    if(risk.pain>0 || risk.rpeHigh>0) items.push({icon:'⚠️',tone:'risk',title:'Risk / deload notu',body:'Pain kaydı: '+risk.pain+' · yüksek RPE seti: '+risk.rpeHigh+'. Bugün gereksiz yoğunluk ekleme.'});
-    else items.push({icon:'🛡️',tone:'good',title:'Risk / deload notu',body:'Belirgin pain veya aşırı RPE sinyali yok. Yine de form kalitesi ana kriter.'});
+    if(reco.warnings&&reco.warnings.length) items.push({icon:'⚠️',tone:'risk',title:'Coach güvenlik notu',body:reco.warnings.slice(0,2).join(' ')});
+    else items.push({icon:'🛡️',tone:'good',title:'Coach güvenlik notu',body:'Canonical Coach kararında belirgin güvenlik uyarısı yok.'});
     items.push({icon:'⌁',tone:a?'good':'',title:'Veri kaynağı',body:a?((a.source||'Workout')+': '+(a.name||'Activity')+' · '+(a.duration||'-')+'.'):'Bugün kayıtlı workout yok.'});
     return {reco:reco,items:items,rec:rec};
   }
@@ -13456,6 +13453,9 @@ m Shell V4: Logger information architecture fix -->
   function calcSafe(rows){try{return typeof calc==='function'?calc(rows):{sets:rows.length,reps:0,vol:0};}catch(e){return {sets:rows.length,reps:0,vol:0};}}
   function tr(d){try{return typeof trDate==='function'?trDate(d):d;}catch(e){return d;}}
   function program(){try{return typeof getProgramLabelForDate==='function'?getProgramLabelForDate(selDate()):'Bugünün programı';}catch(e){return 'Bugünün programı';}}
+  function canonicalDecision(date){
+    try{return window.SimurgCoachClient&&typeof window.SimurgCoachClient.resolveDecision==='function'?window.SimurgCoachClient.resolveDecision(date||selDate(),{data:DATA,store:false,engineOptions:{deferTechnical:true}}):null;}catch(e){return null;}
+  }
 
   var oldNormalize=window.normalizeActivityType;
   window.normalizeActivityType=function(rec){
@@ -13489,15 +13489,6 @@ m Shell V4: Logger information architecture fix -->
     ((DATA&&DATA.workouts)||[]).filter(function(w){return String(w.exercise||'')===String(ex) && String(w.date||'')<String(date);}).forEach(function(w){(by[w.date]=by[w.date]||[]).push(w);});
     return Object.keys(by).sort(function(a,b){return String(b).localeCompare(String(a));}).map(function(d){return {date:d,rows:by[d]};});
   }
-  function stat(rows){
-    rows=rows||[];
-    var summary=window.SimurgVolumeModel.summary(rows),reps=summary.reps,vol=summary.volume;
-    var best=rows.reduce(function(m,w){var wt=n(w.weight),rp=n(w.reps);return (wt>m.weight||(wt===m.weight&&rp>m.reps))?{weight:wt,reps:rp}:m;},{weight:0,reps:0});
-    var rpe=rows.map(function(w){return n(w.rpe);}).filter(Boolean).slice(-1)[0]||0;
-    var form=(rows.map(function(w){return w.form||'';}).filter(Boolean).slice(-1)[0]||'').trim();
-    var pain=(rows.map(function(w){return w.pain||'';}).filter(Boolean).slice(-1)[0]||'None').trim();
-    return {sets:rows.length,reps:reps,vol:vol,best:best,rpe:rpe,form:form,pain:pain};
-  }
   function activityContext(date){
     var dates=[date,dateBefore(date)], rows=[];
     try{rows=((DATA&&DATA.appleWatch)||[]).filter(function(r){return dates.indexOf(r.date)>=0;});}catch(e){rows=[];}
@@ -13511,33 +13502,11 @@ m Shell V4: Logger information architecture fix -->
 
   function smartDecision(ex,rows,date){
     date=date||selDate();
-    var cat=exerciseCategory(ex), st=stat(rows||[]), act=activityContext(date);
-    var painBad=st.pain && st.pain!=='None';
-    var formBad=st.form==='Okay'||st.form==='Bad';
-    var highExtra=act.level==='high', medExtra=act.level==='medium';
-    var ref=st.best.weight?('Son referans: '+st.best.weight+'kg x '+st.best.reps+'. '):'';
-    if(!cat.aggressive){
-      return {level:'protect',tone:'protect',label:cat.label,text:ref+'Ağırlık artırmak öncelik değil. Form, tempo, kontrol ve ağrısızlık öncelikli. Özellikle omuz/skapula kalitesi bozulursa yükü artırma.',category:cat,activity:act};
-    }
-    if(painBad || formBad){
-      return {level:'danger',tone:'caution',label:'Önce Teknik',text:ref+'Ağrı sinyali veya Form Orta/Kötü var. Kilo artırma; hareketi sadeleştir, kontrollü tempo kullan ve gerekirse hacmi azalt.',category:cat,activity:act};
-    }
-    if(st.rpe>=9){
-      return {level:'danger',tone:'caution',label:'Load caution',text:ref+'RPE çok yüksek. Bugün/sonraki seansta artış yok; aynı hedefi daha temiz tamamla veya hacmi azalt.',category:cat,activity:act};
-    }
-    if(highExtra){
-      return {level:'warning',tone:'caution',label:'Ek Yük Filtresi',text:ref+act.text+' Otomatik hedef agresifliği bugün düşürüldü.',category:cat,activity:act};
-    }
-    if(st.form==='Good' && (!st.pain||st.pain==='None') && st.rpe>=6 && st.rpe<=7){
-      return {level:'',tone:'main',label:'İlerleme Uygun',text:ref+'Form İyi + Ağrı Yok + RPE '+st.rpe+'. Ana hareket olduğu için sonraki antrenmanda +1 tekrar veya çok küçük kilo artışı denenebilir.',category:cat,activity:act};
-    }
-    if(st.form==='Good' && (!st.pain||st.pain==='None') && st.rpe===8){
-      return {level:'warning',tone:'caution',label:'Hedefi Koru',text:ref+'Performans iyi ama RPE 8. Hedefi koru; ağırlığı artırmadan kaliteyi ve setleri eşitle.',category:cat,activity:act};
-    }
-    if(medExtra){
-      return {level:'warning',tone:'caution',label:'Kontrollü Başla',text:ref+act.text+' İyi hissedersen sadece ana harekette küçük tekrar hedefi yeterli.',category:cat,activity:act};
-    }
-    return {level:'',tone:'main',label:'Yardımcı Hedef',text:ref+'Otomatik hedef yardımcı öneridir. Form İyi + Ağrı Yok netleşirse ana harekette +1 tekrar hedeflenebilir; veri eksikse aynı yükte temiz form öncelikli.',category:cat,activity:act};
+    var cat=exerciseCategory(ex),act=activityContext(date),coach=canonicalDecision(date),decision=coach&&coach.trainingDecision||'controlled';
+    var labels={progress:'İlerleme Uygun',normal:'Hedefi Koru',controlled:'Kontrollü Başla',reduce:'Yükü Azalt',recovery:'Toparlanma Önceliği',rest:'Dinlen'};
+    var guidance=coach&&coach.workoutGuidance||( {}),text=cat.aggressive?guidance.mainLifts:cat.key==='conditioning'?guidance.conditioning:cat.key==='accessory'?guidance.accessories:guidance.stabilityPosture;
+    var tone=decision==='progress'?'main':cat.aggressive?'caution':'protect';
+    return {level:decision==='progress'?'':decision==='normal'?'warning':'danger',tone:tone,label:labels[decision]||'Kontrollü Başla',text:text||'Canonical Coach kararı bekleniyor; yükü artırma.',category:cat,activity:act,coachDecision:coach};
   }
   window.simurgSmartExerciseDecision=smartDecision;
 
@@ -13547,8 +13516,7 @@ m Shell V4: Logger information architecture fix -->
     var ex=identity.name||identity.originalName||'';
     var cat=exerciseCategory(ex);
     var sessions=exerciseSessions(identity,{beforeDate:selDate(),limit:3});
-    var act=activityContext(selDate());
-    return window.SimurgNextSessionTarget.recommend(sessions,{allowProgression:cat.aggressive&&act.level==='normal',reason:cat.aggressive?'Ek aktivite yükü nedeniyle progresyon sınırlandı.':'Bu hareket türünde ağırlık progresyonu öncelikli değil.'});
+    return window.SimurgNextSessionTarget.recommend(sessions,{coachDecision:canonicalDecision(selDate()),requireCoachDecision:true,allowProgression:cat.aggressive,reason:'Bu hareket türünde ağırlık progresyonu öncelikli değil.'});
   };
 
   function applyGymSmartDOM(){
@@ -13584,15 +13552,9 @@ m Shell V4: Logger information architecture fix -->
   };
 
   function overallDecision(){
-    var rows=rowsForDate(selDate()), act=activityContext(selDate());
-    var c=calcSafe(rows);
-    var pain=rows.filter(function(w){return w.pain && w.pain!=='None';}).length;
-    var badForm=rows.filter(function(w){return w.form==='Okay'||w.form==='Bad';}).length;
-    var rpes=rows.map(function(w){return n(w.rpe);}).filter(Boolean); var avg=rpes.length?Math.round(rpes.reduce(function(a,b){return a+b;},0)/rpes.length):0;
-    if(pain||badForm) return {tone:'caution',title:'Technique priority',msg:'Pain veya Form Okay/Bad sinyali var. Bugün kilo artırma; hareketleri sadeleştir ve temiz formu geri al.',c:c,act:act,avg:avg};
-    if(act.level==='high') return {tone:'caution',title:'Extra load filter active',msg:act.text,c:c,act:act,avg:avg};
-    if(avg>=8) return {tone:'caution',title:'Performans iyi, hedefi koru',msg:'Ortalama RPE 8 civarı. Ana hareketlerde aynı hedefi koru; agresif kilo artışı yok.',c:c,act:act,avg:avg};
-    return {tone:'main',title:'Smart progression mümkün',msg:'Pain None + Form Good + RPE 6-7 gelen ana hareketlerde +1 tekrar veya küçük kilo artışı denenebilir. Koruma/postür hareketlerinde tempo ve kontrol öncelik.',c:c,act:act,avg:avg};
+    var rows=rowsForDate(selDate()),act=activityContext(selDate()),coach=canonicalDecision(selDate()),decision=coach&&coach.trainingDecision||'controlled';
+    var labels={progress:'Kontrollü progresyon',normal:'Planı koru',controlled:'Kontrollü başla',reduce:'Yükü azalt',recovery:'Toparlanmayı önceliklendir',rest:'Dinlen'};
+    return {tone:decision==='progress'||decision==='normal'?'main':'caution',title:labels[decision],msg:coach?coach.headline+' '+coach.workoutGuidance.mainLifts:'Coach verisi bekleniyor; yükü artırma.',c:calcSafe(rows),act:act,avg:null,coachDecision:coach};
   }
   function ensureSmartPanel(){
     var sec=document.getElementById('coaching'); if(!sec || window.innerWidth>860) return;
@@ -16187,23 +16149,12 @@ m Shell V4: Logger information architecture fix -->
 		      +polarWorkoutAccessHtml()
 		      +'</div>';
 		  }
-	  var lastHomePolarSentence='';
-	  function homePolarSentence(entry){
-	    if(!entry) return '';
-	    var sig=signal(entry);
-	    if(sig.cls==='controlled') return 'Polar signal controlled: keep today\'s program, but avoid aggressive progression.';
-	    if(sig.cls==='ready') return 'Polar signal good: sleep and HRV support today\'s plan.';
-	    return '';
-	  }
 	  function renderHomePolarNote(){
 	    var note=document.getElementById('homeCoachNote');
 	    if(!note) return;
-	    var current=note.textContent||'';
-	    if(lastHomePolarSentence && current.indexOf(lastHomePolarSentence)>-1) current=current.replace(lastHomePolarSentence,'').trim();
-	    var sentence=homePolarSentence(latestEntry());
-	    lastHomePolarSentence=sentence;
-	    if(sentence) note.textContent=(current.replace(/\s+$/,'')+' '+sentence).trim();
-	    else note.textContent=current.trim();
+	    var date='';try{date=selectedDate;}catch(e){}
+	    var coach=null;try{coach=window.SimurgCoachClient.resolveDecision(date,{data:DATA,store:false,engineOptions:{deferTechnical:true}});}catch(e){}
+	    if(coach)note.textContent=coach.headline+' '+coach.workoutGuidance.mainLifts;
 	  }
 		  function renderCoachingPolarCard(){
 		    var old=document.getElementById('polarBridgeCoachCard');
@@ -16213,7 +16164,9 @@ m Shell V4: Logger information architecture fix -->
 		    var section=document.getElementById('coaching');
 		    if(!section) return;
 		    var sig=signal(entry);
-		    var aggression=sig.cls==='waiting'?'WAITING':(sig.cls==='controlled'?'REDUCED':'NORMAL');
+		    var date='';try{date=selectedDate;}catch(e){}
+		    var coach=null;try{coach=window.SimurgCoachClient.resolveDecision(date,{data:DATA,store:false,engineOptions:{deferTechnical:true}});}catch(e){}
+		    var aggression=coach?String(coach.trainingDecision||'controlled').toUpperCase():'WAITING';
 		    function line(label,status,value,width){
 		      var tone=statusTone(status);
 		      return '<div class="polarCoachLineV1 '+esc(tone)+'" style="--polarBar:'+clamp(width,0,100)+'%">'
@@ -16226,7 +16179,7 @@ m Shell V4: Logger information architecture fix -->
 		    var hrvWidth=entry.hrvMs==null?0:clamp(entry.hrvMs/80*100,8,100);
 		    var rhrWidth=entry.restingHr==null?0:clamp((75-entry.restingHr)/30*100,8,100);
 		    var actWidth=entry.cardioLoad!=null?clamp(entry.cardioLoad,8,100):(activityLoadModerate(entry)?60:38);
-		    var targetWidth=aggression==='NORMAL'?82:(aggression==='REDUCED'?48:12);
+		    var targetWidth=aggression==='PROGRESS'?82:aggression==='NORMAL'?68:aggression==='CONTROLLED'?48:18;
 		    var card=document.createElement('div');
 		    card.id='polarBridgeCoachCard';
 		    card.className='card polarBridgeCoachCard';
@@ -16238,7 +16191,7 @@ m Shell V4: Logger information architecture fix -->
 		      +line('Activity Load',activityStatus(entry),entry.cardioLoad!=null?entry.cardioLoad+'/100':(entry.activityLoad||''),actWidth)
 		      +line('Target',aggression,'aggressiveness',targetWidth)
 		      +'</div>'
-		      +'<p>'+esc(signalMeaning(entry))+' Program otomatik değişmedi.</p>';
+		      +'<p>'+esc(signalMeaning(entry))+' '+esc(coach?coach.headline:'Canonical Coach kararı bekleniyor.')+'</p>';
 		    var anchor=document.getElementById('coachV11SmartFilter') || document.getElementById('coachV8Premium') || section.querySelector('.coachingGrid') || section.firstElementChild;
 		    if(anchor && anchor.parentNode) anchor.parentNode.insertBefore(card,anchor.nextSibling);
 		    else section.appendChild(card);
@@ -16317,18 +16270,18 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./polar-workout.css?v=12">
 <script src="./polar-workout.js?v=16"></script>
 <script src="./workout-source-policy.js?v=3"></script>
-<link rel="stylesheet" href="./simurg-coach.css?v=11">
-<script src="./simurg-coach-ui.js?v=11"></script>
-<link rel="stylesheet" href="./premium-standard.css?v=38">
-<script src="./premium-standard.js?v=48"></script>
+<link rel="stylesheet" href="./simurg-coach.css?v=12">
+<script src="./simurg-coach-ui.js?v=12"></script>
+<link rel="stylesheet" href="./premium-standard.css?v=39">
+<script src="./premium-standard.js?v=50"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=9"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=27">
 <script src="./desktop-alignment.js?v=37"></script>
-<link rel="stylesheet" href="./mobile-ia-premium.css?v=11">
+<link rel="stylesheet" href="./mobile-ia-premium.css?v=12">
 <link rel="stylesheet" href="./simurg-gym-flex.css?v=2">
 <link rel="stylesheet" href="./simurg-training-lab.css?v=11">
-<script src="./mobile-ia-premium.js?v=7"></script>
+<script src="./mobile-ia-premium.js?v=9"></script>
 <script src="./simurg-training-lab-ui.js?v=17"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
 <script src="./simurg-cloud-auth.js?v=7" defer></script>

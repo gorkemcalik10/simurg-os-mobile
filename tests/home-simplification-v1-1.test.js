@@ -42,7 +42,7 @@ run('Home-only Coach card omits readiness and keeps a single Coach resolution', 
   const homeBlock = coach.slice(coach.indexOf('function decorateHome'), coach.indexOf('root.simurgCoachOpen'));
   assert.doesNotMatch(homeBlock, /Hazırlık|score\(result\)/);
   assert.match(homeBlock, /presentation\.title/);
-  assert.equal((homeBlock.match(/resolve\('daily'/g) || []).length, 1);
+  assert.equal((homeBlock.match(/resolveDecision\(date\|\|selected\(\)\)/g) || []).length, 1);
   assert.match(premium, /decorateHome\(content,homeTab,homeDateValue\(\),model\)/);
 });
 

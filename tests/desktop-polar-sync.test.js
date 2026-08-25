@@ -43,24 +43,24 @@ run('changed production assets use matching cache versions', () => {
     'simurg-training-lab-anatomy-assets.js?v=6',
     'simurg-training-lab-anatomy-renderer.js?v=5',
     'simurg-exercise-history.js?v=2',
-    'simurg-next-session-target.js?v=1',
-    'simurg-coach-engine.js?v=5',
-    'simurg-coach-client.js?v=4',
-    'simurg-coach.css?v=11',
-    'simurg-coach-ui.js?v=11',
+    'simurg-next-session-target.js?v=2',
+    'simurg-coach-engine.js?v=6',
+    'simurg-coach-client.js?v=5',
+    'simurg-coach.css?v=12',
+    'simurg-coach-ui.js?v=12',
     'simurg-persistence.js?v=2',
     'simurg-gym-identity.js?v=1',
     'simurg-exercise-canonicalization.js?v=2',
     'simurg-training-lab-analysis.js?v=5',
     'simurg-data-validation.js?v=8',
     'polar-accesslink.js?v=9',
-    'premium-standard.css?v=38',
-    'premium-standard.js?v=48',
+    'premium-standard.css?v=39',
+    'premium-standard.js?v=50',
     'desktop-alignment.css?v=27',
     'desktop-alignment.js?v=37',
     'simurg-cloud-auth.js?v=7',
-    'mobile-ia-premium.css?v=11',
-    'mobile-ia-premium.js?v=7',
+    'mobile-ia-premium.css?v=12',
+    'mobile-ia-premium.js?v=9',
     'simurg-gym-flex.js?v=1',
     'simurg-gym-flex.css?v=2',
     'simurg-training-lab.css?v=11',
@@ -69,8 +69,8 @@ run('changed production assets use matching cache versions', () => {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=polar-premium-redesign-1/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-polar-premium-redesign-1'/);
+  assert.match(index, /sw\.js\?v=coach-single-decision-1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-coach-single-decision-1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

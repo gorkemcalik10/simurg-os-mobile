@@ -134,22 +134,24 @@
     return 'Uyku sinyalleri normal ve kontrollü bir antrenman günüyle uyumlu görünüyor.';
   }
   function loadAggressiveness(model){
-    if(model.load==null&&model.rpe==null)return 'WAITING';
-    if((model.load!=null&&model.load>=70)||(model.rpe!=null&&model.rpe>=8))return 'REDUCED';
-    return 'NORMAL';
+    var coach=canonicalCoach(model.selectedDate||homeDateValue());
+    if(!coach)return 'WAITING';
+    return coach.trainingDecision==='progress'||coach.trainingDecision==='normal'?'NORMAL':'REDUCED';
+  }
+  function canonicalCoach(date){
+    try{return window.SimurgCoachClient&&typeof window.SimurgCoachClient.resolveDecision==='function'?window.SimurgCoachClient.resolveDecision(date,{data:dataRoot(),store:false,engineOptions:{deferTechnical:true}}):null;}catch(error){return null;}
   }
   function loadInterpretation(model){var status=loadAggressiveness(model);if(status==='WAITING')return 'Henüz yorumlanabilir antrenman yükü yok.';if(status==='REDUCED')return 'Son yük verisi daha düşük agresiflik öneriyor. Programı koru ancak progresyonu zorlama.';return 'Mevcut yük yönetilebilir görünüyor. Programa devam et ve ilk çalışma setlerine kontrollü başla.';}
   function coachSentence(model){
-    if(model.readiness==null&&model.load==null&&!model.activity&&!model.hasRecoverySignals)return 'Henüz günlük antrenman ve toparlanma özeti yok.';
-    if(loadAggressiveness(model)==='REDUCED')return 'Bugün kaliteyi koru: programı sürdür, agresifliği azalt ve yedek tekrar bırak.';
-    if(model.readiness==null&&model.hasRecoverySignals)return 'Toparlanma sinyalleri kısmi. Mevcut HRV, nabız ve solunum verisini kontrollü bir başlangıç için kullan.';
-    if(model.readiness!=null&&model.readiness<60)return 'Toparlanma kontrollü. Planı koru ancak ilk çalışma setlerini daha sakin uygula.';
-    return 'Bugünkü veriler mevcut planı destekliyor. Yoğunluğu kademeli artır ve form kalitesini koru.';
+    var coach=canonicalCoach(model.selectedDate||homeDateValue());
+    return coach?coach.headline+' '+(coach.workoutGuidance&&coach.workoutGuidance.mainLifts||''):'Henüz günlük antrenman ve toparlanma özeti yok.';
   }
   function homeDateValue(){try{return selectedDate||today();}catch(e){return today();}}
   function homeDateLabel(){var value=homeDateValue();try{return new Intl.DateTimeFormat('tr-TR',{day:'numeric',month:'long',year:'numeric',weekday:'long',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));}catch(e){return formatDate(value);}}
   function readinessDecision(model){
-    var result=model.readinessResult||resolveReadiness(model.selectedDate||homeDateValue(),{});return {label:result.label,tone:result.isWaiting||result.isPartial?'waiting':result.score>=70?'good':result.score>=55?'caution':'recovery'};
+    var coach=canonicalCoach(model.selectedDate||homeDateValue()),labels={progress:'Biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'};
+    if(coach)return {label:labels[coach.trainingDecision]||coach.headline,tone:coach.trainingDecision==='progress'||coach.trainingDecision==='normal'?'good':coach.trainingDecision==='controlled'?'caution':'recovery'};
+    return {label:'Veri bekleniyor',tone:'waiting'};
   }
   function selectedGymSession(model){
     var rows=Array.isArray(model.data.workouts)?model.data.workouts.filter(function(row){return row&&row.date===model.selectedDate;}):[];
@@ -198,12 +200,12 @@
     var contributors=energy&&energy.contributors||{},sleep=contributors.sleep&&contributors.sleep.reasons||[],recovery=contributors.recovery&&contributors.recovery.reasons||[],activity=contributors.activityLoad&&contributors.activityLoad.reasons||[],selected=[];
     if(energy&&energy.status==='high')selected=[sleep[0],recovery[0]];
     else if(energy&&energy.status==='medium')selected=[recovery[0],activity[0]];
-    else if(energy&&energy.status==='low')selected=[energy.action&&energy.action.trainingRecommendation,sleep[0]||activity[0]];
+    else if(energy&&energy.status==='low')selected=[sleep[0]||activity[0],recovery[0]];
     selected=selected.filter(Boolean);
     if(selected.length)return selected.join(' ');
     var reasons=Array.isArray(energy&&energy.reasons)?energy.reasons.filter(Boolean):[];
     if(reasons.length)return reasons.slice(0,2).join(' ');
-    return text(energy&&energy.action&&energy.action.trainingRecommendation,'Energy için yeterli güvenilir sinyal yok.');
+    return 'Energy için yeterli güvenilir sinyal yok; bu alan Coach kararına kanıt sağlar.';
   }
   function energyCard(model){
     var energy=model.energy||{},contributors=energy.contributors||{},activityScore=number(contributors.activityLoad&&contributors.activityLoad.score),trainingScore=number(contributors.trainingLoad&&contributors.trainingLoad.score),loadScore=activityScore==null||trainingScore==null?null:(activityScore*.12+trainingScore*.08)/.20;
@@ -441,7 +443,12 @@
       var tone=!known?'unknown':score.classList.contains('risk')||score.classList.contains('danger')?'risk':score.classList.contains('warn')?'caution':score.classList.contains('good')?'good':'neutral';
       score.dataset.gpTone=tone;
     });
-    var strategy=program.querySelector('.programIntelPremiumCard.wide');if(strategy)strategy.classList.add('gp-program-strategy');
+    var strategy=program.querySelector('.programIntelPremiumCard.wide');
+    if(strategy){
+      strategy.classList.add('gp-program-strategy');
+      var coach=canonicalCoach(selectedDateValue());
+      if(coach)strategy.innerHTML='<div class="programIntelPremiumHead"><div><small>CANONICAL COACH</small><b>Seçili gün kararı</b></div><div class="programIntelPremiumScore '+(coach.trainingDecision==='progress'||coach.trainingDecision==='normal'?'good':coach.trainingDecision==='controlled'?'warn':'risk')+'">🧭</div></div><div class="programIntelCoachBody"><div class="programIntelVerdictBox"><h3>'+esc(coach.headline)+'</h3>'+esc(coach.summary)+'<div class="programIntelNextBox"><b>Seans rehberi:</b> '+esc(coach.workoutGuidance.mainLifts)+'</div></div></div>';
+    }
   }
   function allPolar(data){var daily=data.polarWorkouts&&data.polarWorkouts.daily||{};return Object.keys(daily).flatMap(function(date){var value=daily[date];return (Array.isArray(value)?value:[value]).filter(Boolean);});}
   function recoveryRows(data){

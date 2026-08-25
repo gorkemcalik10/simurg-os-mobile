@@ -43,14 +43,9 @@
     }catch(error){}
     return null;
   }
-  function coachCopy(signals,hasGym,hasActivity){
-    var r=signals.readiness||{},score=num(r.score),status=String(r.status||'').toLowerCase();
-    if(score==null)return 'Bugün için hazırlık verisi kısmi. Ağrı, form ve enerji sinyalini kontrol ederek kontrollü başla.';
-    if(status.indexOf('recovery')>=0||score<45)return 'Toparlanmayı öne al. Yükü azalt, temiz formu koru ve zorlayıcı progresyon deneme.';
-    if(score<70)return 'Plan uygulanabilir; ilk ana harekette performansı kontrol et ve gereksiz ekstra set ekleme.';
-    if(hasGym)return 'Hazırlık sinyalleri antrenmanı destekliyor. İlk sette form temizse planlanan ilerlemeyi deneyebilirsin.';
-    if(hasActivity)return 'Bugünkü aktivite yükünü toparlanma sinyalleriyle birlikte izle; ek yük eklemek zorunda değilsin.';
-    return 'Hazırlık iyi görünüyor. Antrenman planın varsa normal başlayabilir, ilk sette tekrar kalitesini doğrulayabilirsin.';
+  function coachCopy(date){
+    var coach=null;try{coach=window.SimurgCoachClient&&typeof window.SimurgCoachClient.resolveDecision==='function'?window.SimurgCoachClient.resolveDecision(date,{data:dataRoot(),store:false,engineOptions:{deferTechnical:true}}):null;}catch(error){}
+    return coach?coach.headline+' '+(coach.workoutGuidance&&coach.workoutGuidance.mainLifts||''):'Canonical Coach kararı bekleniyor; yükü artırma.';
   }
   function metric(label,value,meta,tone){
     return '<div class="miaMetric '+(tone||'')+'"><small>'+esc(label)+'</small><b>'+esc(value)+'</b><span>'+esc(meta)+'</span></div>';
@@ -86,7 +81,7 @@
     var gymMeta=rows.length?summary.sets+' set · '+summary.reps+' tekrar · '+Math.round(summary.volume).toLocaleString('tr-TR')+' kg':'Bu gün için Gym kaydı yok.';
     var sleepDetail=[signals.sleepMinutes!=null?'Uyku '+Math.round(signals.sleepMinutes/60*10)/10+' saat':'',signals.hrv!=null?'HRV '+Math.round(signals.hrv)+' ms':''].filter(Boolean).join(' · ')||'Uyku ve HRV verisi bekleniyor.';
     shell.innerHTML='<header class="miaDailyHead"><div><small>SEÇİLİ GÜN</small><h1>Günlük</h1><p>'+esc(dateLabel(date))+' · '+esc(dayLabel(date))+'</p></div><div class="miaDateNav"><button type="button" onclick="simurgMobileDailyMove(-1)" aria-label="Önceki gün">←</button><button type="button" onclick="simurgMobileDailyToday()">Bugün</button><button type="button" onclick="simurgMobileDailyMove(1)" aria-label="Sonraki gün">→</button></div></header>'
-      +'<section class="miaCoachCard"><small>SIMURG İÇGÖRÜSÜ</small><h2>'+esc(readinessValue==null?'Veri birikiyor':(readiness.status||'Günün kararı'))+'</h2><p>'+esc(coachCopy(signals,rows.length>0,!!activity))+'</p><button type="button" onclick="simurgV8Go(\'coaching\',\'menu\')">Koçluk detayını aç →</button></section>'
+      +'<section class="miaCoachCard"><small>SIMURG İÇGÖRÜSÜ</small><h2>'+esc(readinessValue==null?'Veri birikiyor':(readiness.status||'Günün kararı'))+'</h2><p>'+esc(coachCopy(date))+'</p><button type="button" onclick="simurgV8Go(\'coaching\',\'menu\')">Koçluk detayını aç →</button></section>'
       +'<div class="miaMetricGrid">'+metric('Hazırlık',readinessValue==null?'—':Math.round(readinessValue),readinessValue==null?'Veri güveni düşük':'100 üzerinden','ready')+metric('Uyku',sleepValue,signals.sleepScore!=null?'Uyku skoru':'Süre / skor','sleep')+metric('Yük',loadValue,signals.cardio!=null?'Kardiyo yükü':'Veri bekleniyor','load')+'</div>'
       +'<section class="miaDayCard"><div class="miaCardIcon">G</div><div><small>GÜNÜN GYM ANTRENMANI</small><h2>'+esc(rows.length?Array.from(summary.exercises).slice(0,2).join(' · '):'Kayıt bulunmuyor')+'</h2><p>'+esc(gymMeta)+'</p></div><button type="button" onclick="simurgMobileOpenGym()">Gym →</button></section>'
       +'<section class="miaDayCard"><div class="miaCardIcon polar">P</div><div><small>GÜNÜN POLAR AKTİVİTESİ</small><h2>'+esc(activityName)+'</h2><p>'+esc(activityMeta)+'</p></div><button type="button" onclick="simurgMobileOpenData()">Senkronize et →</button></section>'
@@ -311,10 +306,11 @@
     return [0,1,2,3,4,5,6].map(function(offset){try{return addDays(start,offset);}catch(error){return start;}});
   }
   function programDayModel(date){
-    var resolved=null,plan=null,items=[];
+    var resolved=null,plan=null,items=[],coach=null;
     try{resolved=window.SimurgSignalModel&&typeof window.SimurgSignalModel.day==='function'?window.SimurgSignalModel.day(date):null;}catch(error){}
     plan=resolved&&resolved.gymPlan||{mode:'rest',label:'Dinlenme Günü',planned:false,skipped:false,performed:false};
     try{items=typeof gymItemsForDate==='function'?gymItemsForDate(date):[];}catch(error){items=[];}
+    try{coach=window.SimurgCoachClient&&typeof window.SimurgCoachClient.resolveDecision==='function'?window.SimurgCoachClient.resolveDecision(date,{data:window.DATA,store:false,engineOptions:{deferTechnical:true}}):null;}catch(error){coach=null;}
     if(plan.skipped||plan.mode==='rest')items=[];
     var dayKey='';try{dayKey=dayName(date);}catch(error){}
     var scheduledName='';try{scheduledName=typeof getProgramType==='function'?getProgramType(dayKey):'';}catch(error){}
@@ -322,7 +318,7 @@
     var name=rawName||'Dinlenme Günü';
     if(window.SimurgLabels)name=window.SimurgLabels.sentence(name);
     var state=plan.skipped?'Atlandı':plan.mode==='rest'?'Dinlenme':'Antrenman';
-    return {date:date,dayKey:dayKey,day:dayLabel(date),name:name,state:state,plan:plan,items:items};
+    return {date:date,dayKey:dayKey,day:dayLabel(date),name:name,state:state,plan:plan,items:items,coach:coach};
   }
   function programExerciseRow(item,index){
     var body=item.bodyPart||item.exerciseType||'';
@@ -335,7 +331,8 @@
     var count=model.items.length,summary=rest?'Planlı egzersiz yok':count+' egzersiz';
     var list=count?'<ol class="miaProgramExercises">'+model.items.map(programExerciseRow).join('')+'</ol>':'<p class="miaProgramEmpty">Bu gün için planlı egzersiz bulunmuyor.</p>';
     var actions=(canRename?'<button type="button" onclick="simurgMobileProgramRename(\''+esc(model.dayKey)+'\',\''+esc(model.date)+'\')">Program adını düzenle</button>':'')+(rest?'':'<button type="button" class="primary" onclick="simurgMobileProgramOpenGym(\''+esc(model.date)+'\')">Gym’de düzenle</button>');
-    return '<article class="miaProgramDay '+(open?'isOpen ':'')+(rest?'isRest':'')+'"><button type="button" class="miaProgramDayToggle" data-program-toggle="'+esc(model.date)+'" aria-expanded="'+(open?'true':'false')+'"><span class="miaProgramDate"><b>'+esc(model.day)+'</b><small>'+esc(dateLabel(model.date))+'</small></span><span class="miaProgramTitle"><b>'+esc(model.name)+'</b><small>'+esc(model.state)+' · '+esc(summary)+'</small></span><i>⌄</i></button>'+(open?'<div class="miaProgramDetail">'+list+'<div class="miaProgramActions">'+actions+'</div></div>':'')+'</article>';
+    var coach=model.coach?'<div class="miaProgramCoach"><small>KOÇ KARARI</small><b>'+esc(model.coach.headline)+'</b><p>'+esc(model.coach.workoutGuidance&&model.coach.workoutGuidance.mainLifts||model.coach.summary)+'</p></div>':'';
+    return '<article class="miaProgramDay '+(open?'isOpen ':'')+(rest?'isRest':'')+'"><button type="button" class="miaProgramDayToggle" data-program-toggle="'+esc(model.date)+'" aria-expanded="'+(open?'true':'false')+'"><span class="miaProgramDate"><b>'+esc(model.day)+'</b><small>'+esc(dateLabel(model.date))+'</small></span><span class="miaProgramTitle"><b>'+esc(model.name)+'</b><small>'+esc(model.state)+' · '+esc(summary)+'</small></span><i>⌄</i></button>'+(open?'<div class="miaProgramDetail">'+coach+list+'<div class="miaProgramActions">'+actions+'</div></div>':'')+'</article>';
   }
   function ensureProgramShell(){
     if(!isMobile())return null;

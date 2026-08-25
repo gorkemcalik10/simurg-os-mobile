@@ -22,9 +22,9 @@ run('coach client and UI assets load in dependency order', () => {
   assert.ok(engine >= 0 && client > engine);
   assert.ok(uiRuntime > client);
   assert.ok(uiRuntime < html.indexOf('premium-standard.js'));
-  assert.match(html, /simurg-coach-client\.js\?v=4/);
-  assert.match(html, /simurg-coach\.css\?v=11/);
-  assert.match(html, /simurg-coach-ui\.js\?v=11/);
+  assert.match(html, /simurg-coach-client\.js\?v=5/);
+  assert.match(html, /simurg-coach\.css\?v=12/);
+  assert.match(html, /simurg-coach-ui\.js\?v=12/);
 });
 
 run('mobile Coaching exposes daily weekly and history views', () => {
@@ -42,10 +42,10 @@ run('simplified Daily keeps the engine decision and safety values as inputs', ()
   for (const [key, label] of Object.entries({progress:'Bugün biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'})) {
     assert.match(ui, new RegExp(`${key}:'${label}'`));
   }
-  assert.match(ui, /dailyDecision\(pre\)/);
-  assert.match(ui, /warningsCard\(pre\)/);
+  assert.match(ui, /dailyDecision\(canonical\)/);
+  assert.match(ui, /warningsCard\(canonical\)/);
   assert.match(ui, /if\(!rows\.length\)return ''/);
-  assert.match(ui, /Hazırlık '\+esc\(score\(daily\)\)/);
+  assert.match(ui, /Hazırlık '\+esc\(score\(canonical\)\)/);
   assert.doesNotMatch(dailyBody, /Belirgin risk uyarısı yok\./);
 });
 
@@ -61,7 +61,7 @@ run('movement categories stay in the shared engine but collapse into one Daily n
 
 run('post-workout and pattern analyses are reached only by the Technical Details loader', () => {
   const dailyBody = ui.slice(ui.indexOf('function dailyView'), ui.indexOf('function weeklyView'));
-  assert.match(dailyBody, /resolveImmediate\('daily',date\).*resolveImmediate\('pre_workout',date\)/);
+  assert.match(dailyBody, /resolveDecision\(date,true\)/);
   assert.doesNotMatch(dailyBody, /resolve\('post_workout'|resolve\('pattern'/);
   assert.match(ui, /function technicalContent[^]*resolve\('daily',date\),pre=resolve\('pre_workout',date\),post=resolve\('post_workout',date\),pattern=resolve\('pattern',date\)/);
   assert.match(ui, /function resolveImmediate[^]*deferTechnical:true/);
