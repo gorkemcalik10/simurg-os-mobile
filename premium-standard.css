@@ -941,12 +941,12 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
   #workout.gp-logger-refined .psLoggerKicker,#workout.gp-logger-refined .gp-logger-exercises-title small{color:var(--hf-amber)!important}
   #workout.gp-logger-refined #workoutGroups{padding-bottom:18px!important;overflow:visible!important}
 
-  #polar-workout{--pw-bg:var(--hf-bg);--pw-card:var(--hf-surface);--pw-card-deep:var(--hf-field);--pw-line:var(--hf-line);--pw-cyan:var(--hf-cyan);--pw-text:var(--hf-text);--pw-muted:var(--hf-muted)}
+  #polar-workout{--pw-bg:var(--hf-bg);--pw-surface:var(--hf-surface);--pw-field:var(--hf-field);--pw-line:var(--hf-line);--pw-amber:var(--hf-amber);--pw-amber-soft:var(--hf-amber-soft);--pw-cyan:var(--hf-cyan);--pw-text:var(--hf-text);--pw-muted:var(--hf-muted)}
   #polar-workout .pw-shell{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
-  #polar-workout :is(.pw-header,.pw-date-nav,.pw-tabs){background:#080f16!important;border-color:var(--hf-line-soft)!important}
-  #polar-workout .pw-card{border-color:var(--hf-line)!important;border-radius:17px!important;background:linear-gradient(180deg,#0d1821,#081018)!important;box-shadow:none!important;overflow:visible!important}
+  #polar-workout :is(.pw-header,.pw-date-nav){border-color:var(--hf-line-soft)!important}
+  #polar-workout .pw-card{border-color:var(--hf-line)!important;border-radius:19px!important;box-shadow:none!important}
   #polar-workout .pw-empty{padding:28px 18px!important;border-color:var(--hf-line)!important;background:#091119!important;box-shadow:none!important}
-  #polar-workout .pw-tab.active:after,#polar-workout .pw-date-chip.has-workout:after{background:var(--hf-cyan)!important;box-shadow:none!important}
+  #polar-workout .pw-date-chip.has-workout:after{box-shadow:none!important}
   #polar-workout .pw-content,#polar-workout .pw-pane{overflow:visible!important}
 
   #polar .polarDashboardV1{display:grid!important;gap:9px!important;width:100%!important;max-width:520px!important;min-height:0!important;margin:0 auto!important;padding:0!important;overflow:visible!important}

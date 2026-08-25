@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-post-audit-fixes-1';
+const SIMURG_CACHE = 'simurg-polar-premium-redesign-1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -19,8 +19,8 @@ const CORE_ASSETS = [
   './simurg-gym-flex.js?v=1',
   './simurg-exercise-catalog.js?v=1',
   './simurg-gym-flex.css?v=2',
-  './polar-workout.css?v=11',
-  './polar-workout.js?v=15',
+  './polar-workout.css?v=12',
+  './polar-workout.js?v=16',
   './workout-source-policy.js?v=3',
   './premium-standard.css?v=38',
   './premium-standard.js?v=48',
@@ -36,7 +36,7 @@ const CORE_ASSETS = [
   './polar-accesslink.js?v=9',
   './simurg-cloud-auth.js?v=7',
   './desktop-alignment.css?v=27',
-  './desktop-alignment.js?v=36',
+  './desktop-alignment.js?v=37',
   './mobile-ia-premium.css?v=11',
   './mobile-ia-premium.js?v=7',
   './simurg-training-lab.css?v=11',

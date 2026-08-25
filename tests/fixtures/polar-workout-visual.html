@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Polar Workout Visual Fixture</title>
+  <link rel="stylesheet" href="../../polar-workout.css?v=12">
+  <link rel="stylesheet" href="../../premium-standard.css?v=38">
+  <style>
+    html,body{margin:0;min-height:100%;background:#04080c;color:#eef2f5;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    main{width:100%;max-width:1180px;margin:0 auto;padding:0 14px}
+    .section{display:none}.section.active{display:block}
+    @media(min-width:901px){body[data-simurg-active-screen="polar-workout"] #polar-workout{display:block!important}}
+    #simurgV8Nav{display:none}
+    @media(max-width:900px){
+      main{height:100dvh;padding:0}
+      #simurgV8Nav{position:fixed;z-index:20;display:grid;grid-template-columns:repeat(5,1fr);left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));height:68px;padding:7px;gap:5px;border:1px solid rgba(255,255,255,.10);border-radius:27px;background:rgba(12,17,24,.95)}
+      #simurgV8Nav button{border:0;border-radius:18px;background:transparent;color:#87929e;font-size:10px;font-weight:800}
+      #simurgV8Nav button.active{background:rgba(245,163,13,.12);color:#ffc04a}
+    }
+  </style>
+</head>
+<body data-simurg-active-screen="polar-workout">
+  <main></main>
+  <nav id="simurgV8Nav" aria-label="Simurg mobil gezinme">
+    <button data-key="home">Ana</button><button data-key="gym">Gym</button><button data-key="logger">Günlük</button><button data-key="training-lab">Lab</button><button data-key="menu">Menü</button>
+  </nav>
+  <script>
+    window.DATA={
+      polarWorkouts:{daily:{
+        "2026-08-24":[{date:"2026-08-24",polarExerciseId:"visual-a",startTime:"18:10:00",duration:"00:32:08",workoutType:"Koşu",source:"Polar Flow",device:"Polar Pacer Pro",activeCal:286,avgHR:136,maxHR:162,cardioLoad:33.4,cardioLoadInterpretation:"medium",zones:{zone1:"00:08:20",zone2:"00:13:10",zone3:"00:07:42",zone4:"00:02:56",zone5:"00:00:00"},zoneSummary:{easyControlled:"00:21:30",moderate:"00:07:42",high:"00:02:56",unclassifiedTime:"00:00:00"},heartRateSeries:[92,104,119,136,145,152,141,133,128],trainingImpact:{}}],
+        "2026-08-25":[
+          {date:"2026-08-25",polarExerciseId:"visual-b",startTime:"07:40:00",duration:"00:20:00",workoutType:"Mobilite",source:"Polar Flow",device:"Polar Flow app",activeCal:112,avgHR:96,maxHR:118,cardioLoad:8.2,cardioLoadInterpretation:"low",zones:{zone1:"00:18:12",zone2:"00:01:48",zone3:"00:00:00",zone4:"00:00:00",zone5:"00:00:00"},zoneSummary:{easyControlled:"00:20:00",moderate:"00:00:00",high:"00:00:00",unclassifiedTime:"00:00:00"},trainingImpact:{}},
+          {date:"2026-08-25",polarExerciseId:"visual-c",startTime:"09:48:31",duration:"00:48:11",workoutType:"Fonksiyonel Antrenman",source:"Polar Flow",device:"Polar Flow app",activeCal:357,avgHR:113,maxHR:143,cardioLoad:28.9,cardioLoadInterpretation:"medium",muscleLoad:-1,muscleLoadInterpretation:"NOT_AVAILABLE",perceivedLoad:0,perceivedLoadInterpretation:"NOT AVAILABLE",zones:{zone1:"00:16:22",zone2:"00:00:35",zone3:"00:00:00",zone4:"00:00:00",zone5:"00:00:00"},zoneSummary:{easyControlled:"00:16:57",moderate:"00:00:00",high:"00:00:00",unclassifiedTime:"00:31:14"},trainingImpact:{}}
+        ]
+      },latest:null}
+    };
+    window.simurgV8Go=function(){};
+  </script>
+  <script src="../../polar-workout.js?v=16"></script>
+  <script type="module" src="../ui-overflow-audit.mjs"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded",function(){window.simurgOpenPolarWorkoutFor("2026-08-25","visual-c")});
+  </script>
+</body>
+</html>
