@@ -28,7 +28,9 @@
     var readiness=null;
     try{readiness=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):calculateReadiness(date);}catch(error){}
     var sleepScore=num(sleep.sleepScore!=null?sleep.sleepScore:sleep.score);
-    var sleepMinutes=num(sleep.sleepDurationMinutes!=null?sleep.sleepDurationMinutes:sleep.durationMinutes);
+    var sleepIntelligence=null;
+    try{sleepIntelligence=window.SimurgSleepIntelligence&&typeof window.SimurgSleepIntelligence.resolve==='function'?window.SimurgSleepIntelligence.resolve(date,{data:data}):null;}catch(error){}
+    var sleepMinutes=sleepIntelligence&&sleepIntelligence.status==='available'?num(sleepIntelligence.daily&&sleepIntelligence.daily.actualSleepMinutes):null;
     var hrv=num(night.heartRateVariabilityAvg!=null?night.heartRateVariabilityAvg:night.hrvMs);
     var cardio=num(load.cardioLoad!=null?load.cardioLoad:load.value);
     return {readiness:readiness,sleepScore:sleepScore,sleepMinutes:sleepMinutes,hrv:hrv,cardio:cardio,night:night,sleep:sleep,load:load};

@@ -7,7 +7,7 @@
   var dailyDecisionLabels={progress:'Bugün biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'};
   var homeDecisionLabels={progress:'Biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'};
   var weeklyDecisionLabels={progress:'Biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Yükü biraz azalt',recovery:'Toparlanmayı öne al',rest:'Dinlenmeyi önceliklendir'};
-  var metricLabels={hrv:'HRV',restingHr:'Dinlenik nabız',sleepMinutes:'Uyku süresi',sleepScore:'Uyku skoru',cardioLoad:'Cardio Load'};
+  var metricLabels={hrv:'HRV',restingHr:'Nabız',sleepMinutes:'Uyku süresi',sleepScore:'Uyku skoru',cardioLoad:'Cardio Load'};
 
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char];});}
   function data(){try{return DATA||{};}catch(error){return root.DATA||{};}}
@@ -63,6 +63,10 @@
       +'</div>';
   }
   function metric(result,key){return result&&result.baseline&&result.baseline[key]||{};}
+  function heartMetricLabel(date){
+    var nightly=data().polarNightlyRecharge&&data().polarNightlyRecharge.daily&&data().polarNightlyRecharge.daily[date]||{};
+    return [nightly.heartRateAvg,nightly.heart_rate_avg,nightly.nightlyHr,nightly.nightHr].some(function(value){return value!=null&&value!=='';})?'Gece Nabzı':'Dinlenik Nabız';
+  }
   function plainDecisionExplanation(result){
     if(result.readinessScore==null)return 'Toparlanma verilerin eksik olduğu için bugün kontrollü ilerle ve ilk setten sonra nasıl hissettiğini değerlendir.';
     return {
@@ -147,18 +151,18 @@
     return '<div class="sci-metric-list">'
       +metricRow('Uyku',sleepReason(result).status,durationLabel(sleep.current))
       +metricRow('HRV',semanticDeviation(hrv.deviation7,true),hrv.current==null?'—':roundOne(hrv.current)+' ms')
-      +metricRow('Dinlenik nabız',semanticDeviation(heart.deviation7,false),heart.current==null?'—':Math.round(heart.current)+' bpm')
+      +metricRow(heartMetricLabel(date),semanticDeviation(heart.deviation7,false),heart.current==null?'—':Math.round(heart.current)+' bpm')
       +metricRow('Cardio Load',load.status,'')
       +metricRow('Son Gym RPE',gym.rpe==null?'Kayıt yok':gym.rpe<6?'Hafif':gym.rpe<8?'Orta':'Yüksek',gym.rpe==null?'—':roundOne(gym.rpe))
       +metricRow('Form',gym.form||'Kayıt yok','')+metricRow('Ağrı',gym.pain||'Kayıt yok','')+'</div>';
   }
-  function baselineTable(result){
+  function baselineTable(result,date){
     var keys=['hrv','restingHr','sleepMinutes','sleepScore','cardioLoad','strain','tolerance','cardioLoadRatio'];
-    return '<div class="sci-tech-table"><div><b>Metrik</b><b>Bugün</b><b>7g</b><b>14g</b><b>28g</b><b>Sapma</b></div>'+keys.map(function(key){var item=metric(result,key),label={hrv:'HRV',restingHr:'Dinlenik nabız',sleepMinutes:'Uyku',sleepScore:'Uyku skoru',cardioLoad:'Cardio Load',strain:'Strain',tolerance:'Tolerance',cardioLoadRatio:'Strain/Tolerance'}[key];return '<div><span>'+esc(label)+'</span><span>'+esc(roundOne(item.current))+'</span><span>'+esc(roundOne(item[7]&&item[7].mean))+'</span><span>'+esc(roundOne(item[14]&&item[14].mean))+'</span><span>'+esc(roundOne(item[28]&&item[28].mean))+'</span><span>'+esc(item.deviation7==null?'—':(item.deviation7>0?'+':'')+item.deviation7+'%')+'</span></div>';}).join('')+'</div>';
+    return '<div class="sci-tech-table"><div><b>Metrik</b><b>Bugün</b><b>7g</b><b>14g</b><b>28g</b><b>Sapma</b></div>'+keys.map(function(key){var item=metric(result,key),label={hrv:'HRV',restingHr:heartMetricLabel(date),sleepMinutes:'Uyku',sleepScore:'Uyku skoru',cardioLoad:'Cardio Load',strain:'Strain',tolerance:'Tolerance',cardioLoadRatio:'Strain/Tolerance'}[key];return '<div><span data-label="Metrik">'+esc(label)+'</span><span data-label="Bugün">'+esc(roundOne(item.current))+'</span><span data-label="7g">'+esc(roundOne(item[7]&&item[7].mean))+'</span><span data-label="14g">'+esc(roundOne(item[14]&&item[14].mean))+'</span><span data-label="28g">'+esc(roundOne(item[28]&&item[28].mean))+'</span><span data-label="Sapma">'+esc(item.deviation7==null?'—':(item.deviation7>0?'+':'')+item.deviation7+'%')+'</span></div>';}).join('')+'</div>';
   }
   function technicalContent(date,results){
     var daily=resolve('daily',date),pre=resolve('pre_workout',date),post=resolve('post_workout',date),pattern=resolve('pattern',date);
-    return '<div class="sci-tech-section"><h3>Kişisel karşılaştırmalar</h3>'+baselineTable(daily)
+    return '<div class="sci-tech-section"><h3>Kişisel karşılaştırmalar</h3>'+baselineTable(daily,date)
       +'<h3>Veri güveni</h3><p>'+esc(confidence(daily))+' · '+esc(daily.confidenceLabel||'Düşük')+'</p>'+list(daily.missingData,'Eksik temel veri yok.',8)
       +'<h3>Trendler ve benzer günler</h3>'+list(daily.trendInsights,'Yeterli trend verisi yok.',6)+list(daily.comparisonNotes,'Yeterince benzer gün bulunamadı.',4)
       +'<h3>Tekrarlanan paternler</h3><p>'+esc(pattern.summary)+'</p>'+list(pattern.trendInsights,'Minimum örnek eşiğini geçen patern yok.',5)
@@ -238,7 +242,7 @@
     return '<div class="sci-metric-list">'
       +metricRow('Uyku',weeklySleepReason(result).status,durationLabel(sleep.current))
       +metricRow('HRV',semanticDeviation(hrv.deviation7,true),hrv.current==null?'—':roundOne(hrv.current)+' ms')
-      +metricRow('Dinlenik nabız',semanticDeviation(heart.deviation7,false),heart.current==null?'—':Math.round(heart.current)+' bpm')
+      +metricRow(heartMetricLabel(state.date),semanticDeviation(heart.deviation7,false),heart.current==null?'—':Math.round(heart.current)+' bpm')
       +metricRow('Cardio Load',load.status,'')
       +metricRow('Yakın Gym RPE',gym.rpe==null?'Kayıt yok':gym.rpe<6?'Hafif':gym.rpe<8?'Orta':'Yüksek',gym.rpe==null?'—':roundOne(gym.rpe))
       +metricRow('Form',gym.form||'Kayıt yok','')+metricRow('Ağrı',gym.pain||'Kayıt yok','')+'</div>';
@@ -246,7 +250,7 @@
   function weeklyTechnicalContent(result){
     return '<div class="sci-tech-section"><h3>Veri güveni</h3><p>'+esc(confidence(result))+' · '+esc(result.confidenceLabel||'Düşük')+'</p>'+list(result.missingData,'Eksik temel veri yok.',8)
       +'<h3>Ham haftalık sinyaller</h3>'+list(result.keyDrivers,'Haftalık sinyal yok.',8)
-      +'<h3>Yük ayarı</h3><p>'+esc(adjustment(result))+'</p><h3>Kişisel karşılaştırmalar</h3>'+baselineTable(result)
+      +'<h3>Yük ayarı</h3><p>'+esc(adjustment(result))+'</p><h3>Kişisel karşılaştırmalar</h3>'+baselineTable(result,state.date)
       +'<h3>Trendler</h3>'+list(result.trendInsights,'Yeterli trend verisi yok.',6)
       +'<h3>Ham güvenlik uyarıları</h3>'+list(result.warnings,'Belirgin risk uyarısı yok.',6)
       +'<h3>Toparlanma aksiyonları</h3>'+list(result.recoveryActions,'Ek aksiyon yok.',6)
@@ -286,7 +290,7 @@
   }
   function historyComparison(date){
     var current=resolve('daily',date),previous=resolve('daily',addDays(date,-7)),metrics=['hrv','restingHr','sleepMinutes','sleepScore','cardioLoad'];
-    return '<div class="sci-baseline-table"><div><b>Metrik</b><b>Bugün</b><b>7g baz</b><b>Sapma</b></div>'+metrics.map(function(metric){var base=current.baseline&&current.baseline[metric]||{},value=base.current,mean=base[7]&&base[7].mean,deviation=base.deviation7;return '<div><span>'+esc(metricLabels[metric])+'</span><span>'+esc(value==null?'—':Math.round(value*10)/10)+'</span><span>'+esc(mean==null?'—':mean)+'</span><span>'+esc(deviation==null?'—':(deviation>0?'+':'')+deviation+'%')+'</span></div>';}).join('')+'</div><p class="sci-compare-note">7 gün önceki karar: <b>'+esc(decision(previous))+'</b> · readiness '+esc(score(previous))+' · veri güveni '+esc(confidence(previous))+'.</p>';
+    return '<div class="sci-baseline-table"><div><b>Metrik</b><b>Bugün</b><b>7g baz</b><b>Sapma</b></div>'+metrics.map(function(metric){var base=current.baseline&&current.baseline[metric]||{},value=base.current,mean=base[7]&&base[7].mean,deviation=base.deviation7,label=metric==='restingHr'?heartMetricLabel(date):metricLabels[metric];return '<div><span>'+esc(label)+'</span><span>'+esc(value==null?'—':Math.round(value*10)/10)+'</span><span>'+esc(mean==null?'—':mean)+'</span><span>'+esc(deviation==null?'—':(deviation>0?'+':'')+deviation+'%')+'</span></div>';}).join('')+'</div><p class="sci-compare-note">7 gün önceki karar: <b>'+esc(decision(previous))+'</b> · readiness '+esc(score(previous))+' · veri güveni '+esc(confidence(previous))+'.</p>';
   }
   function renderDesktop(section,date){
     if(root.innerWidth<=900)return false;

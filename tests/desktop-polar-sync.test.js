@@ -44,10 +44,10 @@ run('changed production assets use matching cache versions', () => {
     'simurg-training-lab-anatomy-renderer.js?v=5',
     'simurg-exercise-history.js?v=2',
     'simurg-next-session-target.js?v=1',
-    'simurg-coach-engine.js?v=4',
+    'simurg-coach-engine.js?v=5',
     'simurg-coach-client.js?v=4',
-    'simurg-coach.css?v=10',
-    'simurg-coach-ui.js?v=10',
+    'simurg-coach.css?v=11',
+    'simurg-coach-ui.js?v=11',
     'simurg-persistence.js?v=2',
     'simurg-gym-identity.js?v=1',
     'simurg-exercise-canonicalization.js?v=2',
@@ -55,12 +55,12 @@ run('changed production assets use matching cache versions', () => {
     'simurg-data-validation.js?v=8',
     'polar-accesslink.js?v=9',
     'premium-standard.css?v=38',
-    'premium-standard.js?v=47',
+    'premium-standard.js?v=48',
     'desktop-alignment.css?v=27',
-    'desktop-alignment.js?v=35',
+    'desktop-alignment.js?v=36',
     'simurg-cloud-auth.js?v=7',
     'mobile-ia-premium.css?v=11',
-    'mobile-ia-premium.js?v=6',
+    'mobile-ia-premium.js?v=7',
     'simurg-gym-flex.js?v=1',
     'simurg-gym-flex.css?v=2',
     'simurg-training-lab.css?v=11',
@@ -69,8 +69,8 @@ run('changed production assets use matching cache versions', () => {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=home-recovery-v2-1/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-home-recovery-v2-1'/);
+  assert.match(index, /sw\.js\?v=post-audit-fixes-1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-post-audit-fixes-1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

@@ -25,6 +25,7 @@ function baseData() {
   };
 }
 function recoveryDay(data, date, values = {}) {
+  const sleepMinutes = values.sleepMinutes == null ? 450 : values.sleepMinutes;
   data.polarNightlyRecharge.daily[date] = {
     date,
     heartRateVariabilityAvg: values.hrv == null ? 60 : values.hrv,
@@ -34,11 +35,11 @@ function recoveryDay(data, date, values = {}) {
   };
   data.polarSleep.daily[date] = {
     date,
-    durationSeconds: (values.sleepMinutes == null ? 450 : values.sleepMinutes) * 60,
+    durationSeconds: sleepMinutes * 60,
     sleepScore: values.sleepScore == null ? 80 : values.sleepScore,
-    deepSleep: 5400,
-    remSleep: 7200,
-    lightSleep: 14400
+    deepSleep: sleepMinutes * 0.2 * 60,
+    remSleep: sleepMinutes * 0.2 * 60,
+    lightSleep: sleepMinutes * 0.6 * 60
   };
   data.polarCardioLoad.daily[date] = {
     date,

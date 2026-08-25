@@ -74,6 +74,22 @@ run('actual sleep excludes awake, interruptions, and unknown stages', () => {
   assert.equal(result.daily.sleepStages.awake.percentageOfActualSleep, null);
 });
 
+run('August 25 presentation example resolves 6h36 actual sleep instead of 6h58 time in bed', () => {
+  const date = '2026-08-25';
+  const row = sleep(date, {
+    startTime: '2026-08-24T23:02:00+03:00',
+    endTime: '2026-08-25T06:00:00+03:00',
+    durationMinutes: 418,
+    deepSleep: 72 * 60,
+    remSleep: 84 * 60,
+    lightSleep: 240 * 60,
+  });
+  const result = sleepIntelligence.analyze({ polarSleep: { daily: { [date]: row } } }, date);
+  assert.equal(result.status, 'available');
+  assert.equal(result.daily.actualSleepMinutes, 396);
+  assert.equal(result.daily.timeInBedMinutes, 418);
+});
+
 run('interruption normalization preserves direct Polar evidence without inventing count or severity', () => {
   const date = '2026-08-21';
   const result = sleepIntelligence.analyze({ polarSleep: { daily: { [date]: sleep(date) } } }, date);

@@ -15,6 +15,10 @@ export const AUDIT_VIEWPORTS = [
   { width: 1728, height: 1117 },
 ];
 
+if (JSON.stringify(AUDIT_VIEWPORTS.map(({ width }) => width)) !== JSON.stringify([320, 360, 390, 430, 844, 768, 900, 901, 1024, 1280, 1440, 1728])) {
+  throw new Error('Responsive audit viewport contract changed unexpectedly.');
+}
+
 const CARD_SELECTOR = [
   '.card', '.panel', '.group', '.exerciseCard', '.gymCard', '.gymAddCard',
   '.gp-card', '.gp-ring-card', '.gp-home-content > *', '.polarCard',

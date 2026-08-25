@@ -87,6 +87,42 @@ run('load cards render independently and empty only when all loads are missing',
   assert.match(empty, /Antrenman yükü mevcut değil/);
 });
 
+run('provider load sentinels and unavailable interpretations stay unavailable', () => {
+  const window = runtime();
+  const workout = {
+    cardioLoad: 28.9,
+    muscleLoad: -1,
+    muscleLoadInterpretation: 'NOT_AVAILABLE',
+    perceivedLoad: 0,
+    perceivedLoadInterpretation: 'NOT AVAILABLE',
+    trainingImpact: {},
+  };
+  const resolved = window.SimurgPolarWorkoutLoads.resolve(workout);
+  const html = window.SimurgPolarWorkoutLoads.render(workout);
+  assert.equal(resolved.muscle.value, null);
+  assert.equal(resolved.perceived.value, null);
+  assert.match(html, /Cardio Load/);
+  assert.doesNotMatch(html, /Kas Yükü|Algılanan Yük|NOT[ _-]*AVAILABLE|>-1</);
+});
+
+run('low Polar zone coverage produces source-aware cautious commentary', () => {
+  const window = runtime();
+  const workout = {
+    duration: '00:48:00',
+    zones: { zone1: '00:10:00', zone2: '00:06:48', zone3: '00:00:00', zone4: '00:00:00', zone5: '00:00:00' },
+    zoneSummary: { unclassifiedTime: '00:31:12' },
+  };
+  const coverage = window.SimurgPolarWorkoutCommentary.coverage(workout);
+  const heart = window.SimurgPolarWorkoutCommentary.heart(workout);
+  const zones = window.SimurgPolarWorkoutCommentary.zones(workout);
+  assert.equal(coverage.classifiedPercent, 35);
+  assert.equal(coverage.unclassifiedPercent, 65);
+  assert.equal(coverage.sufficient, false);
+  assert.match(heart, /Polar nabız bölgeleri.*%35.*%65.*kesin bir yoğunluk yorumu yapılamıyor/);
+  assert.match(zones, /yeniden dağıtılmaz/);
+  assert.doesNotMatch(heart + zones, /düşük-orta yoğunlukta kontrollü|toparlanma dostu/);
+});
+
 run('manual normalization preserves ID, loads, interpretations and raw payload', () => {
   const window = runtime();
   const normalized = window.SimurgPolarWorkoutNormalize({

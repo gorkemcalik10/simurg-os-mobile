@@ -68,15 +68,22 @@
   function resolveRecoveryIntelligence(date,data,canonicalRecovery){
     try{return window.SimurgRecoveryIntelligence&&typeof window.SimurgRecoveryIntelligence.resolve==='function'?window.SimurgRecoveryIntelligence.resolve(date,{data:data,canonicalRecovery:canonicalRecovery,signalDay:window.SimurgSignalModel&&window.SimurgSignalModel.day}):null;}catch(error){return null;}
   }
+  function resolveActualSleepMinutes(date,data,bridge,recovery){
+    var result=null;
+    try{result=window.SimurgSleepIntelligence&&typeof window.SimurgSleepIntelligence.resolve==='function'?window.SimurgSleepIntelligence.resolve(date,{data:data}):null;}catch(error){result=null;}
+    var daily=result&&result.daily||{},canonical=result&&result.status==='available'?number(daily.actualSleepMinutes):null;
+    if(canonical!=null)return canonical;
+    return firstNumber(bridge&&bridge.actualSleepMinutes,recovery&&recovery.actualSleepMinutes);
+  }
   function homeModel(date){
     var data=dataRoot(),bridge=bridgeEntry(data,date)||{},recovery=recoveryEntry(data,date)||{},chosen=window.SimurgWorkoutSource&&window.SimurgWorkoutSource.day?window.SimurgWorkoutSource.day(date):null,polar=chosen&&chosen.primaryPolar||null,apple=chosen&&chosen.appleLegacy||appleAt(data,date),gym=chosen&&chosen.gym||((data.workouts||[]).filter(function(row){return row&&row.date===date;}));
     var signalDay=window.SimurgSignalModel&&typeof window.SimurgSignalModel.day==='function'?window.SimurgSignalModel.day(date):null,polarAggregate=signalDay&&signalDay.polarAggregate,polarSleep=polarLatest(data,'polarSleep',date),polarNightly=polarLatest(data,'polarNightlyRecharge',date),loadResult=sharedLoad(date);
-    var sleepMinutes=firstNumber(polarSleep&&polarSleep.durationMinutes,polarSleep&&secondsToMinutes(polarSleep.durationSeconds),bridge.sleepDurationMinutes,recovery.sleepDurationMinutes,recovery.sleepMinutes);
+    var sleepMinutes=resolveActualSleepMinutes(date,data,bridge,recovery);
     var sleepScore=firstNumber(polarSleep&&polarSleep.sleepScore,bridge.sleepScore,recovery.sleepScore);
     var nightly=firstNumber(bridge.nightlyRecharge,recovery.nightlyRecharge,recovery.nightlyRechargeScore);
     var nightlyDisplay=nightlyStatusLabel(polarNightly&&polarNightly.nightlyRechargeStatus)||(nightly==null?null:nightly);
     var hrv=firstNumber(polarNightly&&polarNightly.heartRateVariabilityAvg,bridge.hrvMs,recovery.hrvMs,recovery.hrv);
-    var rhr=firstNumber(polarNightly&&polarNightly.heartRateAvg,bridge.restingHr,recovery.restingHr,recovery.restingHR,recovery.rhr);
+    var nightHr=firstNumber(polarNightly&&polarNightly.heartRateAvg),restingHr=firstNumber(bridge.restingHr,recovery.restingHr,recovery.restingHR,recovery.rhr),rhr=firstNumber(nightHr,restingHr),heartRateSource=nightHr!=null?'night_hr':restingHr!=null?'resting_hr':null;
     var sleepHr=firstNumber(bridge.sleepHr,recovery.sleepHr,recovery.sleepHR);
     var respiratory=firstNumber(polarNightly&&polarNightly.breathingRateAvg,bridge.respiratoryRate,recovery.respiratoryRate);
     var load=loadResult.available?loadResult.value:null;
@@ -90,7 +97,7 @@
     var hasRecoverySignals=[hrv,rhr,respiratory,nightlyDisplay].some(function(value){return value!=null&&value!=='';});
     var readinessResult=window.SimurgReadiness&&typeof window.SimurgReadiness.resolve==='function'?window.SimurgReadiness.resolve(date):resolveReadiness(date,{recovery:recovery,hasActivity:!!(polar||apple||gym.length),signals:{hrv:hrv,rhr:rhr,respiratory:respiratory,sleepScore:sleepScore,cardioLoad:load}}),readiness=readinessResult.score;
     var sharedDay=window.SimurgSignalModel&&typeof window.SimurgSignalModel.day==='function'?window.SimurgSignalModel.day(date):null;
-    return {selectedDate:date,data:data,bridge:bridge,recovery:recovery,polar:polar,polarAggregate:polarAggregate,apple:apple,gym:gym,gymPlan:sharedDay&&sharedDay.gymPlan||null,workoutSource:chosen&&chosen.source,polarSleep:polarSleep,polarNightly:polarNightly,loadResult:loadResult,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,readinessResult:readinessResult,recoveryIntelligence:resolveRecoveryIntelligence(date,data,readinessResult),energy:resolveEnergy(date),hasRecoverySignals:hasRecoverySignals,hrv:hrv,rhr:rhr,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
+    return {selectedDate:date,data:data,bridge:bridge,recovery:recovery,polar:polar,polarAggregate:polarAggregate,apple:apple,gym:gym,gymPlan:sharedDay&&sharedDay.gymPlan||null,workoutSource:chosen&&chosen.source,polarSleep:polarSleep,polarNightly:polarNightly,loadResult:loadResult,sleepMinutes:sleepMinutes,sleepScore:sleepScore,nightly:nightly,nightlyDisplay:nightlyDisplay,readiness:readiness,readinessResult:readinessResult,recoveryIntelligence:resolveRecoveryIntelligence(date,data,readinessResult),energy:resolveEnergy(date),hasRecoverySignals:hasRecoverySignals,hrv:hrv,rhr:rhr,heartRateSource:heartRateSource,sleepHr:sleepHr,respiratory:respiratory,load:load,activeEnergy:activeEnergy,rpe:rpe,stages:stages,activity:activity};
   }
   function metric(label,value,unit){var textValue=label==='Latest Activity'||label==='Aggressiveness';return '<div class="gp-metric '+(textValue?'gp-metric-text':'')+'"><small>'+esc(label)+'</small><b>'+esc(value==null?'—':value)+(value==null?'':'<em>'+esc(unit||'')+'</em>')+'</b></div>';}
   function recoveryRingColor(value){if(value==null||value>=60)return '#80c72e';if(value>=40)return '#f1b721';return '#e33a46';}
@@ -211,11 +218,11 @@
   }
   function dailyEvidenceCard(model){
     var sleepValue=model.sleepScore==null?(model.sleepMinutes==null?null:formatSleep(model.sleepMinutes)):Math.round(model.sleepScore),sleepUnit=model.sleepScore==null?'':'/100',sleepCaption=model.sleepScore==null?'Uyku süresi':'Uyku skoru';
-    var hrLabel=model.polarNightly?'Night HR':'Resting HR';
+    var hrLabel=model.heartRateSource==='night_hr'?'Gece Nabzı':'Dinlenik Nabız';
     return '<section class="gp-card gp-daily-evidence"><div class="gp-card-head"><h2>Günlük Kanıtlar</h2><span>'+esc(model.selectedDate===today()?'Bugün':'Seçili gün')+'</span></div><div class="gp-evidence-strip">'
       +evidenceItem('sleep','Sleep',sleepValue,sleepUnit,sleepCaption,'sleep')
       +evidenceItem('recovery','HRV',model.hrv==null?null:formatLoad(model.hrv),'ms','Gece ortalaması','hrv')
-      +evidenceItem('recovery',hrLabel,model.rhr==null?null:formatLoad(model.rhr),'bpm',model.polarNightly?'Polar gece verisi':'Mevcut kayıt','heart')
+      +evidenceItem('recovery',hrLabel,model.rhr==null?null:formatLoad(model.rhr),'bpm',model.heartRateSource==='night_hr'?'Polar gece verisi':'Mevcut kayıt','heart')
       +evidenceItem('load','Cardio Load',loadValueLabel(model.loadResult),'',model.loadResult&&model.loadResult.available?text(model.loadResult.statusLabel,'Mevcut'):'Veri bekleniyor','load')
       +'</div></section>';
   }
@@ -249,7 +256,7 @@
     var loadDetail=load.value==null?'Önceki gün Cardio Load verisi yok':'Önceki günün mevcut Cardio Load değeri';
     return '<section class="gp-card gp-recovery-context"><div class="gp-card-head"><h2>Kişisel Baseline Karşılaştırması</h2><span>'+esc(recoveryConfidenceLabel(intelligence.confidence))+' güven</span></div><div class="gp-recovery-evidence-grid">'
       +recoveryMetricCard('HRV',contributors.hrv,'ms','Gece kalp hızı değişkenliği')
-      +recoveryMetricCard('Night HR',contributors.nightHr,'bpm','Polar gece nabzı')
+      +recoveryMetricCard('Gece Nabzı',contributors.nightHr,'bpm','Polar gece nabzı')
       +recoveryMetricCard('ANS Charge',ans,'',ansDetail)
       +recoveryMetricCard('Sleep Charge',sleep,'',sleepDetail)
       +recoveryMetricCard('Previous-day Load',load,'',loadDetail)

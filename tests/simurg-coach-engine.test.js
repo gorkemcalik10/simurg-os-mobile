@@ -120,6 +120,17 @@ run('missing Polar data lowers confidence and never recommends progression', () 
   assert.ok(output.missingData.includes('Yeterli 7 günlük kişisel baseline'));
 });
 
+run('Coach consumes validated stage totals instead of Polar time in bed', () => {
+  const scenario = plain(byId.good_recovery);
+  const sleep = scenario.data.polarSleep.daily[scenario.date];
+  sleep.durationSeconds = 418 * 60;
+  sleep.deepSleep = 72 * 60;
+  sleep.remSleep = 84 * 60;
+  sleep.lightSleep = 240 * 60;
+  const output = engine.analyzeDaily(scenario.data, scenario.date);
+  assert.equal(output.baseline.sleepMinutes.current, 396);
+});
+
 run('tennis or badminton context adds upper-limb caution', () => {
   const scenario = byId.racket_sport_day;
   const output = engine.analyzePreWorkout(scenario.data, scenario.date);

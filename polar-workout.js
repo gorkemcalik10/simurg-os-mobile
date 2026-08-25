@@ -20,7 +20,8 @@
   }
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function num(value,fallback){var n=Number(value);return Number.isFinite(n)?n:(fallback==null?0:fallback);}
-  function optionalNumber(value){if(value==null||value==='')return null;var n=Number(value);return Number.isFinite(n)?n:null;}
+  function unavailableMarker(value){return typeof value==='string'&&/^(?:-1|n\/?a|not[\s_-]*available|unavailable|unknown|missing|null|none)$/i.test(value.trim());}
+  function optionalNumber(value){if(value==null||value===''||unavailableMarker(value))return null;var n=Number(value);return Number.isFinite(n)&&n>=0?n:null;}
   function clamp(value,min,max){return Math.max(min,Math.min(max,value));}
   function text(value,fallback){var result=String(value==null?'':value).trim();return result||fallback||'';}
   function workoutLabel(value){
@@ -145,12 +146,17 @@
   function rawLoadPro(workout){var raw=workout&&workout.raw&&typeof workout.raw==='object'?workout.raw:workout||{};return raw.training_load_pro||raw['training-load-pro']||workout.training_load_pro||workout['training-load-pro']||{};}
   function firstOptional(){for(var i=0;i<arguments.length;i++){var value=optionalNumber(arguments[i]);if(value!=null)return value;}return null;}
   function firstInterpretation(){for(var i=0;i<arguments.length;i++){var value=text(arguments[i],'');if(value)return value;}return '';}
+  function resolvedLoad(values,interpretations){
+    var interpretation=firstInterpretation.apply(null,interpretations||[]);
+    if(unavailableMarker(interpretation))return {value:null,interpretation:''};
+    return {value:firstOptional.apply(null,values||[]),interpretation:interpretation};
+  }
   function resolveWorkoutLoads(workout){
     workout=workout||{};var raw=workout.raw&&typeof workout.raw==='object'?workout.raw:workout,pro=rawLoadPro(workout);
     return {
-      cardio:{value:firstOptional(workout.cardioLoad,pro['cardio-load'],pro.cardio_load),interpretation:firstInterpretation(workout.cardioLoadInterpretation,pro['cardio-load-interpretation'],pro.cardio_load_interpretation,raw.cardioLoadInterpretation,raw.cardio_load_interpretation,raw['cardio-load-interpretation'])},
-      muscle:{value:firstOptional(workout.muscleLoad,pro['muscle-load'],pro.muscle_load,raw.muscleLoad,raw.muscle_load,raw['muscle-load']),interpretation:firstInterpretation(workout.muscleLoadInterpretation,pro['muscle-load-interpretation'],pro.muscle_load_interpretation,raw.muscleLoadInterpretation,raw.muscle_load_interpretation,raw['muscle-load-interpretation'])},
-      perceived:{value:firstOptional(workout.perceivedLoad,pro['perceived-load'],pro.perceived_load,raw.perceivedLoad,raw.perceived_load,raw['perceived-load']),interpretation:firstInterpretation(workout.perceivedLoadInterpretation,pro['perceived-load-interpretation'],pro.perceived_load_interpretation,raw.perceivedLoadInterpretation,raw.perceived_load_interpretation,raw['perceived-load-interpretation'])}
+      cardio:resolvedLoad([workout.cardioLoad,pro['cardio-load'],pro.cardio_load],[workout.cardioLoadInterpretation,pro['cardio-load-interpretation'],pro.cardio_load_interpretation,raw.cardioLoadInterpretation,raw.cardio_load_interpretation,raw['cardio-load-interpretation']]),
+      muscle:resolvedLoad([workout.muscleLoad,pro['muscle-load'],pro.muscle_load,raw.muscleLoad,raw.muscle_load,raw['muscle-load']],[workout.muscleLoadInterpretation,pro['muscle-load-interpretation'],pro.muscle_load_interpretation,raw.muscleLoadInterpretation,raw.muscle_load_interpretation,raw['muscle-load-interpretation']]),
+      perceived:resolvedLoad([workout.perceivedLoad,pro['perceived-load'],pro.perceived_load,raw.perceivedLoad,raw.perceived_load,raw['perceived-load']],[workout.perceivedLoadInterpretation,pro['perceived-load-interpretation'],pro.perceived_load_interpretation,raw.perceivedLoadInterpretation,raw.perceived_load_interpretation,raw['perceived-load-interpretation']])
     };
   }
   function loadStatus(workout){
@@ -168,6 +174,8 @@
   function pctFor(workout,key){return clamp(Math.round(seconds(workout.zones&&workout.zones[key])/durationSeconds(workout)*100),0,100);}
   function classifiedZoneSeconds(workout){return ['zone1','zone2','zone3','zone4','zone5'].reduce(function(total,key){return total+seconds(workout.zones&&workout.zones[key]);},0);}
   function hasZoneData(workout){return classifiedZoneSeconds(workout)>0;}
+  function zoneCoverage(workout){var duration=durationSeconds(workout),classified=classifiedZoneSeconds(workout);return {classifiedSeconds:classified,durationSeconds:duration,classifiedPercent:clamp(Math.round(classified/duration*100),0,100),unclassifiedPercent:clamp(Math.round((duration-classified)/duration*100),0,100),sufficient:classified/duration>=0.7};}
+  function limitedZoneCommentary(workout){var coverage=zoneCoverage(workout);return 'Polar nabız bölgeleri seansın yalnızca %'+coverage.classifiedPercent+'\'ini sınıflandırıyor; kalan %'+coverage.unclassifiedPercent+' için yoğunluk bilinmediğinden kesin bir yoğunluk yorumu yapılamıyor.';}
   function zoneRows(workout,detailed){
     return ['zone5','zone4','zone3','zone2','zone1'].map(function(key){
       var available=hasZoneData(workout),meta=zoneMeta[key],pct=available?pctFor(workout,key):0,duration=workout.zones&&workout.zones[key]||'';
@@ -240,6 +248,7 @@
   }
   function heartInterpretation(workout){
     if(!hasZoneData(workout)) return '<div class="pw-card"><div class="pw-card-title"><h2>♡ &nbsp;Nabız Yorumu</h2></div><p class="pw-copy">Bölge detayı olmadığı için yoğunluk yorumu yapılamıyor.</p></div>';
+    if(!zoneCoverage(workout).sufficient)return '<div class="pw-card"><div class="pw-card-title"><h2>♡ &nbsp;Nabız Yorumu</h2></div><p class="pw-copy">'+esc(limitedZoneCommentary(workout))+'</p><p class="pw-copy">Gösterilen yüzdeler yalnızca Polar tarafından sınıflandırılan süreyi temsil eder.</p></div>';
     var zone1=pctFor(workout,'zone1'),moderateHigh=seconds(workout.zones.zone3)+seconds(workout.zones.zone4)+seconds(workout.zones.zone5),sentence;
     if(zone1>=50)sentence='Bu antrenman düşük yoğunlukta ve toparlanma dostu ilerlemiş.';
     else if(moderateHigh>0)sentence='Bu antrenmanda orta-yüksek yoğunluk bloğu var.';
@@ -258,6 +267,7 @@
   function zoneSummaryCard(workout){return '<div class="pw-card"><div class="pw-card-title"><h2>Bölge Özeti</h2></div><div class="pw-summary-list">'+summaryRows(workout)+'</div></div>';}
   function zoneInterpretation(workout){
     if(!hasZoneData(workout))return '<div class="pw-card"><div class="pw-card-title"><h2>◉ &nbsp;Bölge Yorumu</h2></div><p class="pw-copy">Sınıflandırılmış nabız bölgesi detayı mevcut değil. Varsa sınıflandırılmamış süre yukarıda ayrı gösterilir.</p></div>';
+    if(!zoneCoverage(workout).sufficient)return '<div class="pw-card"><div class="pw-card-title"><h2>◉ &nbsp;Bölge Yorumu</h2></div><p class="pw-copy">'+esc(limitedZoneCommentary(workout))+'</p><p class="pw-copy">Yüzdeler Polar’dan geldiği haliyle korunur; sınıflandırılmamış süre yeniden dağıtılmaz.</p></div>';
     var zone1=pctFor(workout,'zone1'),moderateHigh=seconds(workout.zones.zone3)+seconds(workout.zones.zone4)+seconds(workout.zones.zone5),copy=zone1>=50?'Seansın büyük bölümü Zone 1’de ve düşük yoğunlukta ilerlemiş.':moderateHigh>0?'Zone 3–5 içinde anlamlı bir orta-yüksek yoğunluk bölümü var.':'Zone dağılımı düşük-orta yoğunlukta kontrollü görünüyor.';
     return '<div class="pw-card"><div class="pw-card-title"><h2>◉ &nbsp;Bölge Yorumu</h2></div><p class="pw-copy">'+esc(copy)+'</p><p class="pw-copy">Yüzdeler Polar’dan geldiği haliyle korunur; sınıflandırılmamış süre yeniden dağıtılmaz.</p></div>';
   }
@@ -383,6 +393,7 @@
 
   window.SimurgPolarWorkoutNormalize=normalizeWorkout;
   window.SimurgPolarWorkoutLoads={resolve:resolveWorkoutLoads,render:load};
+  window.SimurgPolarWorkoutCommentary={coverage:zoneCoverage,heart:heartInterpretation,zones:zoneInterpretation};
   window.importPolarWorkout=importPolarWorkout;
   window.renderPolarWorkout=render;
   window.polarWorkoutSelectDate=function(date){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date||'')))return;selectedDate=date;selectedWorkoutKey=null;currentTab='overview';render();var section=document.getElementById('polar-workout');if(section)section.scrollTop=0;};

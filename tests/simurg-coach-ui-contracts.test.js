@@ -23,8 +23,8 @@ run('coach client and UI assets load in dependency order', () => {
   assert.ok(uiRuntime > client);
   assert.ok(uiRuntime < html.indexOf('premium-standard.js'));
   assert.match(html, /simurg-coach-client\.js\?v=4/);
-  assert.match(html, /simurg-coach\.css\?v=10/);
-  assert.match(html, /simurg-coach-ui\.js\?v=10/);
+  assert.match(html, /simurg-coach\.css\?v=11/);
+  assert.match(html, /simurg-coach-ui\.js\?v=11/);
 });
 
 run('mobile Coaching exposes daily weekly and history views', () => {
@@ -118,6 +118,16 @@ run('coach surfaces inherit the Simurg dark palette without light canvases', () 
   assert.doesNotMatch(css, /color-scheme\s*:\s*light/i);
   assert.doesNotMatch(css, /background(?:-color)?\s*:\s*(?:white|#fff(?:fff)?\b)/i);
   assert.doesNotMatch(css, /background(?:-color)?\s*:\s*#[fFeE][0-9a-fA-F]{5}\b/);
+});
+
+run('Coach technical comparisons reflow into bounded mobile metric cards', () => {
+  assert.match(ui, /data-label="Bugün"/);
+  assert.match(ui, /data-label="Sapma"/);
+  assert.match(css, /@media\(max-width:900px\)[^]*?\.sci-tech-table\{min-width:0/);
+  assert.match(css, /\.sci-tech-table>div:not\(:first-child\)\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(css, /\.sci-disclosure>div\{overflow-x:visible\}/);
+  assert.match(css, /\.sci-tech-table span\{min-width:0;overflow-wrap:anywhere\}/);
+  assert.match(css, /@media\(min-width:901px\)/);
 });
 
 run('existing canonical mobile navigation remains unchanged', () => {
