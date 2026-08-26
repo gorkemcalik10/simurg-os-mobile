@@ -404,7 +404,7 @@
     var nav=document.getElementById('simurgV8Nav');
     if(nav&&nav.querySelector('[data-key="polar"]'))nav.querySelector('[data-key="polar"]').remove();
     var grid=document.querySelector('#simurgV8Sheet .simurgV8Grid');
-    if(grid)grid.innerHTML='<button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve öneriler</small></span></button><button onclick="simurgV8Go(\'program\',\'menu\')"><i>🧭</i><span><b>Program</b><small>Antrenman planı</small></span></button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedek</small></span></button>';
+    if(grid)grid.innerHTML='<button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve öneriler</small></span></button><button onclick="simurgV8Go(\'journal\',\'menu\')"><i>✦</i><span><b>Journal</b><small>Günlük davranış ve kısa not</small></span></button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedek</small></span></button>';
   }
   function patchRouter(){
     if(window.__miaRouterPatched||typeof window.simurgV8Go!=='function')return;

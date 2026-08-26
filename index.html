@@ -11,6 +11,7 @@
 <script src="./simurg-exercise-history.js?v=2"></script>
 <script src="./simurg-next-session-target.js?v=2"></script>
 <script src="./simurg-signal-model.js?v=7"></script>
+<script src="./simurg-journal.js?v=1"></script>
 <script src="./simurg-sleep-intelligence.js?v=1"></script>
 <script src="./simurg-polar-intelligence.js?v=1"></script>
 <script src="./simurg-recovery-intelligence.js?v=1"></script>
@@ -6132,6 +6133,7 @@ body{background:#050607!important;}
 
 <section id="daily" class="section"><div class="topbar"><div class="title"><div class="titleIcon">📝</div><div><h1>Daily Summary</h1><div class="sub">Compact training log.</div></div></div></div><div id="dailyReport"></div></section>
 <section id="weekly" class="section"><div class="topbar"><div class="title"><div class="titleIcon">📅</div><div><h1>Haftalık Özet</h1><div class="sub">Seçili haftanın otomatik raporu</div></div></div></div><div id="weeklyReport"></div></section>
+<section id="journal" class="section"><div class="topbar"><div class="title"><div class="titleIcon">✦</div><div><h1>Simurg Journal</h1><div class="sub">Günün davranışlarını birkaç dokunuşla kaydet.</div></div></div></div><div id="journalApp"></div></section>
 <section id="program" class="section"><div class="topbar"><div class="title"><div class="titleIcon">🧭</div><div><h1>Program Intelligence</h1><div class="sub">Haftalık yük, toparlanma borcu ve gelecek hafta stratejisi</div></div></div></div><div id="programReport"></div></section>
 <section id="monthly" class="section"><div class="topbar"><div class="title"><div class="titleIcon">🗓️</div><div><h1>Aylık Değerlendirme</h1><div class="sub">Seçili ayın Gym, aktivite ve toparlanma blok özeti</div></div></div></div><div id="monthlyReport"></div></section>
 <section id="reports" class="section">
@@ -6280,12 +6282,12 @@ body{background:#050607!important;}
 <script src="./simurg-gym-identity.js?v=1"></script>
 <script src="./simurg-exercise-canonicalization.js?v=2"></script>
 <script src="./simurg-training-lab-analysis.js?v=6"></script>
-<script src="./simurg-data-validation.js?v=8"></script>
+<script src="./simurg-data-validation.js?v=9"></script>
 <script src="./simurg-workout-recovery.js?v=1"></script>
 <script src="./simurg-gym-flex.js?v=1"></script>
 <script src="./simurg-exercise-catalog.js?v=1"></script>
 <script>
-const INITIAL={"schemaVersion":1,"workouts":[],"metrics":[],"nutrition":[],"recovery":[],"appleWatch":[],"dailyNotes":[],"weeklyNotes":[],"customGymPrograms":{},"programNames":{},"gymDayState":{},"exerciseLoadProfiles":{},"exerciseCatalog":{},"coachIntelligence":{"schemaVersion":1,"daily":{},"weekly":{},"patterns":{},"aiCache":{},"settings":{"movementCategories":{}}},"polarWorkouts":{"daily":{},"latest":null},"polarActivity":{"daily":{},"latest":null},"polarProfile":{"latest":null},"polarSleep":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarNightlyRecharge":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarContinuousHr":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarCardioLoad":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarConnection":{"connected":false,"status":"disconnected","lastSyncAt":null,"lastError":null,"source":"Polar AccessLink"}};
+const INITIAL={"schemaVersion":1,"workouts":[],"metrics":[],"nutrition":[],"recovery":[],"appleWatch":[],"dailyNotes":[],"weeklyNotes":[],"customGymPrograms":{},"programNames":{},"gymDayState":{},"exerciseLoadProfiles":{},"exerciseCatalog":{},"journal":{"schemaVersion":1,"daily":{}},"coachIntelligence":{"schemaVersion":1,"daily":{},"weekly":{},"patterns":{},"aiCache":{},"settings":{"movementCategories":{}}},"polarWorkouts":{"daily":{},"latest":null},"polarActivity":{"daily":{},"latest":null},"polarProfile":{"latest":null},"polarSleep":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarNightlyRecharge":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarContinuousHr":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarCardioLoad":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarConnection":{"connected":false,"status":"disconnected","lastSyncAt":null,"lastError":null,"source":"Polar AccessLink"}};
 window.SIMURG_INITIAL_DEFAULTS=INITIAL;
 let DATA;
 var simurgStoredDataRaw=localStorage.getItem('atlas_summary_reports');
@@ -6331,6 +6333,7 @@ if(!DATA.customGymPrograms) DATA.customGymPrograms={};
 if(!DATA.programNames) DATA.programNames={};
 if(!DATA.gymDayState) DATA.gymDayState={};
 if(!DATA.exerciseLoadProfiles) DATA.exerciseLoadProfiles={};
+if(!DATA.journal) DATA.journal={schemaVersion:1,daily:{}};
 let selectedDate=todayStr(), weekStart=mondayOf(selectedDate), editIndexes=[];
 const program=[
   ['Monday','Push Strength'],
@@ -6382,6 +6385,7 @@ function render(){
     else if(screen==='workout'){renderProgramDays();renderWeekStrip();renderWorkout();}
     else if(screen==='daily')renderDailyReport();
     else if(screen==='weekly')renderWeeklyReport();
+    else if(screen==='journal'&&window.SimurgJournalUI)window.SimurgJournalUI.render();
     else if(screen==='program'||screen==='monthly'||screen==='reports')renderReports();
     else if(screen==='coaching'){renderCoachPanels();renderReadinessPanel();renderInjuryRiskPanel();renderPhoenixReport();}
     renderSide();
@@ -7981,7 +7985,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=coach-personal-calibration-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=journal-v1').catch(function(){});
   });
 }
 </script>
@@ -11180,6 +11184,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     }
     else if(id==='daily'&&typeof window.renderDailyReport==='function')window.renderDailyReport();
     else if(id==='weekly'&&typeof window.renderWeeklyReport==='function')window.renderWeeklyReport();
+    else if(id==='journal'&&window.SimurgJournalUI)window.SimurgJournalUI.render();
     else if((id==='program'||id==='monthly'||id==='reports')&&typeof window.renderReports==='function')window.renderReports();
     else if(id==='coaching'){
       if(typeof window.renderCoachPanels==='function')window.renderCoachPanels();
@@ -11216,7 +11221,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   window.simurgV8Go=go; window.simurgV8OpenMenu=openMenu; window.simurgV8CloseMenu=closeMenu;
   ready(function(){
     if(!document.getElementById('simurgV8Nav')){
-      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Üç temel merkez</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('program','menu')"><i>🧭</i><span><b>Program</b><small>Antrenman planı ve ilerleme</small></span></button><button onclick="simurgV8Go('data','menu')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedekleme</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Günlük</button><button data-key="training-lab" onclick="SimurgTrainingLabUI.open()"><i>◫</i>Lab</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
+      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Üç temel merkez</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('journal','menu')"><i>✦</i><span><b>Journal</b><small>Günlük davranış ve kısa not</small></span></button><button onclick="simurgV8Go('data','menu')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedekleme</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Günlük</button><button data-key="training-lab" onclick="SimurgTrainingLabUI.open()"><i>◫</i>Lab</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
     }
     var loggerButton=document.querySelector('#simurgV8Nav button[data-key="logger"]');
     if(loggerButton)loggerButton.setAttribute('onclick',"simurgV8Go('workout','logger')");
@@ -16282,8 +16287,10 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./mobile-ia-premium.css?v=12">
 <link rel="stylesheet" href="./simurg-gym-flex.css?v=2">
 <link rel="stylesheet" href="./simurg-training-lab.css?v=13">
-<script src="./mobile-ia-premium.js?v=9"></script>
+<link rel="stylesheet" href="./simurg-journal.css?v=1">
+<script src="./mobile-ia-premium.js?v=10"></script>
 <script src="./simurg-training-lab-ui.js?v=19"></script>
+<script src="./simurg-journal-ui.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
 <script src="./simurg-cloud-auth.js?v=7" defer></script>
 <script>

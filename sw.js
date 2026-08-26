@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-coach-personal-calibration-v1';
+const SIMURG_CACHE = 'simurg-journal-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -14,7 +14,7 @@ const CORE_ASSETS = [
   './simurg-training-lab-anatomy-renderer.js?v=5',
   './simurg-exercise-history.js?v=2',
   './simurg-next-session-target.js?v=2',
-  './simurg-data-validation.js?v=8',
+  './simurg-data-validation.js?v=9',
   './simurg-workout-recovery.js?v=1',
   './simurg-gym-flex.js?v=1',
   './simurg-exercise-catalog.js?v=1',
@@ -25,6 +25,7 @@ const CORE_ASSETS = [
   './premium-standard.css?v=39',
   './premium-standard.js?v=51',
   './simurg-signal-model.js?v=7',
+  './simurg-journal.js?v=1',
   './simurg-sleep-intelligence.js?v=1',
   './simurg-polar-intelligence.js?v=1',
   './simurg-recovery-intelligence.js?v=1',
@@ -39,9 +40,11 @@ const CORE_ASSETS = [
   './desktop-alignment.css?v=27',
   './desktop-alignment.js?v=37',
   './mobile-ia-premium.css?v=12',
-  './mobile-ia-premium.js?v=9',
+  './mobile-ia-premium.js?v=10',
   './simurg-training-lab.css?v=13',
   './simurg-training-lab-ui.js?v=19',
+  './simurg-journal.css?v=1',
+  './simurg-journal-ui.js?v=1',
   './assets/simurg-anatomy-base-v1.png',
   './assets/anatomy-masks/pectoralis_sternal.png',
   './assets/anatomy-masks/pectoralis_clavicular.png',

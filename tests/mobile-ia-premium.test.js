@@ -30,7 +30,8 @@ run('mobile bottom navigation exposes Training Lab as a fifth primary route', ()
 run('mobile menu keeps only its core entries while Training Lab stays primary', () => {
   const grid = html.match(/<div class="simurgV8Grid simurgPremiumMenuGrid">([\s\S]*?)<\/div><\/div><nav id="simurgV8Nav"/);
   assert.ok(grid);
-  for (const label of ['Koçluk', 'Program', 'Veri Merkezi']) assert.match(grid[1], new RegExp(label));
+  for (const label of ['Koçluk', 'Journal', 'Veri Merkezi']) assert.match(grid[1], new RegExp(label));
+  assert.doesNotMatch(grid[1], /<b>Program<\/b>|simurgV8Go\('program','menu'\)/);
   assert.doesNotMatch(grid[1], /Training Lab|Haftalık|Aylık|<b>Polar<\/b>/);
   assert.match(trainingLabUi, /data-key','training-lab'/);
   assert.match(trainingLabUi, /simurgV8Go\('training-lab','training-lab'\)/);

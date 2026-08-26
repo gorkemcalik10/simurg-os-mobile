@@ -29,6 +29,7 @@
     schemaVersion:CURRENT_SCHEMA_VERSION,
     workouts:[],metrics:[],nutrition:[],recovery:[],appleWatch:[],dailyNotes:[],weeklyNotes:[],
     customGymPrograms:{},programNames:{},gymDayState:{},exerciseLoadProfiles:{},exerciseCatalog:{},
+    journal:{schemaVersion:1,daily:{}},
     coachIntelligence:{schemaVersion:1,daily:{},weekly:{},patterns:{},aiCache:{},settings:{movementCategories:{}}},
     polarWorkouts:{daily:{},latest:null},
     polarActivity:{daily:{},latest:null},
@@ -388,6 +389,27 @@
     });
     scan(store.aiCache);
   }
+  function validateJournalStore(store,path){
+    var behaviorKeys=['goodHydration','lateCaffeine','lateMeal','highStress','lateBedtime','extraActivity','mobilityRecovery','alcohol'];
+    plain(store,path);
+    number(store.schemaVersion,path+'.schemaVersion',{integer:true,min:1,max:100});
+    plain(store.daily,path+'.daily');
+    Object.keys(store.daily).forEach(function(key){
+      var entryPath=pathFor(path+'.daily',key),entry=store.daily[key];
+      date(key,entryPath);plain(entry,entryPath);
+      if(entry.date!==key)fail('journal_date_mismatch','Journal record date must match its date key',entryPath+'.date');
+      behaviorKeys.forEach(function(behavior){
+        if(!Object.prototype.hasOwnProperty.call(entry.behaviors||{},behavior))fail('missing_journal_behavior','Journal behavior must be explicitly tri-state',entryPath+'.behaviors.'+behavior);
+        var value=entry.behaviors[behavior];
+        if(value!==true&&value!==false&&value!==null)fail('invalid_journal_behavior','Journal behavior must be true, false, or null',entryPath+'.behaviors.'+behavior);
+      });
+      plain(entry.behaviors,entryPath+'.behaviors');
+      Object.keys(entry.behaviors).forEach(function(behavior){if(behaviorKeys.indexOf(behavior)<0)fail('unknown_journal_behavior','Unknown Journal behavior',entryPath+'.behaviors.'+behavior)});
+      text(entry.note==null?'':entry.note,entryPath+'.note',2000,true);
+      optionalDateTime(entry.updatedAt,entryPath+'.updatedAt');
+      scan(entry);
+    });
+  }
   function permissivePolarRecord(value,path){
     if(!isPlainObject(value))fail('invalid_polar_record','Polar günlük kaydı nesne olmalı',path);
     if(value.date!=null)date(value.date,path+'.date');
@@ -492,6 +514,7 @@
     if(candidate.polarConnection.lastError!=null)text(candidate.polarConnection.lastError,'$.polarConnection.lastError',4096,true);
     if(candidate.recoveryEntries!=null)validateDatedMap(candidate.recoveryEntries,'$.recoveryEntries',validatePolarRecoveryRecord,{coerce:!!options.coerce});
     validateCoachStore(candidate.coachIntelligence,'$.coachIntelligence');
+    validateJournalStore(candidate.journal,'$.journal');
     if(candidate.polarBridge!=null){
       plain(candidate.polarBridge,'$.polarBridge');
       if(candidate.polarBridge.source!=null)text(candidate.polarBridge.source,'$.polarBridge.source',512,true);

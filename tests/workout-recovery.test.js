@@ -22,6 +22,7 @@ function data(workouts = []) {
     dailyNotes: [], weeklyNotes: [], customGymPrograms: { Thursday: [{ exercise: 'Press' }] },
     programNames: { Thursday: 'Push' }, gymDayState: {},
     exerciseLoadProfiles: {}, exerciseCatalog: {},
+    journal: { schemaVersion: 1, daily: {} },
     coachIntelligence: { schemaVersion: 1, daily: {}, weekly: {}, patterns: {}, aiCache: {}, settings: { movementCategories: {} } },
     polarWorkouts: { daily: {}, latest: null },
     polarActivity: { daily: {}, latest: null }, polarProfile: { latest: null },
