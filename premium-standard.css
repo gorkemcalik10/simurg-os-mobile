@@ -30,6 +30,23 @@
   --gp-danger:var(--hz-red);
 }
 
+#home.gp-home .gp-guidance-source-status{display:none!important}
+@media(min-width:901px){
+  #home.gp-home .gp-daily-guidance{display:grid!important;grid-template-columns:minmax(0,1.15fr) minmax(220px,.85fr)!important;align-items:center!important;gap:20px!important;min-width:0!important;padding:20px!important;border-color:rgba(245,163,13,.24)!important;background:radial-gradient(circle at 8% 20%,rgba(245,163,13,.07),transparent 42%),linear-gradient(180deg,#0c151d,#081018)!important}
+  #home.gp-home .gp-guidance-action,#home.gp-home .gp-guidance-sleep{min-width:0!important;overflow-wrap:anywhere!important}
+  #home.gp-home .gp-guidance-action h2{margin:7px 0 6px!important;font-size:22px!important;line-height:1.15!important}
+  #home.gp-home .gp-guidance-action p{max-width:62ch!important;margin:0!important;color:#9ca7b1!important;font-size:12px!important;line-height:1.45!important}
+  #home.gp-home .gp-guidance-sleep{padding-left:20px!important;border-left:1px solid var(--hz-line)!important}
+  #home.gp-home .gp-guidance-sleep small,#home.gp-home .gp-guidance-sleep b,#home.gp-home .gp-guidance-sleep span{display:block!important;overflow-wrap:anywhere!important}
+  #home.gp-home .gp-guidance-sleep small{color:#b98be3!important;font-size:9px!important;font-weight:850!important;letter-spacing:1px!important}
+  #home.gp-home .gp-guidance-sleep b{margin-top:7px!important;color:#eceff2!important;font-size:14px!important;line-height:1.35!important}
+  #home.gp-home .gp-guidance-sleep span{margin-top:5px!important;color:#8995a1!important;font-size:10px!important}
+}
+@media(min-width:901px) and (max-width:1100px){
+  #home.gp-home .gp-daily-guidance{grid-template-columns:minmax(0,1fr)!important;gap:14px!important}
+  #home.gp-home .gp-guidance-sleep{padding:14px 0 0!important;border-top:1px solid var(--hz-line)!important;border-left:0!important}
+}
+
 @media(min-width:901px){
   /* The desktop workspace has its own Polar workout renderer. */
   body[data-simurg-active-screen="polar-workout"] #polar-workout,
@@ -876,9 +893,19 @@ main>#polar :is(input,select,textarea):focus{outline:0!important;border-color:rg
   #home.gp-home .gp-daily-status-tags{display:flex!important;flex-wrap:wrap!important;justify-content:flex-end!important;gap:5px!important}
   #home.gp-home .gp-daily-status-tags>span{padding:6px 7px!important;border:1px solid var(--hf-line-soft)!important;border-radius:9px!important;background:#080f16!important;color:#7f8b96!important;font-size:6.5px!important;text-align:center!important}
   #home.gp-home .gp-daily-status-tags b{display:block!important;margin-top:2px!important;color:#dfe4e8!important;font-size:8px!important}
+  #home.gp-home .gp-daily-guidance{grid-template-columns:minmax(0,1.15fr) minmax(138px,.85fr)!important;border-color:rgba(245,163,13,.24)!important;background:radial-gradient(circle at 8% 20%,rgba(245,163,13,.07),transparent 42%),linear-gradient(180deg,#0c151d,#081018)!important}
+  #home.gp-home .gp-guidance-action,#home.gp-home .gp-guidance-sleep{min-width:0!important}
+  #home.gp-home .gp-guidance-action p{max-width:62ch!important;overflow-wrap:anywhere!important}
+  #home.gp-home .gp-guidance-sleep{padding-left:12px!important;border-left:1px solid var(--hf-line-soft)!important}
+  #home.gp-home .gp-guidance-sleep small,#home.gp-home .gp-guidance-sleep b,#home.gp-home .gp-guidance-sleep span{display:block!important;overflow-wrap:anywhere!important}
+  #home.gp-home .gp-guidance-sleep small{color:#b98be3!important;font-size:7px!important;font-weight:850!important;letter-spacing:.8px!important}
+  #home.gp-home .gp-guidance-sleep b{margin-top:5px!important;color:#eceff2!important;font-size:10px!important;line-height:1.3!important}
+  #home.gp-home .gp-guidance-sleep span{margin-top:4px!important;color:#8995a1!important;font-size:7.5px!important}
+  #home.gp-home .gp-guidance-source-status{display:none!important}
   @media(max-width:360px){
     #home.gp-home .gp-daily-status{grid-template-columns:minmax(0,1fr)!important;align-items:start!important}
     #home.gp-home .gp-daily-status-tags{justify-content:flex-start!important}
+    #home.gp-home .gp-guidance-sleep{padding:9px 0 0!important;border-top:1px solid var(--hf-line-soft)!important;border-left:0!important}
   }
   #home.gp-home .gp-daily-evidence{padding:11px 12px 12px!important}
   #home.gp-home .gp-evidence-strip{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;margin-top:9px!important}

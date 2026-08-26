@@ -55,10 +55,11 @@ run('zero load has a distinct semantic label while meaningful non-zero load keep
   assert.equal(ui.loadReason({ baseline: { cardioLoad: {}, cardioLoadRatio: {} } }, null).status, 'Veri bekleniyor');
 });
 
-run('Home v2 keeps one compact daily summary and four evidence links', () => {
+run('Home v2 keeps one compact Daily Guidance summary and four evidence links', () => {
   const overview = premium.slice(premium.indexOf('function dailyStatusCard'), premium.indexOf('function recoveryStatusLabel'));
-  assert.match(overview, /GÜNLÜK DURUM/);
-  assert.match(overview, /Bugünkü durum.*Seçili günün durumu/);
+  assert.match(overview, /GÜNLÜK YÖNLENDİRME/);
+  assert.match(overview, /UYKU DESTEĞİ/);
+  assert.match(overview, /SimurgDailyGuidance\.resolve/);
   for (const label of ['Sleep', 'HRV', 'Gece Nabzı', 'Dinlenik Nabız', 'Cardio Load']) assert.ok(overview.includes(label));
   assert.equal((overview.match(/evidenceItem\('/g) || []).length, 4);
   assert.match(css, /\.gp-evidence-strip\{[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
