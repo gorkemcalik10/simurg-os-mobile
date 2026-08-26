@@ -35,6 +35,7 @@
   var DISCLAIMER='Bu değerlendirme tıbbi teşhis veya tedavi önerisi değildir; performans ve toparlanma desteği amaçlıdır.';
   var DECISION_RANK={progress:0,normal:1,controlled:2,reduce:3,recovery:4,rest:5};
   var WINDOW_MINIMUMS={7:4,14:7,28:14};
+  var CALIBRATION_MINIMUMS={recovery:8,sleep:8,load:6,gymSessions:5,recentDays:3};
   var METRICS=['hrv','nightHr','restingHr','breathingRate','sleepMinutes','sleepScore','cardioLoad','strain','tolerance','cardioLoadRatio'];
   var CATEGORY_LABELS={
     main_lift:'Main Lift',
@@ -58,6 +59,11 @@
     var next=Number(value);
     return Number.isFinite(next)&&next>=0?next:null;
   }
+  function signedNumber(value){
+    if(value==null||value===''||value===false)return null;
+    var next=Number(value);
+    return Number.isFinite(next)?next:null;
+  }
   function firstNumber(){
     for(var i=0;i<arguments.length;i+=1){var value=number(arguments[i]);if(value!=null)return value;}
     return null;
@@ -73,6 +79,18 @@
   function average(values){
     var valid=values.filter(function(value){return value!=null&&Number.isFinite(value);});
     return valid.length?valid.reduce(function(sum,value){return sum+value;},0)/valid.length:null;
+  }
+  function median(values){
+    var valid=values.filter(function(value){return value!=null&&Number.isFinite(value);}).sort(function(a,b){return a-b;});
+    if(!valid.length)return null;
+    var middle=Math.floor(valid.length/2);
+    return valid.length%2?valid[middle]:(valid[middle-1]+valid[middle])/2;
+  }
+  function percentile(values,ratio){
+    var valid=values.filter(function(value){return value!=null&&Number.isFinite(value);}).sort(function(a,b){return a-b;});
+    if(!valid.length)return null;
+    var index=(valid.length-1)*ratio,lower=Math.floor(index),upper=Math.ceil(index);
+    return valid[lower]+(valid[upper]-valid[lower])*(index-lower);
   }
   function deviation(value,baseline){
     return value==null||baseline==null||baseline===0?null:round((value-baseline)/baseline*100,1);
@@ -424,7 +442,7 @@
         restingHr:firstNumber(activity.restingHeartRate,activity.restingHr),
         breathingRate:firstNumber(night.breathingRateAvg,night.breathingRate),
         nightlyRechargeStatus:firstText(night.nightlyRechargeStatus,night.status),
-        ansCharge:firstNumber(night.ansCharge,night.ansChargeScore),
+        ansCharge:firstText(night.ansCharge,night.ansChargeScore)==null?null:signedNumber(firstText(night.ansCharge,night.ansChargeScore)),
         sleepMinutes:sleepMinutes,
         sleepScore:firstNumber(sleep.sleepScore),
         deepSleepMinutes:firstNumber(sleep.deepSleepMinutes,number(sleep.deepSleep)==null?null:number(sleep.deepSleep)/60),
@@ -495,6 +513,103 @@
       output[key].deviation28=deviation(current,output[key][28].qualified?output[key][28].mean:null);
     });
     return output;
+  }
+  function calibrationRange(data,date,accessor,minimum,options){
+    var values=[];
+    for(var offset=28;offset>=5;offset-=1){
+      var value=accessor(extractDay(data,addDays(date,-offset),options));
+      if(value!=null)values.push(value);
+    }
+    var qualified=values.length>=minimum,center=qualified?median(values):null,lower=qualified?percentile(values,.25):null,upper=qualified?percentile(values,.75):null;
+    return {sampleSize:values.length,minimumSamples:minimum,qualified:qualified,median:round(center,1),lower:round(lower,1),upper:round(upper,1)};
+  }
+  function rangeDirection(value,range,positiveDirection){
+    if(value==null||!range||!range.qualified||range.median==null)return null;
+    var spread=Math.max(Math.abs((range.upper==null?range.median:range.upper)-(range.lower==null?range.median:range.lower)),Math.abs(range.median)*.08,1);
+    var difference=value-range.median,adjusted=positiveDirection==='lower'?-difference:difference;
+    if(positiveDirection==='stable')return Math.abs(difference)>spread?'negative':'neutral';
+    return adjusted>spread?'positive':adjusted<-spread?'negative':'neutral';
+  }
+  function calibrationSignals(day,ranges){
+    var recovery=[
+      rangeDirection(day.recovery.hrv,ranges.hrv,'higher'),
+      rangeDirection(day.recovery.nightHr,ranges.nightHr,'lower'),
+      rangeDirection(day.recovery.ansCharge,ranges.ansCharge,'higher'),
+      rangeDirection(day.recovery.nightlyRechargeStatus,ranges.nightlyRechargeStatus,'higher'),
+      rangeDirection(day.recovery.breathingRate,ranges.breathingRate,'stable')
+    ].filter(Boolean);
+    var sleep=[rangeDirection(day.recovery.sleepMinutes,ranges.sleepMinutes,'higher'),rangeDirection(day.recovery.sleepScore,ranges.sleepScore,'higher')].filter(Boolean);
+    var load=[rangeDirection(day.load.cardioLoad,ranges.cardioLoad,'lower'),rangeDirection(day.load.dailyActivity,ranges.dailyActivity,'lower')].filter(Boolean).map(function(value){return value==='positive'?'neutral':value;});
+    function domain(items,minimum){
+      var positive=items.filter(function(value){return value==='positive';}).length,negative=items.filter(function(value){return value==='negative';}).length;
+      if(negative>=minimum)return 'negative';
+      if(positive>=minimum)return 'positive';
+      return items.length?'neutral':null;
+    }
+    return {recovery:domain(recovery,2),sleep:domain(sleep,1),load:domain(load,1)};
+  }
+  function calibrationGymHistory(data,date){
+    var rows=(data&&data.workouts||[]).filter(function(row){return row&&validDate(row.date)&&row.date<date&&row.date>=addDays(date,-56);});
+    var dates=unique(rows.map(function(row){return row.date;})).sort().reverse(),sessions=dates.map(function(sessionDate){
+      var sessionRows=rows.filter(function(row){return row.date===sessionDate;}),rpes=sessionRows.map(function(row){return number(row.rpe);}).filter(function(value){return value!=null;});
+      return {date:sessionDate,rpe:average(rpes),volume:sessionRows.reduce(function(sum,row){return sum+volume(row);},0),pain:sessionRows.some(function(row){return painLevel(row.pain)>0;}),form:sessionRows.some(function(row){return formLevel(row.form)>0;}),quality:sessionRows.length>0&&sessionRows.every(function(row){return painLevel(row.pain)===0&&formLevel(row.form)===0;})};
+    });
+    var recent=sessions.slice(0,3),history=sessions.slice(3),historyRpe=history.map(function(item){return item.rpe;}).filter(function(value){return value!=null;}),historyVolume=history.map(function(item){return item.volume;}).filter(function(value){return value!=null;}),recentRpe=average(recent.map(function(item){return item.rpe;})),recentVolume=average(recent.map(function(item){return item.volume;}));
+    var qualified=history.length>=CALIBRATION_MINIMUMS.gymSessions,baselineRpe=qualified?median(historyRpe):null,baselineVolume=qualified?median(historyVolume):null;
+    var elevated=qualified&&((recentRpe!=null&&baselineRpe!=null&&recentRpe>Math.max(8,baselineRpe*1.12))||(recentVolume!=null&&baselineVolume!=null&&recentVolume>baselineVolume*1.15));
+    var repeatedSafety=recent.filter(function(item){return item.pain||item.form;}).length>=2;
+    var supportive=qualified&&recent.length===3&&recent.every(function(item){return item.quality&&item.rpe!=null&&item.rpe>=6&&item.rpe<=7;});
+    return {qualified:qualified,recentSessions:recent.length,baselineSessions:history.length,recentRpe:round(recentRpe,1),baselineRpe:round(baselineRpe,1),recentVolume:round(recentVolume,1),baselineVolume:round(baselineVolume,1),elevated:elevated,repeatedSafety:repeatedSafety,supportive:supportive};
+  }
+  function personalCalibration(data,date,day,evidence,options){
+    var ranges={
+      hrv:calibrationRange(data,date,function(item){return item.recovery.hrv;},CALIBRATION_MINIMUMS.recovery,options),
+      nightHr:calibrationRange(data,date,function(item){return item.recovery.nightHr;},CALIBRATION_MINIMUMS.recovery,options),
+      ansCharge:calibrationRange(data,date,function(item){return item.recovery.ansCharge;},CALIBRATION_MINIMUMS.recovery,options),
+      nightlyRechargeStatus:calibrationRange(data,date,function(item){return signedNumber(item.recovery.nightlyRechargeStatus);},CALIBRATION_MINIMUMS.recovery,options),
+      breathingRate:calibrationRange(data,date,function(item){return item.recovery.breathingRate;},CALIBRATION_MINIMUMS.recovery,options),
+      sleepMinutes:calibrationRange(data,date,function(item){return item.recovery.sleepMinutes;},CALIBRATION_MINIMUMS.sleep,options),
+      sleepScore:calibrationRange(data,date,function(item){return item.recovery.sleepScore;},CALIBRATION_MINIMUMS.sleep,options),
+      cardioLoad:calibrationRange(data,date,function(item){return item.load.cardioLoad;},CALIBRATION_MINIMUMS.load,options),
+      dailyActivity:calibrationRange(data,date,function(item){return item.load.dailyActivity;},CALIBRATION_MINIMUMS.load,options)
+    };
+    var todaySignals=calibrationSignals(day,ranges),recentSignals=[];
+    for(var offset=1;offset<=4;offset+=1)recentSignals.push(calibrationSignals(extractDay(data,addDays(date,-offset),options),ranges));
+    var gym=calibrationGymHistory(data,date),negative=[],positive=[],repeatedNegative=[],sustainedPositive=[];
+    function addDomain(collection,domain){if(collection.indexOf(domain)<0)collection.push(domain);}
+    ['recovery','sleep','load'].forEach(function(domain){
+      var current=todaySignals[domain],recent=recentSignals.map(function(item){return item[domain];}).filter(Boolean),negativeCount=recent.filter(function(value){return value==='negative';}).length,positiveCount=recent.filter(function(value){return value==='positive';}).length;
+      if(current==='negative'){addDomain(negative,domain);if(recent.length>=CALIBRATION_MINIMUMS.recentDays&&negativeCount>=2)addDomain(repeatedNegative,domain);}
+      if(current==='positive'){addDomain(positive,domain);if(recent.length>=CALIBRATION_MINIMUMS.recentDays&&positiveCount>=2)addDomain(sustainedPositive,domain);}
+    });
+    var evidenceNegative=list(evidence&&evidence.negativeDomains),evidencePositive=list(evidence&&evidence.positiveDomains);
+    if(evidenceNegative.some(function(domain){return domain==='recovery'||domain==='physiology'||domain==='polar_nightly';}))addDomain(negative,'recovery');
+    if(evidenceNegative.indexOf('sleep')>=0)addDomain(negative,'sleep');
+    if(evidenceNegative.some(function(domain){return domain==='load'||domain==='polar_activity'||domain==='training_history';}))addDomain(negative,'load');
+    if(evidenceNegative.indexOf('energy')>=0)addDomain(negative,'energy');
+    if(evidencePositive.some(function(domain){return domain==='recovery'||domain==='physiology'||domain==='polar_nightly'||domain==='polar_support';}))addDomain(positive,'recovery');
+    if(evidencePositive.indexOf('sleep')>=0)addDomain(positive,'sleep');
+    if(evidencePositive.indexOf('energy')>=0)addDomain(positive,'energy');
+    if(gym.elevated){addDomain(negative,'load');addDomain(repeatedNegative,'load');}
+    if(gym.repeatedSafety){addDomain(negative,'training_safety');addDomain(repeatedNegative,'training_safety');}
+    if(gym.supportive){addDomain(positive,'training_quality');addDomain(sustainedPositive,'training_quality');}
+    var qualifiedDomains=['recovery','sleep','load'].filter(function(domain){return Object.keys(ranges).some(function(key){return (domain==='recovery'&&['hrv','nightHr','ansCharge','nightlyRechargeStatus','breathingRate'].indexOf(key)>=0||domain==='sleep'&&['sleepMinutes','sleepScore'].indexOf(key)>=0||domain==='load'&&['cardioLoad','dailyActivity'].indexOf(key)>=0)&&ranges[key].qualified;});});
+    if(gym.qualified)qualifiedDomains.push('training');
+    var progressionSupport=sustainedPositive.indexOf('recovery')>=0&&(sustainedPositive.indexOf('sleep')>=0||sustainedPositive.indexOf('training_quality')>=0)&&negative.length===0;
+    var pattern=qualifiedDomains.length<2?'insufficient':repeatedNegative.length?'repeated_negative':negative.length?'temporary_negative':progressionSupport?'sustained_positive':positive.length?'temporary_positive':'stable';
+    var decisionFloor=null;
+    if(negative.length>=3&&repeatedNegative.length>=2)decisionFloor='recovery';
+    else if(negative.length>=2&&(repeatedNegative.length||negative.indexOf('recovery')>=0&&negative.indexOf('load')>=0))decisionFloor='reduce';
+    else if(repeatedNegative.length||negative.length)decisionFloor='controlled';
+    var reasons=[];
+    if(pattern==='sustained_positive')reasons.push('Kendi normalinin üzerinde toparlandın.');
+    else if(pattern==='temporary_positive')reasons.push('Bugünkü iyi sinyal tek başına yük artışı için yeterli değil.');
+    if(negative.indexOf('load')>=0)reasons.push(repeatedNegative.indexOf('load')>=0?'Son günlerde yükün alıştığın seviyenin üstünde.':'Bugünkü yük sinyali normalinden yüksek.');
+    if(negative.indexOf('recovery')>=0)reasons.push(repeatedNegative.indexOf('recovery')>=0?'Toparlanma birkaç gündür kendi normalinin altında.':'Toparlanma bugün kendi normalinin altında.');
+    if(negative.indexOf('sleep')>=0)reasons.push(repeatedNegative.indexOf('sleep')>=0?'Uyku desteğin birkaç gündür normalinin altında.':'Uyku desteğin bugün normalinin altında.');
+    if(gym.repeatedSafety)reasons.push('Son seanslarda form veya ağrı uyarısı tekrar etti.');
+    if(pattern==='insufficient')reasons.push('Kişisel karşılaştırma için geçmiş veri henüz yeterli değil.');
+    return {status:pattern==='insufficient'?'insufficient':'qualified',pattern:pattern,progressionSupport:progressionSupport,decisionFloor:decisionFloor,positiveDomains:positive,negativeDomains:negative,repeatedNegativeDomains:repeatedNegative,sustainedPositiveDomains:sustainedPositive,qualifiedDomains:unique(qualifiedDomains),reasons:unique(reasons).slice(0,3),missingDomains:['recovery','sleep','load','training'].filter(function(domain){return qualifiedDomains.indexOf(domain)<0;}),ranges:ranges,gym:gym};
   }
   function trendForMetric(data,date,key,options){
     var recent=[],previous=[];
@@ -595,8 +710,8 @@
     if(breathingDeviation!=null&&Math.abs(breathingDeviation)>=5)physiologyNegative+=1;
     if(recoveryContext.status==='strained')add('recovery','negative',recoveryContext.action.caution||recoveryContext.negative[0]);
     else if(recoveryContext.status==='positive')add('recovery','positive',recoveryContext.positive[0]||recoveryContext.action.recommendation);
-    if(physiologyNegative>=1)add('physiology','negative',recoveryContext.negative[0]);
-    else if(physiologyPositive>=2)add('physiology','positive',recoveryContext.positive[0]);
+    if(physiologyNegative>=1&&negativeDomains.indexOf('recovery')<0)add('recovery','negative',recoveryContext.negative[0]);
+    else if(physiologyPositive>=2&&positiveDomains.indexOf('recovery')<0)add('recovery','positive',recoveryContext.positive[0]);
 
     var poorSleep=day.recovery.sleepMinutes!=null&&day.recovery.sleepMinutes<360||day.recovery.sleepScore!=null&&day.recovery.sleepScore<60||sleepContext.sleepDebtMinutes!=null&&sleepContext.sleepDebtMinutes>=90;
     var goodSleep=day.recovery.sleepMinutes!=null&&day.recovery.sleepMinutes>=420&&day.recovery.sleepScore!=null&&day.recovery.sleepScore>=80;
@@ -614,9 +729,9 @@
     var polarNegative=list(polarContext&&polarContext.negativeDomains),polarPositive=list(polarContext&&polarContext.positiveDomains);
     if(polarNegative.indexOf('activity')>=0)add('polar_activity','negative',polarContext.compact&&polarContext.compact[0]);
     if(polarNegative.indexOf('cardio_load')>=0&&negativeDomains.indexOf('load')<0)add('load','negative',null);
-    if(polarNegative.indexOf('nightly')>=0&&negativeDomains.indexOf('recovery')<0&&negativeDomains.indexOf('physiology')<0)add('polar_nightly','negative',null);
+    if(polarNegative.indexOf('nightly')>=0&&negativeDomains.indexOf('recovery')<0)add('recovery','negative',null);
     if(polarNegative.indexOf('sleep')>=0&&negativeDomains.indexOf('sleep')<0)add('sleep','negative',null);
-    if(polarPositive.length)add('polar_support','positive',null);
+    if(polarPositive.indexOf('nightly')>=0&&positiveDomains.indexOf('recovery')<0)add('recovery','positive',null);
 
     var target=null;
     if(energy.status==='low'&&energy.score!=null&&energy.score<40||negativeDomains.length>=3)target='recovery';
@@ -649,7 +764,7 @@
     if(categories.stability_posture.length)guidance.stabilityPosture='Stability/posture hareketlerinde agresif kilo hedefi verme; tempo, kontrol, teknik ve ağrısız uygulamayı koru.';
     return guidance;
   }
-  function safety(day,readinessResult,evidence,data,options){
+  function safety(day,readinessResult,evidence,data,options,calibration){
     var decision=readinessResult.score==null?'controlled':readinessResult.score>=82?'progress':readinessResult.score>=65?'normal':readinessResult.score>=50?'controlled':readinessResult.score>=35?'reduce':'recovery';
     var warnings=[],drivers=[],recoveryActions=[],pain=day.gym.painLevel,form=day.gym.formLevel;
     if(pain===1){decision=enforceDecision(decision,'controlled');warnings.push('Ağrı kaydı varken yük veya progresyon önerilmez.');}
@@ -670,13 +785,20 @@
       drivers=drivers.concat(evidence.caution.slice(0,2));
       if(evidence.contradictory)warnings.push('Recovery evidence is contradictory; the decision uses the more conservative supported direction.');
     }
+    if(calibration){
+      if(decision==='progress'&&!calibration.progressionSupport){decision='normal';drivers.push('Planı koru; tek günlük iyi sinyal agresif ilerleme için yeterli değil.');}
+      if(calibration.decisionFloor)decision=enforceDecision(decision,calibration.decisionFloor);
+      drivers=calibration.reasons.concat(drivers);
+      if(calibration.pattern==='repeated_negative')warnings.push('Kişisel geçmişte tekrarlanan olumsuz örüntü nedeniyle karar daha korumacı tutuldu.');
+      evidence.personalCalibration=clone(calibration);
+    }
     if(day.physical.racketSport){decision=enforceDecision(decision,'controlled');warnings.push('Tenis/badminton sonrası önkol, dirsek ve omuz yükü için kontrollü başlangıç gerekli.');}
     if(readinessResult.score==null)warnings.push('Eksik recovery verisi nedeniyle progresyon önerisi üretilmedi.');
     if(DECISION_RANK[decision]>=DECISION_RANK.reduce)recoveryActions.push('Toplam set veya çalışma yükünü azalt; ağrısız kaliteli tekrarları koru.');
     if(day.recovery.sleepMinutes!=null&&day.recovery.sleepMinutes<420)recoveryActions.push('Bu gece uyku süresini kişisel hedefe yaklaştır.');
     recoveryActions.push('İlk çalışma setinden sonra form, ağrı ve beklenmedik yorgunluğu yeniden değerlendir.');
     var adjustment={progress:0,normal:0,controlled:-5,reduce:-15,recovery:-25,rest:-100}[decision];
-    return {decision:decision,loadAdjustmentPercent:adjustment,warnings:unique(warnings),drivers:unique(drivers),recoveryActions:unique(recoveryActions),evidence:evidence};
+    return {decision:decision,loadAdjustmentPercent:adjustment,warnings:unique(warnings),drivers:unique(drivers),recoveryActions:unique(recoveryActions),evidence:evidence,personalCalibration:calibration||null};
   }
   function comparableDays(data,date,day,options){
     var candidates=allDataDates(data).filter(function(value){return value<date;}).map(function(value){return extractDay(data,value,options);});
@@ -701,7 +823,7 @@
       type:type,date:date,localNarrativeVersion:LOCAL_NARRATIVE_VERSION,recovery:features.recovery,load:features.load,
       gym:{setCount:features.gym.setCount,volume:features.gym.volume,avgRpe:features.gym.avgRpe,painLevel:features.gym.painLevel,formLevel:features.gym.formLevel},
       physical:{names:features.physical.names,durationMinutes:features.physical.durationMinutes,avgHr:features.physical.avgHr,maxHr:features.physical.maxHr,racketSport:features.physical.racketSport},
-      baselines:baseline,decision:decision,recoveryIntelligence:recoveryContext,sleepIntelligence:sleepContext,energy:energy,decisionEvidence:safetyResult.evidence
+      baselines:baseline,decision:decision,recoveryIntelligence:recoveryContext,sleepIntelligence:sleepContext,energy:energy,decisionEvidence:safetyResult.evidence,personalCalibration:safetyResult.personalCalibration
     };
     return {
       schemaVersion:OUTPUT_SCHEMA_VERSION,type:type,date:date,generatedAt:new Date().toISOString(),inputHash:inputHash(safeFeatures),
@@ -709,6 +831,7 @@
       recoveryScore:recoveryContext.score,recoveryStatus:recoveryContext.status,recoveryReasons:recoveryContext.reasons,recoveryAction:recoveryContext.action,
       energyScore:energy.score,energyStatus:energy.status,energyConfidence:energy.confidence,energyReasons:energy.reasons,energyAction:energy.action,
       decisionEvidence:clone(safetyResult.evidence),
+      personalCalibration:clone(safetyResult.personalCalibration),
       headline:headline,summary:summary,keyDrivers:unique(readinessResult.drivers.concat(safetyResult.drivers)).slice(0,6),
       trainingDecision:decision,loadAdjustmentPercent:safetyResult.loadAdjustmentPercent,
       workoutGuidance:movementGuidance(features,decision),
@@ -720,7 +843,7 @@
   function analyzeDaily(data,date,options){
     if(!validDate(date))throw new Error('SimurgCoachEngine date must use YYYY-MM-DD.');
     data=data||{};options=options||{};
-    var day=extractDay(data,date,options),baseline=baselines(data,date,options),missing=missingData(day,baseline),confidenceResult=confidence(day,baseline,missing),readinessResult=readiness(day,baseline,confidenceResult),sleepResult=resolveSleepResult(data,date,options),sleepContext=resolveSleepContext(sleepResult),recoveryContext=resolveRecoveryContext(data,date,options,sleepResult),energy=resolveEnergyContext(data,date,options,sleepResult),polarContext=resolvePolarContext(data,date,options),evidence=recoveryDecisionEvidence(day,baseline,recoveryContext,sleepContext,energy,data,date,polarContext),safetyResult=safety(day,readinessResult,evidence,data,options),output=baseOutput(options.type||'daily',date,day,baseline,readinessResult,confidenceResult,safetyResult,recoveryContext,sleepContext,energy);
+    var day=extractDay(data,date,options),baseline=baselines(data,date,options),missing=missingData(day,baseline),confidenceResult=confidence(day,baseline,missing),readinessResult=readiness(day,baseline,confidenceResult),sleepResult=resolveSleepResult(data,date,options),sleepContext=resolveSleepContext(sleepResult),recoveryContext=resolveRecoveryContext(data,date,options,sleepResult),energy=resolveEnergyContext(data,date,options,sleepResult),polarContext=resolvePolarContext(data,date,options),evidence=recoveryDecisionEvidence(day,baseline,recoveryContext,sleepContext,energy,data,date,polarContext),calibration=personalCalibration(data,date,day,evidence,options),safetyResult=safety(day,readinessResult,evidence,data,options,calibration),output=baseOutput(options.type||'daily',date,day,baseline,readinessResult,confidenceResult,safetyResult,recoveryContext,sleepContext,energy);
     output.workoutGuidance=movementGuidance(day,safetyResult.decision,data,options);
     if(!options.deferTechnical){
       output.trendInsights=['hrv','nightHr','sleepMinutes','cardioLoad'].map(function(key){return trendForMetric(data,date,key,options);}).filter(function(item){return item.qualified;}).map(function(item){
@@ -752,7 +875,7 @@
       if(previousDate){
         var previous=extractDay(data,previousDate,options),baseline=result.baseline,confidenceResult=confidence(current,baseline,result.missingData),readinessResult=readiness(current,baseline,confidenceResult);
         current.gym=previous.gym;
-        var sleepResult=resolveSleepResult(data,date,options),sleepContext=resolveSleepContext(sleepResult),recoveryContext=resolveRecoveryContext(data,date,options,sleepResult),energy=resolveEnergyContext(data,date,options,sleepResult),polarContext=resolvePolarContext(data,date,options),evidence=recoveryDecisionEvidence(current,baseline,recoveryContext,sleepContext,energy,data,date,polarContext),safetyResult=safety(current,readinessResult,evidence,data,options);
+        var sleepResult=resolveSleepResult(data,date,options),sleepContext=resolveSleepContext(sleepResult),recoveryContext=resolveRecoveryContext(data,date,options,sleepResult),energy=resolveEnergyContext(data,date,options,sleepResult),polarContext=resolvePolarContext(data,date,options),evidence=recoveryDecisionEvidence(current,baseline,recoveryContext,sleepContext,energy,data,date,polarContext),calibration=personalCalibration(data,date,current,evidence,options),safetyResult=safety(current,readinessResult,evidence,data,options,calibration);
         result.trainingDecision=safetyResult.decision;
         result.loadAdjustmentPercent=safetyResult.loadAdjustmentPercent;
         result.warnings=unique(result.warnings.concat(safetyResult.warnings));
@@ -760,6 +883,7 @@
         result.keyDrivers=unique(result.keyDrivers.concat(safetyResult.drivers)).slice(0,6);
         result.workoutGuidance=movementGuidance(current,safetyResult.decision,data,options);
         result.decisionEvidence=clone(safetyResult.evidence);
+        result.personalCalibration=clone(safetyResult.personalCalibration);
         result.comparisonNotes.unshift('Pre-workout güvenlik bağlamı olarak son tamamlanmış Gym kaydı kullanıldı: '+previousDate+'.');
         result.inputHash=inputHash({base:result.inputHash,previousGymDate:previousDate,gym:{avgRpe:previous.gym.avgRpe,painLevel:previous.gym.painLevel,formLevel:previous.gym.formLevel},decisionEvidence:result.decisionEvidence});
       }
@@ -898,6 +1022,7 @@
     STORE_SCHEMA_VERSION:STORE_SCHEMA_VERSION,
     DISCLAIMER:DISCLAIMER,
     WINDOW_MINIMUMS:clone(WINDOW_MINIMUMS),
+    CALIBRATION_MINIMUMS:clone(CALIBRATION_MINIMUMS),
     CATEGORY_LABELS:clone(CATEGORY_LABELS),
     DEFAULT_CATEGORIES:clone(DEFAULT_CATEGORIES),
     LOCAL_NARRATIVE_VERSION:LOCAL_NARRATIVE_VERSION,
@@ -908,6 +1033,7 @@
     movementCategory:movementCategory,
     extractDay:extractDay,
     baselines:baselines,
+    personalCalibration:personalCalibration,
     patternInsights:patternInsights,
     composeLocalNarrative:composeLocalNarrative,
     analyze:analyze,

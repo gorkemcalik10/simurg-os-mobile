@@ -23,8 +23,8 @@ run('coach client and UI assets load in dependency order', () => {
   assert.ok(uiRuntime > client);
   assert.ok(uiRuntime < html.indexOf('premium-standard.js'));
   assert.match(html, /simurg-coach-client\.js\?v=5/);
-  assert.match(html, /simurg-coach\.css\?v=13/);
-  assert.match(html, /simurg-coach-ui\.js\?v=13/);
+  assert.match(html, /simurg-coach\.css\?v=14/);
+  assert.match(html, /simurg-coach-ui\.js\?v=14/);
 });
 
 run('mobile Coaching exposes daily weekly and history views', () => {
@@ -39,7 +39,7 @@ run('mobile Coaching exposes daily weekly and history views', () => {
 
 run('simplified Daily keeps the engine decision and safety values as inputs', () => {
   const dailyBody = ui.slice(ui.indexOf('function dailyView'), ui.indexOf('function weeklyView'));
-  for (const [key, label] of Object.entries({progress:'Bugün biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'})) {
+  for (const [key, label] of Object.entries({progress:'Küçük bir ilerleme deneyebilirsin',normal:'Planı koru',controlled:'İlk setlere kontrollü başla',reduce:'Bugün yükü biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'})) {
     assert.match(ui, new RegExp(`${key}:'${label}'`));
   }
   assert.match(ui, /dailyDecision\(canonical\)/);
@@ -84,8 +84,8 @@ run('desktop delegates Coaching to the common Coach UI output', () => {
   assert.doesNotMatch(desktop, /SimurgCoachUI\.renderDesktop\(sec,state\.loggerDate/);
   assert.match(ui, /function renderDesktop\(section,date\)/);
   assert.match(ui, /id="desktopLegacyCoaching"[^>]*data-coach-intelligence="1"/);
-  assert.match(ui, /7 GÜNLÜK KARŞILAŞTIRMA/);
-  assert.match(ui, /PATTERN COACH/);
+  assert.match(ui, /state\.tab==='daily'\?dailyView\(date\):state\.tab==='weekly'\?weeklyView\(date\):historyView\(date\)/);
+  assert.match(ui, /simurgCoachToggleDetails\(this,\\'technical\\'\)/);
 });
 
 run('coach UI preserves section scrolling and avoids lifecycle polling', () => {

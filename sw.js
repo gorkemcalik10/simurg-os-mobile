@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-polar-intelligence-expansion-v1';
+const SIMURG_CACHE = 'simurg-coach-personal-calibration-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -29,10 +29,10 @@ const CORE_ASSETS = [
   './simurg-polar-intelligence.js?v=1',
   './simurg-recovery-intelligence.js?v=1',
   './simurg-energy-engine.js?v=1',
-  './simurg-coach-engine.js?v=8',
+  './simurg-coach-engine.js?v=9',
   './simurg-coach-client.js?v=5',
-  './simurg-coach.css?v=13',
-  './simurg-coach-ui.js?v=13',
+  './simurg-coach.css?v=14',
+  './simurg-coach-ui.js?v=14',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=9',
   './simurg-cloud-auth.js?v=7',

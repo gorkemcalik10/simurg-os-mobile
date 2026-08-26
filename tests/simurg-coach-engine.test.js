@@ -44,13 +44,14 @@ run('seven required fixtures produce schema-valid deterministic outputs', () => 
   }
 });
 
-run('good recovery uses personal baseline and permits only controlled progress', () => {
+run('one-day good recovery uses personal baseline but holds the plan', () => {
   const scenario = byId.good_recovery;
   const output = engine.analyzePreWorkout(scenario.data, scenario.date);
   assertCommonOutput(output, 'pre_workout');
   assert.ok(output.readinessScore >= 80, `score was ${output.readinessScore}`);
-  assert.equal(output.trainingDecision, 'progress');
-  assert.match(output.workoutGuidance.mainLifts, /\+1 tekrar|küçük yük artışı/i);
+  assert.equal(output.trainingDecision, 'normal');
+  assert.equal(output.personalCalibration.pattern, 'temporary_positive');
+  assert.match(output.workoutGuidance.mainLifts, /mevcut hedefi koru/i);
   assert.equal(output.baseline.hrv[7].sampleSize, 7);
   assert.equal(output.baseline.hrv[14].sampleSize, 14);
   assert.equal(output.baseline.hrv[28].sampleSize, 28);

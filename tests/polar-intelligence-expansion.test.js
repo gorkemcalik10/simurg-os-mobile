@@ -68,7 +68,7 @@ run('Cardio Load trajectory requires qualified recent and prior windows', () => 
 
 run('contradictory Polar evidence remains conservative and overlap protected', () => {
   const scenario=clone(fixtures.scenarios.find(item=>item.id==='good_recovery')); activityHistory(scenario.data,scenario.date); scenario.data.polarActivity.daily[scenario.date]={date:scenario.date,steps:16000};
-  const result=coach.analyzePreWorkout(scenario.data,scenario.date); assert.equal(result.decisionEvidence.contradictory,true); assert.ok(result.decisionEvidence.negativeDomains.includes('polar_activity')); assert.ok(result.decisionEvidence.positiveDomains.includes('polar_support')); assert.notEqual(result.trainingDecision,'progress');
+  const result=coach.analyzePreWorkout(scenario.data,scenario.date); assert.equal(result.decisionEvidence.contradictory,true); assert.ok(result.decisionEvidence.negativeDomains.includes('polar_activity')); assert.ok(result.decisionEvidence.positiveDomains.includes('recovery')); assert.equal(result.decisionEvidence.positiveDomains.includes('polar_support'),false); assert.notEqual(result.trainingDecision,'progress');
 });
 
 run('pain and form precedence survives strong positive Polar evidence', () => {

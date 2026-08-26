@@ -45,7 +45,7 @@ run('all six internal decisions have the exact plain-language Daily label', () =
   const { context } = runtime(fixtures.scenarios[0]);
   assert.deepEqual(
     { ...context.SimurgCoachUI.dailyDecisionLabels },
-    { progress:'Bugün biraz ilerleyebilirsin', normal:'Planını aynen uygula', controlled:'Temkinli başla', reduce:'Bugün biraz azalt', recovery:'Hafif gün yap', rest:'Bugün dinlen' }
+    { progress:'Küçük bir ilerleme deneyebilirsin', normal:'Planı koru', controlled:'İlk setlere kontrollü başla', reduce:'Bugün yükü biraz azalt', recovery:'Hafif gün yap', rest:'Bugün dinlen' }
   );
 });
 
@@ -54,7 +54,7 @@ run('mobile Daily first render resolves only the canonical pre-workout decision'
   context.SimurgCoachUI.renderMobile();
   assert.deepEqual(calls, [{ type:'pre_workout', deferred:true }]);
   assert.match(section.innerHTML, /BUGÜN NE YAPAYIM\?/);
-  assert.match(section.innerHTML, /Bugün biraz ilerleyebilirsin/);
+  assert.match(section.innerHTML, /Planı koru/);
   assert.doesNotMatch(section.innerHTML, /SAFETY|TREND &amp; PATTERN|VERİ GÜVENİ/);
 });
 
@@ -98,7 +98,7 @@ run('warnings are absent for a safe day and translated for safety cases', () => 
 run('missing recovery data stays cautious and does not invent readiness', () => {
   const missing = runtime(fixtures.scenarios[4]);
   missing.context.SimurgCoachUI.renderMobile();
-  assert.match(missing.section.innerHTML, /Temkinli başla/);
+  assert.match(missing.section.innerHTML, /İlk setlere kontrollü başla/);
   assert.match(missing.section.innerHTML, /Toparlanma verilerin eksik/);
   assert.match(missing.section.innerHTML, /Hazırlık —/);
   assert.match(missing.section.innerHTML, /Veri bekleniyor/);

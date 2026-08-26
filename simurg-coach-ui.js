@@ -4,7 +4,7 @@
   var state={tab:'daily',date:null,dailyResults:null,weeklyResults:null};
   var tabs=['daily','weekly','history'];
   var decisionLabels={progress:'Kontrollü ilerleme',normal:'Planı koru',controlled:'Kontrollü uygula',reduce:'Yükü azalt',recovery:'Toparlanma günü',rest:'Dinlen'};
-  var dailyDecisionLabels={progress:'Bugün biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'};
+  var dailyDecisionLabels={progress:'Küçük bir ilerleme deneyebilirsin',normal:'Planı koru',controlled:'İlk setlere kontrollü başla',reduce:'Bugün yükü biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'};
   var homeDecisionLabels={progress:'Biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Bugün biraz azalt',recovery:'Hafif gün yap',rest:'Bugün dinlen'};
   var weeklyDecisionLabels={progress:'Biraz ilerleyebilirsin',normal:'Planını aynen uygula',controlled:'Temkinli başla',reduce:'Yükü biraz azalt',recovery:'Toparlanmayı öne al',rest:'Dinlenmeyi önceliklendir'};
   var metricLabels={hrv:'HRV',restingHr:'Nabız',sleepMinutes:'Uyku süresi',sleepScore:'Uyku skoru',cardioLoad:'Cardio Load'};
@@ -88,8 +88,18 @@
     var adjusted=positive?value:-value;
     return adjusted>=8?'Normalinden yüksek':adjusted<=-8?'Normalinden düşük':'Normal';
   }
+  function calibrationReason(result,domain){
+    var calibration=result&&result.personalCalibration||{},negative=calibration.negativeDomains||[],repeated=calibration.repeatedNegativeDomains||[],sustained=calibration.sustainedPositiveDomains||[];
+    if(domain==='recovery'&&negative.indexOf(domain)>=0)return repeated.indexOf(domain)>=0?'Toparlanman birkaç gündür kendi normalinin altında.':'Toparlanman bugün kendi normalinin altında.';
+    if(domain==='recovery'&&sustained.indexOf(domain)>=0)return 'Kendi normalinin üzerinde toparlandın.';
+    if(domain==='sleep'&&negative.indexOf(domain)>=0)return repeated.indexOf(domain)>=0?'Uyku desteğin birkaç gündür normalinin altında.':'Uyku desteğin bugün normalinin altında.';
+    if(domain==='load'&&negative.indexOf(domain)>=0)return repeated.indexOf(domain)>=0?'Son günlerde yükün alıştığın seviyenin üstünde.':'Bugünkü yük sinyali alıştığın seviyenin üstünde.';
+    return null;
+  }
   function sleepReason(result){
     var duration=metric(result,'sleepMinutes'),sleepScore=metric(result,'sleepScore'),minutes=duration.current,scoreValue=sleepScore.current,deviation=duration.deviation7;
+    var calibrated=calibrationReason(result,'sleep');
+    if(calibrated)return {icon:'😴',title:'Uyku',status:'Kişisel düzenine göre',copy:calibrated};
     if(minutes==null&&scoreValue==null)return {icon:'😴',title:'Uyku',status:'Veri bekleniyor',copy:'Uyku kaydı gelmediği için değerlendirme temkinli tutuldu.'};
     if((minutes!=null&&minutes<360)||(scoreValue!=null&&scoreValue<60))return {icon:'😴',title:'Uyku',status:'Düşük',copy:'Uyku süren veya kaliten bugün normal desteğin altında görünüyor.'};
     if(minutes!=null&&minutes>=420&&(deviation==null||deviation>=-8))return {icon:'😴',title:'Uyku',status:'İyi',copy:'Normal uyku düzenine yakınsın.'};
@@ -97,6 +107,8 @@
   }
   function recoveryReason(result){
     var hrv=metric(result,'hrv'),heart=metric(result,'restingHr'),hdev=hrv.deviation7,rdev=heart.deviation7;
+    var calibrated=calibrationReason(result,'recovery');
+    if(calibrated)return {icon:'♥',title:'Toparlanma',status:'Kişisel düzenine göre',copy:calibrated};
     if(hrv.current==null&&heart.current==null)return {icon:'♥',title:'Toparlanma',status:'Veri bekleniyor',copy:'Toparlanma ölçümleri gelmediği için kesin bir sonuç çıkarılmadı.'};
     if((hdev!=null&&hdev<=-8)||(rdev!=null&&rdev>=8))return {icon:'♥',title:'Toparlanma',status:'Biraz düşük',copy:'Toparlanma sinyallerinden biri kendi normalinin altında.'};
     if((hdev!=null&&hdev>=8)&&(rdev==null||rdev<8))return {icon:'♥',title:'Toparlanma',status:'İyi',copy:'HRV ve dinlenik nabzın toparlanmayı destekliyor.'};
@@ -106,6 +118,8 @@
     var load=metric(result,'cardioLoad'),ratio=metric(result,'cardioLoadRatio'),ratioValue=ratio.current;
     var directLoad=selectedLoad==null?null:Number(selectedLoad);
     if(directLoad!=null&&Number.isFinite(directLoad)&&directLoad===0)return {icon:'⚡',title:'Son yük',status:'Yük yok',copy:'Seçili gün için anlamlı bir antrenman yükü yok.'};
+    var calibrated=calibrationReason(result,'load');
+    if(calibrated)return {icon:'⚡',title:'Son yük',status:'Kişisel düzenine göre',copy:calibrated};
     if(load.current==null&&ratioValue==null)return {icon:'⚡',title:'Son yük',status:'Veri bekleniyor',copy:'Yakın dönem yük kaydı henüz yeterli değil.'};
     if((ratioValue!=null&&ratioValue>=1.3)||(load.deviation7!=null&&load.deviation7>=35))return {icon:'⚡',title:'Son yük',status:'Yüksek',copy:'Son günlerdeki yükün kendi alıştığın seviyenin üstünde.'};
     return {icon:'⚡',title:'Son yük',status:'Dengeli',copy:'Son günlerde aşırı yüklenme işareti görünmüyor.'};
@@ -168,7 +182,9 @@
   function technicalContent(date,results){
     var daily=resolve('daily',date),pre=resolve('pre_workout',date),post=resolve('post_workout',date),pattern=resolve('pattern',date);
     var polar=daily.decisionEvidence&&daily.decisionEvidence.polar&&daily.decisionEvidence.polar.intelligence||{};
+    var calibration=daily.personalCalibration||{};
     return '<div class="sci-tech-section"><h3>Kişisel karşılaştırmalar</h3>'+baselineTable(daily,date)
+      +'<h3>Kişisel kalibrasyon</h3><p>'+esc(calibration.status||'insufficient')+' · '+esc(calibration.pattern||'insufficient')+'</p>'+list(calibration.reasons,'Kişisel kalibrasyon için yeterli geçmiş yok.',3)
       +'<h3>Polar kanıt bağlamı</h3>'+list(polar.compact,'Yeterli Polar kişisel trend bağlamı yok.',6)
       +'<h3>Veri güveni</h3><p>'+esc(confidence(daily))+' · '+esc(daily.confidenceLabel||'Düşük')+'</p>'+list(daily.missingData,'Eksik temel veri yok.',8)
       +'<h3>Trendler ve benzer günler</h3>'+list(daily.trendInsights,'Yeterli trend verisi yok.',6)+list(daily.comparisonNotes,'Yeterince benzer gün bulunamadı.',4)
@@ -303,15 +319,8 @@
     if(root.innerWidth<=900)return false;
     section=section||document.getElementById('coaching');if(!section)return false;
     date=date||selected();state.date=date;
-    var canonical=resolveDecision(date),weekly=resolve('weekly',date),pattern=resolve('pattern',date);
     section.classList.remove('gp-coaching-empty');section.classList.add('sci-coaching');
-    section.innerHTML='<div id="desktopLegacyCoaching" class="sci-desktop-shell" data-coach-intelligence="1">'+nav(date)
-      +hero(canonical,'BUGÜNKÜ KARAR')
-      +'<div class="sci-priority-grid"><section class="sci-card"><header><small>NEDEN?</small><h3>Diğer sinyaller</h3></header>'+list((canonical.keyDrivers||[]).slice(2),'Ana nedenler üst özette gösteriliyor.',4)+'</section><section class="sci-card sci-action"><header><small>BUGÜN YAP</small><h3>'+esc(decision(canonical))+'</h3></header>'+list(actionItems(canonical),'Programı koru ve ilk sette formu kontrol et.',3)+'<strong>'+esc(adjustment(canonical))+'</strong></section><section class="sci-card sci-warning"><header><small>SAFETY</small><h3>AI’dan bağımsız koruma</h3></header>'+list(canonical.warnings,'Belirgin risk uyarısı yok.',4)+'</section></div>'
-      +'<section class="sci-card"><header><small>HAREKET REHBERİ</small><h3>Ana Hareket / Tamamlayıcı / Stabilite / Kondisyon</h3></header>'+guidance(canonical)+'</section>'
-      +'<div class="sci-desktop-grid wide"><section class="sci-card"><header><small>7 GÜNLÜK KARŞILAŞTIRMA</small><h3>Baseline ve sapmalar</h3></header>'+historyComparison(date)+'</section><section class="sci-card"><header><small>HAFTALIK COACH</small><h3>'+esc(weekly.headline)+'</h3></header><p>'+esc(weekly.summary)+'</p>'+list(weekly.keyDrivers,'Haftalık veri birikiyor.',4)+'</section></div>'
-      +'<div class="sci-desktop-grid wide"><section class="sci-card"><header><small>PATTERN COACH</small><h3>'+esc(pattern.headline)+'</h3></header><p>'+esc(pattern.summary)+'</p>'+list(pattern.trendInsights,'Minimum örnek eşiği henüz aşılmadı.',5)+'</section><section class="sci-card sci-recovery"><header><small>RECOVERY ACTIONS</small><h3>Bugün uygulanabilir</h3></header>'+list(canonical.recoveryActions,'Ek aksiyon yok.',5)+'</section></div>'
-      +'<footer class="sci-disclaimer">'+esc(canonical.medicalDisclaimer)+'</footer></div>';
+    section.innerHTML='<div id="desktopLegacyCoaching" class="sci-desktop-shell" data-coach-intelligence="1">'+nav(date)+(state.tab==='daily'?dailyView(date):state.tab==='weekly'?weeklyView(date):historyView(date))+'</div>';
     return true;
   }
   function removeLegacyCoachCards(content){

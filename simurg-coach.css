@@ -112,6 +112,11 @@
   .sci-desktop-shell .sci-date-nav{width:max-content;max-width:100%;margin:0 0 12px auto;padding:5px;border:1px solid var(--dl-line,var(--hz-line));border-radius:14px;background:rgba(4,16,28,.8)}
   .sci-desktop-shell .sci-date-nav b{min-width:220px;font-size:11px}.sci-desktop-shell .sci-date-nav button{min-height:34px;padding:0 11px;font-size:10px}
   .sci-desktop-shell .sci-tabs{width:420px;max-width:100%;margin-bottom:14px}
+  .sci-desktop-shell .sci-decision{padding:24px 26px}
+  .sci-desktop-shell .sci-reasons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .sci-desktop-shell .sci-reasons>h2{grid-column:1/-1;margin-bottom:0}
+  .sci-desktop-shell .sci-reasons>article+article{margin-top:0}
+  .sci-desktop-shell .sci-daily-warning,.sci-desktop-shell .sci-workout-note,.sci-desktop-shell .sci-disclosure{max-width:none}
   .sci-desktop-shell .sci-hero{grid-template-columns:minmax(0,8fr) minmax(260px,4fr);min-height:0;background:linear-gradient(135deg,var(--hz-surface-2),var(--hz-field))}
   .sci-desktop-shell .sci-card{padding:16px}.sci-desktop-shell .sci-card h3{font-size:15px}.sci-desktop-shell .sci-card p,.sci-desktop-shell .sci-card li{font-size:10px}
   .sci-desktop-shell .sci-guidance article{min-height:120px}.sci-desktop-shell .sci-guidance p{font-size:10px}
