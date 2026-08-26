@@ -119,3 +119,4 @@
 @media(max-width:360px){
   .sci-head{display:block}.sci-local-badge{display:inline-block;margin-top:8px}.sci-hero{display:block}
 }
+.gp-polar-context,.gp-polar-report-context p{margin:12px 0 0;color:#a9bad0;font-size:12px;line-height:1.55}.gp-polar-summary .gp-polar-context{margin:0}.gp-polar-report-context small{color:#f5a30d;font-weight:850;letter-spacing:.08em}

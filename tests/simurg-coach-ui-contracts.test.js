@@ -23,8 +23,8 @@ run('coach client and UI assets load in dependency order', () => {
   assert.ok(uiRuntime > client);
   assert.ok(uiRuntime < html.indexOf('premium-standard.js'));
   assert.match(html, /simurg-coach-client\.js\?v=5/);
-  assert.match(html, /simurg-coach\.css\?v=12/);
-  assert.match(html, /simurg-coach-ui\.js\?v=12/);
+  assert.match(html, /simurg-coach\.css\?v=13/);
+  assert.match(html, /simurg-coach-ui\.js\?v=13/);
 });
 
 run('mobile Coaching exposes daily weekly and history views', () => {

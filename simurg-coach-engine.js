@@ -1,15 +1,17 @@
 (function(root,factory){
   'use strict';
-  var recoveryApi=null,energyApi=null,sleepApi=null;
+  var recoveryApi=null,energyApi=null,sleepApi=null,polarApi=null;
+  if(typeof module==='object'&&module.exports)try{polarApi=require('./simurg-polar-intelligence.js');}catch(error){}
   if(!(typeof module==='object'&&module.exports)&&root){
     recoveryApi=root.SimurgRecoveryIntelligence;
     energyApi=root.SimurgEnergyEngine;
     sleepApi=root.SimurgSleepIntelligence;
+    polarApi=root.SimurgPolarIntelligence;
   }
-  var api=factory(root,recoveryApi,energyApi,sleepApi);
+  var api=factory(root,recoveryApi,energyApi,sleepApi,polarApi);
   if(typeof module==='object'&&module.exports)module.exports=api;
   if(root)root.SimurgCoachEngine=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(root,defaultRecoveryApi,defaultEnergyApi,defaultSleepApi){
+})(typeof globalThis!=='undefined'?globalThis:this,function(root,defaultRecoveryApi,defaultEnergyApi,defaultSleepApi,defaultPolarApi){
   'use strict';
 
   var OUTPUT_SCHEMA_VERSION=1;
@@ -371,6 +373,15 @@
     }catch(error){result=null;}
     return result&&typeof result==='object'?result:{};
   }
+  function resolvePolarContext(data,date,options){
+    options=options||{};var result=options.polarIntelligence;
+    try{
+      if(typeof options.polarIntelligenceResolver==='function')result=options.polarIntelligenceResolver(date,{data:data,sleepIntelligence:options.sleepIntelligence});
+      else if(!result&&defaultPolarApi&&typeof defaultPolarApi.analyze==='function')result=defaultPolarApi.analyze(data,date,{sleepIntelligence:defaultSleepApi});
+      else if(!result&&root&&root.SimurgPolarIntelligence&&typeof root.SimurgPolarIntelligence.analyze==='function')result=root.SimurgPolarIntelligence.analyze(data,date,{sleepIntelligence:root.SimurgSleepIntelligence});
+    }catch(error){result=null;}
+    return result&&typeof result==='object'?result:{status:'insufficient',date:date,negativeDomains:[],positiveDomains:[],compact:[]};
+  }
   function resolveSleepContext(result){
     result=result&&typeof result==='object'?result:{};var dailyResult=isObject(result.daily)?result.daily:{};
     return {status:text(result.status)||'insufficient',confidence:text(dailyResult.confidence&&dailyResult.confidence.level)||text(result.confidence&&result.confidence.level)||'insufficient',actualSleepMinutes:number(dailyResult.actualSleepMinutes),sleepEfficiency:number(dailyResult.sleepEfficiency),sleepDebtMinutes:number(dailyResult.sleepDebtMinutes),sleepGoalMinutes:number(dailyResult.sleepGoalMinutes),missingData:list(result.missingData||dailyResult.missingData).map(text).filter(Boolean)};
@@ -565,7 +576,7 @@
       formFlag:recentRows.some(function(row){return formLevel(row.form)>0;})
     };
   }
-  function recoveryDecisionEvidence(day,baseline,recoveryContext,sleepContext,energy,data,date){
+  function recoveryDecisionEvidence(day,baseline,recoveryContext,sleepContext,energy,data,date,polarContext){
     var supportive=[],caution=[],negativeDomains=[],positiveDomains=[];
     function add(domain,direction,reason){
       var domains=direction==='negative'?negativeDomains:positiveDomains,items=direction==='negative'?caution:supportive;
@@ -600,6 +611,13 @@
     else if(energyTraining.elevated)add('training_history','negative',energy.reasons[0]);
     if(history.averageRpe!=null&&history.averageRpe>=8.5)add('training_history','negative',null);
 
+    var polarNegative=list(polarContext&&polarContext.negativeDomains),polarPositive=list(polarContext&&polarContext.positiveDomains);
+    if(polarNegative.indexOf('activity')>=0)add('polar_activity','negative',polarContext.compact&&polarContext.compact[0]);
+    if(polarNegative.indexOf('cardio_load')>=0&&negativeDomains.indexOf('load')<0)add('load','negative',null);
+    if(polarNegative.indexOf('nightly')>=0&&negativeDomains.indexOf('recovery')<0&&negativeDomains.indexOf('physiology')<0)add('polar_nightly','negative',null);
+    if(polarNegative.indexOf('sleep')>=0&&negativeDomains.indexOf('sleep')<0)add('sleep','negative',null);
+    if(polarPositive.length)add('polar_support','positive',null);
+
     var target=null;
     if(energy.status==='low'&&energy.score!=null&&energy.score<40||negativeDomains.length>=3)target='recovery';
     else if(recoveryContext.status==='strained')target='reduce';
@@ -616,7 +634,7 @@
       sleep:sleepContext,
       recovery:{score:recoveryContext.score,status:recoveryContext.status,confidence:recoveryContext.confidence,missingData:recoveryContext.missingData},
       energy:{score:energy.score,status:energy.status,confidence:energy.confidence,missingData:energy.missingData},
-      polar:{hrv:day.recovery.hrv,nightHr:day.recovery.nightHr,restingHr:day.recovery.restingHr,breathingRate:day.recovery.breathingRate,ansCharge:day.recovery.ansCharge,nightlyRechargeStatus:day.recovery.nightlyRechargeStatus,cardioLoad:day.load.cardioLoad,cardioLoadRatio:day.load.cardioLoadRatio},
+      polar:{hrv:day.recovery.hrv,nightHr:day.recovery.nightHr,restingHr:day.recovery.restingHr,breathingRate:day.recovery.breathingRate,ansCharge:day.recovery.ansCharge,nightlyRechargeStatus:day.recovery.nightlyRechargeStatus,cardioLoad:day.load.cardioLoad,cardioLoadRatio:day.load.cardioLoadRatio,intelligence:clone(polarContext)},
       recentGym:history
     };
   }
@@ -702,7 +720,7 @@
   function analyzeDaily(data,date,options){
     if(!validDate(date))throw new Error('SimurgCoachEngine date must use YYYY-MM-DD.');
     data=data||{};options=options||{};
-    var day=extractDay(data,date,options),baseline=baselines(data,date,options),missing=missingData(day,baseline),confidenceResult=confidence(day,baseline,missing),readinessResult=readiness(day,baseline,confidenceResult),sleepResult=resolveSleepResult(data,date,options),sleepContext=resolveSleepContext(sleepResult),recoveryContext=resolveRecoveryContext(data,date,options,sleepResult),energy=resolveEnergyContext(data,date,options,sleepResult),evidence=recoveryDecisionEvidence(day,baseline,recoveryContext,sleepContext,energy,data,date),safetyResult=safety(day,readinessResult,evidence,data,options),output=baseOutput(options.type||'daily',date,day,baseline,readinessResult,confidenceResult,safetyResult,recoveryContext,sleepContext,energy);
+    var day=extractDay(data,date,options),baseline=baselines(data,date,options),missing=missingData(day,baseline),confidenceResult=confidence(day,baseline,missing),readinessResult=readiness(day,baseline,confidenceResult),sleepResult=resolveSleepResult(data,date,options),sleepContext=resolveSleepContext(sleepResult),recoveryContext=resolveRecoveryContext(data,date,options,sleepResult),energy=resolveEnergyContext(data,date,options,sleepResult),polarContext=resolvePolarContext(data,date,options),evidence=recoveryDecisionEvidence(day,baseline,recoveryContext,sleepContext,energy,data,date,polarContext),safetyResult=safety(day,readinessResult,evidence,data,options),output=baseOutput(options.type||'daily',date,day,baseline,readinessResult,confidenceResult,safetyResult,recoveryContext,sleepContext,energy);
     output.workoutGuidance=movementGuidance(day,safetyResult.decision,data,options);
     if(!options.deferTechnical){
       output.trendInsights=['hrv','nightHr','sleepMinutes','cardioLoad'].map(function(key){return trendForMetric(data,date,key,options);}).filter(function(item){return item.qualified;}).map(function(item){
@@ -734,7 +752,7 @@
       if(previousDate){
         var previous=extractDay(data,previousDate,options),baseline=result.baseline,confidenceResult=confidence(current,baseline,result.missingData),readinessResult=readiness(current,baseline,confidenceResult);
         current.gym=previous.gym;
-        var sleepResult=resolveSleepResult(data,date,options),sleepContext=resolveSleepContext(sleepResult),recoveryContext=resolveRecoveryContext(data,date,options,sleepResult),energy=resolveEnergyContext(data,date,options,sleepResult),evidence=recoveryDecisionEvidence(current,baseline,recoveryContext,sleepContext,energy,data,date),safetyResult=safety(current,readinessResult,evidence,data,options);
+        var sleepResult=resolveSleepResult(data,date,options),sleepContext=resolveSleepContext(sleepResult),recoveryContext=resolveRecoveryContext(data,date,options,sleepResult),energy=resolveEnergyContext(data,date,options,sleepResult),polarContext=resolvePolarContext(data,date,options),evidence=recoveryDecisionEvidence(current,baseline,recoveryContext,sleepContext,energy,data,date,polarContext),safetyResult=safety(current,readinessResult,evidence,data,options);
         result.trainingDecision=safetyResult.decision;
         result.loadAdjustmentPercent=safetyResult.loadAdjustmentPercent;
         result.warnings=unique(result.warnings.concat(safetyResult.warnings));

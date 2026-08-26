@@ -167,7 +167,9 @@
   }
   function technicalContent(date,results){
     var daily=resolve('daily',date),pre=resolve('pre_workout',date),post=resolve('post_workout',date),pattern=resolve('pattern',date);
+    var polar=daily.decisionEvidence&&daily.decisionEvidence.polar&&daily.decisionEvidence.polar.intelligence||{};
     return '<div class="sci-tech-section"><h3>Kişisel karşılaştırmalar</h3>'+baselineTable(daily,date)
+      +'<h3>Polar kanıt bağlamı</h3>'+list(polar.compact,'Yeterli Polar kişisel trend bağlamı yok.',6)
       +'<h3>Veri güveni</h3><p>'+esc(confidence(daily))+' · '+esc(daily.confidenceLabel||'Düşük')+'</p>'+list(daily.missingData,'Eksik temel veri yok.',8)
       +'<h3>Trendler ve benzer günler</h3>'+list(daily.trendInsights,'Yeterli trend verisi yok.',6)+list(daily.comparisonNotes,'Yeterince benzer gün bulunamadı.',4)
       +'<h3>Tekrarlanan paternler</h3><p>'+esc(pattern.summary)+'</p>'+list(pattern.trendInsights,'Minimum örnek eşiğini geçen patern yok.',5)
