@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-coach-single-decision-1';
+const SIMURG_CACHE = 'simurg-recovery-polar-decision-1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -28,7 +28,7 @@ const CORE_ASSETS = [
   './simurg-sleep-intelligence.js?v=1',
   './simurg-recovery-intelligence.js?v=1',
   './simurg-energy-engine.js?v=1',
-  './simurg-coach-engine.js?v=6',
+  './simurg-coach-engine.js?v=7',
   './simurg-coach-client.js?v=5',
   './simurg-coach.css?v=12',
   './simurg-coach-ui.js?v=12',
