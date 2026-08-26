@@ -21,6 +21,16 @@ function entry(value, note = '') {
   behaviors.lateCaffeine = value;
   return { behaviors, note };
 }
+function qualifiedSleep(date, actualSleepMinutes, timeInBedMinutes = 600) {
+  return {
+    date,
+    durationMinutes: timeInBedMinutes,
+    timeInBedSeconds: timeInBedMinutes * 60,
+    deepSleep: 60 * 60,
+    remSleep: 90 * 60,
+    lightSleep: (actualSleepMinutes - 150) * 60,
+  };
+}
 function history(firstDifference, secondDifference) {
   const data = base();
   const start = '2026-01-01';
@@ -31,7 +41,8 @@ function history(firstDifference, secondDifference) {
     const difference = index < 12 ? firstDifference : secondDifference;
     const absentMinutes = 450;
     journal.upsert(data, date, entry(present), `2026-02-01T00:${String(index).padStart(2, '0')}:00.000Z`);
-    data.polarSleep.daily[outcomeDate] = { date: outcomeDate, durationMinutes: present ? absentMinutes + difference : absentMinutes };
+    const actualSleepMinutes = present ? absentMinutes + difference : absentMinutes;
+    data.polarSleep.daily[outcomeDate] = qualifiedSleep(outcomeDate, actualSleepMinutes);
   }
   return data;
 }
@@ -78,6 +89,24 @@ run('invalid Journal values are rejected without dropping existing DATA', () => 
   assert.equal(data.workouts.length, 1);
 });
 
+run('Journal resolves 396 actual-sleep minutes instead of 418 minutes in bed', () => {
+  const data = base();
+  data.polarSleep.daily['2026-08-25'] = qualifiedSleep('2026-08-25', 396, 418);
+  assert.deepEqual(journal.sleepOutcome(data, '2026-08-25'), { date: '2026-08-25', sleepMinutes: 396 });
+});
+
+run('Journal stays insufficient when time in bed exists without qualified actual sleep', () => {
+  const data = base();
+  data.polarSleep.daily['2026-08-25'] = {
+    date: '2026-08-25',
+    durationMinutes: 418,
+    durationSeconds: 418 * 60,
+    duration: '06:58:00',
+    timeInBedSeconds: 418 * 60,
+  };
+  assert.equal(journal.sleepOutcome(data, '2026-08-25'), null);
+});
+
 run('insufficient history returns no fabricated insight', () => {
   const data = history(-90, -90);
   Object.keys(data.journal.daily).slice(8).forEach(date => { delete data.journal.daily[date]; });
@@ -107,7 +136,7 @@ run('historical insight cutoff excludes later Journal entries and outcomes', () 
   const data = history(-90, -90);
   const before = journal.insights(data, '2026-01-25');
   journal.upsert(data, '2026-01-26', entry(true), '2026-01-26T20:00:00.000Z');
-  data.polarSleep.daily['2026-01-27'] = { date: '2026-01-27', durationMinutes: 900 };
+  data.polarSleep.daily['2026-01-27'] = qualifiedSleep('2026-01-27', 540, 600);
   const after = journal.insights(data, '2026-01-25');
   assert.deepEqual(after, before);
 });

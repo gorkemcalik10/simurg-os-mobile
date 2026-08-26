@@ -1,9 +1,11 @@
 (function(root,factory){
   'use strict';
-  var api=factory();
+  var sleepIntelligence=null;
+  if(typeof module==='object'&&module.exports) sleepIntelligence=require('./simurg-sleep-intelligence.js');
+  var api=factory(root,sleepIntelligence);
   if(typeof module==='object'&&module.exports)module.exports=api;
   if(root)root.SimurgJournal=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+})(typeof globalThis!=='undefined'?globalThis:this,function(root,sleepIntelligence){
   'use strict';
 
   var BEHAVIORS=[
@@ -57,18 +59,10 @@
     return entry;
   }
   function number(value){var next=Number(value);return value==null||value===''||!Number.isFinite(next)||next<0?null:next;}
-  function durationMinutes(value){
-    var direct=number(value);if(direct!=null)return direct>10000?direct/60:direct;
-    var parts=String(value||'').split(':').map(Number);
-    if(parts.length===3&&parts.every(Number.isFinite))return parts[0]*60+parts[1]+parts[2]/60;
-    if(parts.length===2&&parts.every(Number.isFinite))return parts[0]*60+parts[1];
-    return null;
-  }
-  function lastDaily(store,date){var value=store&&store.daily&&store.daily[date];return Array.isArray(value)?value[value.length-1]:value;}
   function sleepOutcome(data,date){
-    var row=lastDaily(data&&data.polarSleep,date)||{},minutes=number(row.durationMinutes);
-    if(minutes==null&&number(row.durationSeconds)!=null)minutes=number(row.durationSeconds)/60;
-    if(minutes==null)minutes=durationMinutes(row.duration);
+    var intelligence=sleepIntelligence||root&&root.SimurgSleepIntelligence;
+    if(!intelligence||typeof intelligence.analyze!=='function')return null;
+    var result=intelligence.analyze(data,date),daily=result&&result.daily||{},minutes=result&&result.status==='available'?number(daily.actualSleepMinutes):null;
     return minutes==null?null:{date:date,sleepMinutes:minutes};
   }
   function average(values){return values.reduce(function(sum,value){return sum+value;},0)/values.length;}
