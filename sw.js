@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-recovery-polar-decision-1';
+const SIMURG_CACHE = 'simurg-training-lab-intelligence-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -6,7 +6,7 @@ const CORE_ASSETS = [
   './simurg-persistence.js?v=2',
   './simurg-gym-identity.js?v=1',
   './simurg-exercise-canonicalization.js?v=2',
-  './simurg-training-lab-analysis.js?v=5',
+  './simurg-training-lab-analysis.js?v=6',
   './simurg-volume-model.js?v=1',
   './simurg-exercise-library.js?v=1',
   './simurg-muscle-anatomy.js?v=4',
@@ -39,8 +39,8 @@ const CORE_ASSETS = [
   './desktop-alignment.js?v=37',
   './mobile-ia-premium.css?v=12',
   './mobile-ia-premium.js?v=9',
-  './simurg-training-lab.css?v=11',
-  './simurg-training-lab-ui.js?v=17',
+  './simurg-training-lab.css?v=12',
+  './simurg-training-lab-ui.js?v=18',
   './assets/simurg-anatomy-base-v1.png',
   './assets/anatomy-masks/pectoralis_sternal.png',
   './assets/anatomy-masks/pectoralis_clavicular.png',

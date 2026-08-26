@@ -97,7 +97,7 @@ run('Training Lab exposes detailed workload while preserving legacy category fal
     { date: '2026-08-17', exercise: 'Incline Machine Press', exerciseId: 'incline_machine_press', sets: 4, reps: 10, weight: 30 },
     { date: '2026-08-18', exercise: 'Conventional Deadlift', exerciseId: 'conventional_deadlift', sets: 3, reps: 5, weight: 80 }
   ] };
-  const result = lab.analyze(data, '2026-08-17', options);
+  const result = lab.analyze(data, '2026-08-18', options);
   assert.equal(result.anatomy.muscleMap.pectoralis_major_clavicular.sets, 4);
   assert.equal(result.anatomy.muscleMap.pectoralis_major_clavicular.label, 'Pectoralis Major Clavicular');
   assert.equal(result.anatomy.muscleMap.anterior_deltoid.sets, 2);

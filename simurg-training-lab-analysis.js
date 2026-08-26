@@ -213,16 +213,23 @@
     var reps=number(row.reps)||0,weight=number(row.weight)||0;
     return {sets:sets,reps:reps,volume:sets*reps*weight,preset:'UNASSIGNED'};
   }
-  function rowMetrics(row,exercise,volumeModel){
+  function profileAt(row,volumeModel,cutoff){
+    var profile=volumeModel&&typeof volumeModel.profileFor==='function'?volumeModel.profileFor(row):null;
+    if(!profile)return {preset:'UNASSIGNED',factor:1,profileSource:'unassigned',comparable:false};
+    var updatedDate=clean(profile.updatedAt).slice(0,10),historicallyKnown=profile.profileSource!=='user'||validDate(updatedDate)&&updatedDate<=cutoff;
+    return {preset:profile.preset||'UNASSIGNED',factor:number(profile.factor),profileSource:profile.profileSource||null,comparable:historicallyKnown&&profile.preset!=='UNASSIGNED'};
+  }
+  function rowMetrics(row,exercise,volumeModel,cutoff){
     var calculated=volumeModel&&typeof volumeModel.row==='function'?volumeModel.row(row):fallbackVolumeRow(row);
     var sets=number(calculated.sets)||0,repsPerSet=number(calculated.reps)||0;
     var nonLoadMovement=['Isometric','Stability','Conditioning','Carry'].indexOf(exercise.movementType)>=0;
     var bodyweight=String(exercise.equipment||'').indexOf('Bodyweight')>=0;
-    var meaningfulVolume=!nonLoadMovement&&!bodyweight&&number(row.weight)>0&&repsPerSet>0;
+    var profile=profileAt(row,volumeModel,cutoff),historicalProfileSafe=profile.comparable||!profile||profile.preset==='UNASSIGNED'||profile.profileSource!=='user';
+    var meaningfulVolume=!nonLoadMovement&&!bodyweight&&number(row.weight)>0&&repsPerSet>0&&historicalProfileSafe;
     return {sets:sets,reps:sets*repsPerSet,volume:meaningfulVolume?(number(calculated.volume)||0):0,meaningfulVolume:meaningfulVolume};
   }
   function emptyGroup(group){return {id:group,label:GROUP_LABELS[group],sets:0,reps:0,volume:0,frequency:0,dates:[],exerciseContributions:[],nonVolumeSets:0,trend:null}}
-  function aggregate(rows,start,end,options){
+  function aggregate(rows,start,end,options,cutoff){
     var dependencies=deps(options),groups=Object.create(null),unmapped=Object.create(null),anatomyState=emptyAnatomy(dependencies.anatomy);
     GROUPS.forEach(function(group){groups[group]=emptyGroup(group)});
     (Array.isArray(rows)?rows:[]).forEach(function(row){
@@ -232,7 +239,7 @@
         if(!unmapped[identity])unmapped[identity]={exerciseId:clean(row.exerciseId)||null,name:clean(row.exercise)||'Bilinmeyen hareket',rows:0,dates:Object.create(null)};
         unmapped[identity].rows+=1;unmapped[identity].dates[row.date]=true;return;
       }
-      var metrics=rowMetrics(row,exercise,dependencies.volumeModel);
+      var metrics=rowMetrics(row,exercise,dependencies.volumeModel,cutoff||end);
       var legacyContributions=contributionsFor(exercise);
       addAnatomyRow(anatomyState,dependencies.anatomy,exercise,legacyContributions,metrics,row);
       legacyContributions.forEach(function(contribution){
@@ -255,11 +262,92 @@
     });
     return {groups:groups,anatomy:finishAnatomy(anatomyState,dependencies.anatomy),unmapped:Object.keys(unmapped).map(function(key){var item=unmapped[key];item.dates=Object.keys(item.dates).sort();return item}).sort(function(a,b){return b.rows-a.rows||a.name.localeCompare(b.name)})};
   }
+  function average(values){return values.length?values.reduce(function(sum,value){return sum+value},0)/values.length:null}
+  function median(values){
+    if(!values.length)return null;var ordered=values.slice().sort(function(a,b){return a-b}),middle=Math.floor(ordered.length/2);
+    return ordered.length%2?ordered[middle]:(ordered[middle-1]+ordered[middle])/2;
+  }
+  function clearPain(value){return !clean(value)||/^(?:none|no|yok|0|ağrı yok|agri yok)$/i.test(clean(value))}
+  function goodForm(value){return !clean(value)||/^(?:good|iyi|clean|temiz)$/i.test(clean(value))}
+  function strictRowMetrics(row,exercise,volumeModel,cutoff){
+    var sets=number(row&&row.sets),reps=number(row&&row.reps),load=number(row&&row.weight),profile=profileAt(row,volumeModel,cutoff);
+    var nonLoadMovement=['Isometric','Stability','Conditioning','Carry'].indexOf(exercise.movementType)>=0;
+    var bodyweight=String(exercise.equipment||'').indexOf('Bodyweight')>=0;
+    var loadMovement=!nonLoadMovement&&!bodyweight;
+    var volume=sets!=null&&sets>0&&reps!=null&&load!=null&&load>0&&loadMovement&&profile.comparable?sets*reps*load*profile.factor:null;
+    return {sets:sets,repsPerSet:reps,totalReps:sets!=null&&sets>0&&reps!=null?sets*reps:null,load:load!=null&&load>0?load:null,volume:volume,preset:profile.preset,loadComparable:profile.comparable&&loadMovement};
+  }
+  function sessionSummary(rows,exercise,volumeModel,cutoff,date,sessionKey){
+    var metrics=rows.map(function(row){return strictRowMetrics(row,exercise,volumeModel,cutoff)}),sets=metrics.every(function(item){return item.sets!=null&&item.sets>0})?metrics.reduce(function(sum,item){return sum+item.sets},0):null;
+    var totalReps=metrics.every(function(item){return item.totalReps!=null})?metrics.reduce(function(sum,item){return sum+item.totalReps},0):null;
+    var volumes=metrics.map(function(item){return item.volume}),volume=volumes.length&&volumes.every(function(value){return value!=null})?volumes.reduce(function(sum,value){return sum+value},0):null;
+    var comparable=metrics.length>0&&metrics.every(function(item){return item.loadComparable}),loads=comparable?metrics.map(function(item){return item.load}).filter(function(value){return value!=null}):[];
+    var repsByLoad=Object.create(null);
+    if(comparable)metrics.forEach(function(item){if(item.load==null||item.repsPerSet==null)return;var key=String(item.load);repsByLoad[key]=Math.max(repsByLoad[key]||0,item.repsPerSet)});
+    var rpes=rows.map(function(row){return number(row&&row.rpe)}).filter(function(value){return value!=null&&value>=1&&value<=10}),forms=rows.map(function(row){return clean(row&&row.form)}).filter(Boolean),pains=rows.map(function(row){return clean(row&&row.pain)}).filter(Boolean);
+    var pain=rows.some(function(row){return !clearPain(row&&row.pain)}),poorForm=rows.some(function(row){return !goodForm(row&&row.form)}),highRpe=rpes.some(function(value){return value>=9});
+    return {date:date,sessionKey:sessionKey,rows:rows.slice(),sets:sets,totalReps:totalReps,volume:volume,maxLoad:loads.length?Math.max.apply(null,loads):null,repsByLoad:repsByLoad,preset:comparable&&metrics[0]?metrics[0].preset:null,comparable:comparable&&loads.length>0,rpe:average(rpes),form:forms.length?forms[forms.length-1]:null,pain:pains.length?pains[pains.length-1]:null,caution:{active:pain||poorForm||highRpe,pain:pain,poorForm:poorForm,highRpe:highRpe},qualified:!pain&&!poorForm&&sets!=null&&totalReps!=null};
+  }
+  function exerciseSessions(rows,cutoff,options){
+    var dependencies=deps(options),groups=Object.create(null);
+    (Array.isArray(rows)?rows:[]).forEach(function(row,index){
+      if(!row||!validDate(row.date)||row.date>cutoff)return;var exercise=resolveExercise(row,dependencies);if(!exercise)return;
+      var identity=exercise.id,sessionKey=row.sessionId?clean(row.sessionId):'legacy',key=identity+'|'+row.date+'|'+sessionKey;
+      if(!groups[key])groups[key]={exercise:exercise,date:row.date,sessionKey:sessionKey,firstIndex:index,rows:[]};groups[key].rows.push(row);
+    });
+    var byExercise=Object.create(null);
+    Object.keys(groups).forEach(function(key){var group=groups[key],session=sessionSummary(group.rows,group.exercise,dependencies.volumeModel,cutoff,group.date,group.sessionKey);if(!byExercise[group.exercise.id])byExercise[group.exercise.id]={exerciseId:group.exercise.id,name:group.exercise.name,equipment:group.exercise.equipment,movementType:group.exercise.movementType,sessions:[]};byExercise[group.exercise.id].sessions.push(session)});
+    Object.keys(byExercise).forEach(function(key){byExercise[key].sessions.sort(function(a,b){return a.date.localeCompare(b.date)||a.sessionKey.localeCompare(b.sessionKey)})});
+    return byExercise;
+  }
+  function personalRecords(sessions){
+    var records={highestLoad:null,highestSessionVolume:null,highestTotalReps:null,bestRepsByLoad:[]},events=[],bestReps=Object.create(null);
+    sessions.forEach(function(session){
+      if(session.maxLoad!=null&&(!records.highestLoad||session.maxLoad>records.highestLoad.value)){records.highestLoad={value:session.maxLoad,date:session.date,sessionKey:session.sessionKey,preset:session.preset};events.push({type:'highest_load',date:session.date,sessionKey:session.sessionKey,value:session.maxLoad})}
+      if(session.volume!=null&&(!records.highestSessionVolume||session.volume>records.highestSessionVolume.value)){records.highestSessionVolume={value:session.volume,date:session.date,sessionKey:session.sessionKey};events.push({type:'highest_session_volume',date:session.date,sessionKey:session.sessionKey,value:session.volume})}
+      if(session.totalReps!=null&&(!records.highestTotalReps||session.totalReps>records.highestTotalReps.value)){records.highestTotalReps={value:session.totalReps,date:session.date,sessionKey:session.sessionKey};events.push({type:'highest_total_reps',date:session.date,sessionKey:session.sessionKey,value:session.totalReps})}
+      Object.keys(session.repsByLoad).forEach(function(load){var reps=session.repsByLoad[load],previous=bestReps[load];if(previous&&reps>previous.reps)events.push({type:'highest_reps_same_load',date:session.date,sessionKey:session.sessionKey,load:Number(load),value:reps});if(!previous||reps>previous.reps)bestReps[load]={load:Number(load),reps:reps,date:session.date,sessionKey:session.sessionKey}});
+    });
+    records.bestRepsByLoad=Object.keys(bestReps).map(function(key){return bestReps[key]}).sort(function(a,b){return b.load-a.load});
+    return {records:records,events:events};
+  }
+  function progression(sessions){
+    var emptyMetrics={loadPercent:null,volumePercent:null,repsPercent:null,repsLoad:null};
+    var qualified=sessions.filter(function(session){return session.qualified&&!session.caution.pain&&!session.caution.poorForm}),excluded=sessions.length-qualified.length;
+    if(qualified.length<6)return {classification:'insufficient_data',evidence:'Karşılaştırma için en az altı güvenilir seans gerekli.',qualifiedSessions:qualified.length,excludedSessions:excluded,metrics:emptyMetrics};
+    var recent=qualified.slice(-3),prior=qualified.slice(-6,-3);
+    var recentLoads=recent.map(function(item){return item.maxLoad}).filter(function(value){return value!=null}),priorLoads=prior.map(function(item){return item.maxLoad}).filter(function(value){return value!=null});
+    var recentVolumes=recent.map(function(item){return item.volume}).filter(function(value){return value!=null}),priorVolumes=prior.map(function(item){return item.volume}).filter(function(value){return value!=null}),signals=[],metrics={loadPercent:null,volumePercent:null,repsPercent:null,repsLoad:null};
+    if(recentLoads.length===recent.length&&priorLoads.length===prior.length){var priorLoad=median(priorLoads),loadDelta=(median(recentLoads)-priorLoad)/priorLoad;metrics.loadPercent=Math.round(loadDelta*100);if(loadDelta>.02)signals.push(1);else if(loadDelta<-.02)signals.push(-1);else signals.push(0)}
+    var sameStructure=new Set(recent.concat(prior).map(function(item){return item.sets})).size===1;
+    if(sameStructure&&recentVolumes.length===recent.length&&priorVolumes.length===prior.length){var priorVolume=median(priorVolumes),volumeDelta=(median(recentVolumes)-priorVolume)/priorVolume;metrics.volumePercent=Math.round(volumeDelta*100);if(volumeDelta>.05)signals.push(1);else if(volumeDelta<-.05)signals.push(-1);else signals.push(0)}
+    var commonLoads=Object.keys(recent.reduce(function(map,item){Object.keys(item.repsByLoad).forEach(function(load){map[load]=(map[load]||0)+1});return map},Object.create(null))).filter(function(load){return recent.filter(function(item){return item.repsByLoad[load]!=null}).length>=2&&prior.filter(function(item){return item.repsByLoad[load]!=null}).length>=2}).map(Number).sort(function(a,b){return b-a});
+    if(commonLoads.length){var repsLoad=commonLoads[0],recentReps=recent.map(function(item){return item.repsByLoad[String(repsLoad)]}).filter(function(value){return value!=null}),priorReps=prior.map(function(item){return item.repsByLoad[String(repsLoad)]}).filter(function(value){return value!=null}),priorRep=median(priorReps),repsDelta=(median(recentReps)-priorRep)/priorRep;metrics.repsLoad=repsLoad;metrics.repsPercent=Math.round(repsDelta*100);if(repsDelta>.05)signals.push(1);else if(repsDelta<-.05)signals.push(-1);else signals.push(0)}
+    if(!signals.length)return {classification:'insufficient_data',evidence:'Yük, tekrar veya hacim semantiği güvenilir biçimde karşılaştırılamıyor.',qualifiedSessions:qualified.length,excludedSessions:excluded,metrics:metrics};
+    var positive=signals.indexOf(1)>=0,negative=signals.indexOf(-1)>=0,classification=positive&&!negative?'improving':negative&&!positive?'declining':'stable';
+    var facts=[];if(metrics.loadPercent!=null)facts.push('yük '+(metrics.loadPercent>0?'+':'')+metrics.loadPercent+'%');if(metrics.repsPercent!=null)facts.push(repsLoad+' kg tekrar '+(metrics.repsPercent>0?'+':'')+metrics.repsPercent+'%');if(metrics.volumePercent!=null)facts.push('hacim '+(metrics.volumePercent>0?'+':'')+metrics.volumePercent+'%');
+    var evidence=classification==='improving'?'Yakın dönem kişisel önceki dönemin üzerinde: '+facts.join(', ')+'.':classification==='declining'?'Yakın dönem karşılaştırılabilir performansı önceki dönemin altında: '+facts.join(', ')+'.':'Karşılaştırılabilir değişimler karışık veya anlamlı eşiklerin içinde: '+facts.join(', ')+'.';
+    return {classification:classification,evidence:evidence,qualifiedSessions:qualified.length,excludedSessions:excluded,metrics:metrics};
+  }
+  function plateau(sessions){
+    var recent=sessions.slice(-4);if(recent.length<4)return {active:false,reason:'insufficient_data',evidence:'Plateau için en az dört yakın seans gerekli.'};
+    if(recent.some(function(item){return !item.qualified||item.caution.active||!item.comparable||item.volume==null}))return {active:false,reason:'unreliable_comparison',evidence:'Ağrı, form, RPE veya yük semantiği karşılaştırmayı güvenilmez kılıyor.'};
+    var structures=recent.map(function(item){return item.sets}),presets=recent.map(function(item){return item.preset});if(new Set(structures).size!==1||new Set(presets).size!==1)return {active:false,reason:'session_structure_changed',evidence:'Seans yapısı veya yük semantiği değiştiği için plateau değerlendirilmedi.'};
+    var baseline=recent[0],improved=recent.slice(1).some(function(item){if(item.maxLoad>baseline.maxLoad*1.02||item.volume>baseline.volume*1.03)return true;return Object.keys(baseline.repsByLoad).some(function(load){var candidate=item.repsByLoad[load];return candidate!=null&&candidate>baseline.repsByLoad[load]})});
+    return improved?{active:false,reason:'meaningful_improvement',evidence:'Yakın pencerede anlamlı yük, tekrar veya hacim gelişimi var.'}:{active:true,reason:'no_meaningful_improvement',evidence:'Son dört karşılaştırılabilir seansta anlamlı yük, tekrar veya hacim artışı görülmedi.'};
+  }
+  function exerciseIntelligence(rows,cutoff,options){
+    var byExercise=exerciseSessions(rows,cutoff,options),items=Object.keys(byExercise).map(function(key){var item=byExercise[key],prs=personalRecords(item.sessions),trend=progression(item.sessions),plateauResult=plateau(item.sessions),recent=item.sessions.slice(-5).reverse(),latest=recent[0]||null,latestDate=latest&&latest.date,latestSessions=recent.filter(function(session){return session.date===latestDate}),latestContext=latestSessions.find(function(session){return session.caution.active})||latest,caution=latestContext?latestContext.caution:{active:false,pain:false,poorForm:false,highRpe:false};return {exerciseId:item.exerciseId,name:item.name,equipment:item.equipment,movementType:item.movementType,lastPerformedDate:latestDate||null,recentSessions:recent,latestContext:latestContext,sessionCount:item.sessions.length,personalRecords:prs.records,prEvents:prs.events,progression:trend,plateau:plateauResult,caution:caution,presentationPriority:caution.active?'caution':plateauResult.active?'plateau':trend.classification};});
+    items.sort(function(a,b){return String(b.lastPerformedDate).localeCompare(String(a.lastPerformedDate))||a.name.localeCompare(b.name)});return {exercises:items,exerciseMap:items.reduce(function(map,item){map[item.exerciseId]=item;return map},Object.create(null))};
+  }
+  function contributionTrends(current,previous){
+    if(!current||!previous)return [];return current.muscles.map(function(item){var before=previous.muscleMap[item.id],previousSets=before?before.sets:0;return {muscleId:item.id,label:item.label,current:item.sets,previous:previousSets,delta:item.sets-previousSets,percent:item.sets>0&&previousSets>0?Math.round((item.sets-previousSets)/previousSets*100):null}}).filter(function(item){return item.current>0||item.previous>0}).sort(function(a,b){return Math.abs(b.delta)-Math.abs(a.delta)||b.current-a.current}).slice(0,6);
+  }
   function analyze(data,selectedDate,options){
     var start=weekStart(selectedDate),rows=data&&Array.isArray(data.workouts)?data.workouts:[];
     if(!start)throw new Error('Training Lab için geçerli bir YYYY-MM-DD tarihi gerekli.');
-    var end=addDays(start,6),previousStart=addDays(start,-7),previousEnd=addDays(start,-1);
-    var current=aggregate(rows,start,end,options),previous=aggregate(rows,previousStart,previousEnd,options);
+    var end=addDays(start,6),cutoff=selectedDate<end?selectedDate:end,previousStart=addDays(start,-7),previousEnd=addDays(start,-1);
+    var current=aggregate(rows,start,cutoff,options,cutoff),previous=aggregate(rows,previousStart,previousEnd,options,cutoff),intelligence=exerciseIntelligence(rows,cutoff,options);
     var ordered=GROUPS.map(function(id){
       var group=current.groups[id],before=previous.groups[id];
       group.trend=group.sets>0&&before.sets>0?{current:group.sets,previous:before.sets,percent:Math.round((group.sets-before.sets)/before.sets*100)}:null;
@@ -270,12 +358,13 @@
       muscle.trend=muscle.sets>0&&before&&before.sets>0?{current:muscle.sets,previous:before.sets,percent:Math.round((muscle.sets-before.sets)/before.sets*100)}:null;
     });
     return {
-      period:{start:start,end:end,previousStart:previousStart,previousEnd:previousEnd},
+      period:{start:start,end:end,cutoff:cutoff,previousStart:previousStart,previousEnd:previousEnd},
       weights:CONTRIBUTION_WEIGHTS,groups:ordered,groupMap:current.groups,
-      totals:{sets:ordered.reduce(function(sum,item){return sum+item.sets},0),reps:ordered.reduce(function(sum,item){return sum+item.reps},0),volume:ordered.reduce(function(sum,item){return sum+item.volume},0),trainingDays:new Set(rows.filter(function(row){return row&&validDate(row.date)&&row.date>=start&&row.date<=end}).map(function(row){return row.date})).size},
-      anatomy:current.anatomy,unmapped:current.unmapped
+      totals:{sets:ordered.reduce(function(sum,item){return sum+item.sets},0),reps:ordered.reduce(function(sum,item){return sum+item.reps},0),volume:ordered.reduce(function(sum,item){return sum+item.volume},0),trainingDays:new Set(rows.filter(function(row){return row&&validDate(row.date)&&row.date>=start&&row.date<=cutoff}).map(function(row){return row.date})).size},
+      anatomy:current.anatomy,contributionTrends:contributionTrends(current.anatomy,previous.anatomy),unmapped:current.unmapped,
+      intelligence:intelligence
     };
   }
 
-  return Object.freeze({version:3,weights:CONTRIBUTION_WEIGHTS,groups:GROUPS,groupLabels:GROUP_LABELS,metadataBridges:METADATA_BRIDGES,weekStart:weekStart,addDays:addDays,resolveExercise:resolveExercise,contributionsFor:contributionsFor,analyze:analyze});
+  return Object.freeze({version:4,weights:CONTRIBUTION_WEIGHTS,groups:GROUPS,groupLabels:GROUP_LABELS,metadataBridges:METADATA_BRIDGES,weekStart:weekStart,addDays:addDays,resolveExercise:resolveExercise,contributionsFor:contributionsFor,exerciseIntelligence:exerciseIntelligence,analyze:analyze});
 });

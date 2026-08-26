@@ -94,7 +94,7 @@ run('historical workout dates land in their real week and produce comparable tre
     row('2026-08-24', 'Cable Fly', 'cable_fly', { sets: 9, reps: 12, weight: 10 })
   ] };
   const current = lab.analyze(data, '2026-08-21', options);
-  assert.deepEqual(current.period, { start: '2026-08-17', end: '2026-08-23', previousStart: '2026-08-10', previousEnd: '2026-08-16' });
+  assert.deepEqual(current.period, { start: '2026-08-17', end: '2026-08-23', cutoff: '2026-08-21', previousStart: '2026-08-10', previousEnd: '2026-08-16' });
   assert.equal(current.groupMap.Chest.sets, 3);
   assert.equal(current.groupMap.Chest.trend.percent, 50);
   assert.equal(lab.analyze(data, '2026-08-12', options).groupMap.Chest.sets, 2);

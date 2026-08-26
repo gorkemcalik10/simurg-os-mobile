@@ -20,7 +20,7 @@ const section = {
 
 global.document = { readyState: 'loading', addEventListener() {}, getElementById(id) { return id === 'training-lab' ? section : null; } };
 global.innerWidth = 1200;
-global.selectedDate = '2026-08-17';
+global.selectedDate = '2026-08-23';
 global.SimurgMuscleAnatomy = require('../simurg-muscle-anatomy.js');
 global.SimurgExerciseLibrary = require('../simurg-exercise-library.js');
 global.SimurgExerciseCanonicalization = require('../simurg-exercise-canonicalization.js');
