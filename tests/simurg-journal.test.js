@@ -152,18 +152,20 @@ run('Journal observations do not change the canonical Coach decision', () => {
   assert.deepEqual(withJournal.decisionEvidence, withoutJournal.decisionEvidence);
 });
 
-run('mobile Menu replaces Program with Journal while desktop Program and Gym editing remain present', () => {
+run('mobile Menu replaces Journal with Weekly while Journal data, desktop Program and Gym editing remain present', () => {
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const active = html.replace(/<template\b[\s\S]*?<\/template>/gi, '');
   const menu = active.match(/<div class="simurgV8Grid simurgPremiumMenuGrid">([\s\S]*?)<\/div><\/div><nav id="simurgV8Nav"/);
   assert.ok(menu);
-  assert.match(menu[1], /simurgV8Go\('journal','menu'\)/);
-  assert.match(menu[1], /<b>Journal<\/b>/);
+  assert.match(menu[1], /simurgV8Go\('weekly','menu'\)/);
+  assert.match(menu[1], /<b>Haftalık<\/b>/);
+  assert.doesNotMatch(menu[1], /simurgV8Go\('journal','menu'\)|<b>Journal<\/b>/);
   assert.doesNotMatch(menu[1], /simurgV8Go\('program','menu'\)|<b>Program<\/b>/);
   assert.match(active, /<section id="program"/);
   assert.match(active, /id="programNameModal"/);
   assert.match(active, /function ensureGymProgramEntry\(date\)/);
   assert.match(active, /<section id="journal"/);
+  assert.match(active, /"journal":\{"schemaVersion":1,"daily":\{\}\}/);
   const nav = active.match(/<nav id="simurgV8Nav"[\s\S]*?<\/nav>/)[0];
   assert.deepEqual([...nav.matchAll(/data-key="([^"]+)"/g)].map(match => match[1]), ['home', 'gym', 'logger', 'training-lab', 'menu']);
 });

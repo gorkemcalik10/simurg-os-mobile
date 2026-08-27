@@ -404,7 +404,7 @@
     var nav=document.getElementById('simurgV8Nav');
     if(nav&&nav.querySelector('[data-key="polar"]'))nav.querySelector('[data-key="polar"]').remove();
     var grid=document.querySelector('#simurgV8Sheet .simurgV8Grid');
-    if(grid)grid.innerHTML='<button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve öneriler</small></span></button><button onclick="simurgV8Go(\'journal\',\'menu\')"><i>✦</i><span><b>Journal</b><small>Günlük davranış ve kısa not</small></span></button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedek</small></span></button>';
+    if(grid)grid.innerHTML='<button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve öneriler</small></span></button><button onclick="simurgV8Go(\'weekly\',\'menu\')"><i>📈</i><span><b>Haftalık</b><small>Bu hafta ve geçen hafta</small></span></button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedek</small></span></button>';
   }
   function patchRouter(){
     if(window.__miaRouterPatched||typeof window.simurgV8Go!=='function')return;
@@ -416,6 +416,7 @@
       ['weeklyReport','monthlyReport'].forEach(function(reportId){var report=document.getElementById(reportId);if(report)report.replaceChildren();});
       if(id==='gym')mountGymAccordion();
       else if(id==='workout')mountJournalDashboard();
+      else if(id==='weekly'&&window.SimurgMobileWeekly)window.SimurgMobileWeekly.mount();
       else if(id==='program')renderMobileProgram();
       else if(id==='data')mountDataCenter();
       else if(id==='polar'&&window.SimurgPolarBridge&&typeof window.SimurgPolarBridge.refresh==='function')window.SimurgPolarBridge.refresh('polar');
@@ -423,7 +424,7 @@
     };
   }
   function handleResize(){
-    if(isMobile()){normalizeMobileShell();patchGymRenderer();patchJournalRenderer();patchProgramNameEditor();mountGymAccordion();if(document.body.getAttribute('data-simurg-active-screen')==='program')renderMobileProgram();}
+    if(isMobile()){normalizeMobileShell();patchGymRenderer();patchJournalRenderer();patchProgramNameEditor();mountGymAccordion();if(document.body.getAttribute('data-simurg-active-screen')==='program')renderMobileProgram();if(document.body.getAttribute('data-simurg-active-screen')==='weekly'&&window.SimurgMobileWeekly)window.SimurgMobileWeekly.mount();}
     else{restoreDesktopGym();restoreDesktopDaily();restoreDesktopProgram();}
   }
   ready(function(){
@@ -435,6 +436,7 @@
     if(document.body.getAttribute('data-simurg-active-screen')==='gym')mountGymAccordion();
     if(document.body.getAttribute('data-simurg-active-screen')==='workout')mountJournalDashboard();
     if(document.body.getAttribute('data-simurg-active-screen')==='program')renderMobileProgram();
+    if(document.body.getAttribute('data-simurg-active-screen')==='weekly'&&window.SimurgMobileWeekly)window.SimurgMobileWeekly.mount();
     window.addEventListener('resize',handleResize,{passive:true});
   });
   window.SimurgMobileIA={renderDaily:renderMobileDaily,mountGym:mountGymAccordion,mountJournal:mountJournalDashboard,mountProgram:renderMobileProgram,mountData:mountDataCenter,openGym:openGymAndFocus};
