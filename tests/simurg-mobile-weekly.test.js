@@ -59,6 +59,9 @@ function stores() {
 function options(data, calls = []) {
   return { today: TODAY, data, signalModel: makeSignal(data, calls), sleepIntelligence: sleep, polarIntelligence: polarProvider(data) };
 }
+function fillActivity(data, start, count, steps, activeMinutes) {
+  for (let index = 0; index < count; index += 1) data.polarActivity.daily[add(start, index)] = { steps, activeMinutes };
+}
 function run(name, fn) { fn(); process.stdout.write(`✓ ${name}\n`); }
 
 run('completed 10-16 August compares only with completed 3-9 August through the canonical provider', () => {
@@ -139,9 +142,123 @@ run('active current week shows week-to-date values and suppresses every formal c
   assert.equal(comparison.volumePercent, null);
   assert.equal(comparison.reasons.sessions, 'active_week');
   assert.equal(comparison.scope, 'active_week');
-  assert.match(html, /Hafta devam ediyor/);
-  assert.match(html, /Haftalık karşılaştırma hafta tamamlandığında oluşacak\./);
-  assert.doesNotMatch(html, /Bu hafta \/ Geçen hafta|geçen haftaya göre|Karşılaştırma yok|Yetersiz veri/);
+  assert.match(html, /Hafta devam ediyor — haftalık karşılaştırma Pazar sonunda tamamlanacak\./);
+  assert.equal((html.match(/Hafta devam ediyor/g) || []).length, 1);
+  assert.doesNotMatch(html, /Bu hafta \/ Geçen hafta|geçen haftaya göre|Karşılaştırma yok/);
+});
+
+run('completed 3/7 Steps versus previous 7/7 keeps the raw total but blocks the total delta', () => {
+  const data = stores();
+  fillActivity(data, '2026-08-03', 7, 8000, 60);
+  fillActivity(data, '2026-08-10', 3, 10000, 70);
+  const current = weekly.buildWeek('2026-08-10', options(data));
+  const previous = weekly.buildWeek('2026-08-03', options(data));
+  const comparison = weekly.compare(current, previous);
+  const html = weekly.render(current, previous, TODAY);
+  assert.deepEqual(current.polar.steps, { value: 30000, sampleSize: 3 });
+  assert.equal(comparison.stepsPercent, null);
+  assert.equal(comparison.reasons.stepsPercent, 'insufficient_samples');
+  assert.match(html, /Adım[\s\S]*?30\.000[\s\S]*?Yetersiz veri[\s\S]*?3\/7 gün/);
+});
+
+run('completed 3/7 Active Duration versus previous 7/7 blocks the duration delta', () => {
+  const data = stores();
+  fillActivity(data, '2026-08-03', 7, 8000, 60);
+  fillActivity(data, '2026-08-10', 3, 10000, 70);
+  const current = weekly.buildWeek('2026-08-10', options(data));
+  const previous = weekly.buildWeek('2026-08-03', options(data));
+  const comparison = weekly.compare(current, previous);
+  assert.deepEqual(current.polar.activeMinutes, { value: 210, sampleSize: 3 });
+  assert.equal(comparison.activeMinutes, null);
+  assert.equal(comparison.reasons.activeMinutes, 'insufficient_samples');
+  assert.match(weekly.render(current, previous, TODAY), /Aktif süre[\s\S]*?3sa 30dk[\s\S]*?Yetersiz veri[\s\S]*?3\/7 gün/);
+});
+
+run('two completed 7/7 activity weeks compare whole-week totals correctly', () => {
+  const data = stores();
+  fillActivity(data, '2026-08-03', 7, 8000, 60);
+  fillActivity(data, '2026-08-10', 7, 10000, 70);
+  const current = weekly.buildWeek('2026-08-10', options(data));
+  const previous = weekly.buildWeek('2026-08-03', options(data));
+  const comparison = weekly.compare(current, previous);
+  assert.deepEqual(current.polar.steps, { value: 70000, sampleSize: 7 });
+  assert.deepEqual(current.polar.activeMinutes, { value: 490, sampleSize: 7 });
+  assert.equal(comparison.stepsPercent, 25);
+  assert.equal(comparison.activeMinutes, 70);
+});
+
+run('Gym-only duration contributes once at canonical session level', () => {
+  const data = stores();
+  data.workouts.push(
+    { date: '2026-08-24', sessionId: 'gym-only', sets: 1, reps: 8, weight: 40, durationMinutes: 55 },
+    { date: '2026-08-24', sessionId: 'gym-only', sets: 1, reps: 8, weight: 42, durationMinutes: 55 },
+  );
+  const result = weekly.buildWeek('2026-08-24', options(data));
+  assert.equal(result.training.sessions, 1);
+  assert.equal(result.training.durationMinutes, 55);
+  assert.equal(result.training.durationSampleSize, 1);
+});
+
+run('matching Polar representation of a Gym duration does not double-count', () => {
+  const data = stores();
+  data.workouts.push({ date: '2026-08-24', sessionId: 'gym-linked', sets: 1, reps: 8, weight: 40, durationMinutes: 55 });
+  data.sessions['2026-08-24'] = [{ id: 'polar-linked', sessionId: 'gym-linked', activityKey: 'strength', durationMinutes: 55 }];
+  const result = weekly.buildWeek('2026-08-24', options(data));
+  assert.equal(result.training.sessions, 1);
+  assert.equal(result.training.durationMinutes, 55);
+});
+
+run('two same-day Gym sessionIds retain distinct durations', () => {
+  const data = stores();
+  data.workouts.push(
+    { date: '2026-08-24', sessionId: 'gym-am', sets: 1, reps: 8, weight: 40, durationMinutes: 35 },
+    { date: '2026-08-24', sessionId: 'gym-pm', sets: 1, reps: 8, weight: 45, durationMinutes: 50 },
+  );
+  const result = weekly.buildWeek('2026-08-24', options(data));
+  assert.equal(result.training.sessions, 2);
+  assert.equal(result.training.durationMinutes, 85);
+  assert.equal(result.training.durationSampleSize, 2);
+});
+
+run('incomplete session duration coverage is surfaced without invented minutes', () => {
+  const data = stores();
+  data.workouts.push(
+    { date: '2026-08-24', sessionId: 'timed', sets: 1, reps: 8, weight: 40, durationMinutes: 45 },
+    { date: '2026-08-25', sessionId: 'untimed', sets: 1, reps: 8, weight: 45 },
+  );
+  const result = weekly.buildWeek('2026-08-24', options(data));
+  const html = weekly.render(result, null, TODAY);
+  assert.equal(result.training.durationMinutes, 45);
+  assert.equal(result.training.durationSampleSize, 1);
+  assert.equal(result.training.durationComplete, false);
+  assert.match(html, /45dk[\s\S]*?1\/2 seans süreli/);
+});
+
+run('training-day count uses unique canonical session dates and stays separate from session count', () => {
+  const data = stores();
+  data.workouts.push(
+    { date: '2026-08-24', sessionId: 'am', sets: 1, reps: 8, weight: 40 },
+    { date: '2026-08-24', sessionId: 'pm', sets: 1, reps: 8, weight: 45 },
+    { date: '2026-08-26', sessionId: 'wed', sets: 1, reps: 8, weight: 50 },
+  );
+  const result = weekly.buildWeek('2026-08-24', options(data));
+  assert.deepEqual([result.training.days, result.training.sessions], [2, 3]);
+  assert.match(weekly.render(result, null, TODAY), /Antrenman günü[\s\S]*?>2<[\s\S]*?3 seans/);
+});
+
+run('average RPE weights canonical Gym sessions equally despite unequal row counts', () => {
+  const data = stores();
+  data.workouts.push(
+    { date: '2026-08-24', sessionId: 'many-rows', sets: 1, reps: 8, weight: 40, rpe: 6 },
+    { date: '2026-08-24', sessionId: 'many-rows', sets: 1, reps: 8, weight: 42, rpe: 6 },
+    { date: '2026-08-24', sessionId: 'many-rows', sets: 1, reps: 8, weight: 44, rpe: 6 },
+    { date: '2026-08-25', sessionId: 'one-row', sets: 1, reps: 8, weight: 45, rpe: 10 },
+    { date: '2026-08-26', sessionId: 'missing-rpe', sets: 1, reps: 8, weight: 50 },
+  );
+  const result = weekly.buildWeek('2026-08-24', options(data));
+  assert.equal(result.strength.avgRpe, 8);
+  assert.equal(result.strength.rpeSampleSize, 2);
+  assert.match(weekly.render(result, null, TODAY), /Ort\. seans RPE[\s\S]*?2 seans/);
 });
 
 run('different workout types and weekday placement do not affect whole-week comparison', () => {
@@ -259,17 +376,62 @@ run('no prior history produces an unavailable delta instead of fake zero', () =>
   assert.doesNotMatch(html, />0 seans</);
 });
 
-run('Cardio Load clearly separates weekly average from latest-day status', () => {
+run('Cardio Load weekly average uses only official Polar daily values and keeps latest status separate', () => {
   const data = stores();
   for (const [date, value, statusLabel] of [
     ['2026-08-24', 40, 'Dengeli'], ['2026-08-25', 50, 'Üretken'], ['2026-08-26', 60, 'Dengeli'],
-  ]) data.loads[date] = { available: true, value, statusLabel };
+  ]) data.loads[date] = { available: true, value, statusLabel, sourceType: 'official' };
+  data.loads['2026-08-27'] = { available: true, value: 1000, statusLabel: 'Fallback', sourceType: 'fallback' };
   const current = weekly.buildWeek('2026-08-24', options(data));
   const html = weekly.render(current, weekly.buildWeek('2026-08-17', options(data)), TODAY);
   assert.equal(current.polar.cardioLoad.value, 50);
+  assert.equal(current.polar.cardioLoad.sampleSize, 3);
   assert.equal(current.polar.cardioLoad.latestStatusLabel, 'Dengeli');
   assert.match(html, /Cardio Load · haftalık ort\./);
-  assert.match(html, /Son gün durumu: Dengeli/);
+  assert.match(html, /Son resmi gün durumu: Dengeli/);
+  assert.doesNotMatch(html, /Fallback|272,5|1\.000/);
+});
+
+run('fewer than three official Cardio Load days cannot form a weekly average', () => {
+  const data = stores();
+  data.loads['2026-08-24'] = { available: true, value: 40, statusLabel: 'Dengeli', sourceType: 'official' };
+  data.loads['2026-08-25'] = { available: true, value: 500, statusLabel: 'Fallback', sourceType: 'workout-derived' };
+  const current = weekly.buildWeek('2026-08-24', options(data));
+  assert.equal(current.polar.cardioLoad.value, null);
+  assert.equal(current.polar.cardioLoad.sampleSize, 1);
+  assert.match(weekly.render(current, null, TODAY), /Cardio Load · haftalık ort\.[\s\S]*?Yetersiz veri[\s\S]*?1 resmi gün/);
+});
+
+run('0 PR renders explicitly and large volume uses compact Turkish ton formatting once', () => {
+  const data = stores();
+  data.workouts.push({ date: '2026-08-24', sessionId: 'volume', sets: 1, reps: 1, weight: 7620 });
+  const current = weekly.buildWeek('2026-08-24', options(data));
+  const html = weekly.render(current, null, TODAY);
+  assert.equal(current.strength.volume, 7620);
+  assert.equal(current.strength.prCount, 0);
+  assert.match(html, /Gym hacmi[\s\S]*?7,6[\s\S]*?ton/);
+  assert.match(html, /<small>PR<\/small><b>0<\/b>/);
+  assert.equal((html.match(/7,6/g) || []).length, 1);
+  assert.doesNotMatch(html, /Toplam hacim|7\.620 kg/);
+});
+
+run('user-facing decimal deltas use Turkish punctuation', () => {
+  const data = stores();
+  data.workouts.push(
+    { date: '2026-08-03', sessionId: 'previous', sets: 1, reps: 1, weight: 1000 },
+    { date: '2026-08-10', sessionId: 'current', sets: 1, reps: 1, weight: 1141 },
+  );
+  for (let index = 0; index < 3; index += 1) {
+    data.polarNightlyRecharge.daily[add('2026-08-03', index)] = { hrv: 40, nightHr: 58 };
+    data.polarNightlyRecharge.daily[add('2026-08-10', index)] = { hrv: 45.6, nightHr: 58 };
+  }
+  const current = weekly.buildWeek('2026-08-10', options(data));
+  const previous = weekly.buildWeek('2026-08-03', options(data));
+  const html = weekly.render(current, previous, TODAY);
+  assert.equal(weekly.compare(current, previous).volumePercent, 14.1);
+  assert.match(html, /\+%14,1/);
+  assert.match(html, /\+5,6 ms/);
+  assert.doesNotMatch(html, /14\.1|5\.6 ms/);
 });
 
 run('Weekly mobile labels stay readable without changing unrelated typography', () => {
@@ -279,6 +441,8 @@ run('Weekly mobile labels stay readable without changing unrelated typography', 
   assert.match(css, /#weekly\.mwMobileWeekly \.mwMetric em[\s\S]*?font-size:10\.5px!important/);
   assert.match(css, /#weekly\.mwMobileWeekly \.mwVisual>div small[\s\S]*?font-size:10\.5px!important/);
   assert.match(css, /\.mwWeekNav button\{width:44px;height:44px/);
+  assert.match(css, /\.mwPrimaryAccent\{/);
+  assert.doesNotMatch(css, /\.mwPrimaryArc|border-left-color|transform:rotate/);
   assert.doesNotMatch(css, /font-size:(?:8\.5|9|9\.5)px/);
 });
 
@@ -312,4 +476,4 @@ run('mobile menu hides Journal while its data contract and stable adjacent surfa
   assert.doesNotMatch(source, /Pzt.{0,20}bugün|aynı günleri|maxDays|partial_equivalent/);
 });
 
-process.stdout.write('17 Simurg mobile Weekly tests passed.\n');
+process.stdout.write('29 Simurg mobile Weekly tests passed.\n');
