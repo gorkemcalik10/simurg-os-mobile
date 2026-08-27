@@ -72,4 +72,22 @@ run('rest-day workout copy is plain and the status title remains canonical', () 
   assert.doesNotMatch(premium, /Takvimde planlı Gym seansı olmayan gerçek dinlenme günü/);
 });
 
+run('Home greeting follows the device local hour', () => {
+  assert.match(premium, /function homeGreeting\(value\)/);
+  assert.match(premium, /hour<12\?'Günaydın':hour<18\?'İyi günler':'İyi akşamlar'/);
+  assert.match(premium, /<h1>'\+esc\(homeGreeting\(\)\)\+'<\/h1>/);
+  assert.doesNotMatch(premium, /<h1>Günaydın, Görkem<\/h1>/);
+});
+
+run('Coach localizes contradictory recovery evidence and groups repeated warning headings', () => {
+  const ui = coachUi();
+  const localized = ui.warningPresentation('Recovery evidence is contradictory; the decision uses the more conservative supported direction.');
+  assert.equal(localized.title, 'Toparlanma sinyalleri çelişkili');
+  assert.equal(localized.copy, 'Karar, desteklenen daha temkinli yöne göre verildi.');
+  const grouped = ui.warningPresentations(['Kişisel patern A', 'Kişisel patern B', 'Kişisel patern A']);
+  assert.equal(grouped.length, 1);
+  assert.equal(grouped[0].title, 'Bugün dikkatli ilerle');
+  assert.equal(grouped[0].copy, 'Kişisel patern A Kişisel patern B');
+});
+
 if (process.exitCode) process.exit(process.exitCode);

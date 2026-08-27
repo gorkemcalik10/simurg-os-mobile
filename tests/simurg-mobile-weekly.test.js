@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const weekly = require('../simurg-mobile-weekly.js');
 const sleep = require('../simurg-sleep-intelligence.js');
+const polar = require('../simurg-polar-intelligence.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const TODAY = '2026-08-27';
@@ -144,6 +145,7 @@ run('active current week shows week-to-date values and suppresses every formal c
   assert.equal(comparison.scope, 'active_week');
   assert.match(html, /Hafta devam ediyor — haftalık karşılaştırma Pazar sonunda tamamlanacak\./);
   assert.equal((html.match(/Hafta devam ediyor/g) || []).length, 1);
+  assert.doesNotMatch(html, /SIMURG WEEKLY/);
   assert.doesNotMatch(html, /Bu hafta \/ Geçen hafta|geçen haftaya göre|Karşılaştırma yok/);
 });
 
@@ -363,6 +365,25 @@ run('one valid HRV and Night HR day cannot create declarative trends', () => {
   assert.doesNotMatch(html, /HRV [+-]\d|Night HR [+-]\d/);
 });
 
+run('active week renders real Polar field names as week-to-date values without deltas', () => {
+  const data = stores();
+  data.polarSleep.daily['2026-08-25'] = {
+    date: '2026-08-25', startTime: '2026-08-24T22:30:00Z', endTime: '2026-08-25T06:30:00Z',
+    deepSleep: 7200, remSleep: 5400, lightSleep: 12600,
+  };
+  data.polarNightlyRecharge.daily['2026-08-25'] = { date: '2026-08-25', heartRateVariabilityAvg: 69, heartRateAvg: 51 };
+  data.polarActivity.daily['2026-08-25'] = { date: '2026-08-25', steps: 8400, activeMinutes: 64 };
+  const current = weekly.buildWeek('2026-08-24', { ...options(data), polarIntelligence: polar });
+  const html = weekly.render(current, null, TODAY);
+  assert.equal(current.polar.actualSleepMinutes, 420);
+  assert.deepEqual(current.polar.hrv, { value: 69, sampleSize: 1 });
+  assert.deepEqual(current.polar.nightHr, { value: 51, sampleSize: 1 });
+  assert.match(html, /Gerçek uyku[\s\S]*?7sa[\s\S]*?1 gece/);
+  assert.match(html, /HRV[\s\S]*?69[\s\S]*?ms[\s\S]*?1 gece/);
+  assert.match(html, /Night HR[\s\S]*?51[\s\S]*?bpm[\s\S]*?1 gece/);
+  assert.doesNotMatch(html, /HRV[\s\S]{0,120}[+-]\d|Night HR[\s\S]{0,120}[+-]\d/);
+});
+
 run('no prior history produces an unavailable delta instead of fake zero', () => {
   const data = stores();
   data.workouts.push({ date: '2026-08-10', sessionId: 'only-history', sets: 1, reps: 10, weight: 10 });
@@ -392,14 +413,23 @@ run('Cardio Load weekly average uses only official Polar daily values and keeps 
   assert.doesNotMatch(html, /Fallback|272,5|1\.000/);
 });
 
-run('fewer than three official Cardio Load days cannot form a weekly average', () => {
+run('one official Cardio Load day renders a current-week value with coverage', () => {
   const data = stores();
   data.loads['2026-08-24'] = { available: true, value: 40, statusLabel: 'Dengeli', sourceType: 'official' };
   data.loads['2026-08-25'] = { available: true, value: 500, statusLabel: 'Fallback', sourceType: 'workout-derived' };
   const current = weekly.buildWeek('2026-08-24', options(data));
+  assert.equal(current.polar.cardioLoad.value, 40);
+  assert.equal(current.polar.cardioLoad.sampleSize, 1);
+  assert.match(weekly.render(current, null, TODAY), /Cardio Load · haftalık ort\.[\s\S]*?40[\s\S]*?1 resmi gün/);
+});
+
+run('fewer than three official Cardio Load days remain insufficient for a completed week', () => {
+  const data = stores();
+  data.loads['2026-08-10'] = { available: true, value: 40, statusLabel: 'Dengeli', sourceType: 'official' };
+  const current = weekly.buildWeek('2026-08-10', options(data));
   assert.equal(current.polar.cardioLoad.value, null);
   assert.equal(current.polar.cardioLoad.sampleSize, 1);
-  assert.match(weekly.render(current, null, TODAY), /Cardio Load · haftalık ort\.[\s\S]*?Yetersiz veri[\s\S]*?1 resmi gün/);
+  assert.match(weekly.render(current, weekly.buildWeek('2026-08-03', options(data)), TODAY), /Cardio Load · haftalık ort\.[\s\S]*?Yetersiz veri[\s\S]*?1 resmi gün/);
 });
 
 run('0 PR renders explicitly and large volume uses compact Turkish ton formatting once', () => {
@@ -441,9 +471,32 @@ run('Weekly mobile labels stay readable without changing unrelated typography', 
   assert.match(css, /#weekly\.mwMobileWeekly \.mwMetric em[\s\S]*?font-size:10\.5px!important/);
   assert.match(css, /#weekly\.mwMobileWeekly \.mwVisual>div small[\s\S]*?font-size:10\.5px!important/);
   assert.match(css, /\.mwWeekNav button\{width:44px;height:44px/);
-  assert.match(css, /\.mwPrimaryAccent\{/);
-  assert.doesNotMatch(css, /\.mwPrimaryArc|border-left-color|transform:rotate/);
+  assert.doesNotMatch(css, /\.mwPrimaryArc|\.mwPrimaryAccent|border-left-color|transform:rotate/);
   assert.doesNotMatch(css, /font-size:(?:8\.5|9|9\.5)px/);
+});
+
+run('primary cards lead with training days, duration, and compact Gym volume without decorative rings', () => {
+  const data = stores();
+  data.workouts.push({ date: '2026-08-24', sessionId: 'gym', sets: 1, reps: 1, weight: 17997, durationMinutes: 45 });
+  const html = weekly.render(weekly.buildWeek('2026-08-24', options(data)), null, TODAY);
+  const primary = html.match(/<section class="mwPrimaryGrid">([\s\S]*?)<\/section>/)[1];
+  assert.ok(primary.indexOf('Antrenman günü') < primary.indexOf('Toplam süre'));
+  assert.ok(primary.indexOf('Toplam süre') < primary.indexOf('Gym hacmi'));
+  assert.match(primary, /Antrenman günü[\s\S]*?1 seans/);
+  assert.match(primary, /Gym hacmi[\s\S]*?18[\s\S]*?ton/);
+  assert.doesNotMatch(primary, /mwPrimaryArc|mwPrimaryAccent/);
+});
+
+run('asset versions and service-worker cache generation invalidate stale Weekly bundles', () => {
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+  for (const asset of ['simurg-mobile-weekly.css?v=2', 'simurg-mobile-weekly.js?v=2']) {
+    assert.match(html, new RegExp(asset.replace(/[.?]/g, '\\$&')));
+    assert.match(sw, new RegExp(asset.replace(/[.?]/g, '\\$&')));
+  }
+  assert.match(html, /sw\.js\?v=weekly-live-ui-v2/);
+  assert.match(sw, /simurg-weekly-live-ui-v2/);
+  assert.doesNotMatch(sw, /simurg-mobile-weekly\.(?:css|js)\?v=1/);
 });
 
 run('missing Polar metrics stay null instead of becoming zero', () => {
@@ -465,6 +518,8 @@ run('mobile menu hides Journal while its data contract and stable adjacent surfa
   const menu = html.match(/<div class="simurgV8Grid simurgPremiumMenuGrid">([\s\S]*?)<\/div><\/div><nav id="simurgV8Nav"/);
   assert.ok(menu);
   assert.match(menu[1], /Haftalık/);
+  assert.match(menu[1], /Antrenman ve vücut özeti/);
+  assert.doesNotMatch(menu[1], /Bu hafta ve geçen hafta/);
   assert.doesNotMatch(menu[1], /Journal|simurgV8Go\('journal','menu'\)/);
   assert.match(html, /"journal":\{"schemaVersion":1,"daily":\{\}\}/);
   assert.match(validation, /function validateJournalStore/);
@@ -476,4 +531,4 @@ run('mobile menu hides Journal while its data contract and stable adjacent surfa
   assert.doesNotMatch(source, /Pzt.{0,20}bugün|aynı günleri|maxDays|partial_equivalent/);
 });
 
-process.stdout.write('29 Simurg mobile Weekly tests passed.\n');
+process.stdout.write('34 Simurg mobile Weekly tests passed.\n');

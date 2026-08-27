@@ -7986,7 +7986,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=daily-guidance-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=weekly-live-ui-v2').catch(function(){});
   });
 }
 </script>
@@ -11222,7 +11222,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   window.simurgV8Go=go; window.simurgV8OpenMenu=openMenu; window.simurgV8CloseMenu=closeMenu;
   ready(function(){
     if(!document.getElementById('simurgV8Nav')){
-      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Üç temel merkez</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('weekly','menu')"><i>📈</i><span><b>Haftalık</b><small>Bu hafta ve geçen hafta</small></span></button><button onclick="simurgV8Go('data','menu')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedekleme</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Günlük</button><button data-key="training-lab" onclick="SimurgTrainingLabUI.open()"><i>◫</i>Lab</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
+      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Üç temel merkez</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('weekly','menu')"><i>📈</i><span><b>Haftalık</b><small>Antrenman ve vücut özeti</small></span></button><button onclick="simurgV8Go('data','menu')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedekleme</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Günlük</button><button data-key="training-lab" onclick="SimurgTrainingLabUI.open()"><i>◫</i>Lab</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
     }
     var loggerButton=document.querySelector('#simurgV8Nav button[data-key="logger"]');
     if(loggerButton)loggerButton.setAttribute('onclick',"simurgV8Go('workout','logger')");
@@ -16278,19 +16278,19 @@ m Shell V4: Logger information architecture fix -->
 <script src="./polar-workout.js?v=16"></script>
 <script src="./workout-source-policy.js?v=3"></script>
 <link rel="stylesheet" href="./simurg-coach.css?v=14">
-<script src="./simurg-coach-ui.js?v=14"></script>
+<script src="./simurg-coach-ui.js?v=15"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=41">
-<script src="./premium-standard.js?v=52"></script>
+<script src="./premium-standard.js?v=53"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=9"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=27">
 <script src="./desktop-alignment.js?v=37"></script>
 <link rel="stylesheet" href="./mobile-ia-premium.css?v=12">
-<link rel="stylesheet" href="./simurg-mobile-weekly.css?v=1">
+<link rel="stylesheet" href="./simurg-mobile-weekly.css?v=2">
 <link rel="stylesheet" href="./simurg-gym-flex.css?v=2">
 <link rel="stylesheet" href="./simurg-training-lab.css?v=13">
 <link rel="stylesheet" href="./simurg-journal.css?v=1">
-<script src="./simurg-mobile-weekly.js?v=1"></script>
+<script src="./simurg-mobile-weekly.js?v=2"></script>
 <script src="./mobile-ia-premium.js?v=11"></script>
 <script src="./simurg-training-lab-ui.js?v=19"></script>
 <script src="./simurg-journal-ui.js?v=1"></script>

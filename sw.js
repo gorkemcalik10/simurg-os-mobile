@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-daily-guidance-v1';
+const SIMURG_CACHE = 'simurg-weekly-live-ui-v2';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -23,7 +23,7 @@ const CORE_ASSETS = [
   './polar-workout.js?v=16',
   './workout-source-policy.js?v=3',
   './premium-standard.css?v=41',
-  './premium-standard.js?v=52',
+  './premium-standard.js?v=53',
   './simurg-signal-model.js?v=7',
   './simurg-journal.js?v=1',
   './simurg-sleep-intelligence.js?v=1',
@@ -34,15 +34,15 @@ const CORE_ASSETS = [
   './simurg-coach-client.js?v=5',
   './simurg-daily-guidance.js?v=1',
   './simurg-coach.css?v=14',
-  './simurg-coach-ui.js?v=14',
+  './simurg-coach-ui.js?v=15',
   './polar-accesslink.css?v=4',
   './polar-accesslink.js?v=9',
   './simurg-cloud-auth.js?v=7',
   './desktop-alignment.css?v=27',
   './desktop-alignment.js?v=37',
   './mobile-ia-premium.css?v=12',
-  './simurg-mobile-weekly.css?v=1',
-  './simurg-mobile-weekly.js?v=1',
+  './simurg-mobile-weekly.css?v=2',
+  './simurg-mobile-weekly.js?v=2',
   './mobile-ia-premium.js?v=11',
   './simurg-training-lab.css?v=13',
   './simurg-training-lab-ui.js?v=19',

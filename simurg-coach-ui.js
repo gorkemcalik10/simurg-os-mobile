@@ -129,6 +129,7 @@
   }
   function warningPresentation(value){
     var text=String(value||'');
+    if(/Recovery evidence is contradictory/.test(text))return {title:'Toparlanma sinyalleri çelişkili',copy:'Karar, desteklenen daha temkinli yöne göre verildi.'};
     if(/Ağrı kaydı/.test(text))return {title:'Ağrılı harekette yük artırma',copy:'Ağrısız hareket aralığını koru ve progresyon deneme.'};
     if(/Belirgin ağrı/.test(text))return {title:'Ağrı uyarısını ciddiye al',copy:'Bugün performans hedefini geri çek ve ağrılı hareketi zorlama.'};
     if(/Form Okay/.test(text))return {title:'Bugün ağırlık artırma',copy:'Önce hareketi sadeleştir ve temiz formu geri kazan.'};
@@ -139,9 +140,14 @@
     if(/Eksik recovery/.test(text))return {title:'Veriler tamamlanana kadar temkinli ol',copy:'Toparlanma verileri eksik olduğu için bugün ağırlık artırma.'};
     return {title:'Bugün dikkatli ilerle',copy:text};
   }
+  function warningPresentations(rows){
+    var grouped={},order=[];
+    (rows||[]).forEach(function(item){var warning=warningPresentation(item),key=warning.title;if(!grouped[key]){grouped[key]={title:warning.title,copies:[]};order.push(key);}if(warning.copy&&grouped[key].copies.indexOf(warning.copy)<0)grouped[key].copies.push(warning.copy);});
+    return order.map(function(key){return {title:grouped[key].title,copy:grouped[key].copies.join(' ')};});
+  }
   function warningsCard(result){
     var rows=result.warnings||[];if(!rows.length)return '';
-    return '<section class="sci-card sci-warning sci-daily-warning"><header><small>DİKKAT ET</small></header><div class="sci-warning-list">'+rows.map(function(item){var warning=warningPresentation(item);return '<article><h3>'+esc(warning.title)+'</h3><p>'+esc(warning.copy)+'</p></article>';}).join('')+'</div></section>';
+    return '<section class="sci-card sci-warning sci-daily-warning"><header><small>DİKKAT ET</small></header><div class="sci-warning-list">'+warningPresentations(rows).map(function(warning){return '<article><h3>'+esc(warning.title)+'</h3><p>'+esc(warning.copy)+'</p></article>';}).join('')+'</div></section>';
   }
   function workoutNote(result){
     var note={
@@ -359,5 +365,5 @@
     target.innerHTML=kind==='weeklyTechnical'?weeklyTechnicalContent(results.weekly):kind==='weeklyMetrics'?weeklyMetricsContent(date,results.weekly):kind==='technical'?technicalContent(date,results):metricsContent(date,results.daily);
     node.dataset.loaded='1';
   };
-  root.SimurgCoachUI={renderMobile:renderMobile,renderDesktop:renderDesktop,decorateHome:decorateHome,state:state,dailyDecisionLabels:dailyDecisionLabels,weeklyDecisionLabels:weeklyDecisionLabels,plainDecisionExplanation:plainDecisionExplanation,homeCoachPresentation:homeCoachPresentation,loadReason:loadReason,warningPresentation:warningPresentation,weeklyWarningPresentation:weeklyWarningPresentation};
+  root.SimurgCoachUI={renderMobile:renderMobile,renderDesktop:renderDesktop,decorateHome:decorateHome,state:state,dailyDecisionLabels:dailyDecisionLabels,weeklyDecisionLabels:weeklyDecisionLabels,plainDecisionExplanation:plainDecisionExplanation,homeCoachPresentation:homeCoachPresentation,loadReason:loadReason,warningPresentation:warningPresentation,warningPresentations:warningPresentations,weeklyWarningPresentation:weeklyWarningPresentation};
 })(typeof window!=='undefined'?window:globalThis);
