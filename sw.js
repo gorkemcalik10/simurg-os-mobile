@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-weekly-live-ui-v2';
+const SIMURG_CACHE = 'simurg-performance-dedup-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
