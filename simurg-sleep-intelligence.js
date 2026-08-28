@@ -81,13 +81,37 @@
     var deep=stageSeconds(row,'deep'),rem=stageSeconds(row,'rem'),light=stageSeconds(row,'light');
     return deep==null||rem==null||light==null?null:deep+rem+light;
   }
-  function goalMinutes(data,row){
-    var source=raw(row),profile=data&&data.polarProfile&&data.polarProfile.latest||{};
-    var value=firstNumber(row&&row.sleepGoal,source.sleep_goal,source['sleep-goal'],profile.sleepGoal);
+  function localDate(){
+    var value=new Date();
+    return [value.getFullYear(),String(value.getMonth()+1).padStart(2,'0'),String(value.getDate()).padStart(2,'0')].join('-');
+  }
+  function timestampDate(value){
+    if(value==null||value==='')return null;
+    var direct=String(value).match(/^(\d{4}-\d{2}-\d{2})(?:$|T|\s)/);
+    if(direct)return direct[1];
+    var parsed=Date.parse(String(value));
+    return Number.isFinite(parsed)?new Date(parsed).toISOString().slice(0,10):null;
+  }
+  function profileGoalDate(profile){
+    var values=[profile&&profile.modified,profile&&profile.effectiveDate,profile&&profile.date,profile&&profile.updatedAt,profile&&profile.syncedAt];
+    for(var i=0;i<values.length;i+=1){var resolved=timestampDate(values[i]);if(resolved)return resolved;}
+    return null;
+  }
+  function normalizedGoalMinutes(value){
+    value=number(value);
     if(value==null||value<=0)return null;
     if(value<=24)return round(value*60,1);
     if(value>1440)return round(value/60,1);
     return round(value,1);
+  }
+  function goal(data,row,date,options){
+    var source=raw(row),exact=firstNumber(row&&row.sleepGoal,source.sleep_goal,source['sleep-goal']);
+    if(exact!=null)return {minutes:normalizedGoalMinutes(exact),source:'sleep_row',effectiveDate:date};
+    var profile=data&&data.polarProfile&&data.polarProfile.latest||{},profileValue=number(profile.sleepGoal),effectiveDate=profileGoalDate(profile),currentDate=dateValue(options&&options.currentDate)||localDate();
+    if(profileValue==null)return {minutes:null,source:null,effectiveDate:effectiveDate};
+    if(date===currentDate)return {minutes:normalizedGoalMinutes(profileValue),source:'current_profile',effectiveDate:effectiveDate};
+    if(effectiveDate&&effectiveDate<=date)return {minutes:normalizedGoalMinutes(profileValue),source:'prior_profile',effectiveDate:effectiveDate};
+    return {minutes:null,source:null,effectiveDate:effectiveDate};
   }
   function clockMinutes(value,wrapAfterNoon){
     var match=String(value||'').match(/T?(\d{2}):(\d{2})/);
@@ -180,7 +204,7 @@
     if(facts.sleepStages.baselineComparison!=null){score+=15;reasons.push('Evreler için kişisel baseline mevcut.');}
     return {level:score>=85?'high':score>=65?'medium':'low',score:score,reasons:reasons};
   }
-  function dailyFacts(data,date){
+  function dailyFacts(data,date,options){
     var row=sleepRow(data,date),missing=[];
     if(!row){
       return {
@@ -194,7 +218,7 @@
     var deepMinutes=stageSeconds(row,'deep'),remMinutes=stageSeconds(row,'rem'),lightMinutes=stageSeconds(row,'light');
     deepMinutes=deepMinutes==null?null:deepMinutes/60;remMinutes=remMinutes==null?null:remMinutes/60;lightMinutes=lightMinutes==null?null:lightMinutes/60;
     var durationsConsistent=actualMinutes!=null&&inBedMinutes!=null&&inBedMinutes>0&&actualMinutes<=inBedMinutes;
-    var interruptions=interruptionFacts(row,inBedMinutes),goal=goalMinutes(data,row),sleepConsistency=consistency(data,date,14);
+    var interruptions=interruptionFacts(row,inBedMinutes),goalResult=goal(data,row,date,options),goalMinutes=goalResult.minutes,sleepConsistency=consistency(data,date,14);
     var stages={
       deep:stageObject(deepMinutes,actualMinutes,inBedMinutes),
       rem:stageObject(remMinutes,actualMinutes,inBedMinutes),
@@ -208,7 +232,7 @@
     if(actualMinutes!=null&&inBedMinutes!=null&&!durationsConsistent)missing.push('sleepDurationConsistency');
     if(interruptions.awakeDurationMinutes==null)missing.push('awakeDuration');
     if(interruptions.interruptionCount==null)missing.push('interruptionCount');
-    if(goal==null)missing.push('sleepGoal');
+    if(goalMinutes==null)missing.push('sleepGoal');
     if(sleepConsistency==null)missing.push('sleepConsistencyBaseline');
     if(stages.baselineComparison==null)missing.push('sleepStageBaseline');
     var facts={
@@ -217,8 +241,10 @@
       actualSleepMinutes:round(actualMinutes,1),
       timeInBedMinutes:round(inBedMinutes,1),
       sleepEfficiency:durationsConsistent?round(actualMinutes/inBedMinutes*100,1):null,
-      sleepDebtMinutes:goal==null||!durationsConsistent?null:round(Math.max(0,goal-actualMinutes),1),
-      sleepGoalMinutes:goal,
+      sleepDebtMinutes:goalMinutes==null||!durationsConsistent?null:round(Math.max(0,goalMinutes-actualMinutes),1),
+      sleepGoalMinutes:goalMinutes,
+      sleepGoalSource:goalResult.source,
+      sleepGoalEffectiveDate:goalResult.effectiveDate,
       sleepConsistency:sleepConsistency,
       sleepStages:stages,
       interruptions:interruptions,
@@ -229,8 +255,8 @@
     facts.confidence=confidenceForDaily(facts);
     return facts;
   }
-  function trend(data,date,windowDays,minimumSamples){
-    var days=allDates(data,date,windowDays,false).map(function(itemDate){return dailyFacts(data,itemDate);});
+  function trend(data,date,windowDays,minimumSamples,options){
+    var days=allDates(data,date,windowDays,false).map(function(itemDate){return dailyFacts(data,itemDate,options);});
     var valid=days.filter(function(day){return day.status==='available';});
     if(valid.length<minimumSamples){
       return {
@@ -251,18 +277,18 @@
     };
   }
   function latestDate(data){var dates=Object.keys(sleepStore(data)).filter(dateValue).sort();return dates.length?dates[dates.length-1]:null;}
-  function analyze(data,date){
-    data=data||{};date=dateValue(date)||latestDate(data);
+  function analyze(data,date,options){
+    data=data||{};options=options||{};date=dateValue(date)||latestDate(data);
     if(!date){
       return {schemaVersion:VERSION,status:'insufficient',date:null,confidence:{level:'insufficient',score:0,reasons:['Polar sleep geçmişi yok.']},daily:null,trends:null,missingData:['polarSleep']};
     }
-    var daily=dailyFacts(data,date),trends={sevenDay:trend(data,date,7,4),fourteenDay:trend(data,date,14,7),thirtyDay:trend(data,date,30,14)};
+    var daily=dailyFacts(data,date,options),trends={sevenDay:trend(data,date,7,4,options),fourteenDay:trend(data,date,14,7,options),thirtyDay:trend(data,date,30,14,options)};
     return {schemaVersion:VERSION,status:daily.status,date:date,confidence:daily.confidence,daily:daily,trends:trends,missingData:daily.missingData.slice()};
   }
   function resolve(date,options){
     options=options||{};var data=options.data;
     try{if(!data&&typeof window!=='undefined')data=typeof window.simurgGetData==='function'?window.simurgGetData():window.DATA;}catch(error){}
-    return analyze(data||{},date);
+    return analyze(data||{},date,options);
   }
 
   return {VERSION:VERSION,analyze:analyze,resolve:resolve,daily:dailyFacts};

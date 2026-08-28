@@ -66,7 +66,15 @@ run('service worker registration and cache share one build label', () => {
 });
 
 run('index asset versions match CORE_ASSETS', () => {
-  for (const file of ['simurg-persistence.js', 'simurg-gym-identity.js', 'simurg-exercise-canonicalization.js', 'simurg-training-lab-analysis.js', 'simurg-volume-model.js', 'simurg-muscle-anatomy.js', 'simurg-training-lab-anatomy-assets.js', 'simurg-training-lab-anatomy-renderer.js', 'simurg-data-validation.js', 'simurg-workout-recovery.js', 'simurg-gym-flex.js', 'simurg-gym-flex.css', 'simurg-signal-model.js', 'simurg-journal.js', 'simurg-journal.css', 'simurg-journal-ui.js', 'simurg-sleep-intelligence.js', 'simurg-recovery-intelligence.js', 'simurg-energy-engine.js', 'simurg-coach-engine.js', 'simurg-coach-client.js', 'simurg-daily-guidance.js', 'simurg-coach-ui.js', 'simurg-coach.css', 'workout-source-policy.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js', 'simurg-training-lab.css', 'simurg-training-lab-ui.js']) {
+  for (const file of ['simurg-persistence.js', 'simurg-gym-identity.js', 'simurg-exercise-canonicalization.js', 'simurg-training-lab-analysis.js', 'simurg-volume-model.js', 'simurg-muscle-anatomy.js', 'simurg-training-lab-anatomy-assets.js', 'simurg-training-lab-anatomy-renderer.js', 'simurg-data-validation.js', 'simurg-workout-recovery.js', 'simurg-gym-flex.js', 'simurg-gym-flex.css', 'simurg-signal-model.js', 'simurg-journal.js', 'simurg-journal.css', 'simurg-journal-ui.js', 'simurg-sleep-intelligence.js', 'simurg-performance-engine.js', 'simurg-recovery-intelligence.js', 'simurg-energy-engine.js', 'simurg-coach-engine.js', 'simurg-coach-client.js', 'simurg-daily-guidance.js', 'simurg-coach-ui.js', 'simurg-coach.css', 'workout-source-policy.js', 'premium-standard.js', 'desktop-alignment.js', 'polar-workout.js', 'polar-accesslink.js', 'simurg-cloud-auth.js', 'simurg-training-lab.css', 'simurg-training-lab-ui.js']) {
+    const escaped = file.replace('.', '\\.');
+    const indexVersion = index.match(new RegExp(`${escaped}\\?v=([^"']+)`));
+    const swVersion = sw.match(new RegExp(`${escaped}\\?v=([^"']+)`));
+    assert.ok(indexVersion, `${file} missing from index`);
+    assert.ok(swVersion, `${file} missing from CORE_ASSETS`);
+    assert.equal(indexVersion[1], swVersion[1], `${file} version mismatch`);
+  }
+  for (const file of ['simurg-performance-ui.js', 'simurg-performance-ui.css']) {
     const escaped = file.replace('.', '\\.');
     const indexVersion = index.match(new RegExp(`${escaped}\\?v=([^"']+)`));
     const swVersion = sw.match(new RegExp(`${escaped}\\?v=([^"']+)`));

@@ -15,7 +15,7 @@ const maskRoot = path.join(root, 'assets', 'anatomy-masks');
 assert.match(index, /<section id="training-lab" class="section"/);
 assert.match(index, /SimurgTrainingLabUI\.open\(this\)/);
 assert.match(ui, /SimurgTrainingLabAnalysis\.analyze\(source,selected\)/);
-assert.match(index, /data-key="training-lab" onclick="SimurgTrainingLabUI\.open\(\)"/);
+assert.match(index, /data-key="training-lab" onclick="SimurgPerformanceUI\.open\(\)"/);
 assert.match(ui, /simurgV8Go\('training-lab','training-lab'\)/);
 assert.match(ui, /function anatomy\(selected,exercise\)/);
 assert.match(ui, /anatomyRenderer\.legacyPlan\('asset_preflight_pending'\)/);

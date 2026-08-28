@@ -13,6 +13,7 @@
 <script src="./simurg-signal-model.js?v=7"></script>
 <script src="./simurg-journal.js?v=1"></script>
 <script src="./simurg-sleep-intelligence.js?v=1"></script>
+<script src="./simurg-performance-engine.js?v=1"></script>
 <script src="./simurg-polar-intelligence.js?v=1"></script>
 <script src="./simurg-recovery-intelligence.js?v=1"></script>
 <script src="./simurg-energy-engine.js?v=1"></script>
@@ -11222,7 +11223,7 @@ button,.btn,.gymMiniBtn,input,select,textarea{
   window.simurgV8Go=go; window.simurgV8OpenMenu=openMenu; window.simurgV8CloseMenu=closeMenu;
   ready(function(){
     if(!document.getElementById('simurgV8Nav')){
-      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Üç temel merkez</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('weekly','menu')"><i>📈</i><span><b>Haftalık</b><small>Antrenman ve vücut özeti</small></span></button><button onclick="simurgV8Go('data','menu')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedekleme</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Günlük</button><button data-key="training-lab" onclick="SimurgTrainingLabUI.open()"><i>◫</i>Lab</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
+      document.body.insertAdjacentHTML('beforeend',`<div id="simurgV8Shade" onclick="simurgV8CloseMenu()"></div><div id="simurgV8Sheet"><div class="simurgV8Handle"></div><div class="simurgV8SheetHead"><div><b>Menü</b><br><span>Üç temel merkez</span></div><button class="btn" onclick="simurgV8CloseMenu()">Kapat</button></div><div class="simurgV8Grid simurgPremiumMenuGrid"><button onclick="simurgV8Go('coaching','menu')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve koç önerileri</small></span></button><button onclick="simurgV8Go('weekly','menu')"><i>📈</i><span><b>Haftalık</b><small>Antrenman ve vücut özeti</small></span></button><button onclick="simurgV8Go('data','menu')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedekleme</small></span></button></div></div><nav id="simurgV8Nav" aria-label="Simurg mobil gezinme"><button data-key="home" class="active" onclick="simurgV8Go('home','home')"><i>🏠</i>Ana</button><button data-key="gym" onclick="simurgV8Go('gym','gym')"><i>🏋️</i>Gym</button><button data-key="logger" onclick="simurgV8Go('workout','logger')"><i>📋</i>Günlük</button><button data-key="training-lab" onclick="SimurgPerformanceUI.open()"><i>◫</i>Performans</button><button data-key="menu" onclick="simurgV8OpenMenu()"><i>☰</i>Menü</button></nav>`);
     }
     var loggerButton=document.querySelector('#simurgV8Nav button[data-key="logger"]');
     if(loggerButton)loggerButton.setAttribute('onclick',"simurgV8Go('workout','logger')");
@@ -16289,10 +16290,12 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./simurg-mobile-weekly.css?v=2">
 <link rel="stylesheet" href="./simurg-gym-flex.css?v=2">
 <link rel="stylesheet" href="./simurg-training-lab.css?v=13">
+<link rel="stylesheet" href="./simurg-performance-ui.css?v=1">
 <link rel="stylesheet" href="./simurg-journal.css?v=1">
 <script src="./simurg-mobile-weekly.js?v=2"></script>
 <script src="./mobile-ia-premium.js?v=11"></script>
 <script src="./simurg-training-lab-ui.js?v=19"></script>
+<script src="./simurg-performance-ui.js?v=1"></script>
 <script src="./simurg-journal-ui.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
 <script src="./simurg-cloud-auth.js?v=7" defer></script>

@@ -15,19 +15,19 @@ function run(name, fn) {
   process.stdout.write(`✓ ${name}\n`);
 }
 
-run('mobile bottom navigation exposes Training Lab as a fifth primary route', () => {
+run('mobile bottom navigation exposes Performance as the fourth primary route', () => {
   const shell = html.match(/<nav id="simurgV8Nav"[\s\S]*?<\/nav>/);
   assert.ok(shell);
   assert.deepEqual([...shell[0].matchAll(/data-key="([^"]+)"/g)].map(match => match[1]), ['home', 'gym', 'logger', 'training-lab', 'menu']);
-  assert.deepEqual([...shell[0].matchAll(/<\/i>([^<]+)<\/button>/g)].map(match => match[1]), ['Ana', 'Gym', 'Günlük', 'Lab', 'Menü']);
-  assert.match(shell[0], /data-key="training-lab" onclick="SimurgTrainingLabUI\.open\(\)"/);
+  assert.deepEqual([...shell[0].matchAll(/<\/i>([^<]+)<\/button>/g)].map(match => match[1]), ['Ana', 'Gym', 'Günlük', 'Performans', 'Menü']);
+  assert.match(shell[0], /data-key="training-lab" onclick="SimurgPerformanceUI\.open\(\)"/);
   assert.doesNotMatch(shell[0], /polar|weekly|monthly/i);
   assert.match(css, /#simurgV8Nav\{grid-template-columns:repeat\(5,1fr\)!important/);
   assert.match(premium, /var order=\['home','gym','logger','training-lab','menu'\]/);
   assert.doesNotMatch(premium.match(/function normalizeNav\(\)[\s\S]*?\n  \}/)?.[0] || '', /'polar'/);
 });
 
-run('mobile menu replaces Journal with Weekly while Training Lab stays primary', () => {
+run('mobile menu replaces Journal with Weekly while Performance stays primary', () => {
   const grid = html.match(/<div class="simurgV8Grid simurgPremiumMenuGrid">([\s\S]*?)<\/div><\/div><nav id="simurgV8Nav"/);
   assert.ok(grid);
   for (const label of ['Koçluk', 'Haftalık', 'Veri Merkezi']) assert.match(grid[1], new RegExp(label));

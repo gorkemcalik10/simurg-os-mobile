@@ -74,6 +74,52 @@ run('actual sleep excludes awake, interruptions, and unknown stages', () => {
   assert.equal(result.daily.sleepStages.awake.percentageOfActualSleep, null);
 });
 
+run('historical sleep goal never falls back to a later latest profile', () => {
+  const date = '2026-07-01';
+  const row = sleep(date, { sleepGoal: null, raw: {} });
+  const data = {
+    polarSleep: { daily: { [date]: row } },
+    polarProfile: { latest: { sleepGoal: 8 * 60 * 60, modified: '2026-08-01T09:00:00Z' } },
+  };
+  const before = sleepIntelligence.analyze(data, date, { currentDate: '2026-08-28' });
+  data.polarProfile.latest.sleepGoal = 9 * 60 * 60;
+  const after = sleepIntelligence.analyze(data, date, { currentDate: '2026-08-28' });
+  assert.equal(before.daily.sleepGoalMinutes, null);
+  assert.equal(before.daily.sleepDebtMinutes, null);
+  assert.equal(before.daily.sleepGoalSource, null);
+  assert.deepEqual(after.daily, before.daily);
+});
+
+run('historical sleep goal may use a reliably dated prior profile goal', () => {
+  const date = '2026-07-01';
+  const row = sleep(date, { sleepGoal: null, raw: {} });
+  const data = {
+    polarSleep: { daily: { [date]: row } },
+    polarProfile: { latest: { sleepGoal: 8 * 60 * 60, modified: '2026-06-15T09:00:00Z' } },
+  };
+  const result = sleepIntelligence.analyze(data, date, { currentDate: '2026-08-28' });
+  assert.equal(result.daily.sleepGoalMinutes, 480);
+  assert.equal(result.daily.sleepDebtMinutes, 30);
+  assert.equal(result.daily.sleepGoalSource, 'prior_profile');
+  assert.equal(result.daily.sleepGoalEffectiveDate, '2026-06-15');
+});
+
+run('current date may use latest profile goal while an exact row goal still wins', () => {
+  const date = '2026-08-28';
+  const withoutGoal = sleep(date, { sleepGoal: null, raw: {} });
+  const data = {
+    polarSleep: { daily: { [date]: withoutGoal } },
+    polarProfile: { latest: { sleepGoal: 8 * 60 * 60 } },
+  };
+  const current = sleepIntelligence.analyze(data, date, { currentDate: date });
+  assert.equal(current.daily.sleepGoalMinutes, 480);
+  assert.equal(current.daily.sleepGoalSource, 'current_profile');
+  data.polarSleep.daily[date].sleepGoal = 7.5 * 60 * 60;
+  const exact = sleepIntelligence.analyze(data, date, { currentDate: date });
+  assert.equal(exact.daily.sleepGoalMinutes, 450);
+  assert.equal(exact.daily.sleepGoalSource, 'sleep_row');
+});
+
 run('August 25 presentation example resolves 6h36 actual sleep instead of 6h58 time in bed', () => {
   const date = '2026-08-25';
   const row = sleep(date, {
