@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const activity = require('../simurg-activity-classification.js');
 const engine = require('../simurg-performance-engine.js');
 
 function run(name, fn) {
@@ -10,7 +11,8 @@ function run(name, fn) {
 function addDays(date, amount) { const value = new Date(`${date}T12:00:00Z`); value.setUTCDate(value.getUTCDate() + amount); return value.toISOString().slice(0, 10); }
 function workout(date, id, raw, options = {}) {
   const durationMinutes = options.duration === false ? undefined : options.duration ?? 60;
-  return { date, sessionId: id, exerciseId: `${id}-exercise`, exercise: options.exercise || 'Squat', programKey: options.family || 'strength-a', sets: options.sets || 4, reps: 8, rpe: options.rpe || raw / (durationMinutes || (options.sets || 4)), durationMinutes, startTime: options.startTime || '18:00' };
+  const startTime = options.startTime === false ? undefined : options.startTime || '18:00';
+  return { date, sessionId: id, sessionLabel: options.sessionLabel, exerciseId: `${id}-exercise`, exercise: options.exercise || 'Squat', programKey: options.family || 'strength-a', sets: options.sets || 4, reps: 8, rpe: options.rpe || raw / (durationMinutes || (options.sets || 4)), durationMinutes, startTime };
 }
 function addGymBaseline(data, date, values, options = {}) {
   values.forEach((raw, index) => {
@@ -21,7 +23,7 @@ function addGymBaseline(data, date, values, options = {}) {
     } else data.workouts.push(workout(day, `gym-${index}`, raw, options));
   });
 }
-function polarSession(date, id, cardioLoad, activityType = 'Running', options = {}) { return { date, polarExerciseId: id, cardioLoad, activityType, durationMinutes: options.duration || 45, startTime: options.startTime || '07:00' }; }
+function polarSession(date, id, cardioLoad, activityType = 'Running', options = {}) { return { date, polarExerciseId: id, sessionId: options.sessionId, cardioLoad, activityType, workoutType: options.workoutType, durationMinutes: options.duration === false ? undefined : options.duration ?? 45, startTime: options.startTime === false ? undefined : options.startTime || '07:00' }; }
 function addCardioDay(data, date, load, index = '') { data.polarWorkouts.daily[date] = [polarSession(date, `polar-${index || date}`, load)]; data.polarCardioLoad.daily[date] = { date, cardioLoad: load }; }
 function sleepRow(date, overrides = {}) { return { date, startTime: `${addDays(date, -1)}T23:00:00Z`, endTime: `${date}T07:00:00Z`, deepSleep: 90 * 60, remSleep: 90 * 60, lightSleep: 270 * 60, sleepGoal: 8 * 60 * 60, ...overrides }; }
 function readinessData(date) {
@@ -30,6 +32,11 @@ function readinessData(date) {
   data.polarNightlyRecharge.daily[date] = { date, ansCharge: 4, ansChargeStatus: 'GOOD', nightlyRechargeStatus: 'GOOD', heartRateVariabilityAvg: 65, heartRateAvg: 50 };
   return data;
 }
+
+run('Functional Training uses the shared canonical strength classification', () => {
+  for (const label of ['Functional Training', 'Fonksiyonel Antrenman', 'functional_training']) assert.equal(activity.key(label), 'strength');
+  for (const existing of ['Strength Training', 'Fitness', 'Gym', 'Weight Training', 'Resistance', 'Circuit', 'CrossFit', 'Ağırlık']) assert.equal(activity.key(existing), 'strength');
+});
 
 run('readiness keeps Sleep Capacity and Polar ANS Charge as the only score contributors', () => {
   const date = '2026-08-21', data = readinessData(date);
@@ -81,6 +88,44 @@ run('a Gym session mirrored in Polar strength is counted once and is not a mixed
   const date = '2026-08-21', data = { workouts: [], polarWorkouts: { daily: {} }, polarCardioLoad: { daily: {} } }; addGymBaseline(data, date, [100, 120, 140, 160, 180, 200, 220, 260, 280, 300]); data.workouts.push(workout(date, 'shared-session', 240, { startTime: '18:00' }));
   data.polarWorkouts.daily[date] = [polarSession(date, 'shared-session', 35, 'Strength training', { duration: 60, startTime: '18:00' })]; data.polarCardioLoad.daily[date] = { date, cardioLoad: 35 };
   const result = engine.actualLoad(data, date); assert.equal(result.status, 'available'); assert.equal(result.modality, 'gym'); assert.equal(result.value, 70); assert.equal(result.components.cardio.status, 'insufficient'); assert.equal(result.deduplication.strengthPolarExcludedFromCardio, true);
+});
+
+run('shared sessionId takes priority and Functional Training is one Gym load', () => {
+  const date = '2026-08-24', data = { workouts: [], polarWorkouts: { daily: {} }, polarCardioLoad: { daily: {} } };
+  addGymBaseline(data, date, [100, 120, 140, 160, 180, 200, 220, 260, 280, 300]);
+  data.workouts.push(workout(date, 'shared-24-aug', 240, { sessionLabel: 'Serbest Antrenman', startTime: '18:00' }));
+  data.polarWorkouts.daily[date] = [polarSession(date, 'polar-24-aug', 35, 'Fonksiyonel Antrenman', { workoutType: 'Functional Training', sessionId: 'shared-24-aug', duration: 50, startTime: false })];
+  data.polarCardioLoad.daily[date] = { date, cardioLoad: 35 };
+  const result = engine.actualLoad(data, date);
+  assert.equal(result.status, 'available'); assert.equal(result.modality, 'gym'); assert.notEqual(result.value, 100); assert.equal(result.deduplication.identityResolution, 'mirrored'); assert.equal(result.deduplication.mirroredStrengthSessions[0].method, 'shared_session_identity');
+});
+
+run('24 Aug overlapping Gym and Polar Functional Training fixture is mirrored, not Mixed/100', () => {
+  const date = '2026-08-24', data = { workouts: [], polarWorkouts: { daily: {} }, polarCardioLoad: { daily: {} } };
+  addGymBaseline(data, date, [100, 120, 140, 160, 180, 200, 220, 260, 280, 300], { duration: 50 });
+  data.workouts.push(workout(date, 'gym-24-aug', 240, { sessionLabel: 'Serbest Antrenman', duration: 50, startTime: '18:00' }));
+  data.polarWorkouts.daily[date] = [polarSession(date, 'polar-functional-24-aug', 35, 'Fonksiyonel Antrenman', { workoutType: 'Functional Training', duration: 50, startTime: '18:05' })];
+  data.polarCardioLoad.daily[date] = { date, cardioLoad: 35 };
+  const result = engine.actualLoad(data, date);
+  assert.equal(result.status, 'available'); assert.equal(result.modality, 'gym'); assert.equal(result.value, 70); assert.notEqual(result.value, 100); assert.equal(result.deduplication.identityResolution, 'mirrored'); assert.equal(result.deduplication.mirroredStrengthSessions[0].method, 'overlapping_time_and_duration');
+});
+
+run('clearly separate same-day Polar strength session remains distinct and never becomes Mixed', () => {
+  const date = '2026-08-24', data = { workouts: [], polarWorkouts: { daily: {} }, polarCardioLoad: { daily: {} } };
+  addGymBaseline(data, date, [100, 120, 140, 160, 180, 200, 220, 260, 280, 300], { duration: 50 });
+  data.workouts.push(workout(date, 'gym-am', 240, { duration: 50, startTime: '08:00' }));
+  data.polarWorkouts.daily[date] = [polarSession(date, 'polar-pm', 35, 'Strength Training', { duration: 50, startTime: '18:00' })];
+  const result = engine.actualLoad(data, date);
+  assert.equal(result.status, 'insufficient'); assert.equal(result.reason, 'distinct_strength_session_load_unsupported'); assert.equal(result.value, null); assert.equal(result.deduplication.identityResolution, 'distinct'); assert.equal(result.deduplication.distinctStrengthSessions.length, 1);
+});
+
+run('24 Aug missing identity/timing fixture is explicitly ambiguous with Readiness retained and no Daily Balance', () => {
+  const date = '2026-08-24', data = readinessData(date); data.workouts = []; data.polarWorkouts = { daily: {} }; data.polarCardioLoad = { daily: {} };
+  addGymBaseline(data, date, [100, 120, 140, 160, 180, 200, 220, 260, 280, 300]);
+  data.workouts.push(workout(date, 'gym-24-aug', 240, { sessionLabel: 'Serbest Antrenman', startTime: false }));
+  data.polarWorkouts.daily[date] = [polarSession(date, 'polar-functional-24-aug', 35, 'Fonksiyonel Antrenman', { workoutType: 'Functional Training', duration: 50, startTime: false })];
+  const result = engine.analyze(data, date, { currentDate: date });
+  assert.equal(result.readiness.status, 'available'); assert.equal(result.actualLoad.status, 'insufficient'); assert.equal(result.actualLoad.reason, 'ambiguous_session_identity'); assert.equal(result.actualLoad.method, 'shared_identity_then_compatible_strength_time_overlap'); assert.equal(result.actualLoad.value, null); assert.equal(result.loadFit.status, 'insufficient'); assert.equal(result.dailyBalance.status, 'insufficient'); assert.equal(result.dailyBalance.reason, 'ambiguous_session_identity'); assert.equal(result.dailyBalance.value, null);
 });
 
 run('a true mixed day combines independently normalized Gym and cardio loads', () => {

@@ -8,6 +8,7 @@ const history = require('../simurg-exercise-history.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const volumeSource = fs.readFileSync(path.join(ROOT, 'simurg-volume-model.js'), 'utf8');
+const activitySource = fs.readFileSync(path.join(ROOT, 'simurg-activity-classification.js'), 'utf8');
 const modelSource = fs.readFileSync(path.join(ROOT, 'simurg-signal-model.js'), 'utf8');
 const desktopSource = fs.readFileSync(path.join(ROOT, 'desktop-alignment.js'), 'utf8');
 const homeSource = fs.readFileSync(path.join(ROOT, 'premium-standard.js'), 'utf8');
@@ -32,6 +33,7 @@ function runtime(data = {}) {
   const context = { window, DATA: data, selectedDate: '2026-08-10', console, Map, Set, Date, Math, Number, String, Object, Array, RegExp, JSON };
   vm.runInNewContext(volumeSource, context, { filename: 'simurg-volume-model.js' });
   window.SimurgVolumeModel = context.SimurgVolumeModel;
+  vm.runInNewContext(activitySource, context, { filename: 'simurg-activity-classification.js' });
   vm.runInNewContext(modelSource, context, { filename: 'simurg-signal-model.js' });
   return window.SimurgSignalModel;
 }

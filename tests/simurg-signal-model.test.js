@@ -5,6 +5,7 @@ const vm = require('node:vm');
 
 const ROOT = path.resolve(__dirname, '..');
 const VOLUME_SOURCE = fs.readFileSync(path.join(ROOT, 'simurg-volume-model.js'), 'utf8');
+const ACTIVITY_SOURCE = fs.readFileSync(path.join(ROOT, 'simurg-activity-classification.js'), 'utf8');
 const MODEL_SOURCE = fs.readFileSync(path.join(ROOT, 'simurg-signal-model.js'), 'utf8');
 
 function sourceDurationMinutes(value) {
@@ -69,6 +70,7 @@ function makeRuntime(data = {}, selectedDate = '2026-07-17') {
   window.window = window;
   vm.runInNewContext(VOLUME_SOURCE, context, { filename: 'simurg-volume-model.js' });
   window.SimurgVolumeModel = context.SimurgVolumeModel;
+  vm.runInNewContext(ACTIVITY_SOURCE, context, { filename: 'simurg-activity-classification.js' });
   vm.runInNewContext(MODEL_SOURCE, context, { filename: 'simurg-signal-model.js' });
   return { model: window.SimurgSignalModel, labels: window.SimurgLabels, window, context, listeners };
 }
@@ -119,6 +121,7 @@ run('duration normalization covers text, seconds, minutes and invalid values', (
     ] } },
   };
   const day = makeRuntime(data).model.day(date);
+  assert.equal(day.polarSessions[0].activityKey, 'strength');
   assert.equal(day.polarSessions[0].durationMinutes, 45);
   assert.ok(Math.abs(day.polarSessions[1].durationMinutes - 44.2167) < 0.001);
   assert.equal(day.polarSessions[2].durationMinutes, 45);

@@ -137,6 +137,10 @@ CardioActualLoad = Percentile(CardioRawLoad, comparablePriorCardioDays)
 - Final formula: `MixedActualLoad = round(clamp(max(Gym, Cardio) + 0.30 × min(Gym, Cardio), 0, 100))`.
 - Alpha simulations at `0.25/0.30/0.35` produced `70+70 → 88/91/95`, `80+20 → 85/86/87`, and `40+40 → 50/52/54`. Alpha `0.30` is the middle, non-extreme setting. It is monotonic, keeps the primary load fully visible, and adds a restrained secondary contribution. Probabilistic union tied at `70 + 70` but over-accumulated two moderate `40` loads to `64`; the old mean did not accumulate at all.
 - Same physical Gym session in both stores is classified as strength and excluded from the cardio branch. Count only the Gym internal-load branch and retain Polar as context.
+- Gym/Polar identity resolution is ordered: shared explicit `sessionId`; otherwise canonical strength compatibility plus close, substantially overlapping intervals and compatible duration; otherwise explicit distinct or ambiguous evidence. Name-only similarity is never enough.
+- A strength Polar session is mirrored by timing only when starts differ by at most 20 minutes, interval overlap is at least 70% of the shorter session, and duration difference is at most the greater of 10 minutes or 25% of the longer session. Clearly non-overlapping intervals remain distinct.
+- If identity/timing evidence cannot establish mirrored versus distinct, Actual Load returns `ambiguous_session_identity`; Load Fit and Daily Balance stay unavailable while valid Readiness remains available.
+- A clearly distinct Polar strength session is preserved in dedup metadata and returns `distinct_strength_session_load_unsupported` instead of being discarded or fabricated as a cardio/Mixed percentile.
 - Rest/no exact-date completed session: no post-training score. Daily activity alone is not a completed training session.
 
 ## 3. Load Fit and Daily Balance

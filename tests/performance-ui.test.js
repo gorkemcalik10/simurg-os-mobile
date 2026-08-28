@@ -49,6 +49,11 @@ run('rest day is neutral and sparse load history cannot fabricate Daily Balance'
   const sparse=readinessData('2026-08-21');sparse.workouts=[workout('2026-08-21','current',240)];global.DATA=sparse;ui.render();assert.match(section.innerHTML,/data-performance-state="balance-insufficient"/);assert.match(section.innerHTML,/Yetersiz geçmiş veri/);
 });
 
+run('ambiguous Gym and Polar identity renders a neutral unavailable state',()=>{
+  const date='2026-08-21',data=readinessData(date);addBaseline(data,date);const current=workout(date,'gym-current',240);delete current.startTime;data.workouts.push(current);data.polarWorkouts={daily:{[date]:[{date,polarExerciseId:'polar-functional',workoutType:'Functional Training',durationMinutes:50,cardioLoad:35}]}};global.DATA=data;ui.setDate(date);ui.render();
+  const result=engine.analyze(data,date,{currentDate:date});assert.equal(result.actualLoad.reason,'ambiguous_session_identity');assert.equal(result.dailyBalance.status,'insufficient');assert.match(section.innerHTML,/data-performance-state="balance-ambiguous"/);assert.match(section.innerHTML,/Aktivite eşleşmesi belirsiz/);assert.match(section.innerHTML,/Yetersiz veri/);assert.doesNotMatch(section.innerHTML,/data-performance-state="balance-available"/);
+});
+
 run('retrospective copy covers low readiness fit and overshoot without recommendations',()=>{
   const lowGood=ui.balanceCopy({readiness:{value:40},loadFit:{value:96,targetLow:30,targetHigh:50},actualLoad:{value:25}});
   assert.equal(lowGood,'Hazırlığın düşüktü, ancak uyguladığın yük kapasitenle iyi eşleşti.');assert.doesNotMatch(lowGood,/öner|yap|azalt|artır/i);

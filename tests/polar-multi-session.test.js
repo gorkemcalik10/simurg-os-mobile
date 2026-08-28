@@ -5,6 +5,7 @@ const vm = require('node:vm');
 
 const root = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'polar-workout.js'), 'utf8');
+const activitySource = fs.readFileSync(path.join(root, 'simurg-activity-classification.js'), 'utf8');
 const signalSource = fs.readFileSync(path.join(root, 'simurg-signal-model.js'), 'utf8');
 const policySource = fs.readFileSync(path.join(root, 'workout-source-policy.js'), 'utf8');
 const volumeSource = fs.readFileSync(path.join(root, 'simurg-volume-model.js'), 'utf8');
@@ -27,6 +28,7 @@ function physicalRuntime(data) {
   const context = { window, DATA: data, document, console, Date, Math, Number, String, Object, Array, RegExp, JSON, Map, Set };
   vm.runInNewContext(volumeSource, context, { filename: 'simurg-volume-model.js' });
   window.SimurgVolumeModel = context.SimurgVolumeModel;
+  vm.runInNewContext(activitySource, context, { filename: 'simurg-activity-classification.js' });
   vm.runInNewContext(signalSource, context, { filename: 'simurg-signal-model.js' });
   vm.runInNewContext(policySource, context, { filename: 'workout-source-policy.js' });
   return window;
