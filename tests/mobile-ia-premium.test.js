@@ -23,6 +23,10 @@ run('mobile bottom navigation exposes Performance as the fourth primary route', 
   assert.match(shell[0], /data-key="training-lab" onclick="SimurgPerformanceUI\.open\(\)"/);
   assert.doesNotMatch(shell[0], /polar|weekly|monthly/i);
   assert.match(css, /#simurgV8Nav\{grid-template-columns:repeat\(5,1fr\)!important/);
+  assert.match(mobile, /function mobileNavIcon\(key\)/);
+  assert.match(mobile, /viewBox="0 0 24 24"/);
+  assert.match(mobile, /nav\.dataset\.iconLanguage='simurg-line-v1'/);
+  assert.match(mobile, /applyMobileNavIcons\(nav\)/);
   assert.match(premium, /var order=\['home','gym','logger','training-lab','menu'\]/);
   assert.doesNotMatch(premium.match(/function normalizeNav\(\)[\s\S]*?\n  \}/)?.[0] || '', /'polar'/);
 });

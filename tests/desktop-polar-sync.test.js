@@ -65,8 +65,9 @@ run('changed production assets use matching cache versions', () => {
     'simurg-cloud-auth.js?v=7',
     'mobile-ia-premium.css?v=12',
     'simurg-mobile-weekly.css?v=2',
+    'simurg-mobile-system.css?v=1',
     'simurg-mobile-weekly.js?v=2',
-    'mobile-ia-premium.js?v=11',
+    'mobile-ia-premium.js?v=12',
     'simurg-gym-flex.js?v=1',
     'simurg-gym-flex.css?v=2',
     'simurg-training-lab.css?v=13',
@@ -81,8 +82,8 @@ run('changed production assets use matching cache versions', () => {
   }
   assert.doesNotMatch(index, /simurg-activity-classification\.js\?v=1/);
   assert.doesNotMatch(worker, /simurg-activity-classification\.js\?v=1/);
-  assert.match(index, /sw\.js\?v=performance-normalization-v2/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-performance-normalization-v2'/);
+  assert.match(index, /sw\.js\?v=mobile-system-v1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-mobile-system-v1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

@@ -494,8 +494,8 @@ run('asset versions and service-worker cache generation invalidate stale Weekly 
     assert.match(html, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(sw, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(html, /sw\.js\?v=performance-dedup-v1/);
-  assert.match(sw, /simurg-performance-dedup-v1/);
+  assert.match(html, /sw\.js\?v=mobile-system-v1/);
+  assert.match(sw, /simurg-mobile-system-v1/);
   assert.doesNotMatch(sw, /simurg-mobile-weekly\.(?:css|js)\?v=1/);
 });
 

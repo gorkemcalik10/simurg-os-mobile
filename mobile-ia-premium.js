@@ -18,6 +18,21 @@
   function currentDate(){try{return String(selectedDate||todayStr());}catch(error){return new Date().toISOString().slice(0,10);}}
   function dateLabel(date){try{return trDate(date);}catch(error){return date.split('-').reverse().join('.');}}
   function dayLabel(date){var parsed=new Date(date+'T12:00:00');return isNaN(parsed)?'':parsed.toLocaleDateString('tr-TR',{weekday:'long'});}
+  function mobileNavIcon(key){
+    var icons={
+      home:'<path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V21h13V9.5"></path><path d="M9.5 21v-6h5v6"></path>',
+      gym:'<path d="M6 7v10M3.5 9.5v5M18 7v10M20.5 9.5v5M6 12h12"></path>',
+      logger:'<path d="M9 5h6M9 3v4M15 3v4"></path><path d="M7 5H5v16h14V5h-2"></path><path d="M8 11h8M8 15h8M8 19h5"></path>',
+      'training-lab':'<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path><path d="m14 7 3-3 3 3"></path>',
+      menu:'<path d="M4 7h16M4 12h16M4 17h16"></path>'
+    };
+    return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'+(icons[key]||icons.menu)+'</svg>';
+  }
+  function applyMobileNavIcons(nav){
+    if(!nav)return;
+    nav.querySelectorAll('button[data-key]').forEach(function(button){var icon=button.querySelector('i');if(icon)icon.innerHTML=mobileNavIcon(button.dataset.key);});
+    nav.dataset.iconLanguage='simurg-line-v1';
+  }
   function rowSummary(rows){
     var sets=rows.length,reps=0,volume=0,exercises=new Set();
     rows.forEach(function(row){var rowSets=Math.max(1,Number(row.sets)||1),rowReps=Number(row.reps)||0;reps+=rowSets*rowReps;volume+=rowSets*rowReps*(Number(row.weight)||0);exercises.add(row.exercise||'Egzersiz');});
@@ -403,6 +418,7 @@
     ['weeklyReport','monthlyReport'].forEach(function(id){var report=document.getElementById(id);if(report)report.replaceChildren();});
     var nav=document.getElementById('simurgV8Nav');
     if(nav&&nav.querySelector('[data-key="polar"]'))nav.querySelector('[data-key="polar"]').remove();
+    applyMobileNavIcons(nav);
     var grid=document.querySelector('#simurgV8Sheet .simurgV8Grid');
     if(grid)grid.innerHTML='<button onclick="simurgV8Go(\'coaching\',\'menu\')"><i>🧠</i><span><b>Koçluk</b><small>Günlük karar ve öneriler</small></span></button><button onclick="simurgV8Go(\'weekly\',\'menu\')"><i>📈</i><span><b>Haftalık</b><small>Bu hafta ve geçen hafta</small></span></button><button onclick="simurgV8Go(\'data\',\'menu\')"><i>◉</i><span><b>Veri Merkezi</b><small>Polar, bulut ve yedek</small></span></button>';
   }
