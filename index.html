@@ -10,11 +10,11 @@
 <script src="./simurg-training-lab-anatomy-renderer.js?v=5"></script>
 <script src="./simurg-exercise-history.js?v=2"></script>
 <script src="./simurg-next-session-target.js?v=2"></script>
-<script src="./simurg-activity-classification.js?v=1"></script>
+<script src="./simurg-activity-classification.js?v=2"></script>
 <script src="./simurg-signal-model.js?v=8"></script>
 <script src="./simurg-journal.js?v=1"></script>
 <script src="./simurg-sleep-intelligence.js?v=1"></script>
-<script src="./simurg-performance-engine.js?v=2"></script>
+<script src="./simurg-performance-engine.js?v=3"></script>
 <script src="./simurg-polar-intelligence.js?v=1"></script>
 <script src="./simurg-recovery-intelligence.js?v=1"></script>
 <script src="./simurg-energy-engine.js?v=1"></script>
@@ -6282,7 +6282,7 @@ body{background:#050607!important;}
 <div class="modal programNameModal" id="programNameModal"><div class="modalbox"><div class="modalTop"><h2>Program İsmini Düzenle</h2><button class="btn sec" onclick="closeProgramNameModal()">Kapat</button></div><div id="programNameBody"></div><div class="actions"><button class="btn" onclick="saveProgramNameEdit()">Kaydet</button><button class="btn sec" onclick="resetProgramNameEdit()">Varsayılana Dön</button></div></div></div>
 <div class="modal exerciseLibraryModal" id="exerciseLibraryModal" role="dialog" aria-modal="true" aria-labelledby="exerciseLibraryTitle"><div class="modalbox"><div class="modalTop"><h2 id="exerciseLibraryTitle">Hareket Kütüphanesi</h2><button class="btn sec" type="button" onclick="closeExerciseLibrary()">Kapat</button></div><p class="exerciseLibraryIntro">Makine, dambıl ve yaygın salon hareketlerinden seç. Türkçe veya İngilizce adla arayabilirsin; istersen özel hareket oluşturmaya devam edebilirsin.</p><div class="exerciseLibraryTools"><input id="exerciseLibrarySearch" type="search" placeholder="Ara: incline press, göğüs, tek kol…" autocomplete="off"><select id="exerciseLibraryCategory" aria-label="Hareket kategorisi"></select></div><div class="exerciseLibraryCount" id="exerciseLibraryCount"></div><div class="exerciseLibraryResults" id="exerciseLibraryResults"></div><div class="actions"><button class="btn sec" type="button" onclick="addCustomGymExerciseFromLibrary()">+ Özel Hareket Oluştur</button></div></div></div>
 <script src="./simurg-persistence.js?v=2"></script>
-<script src="./simurg-gym-identity.js?v=1"></script>
+<script src="./simurg-gym-identity.js?v=2"></script>
 <script src="./simurg-exercise-canonicalization.js?v=2"></script>
 <script src="./simurg-training-lab-analysis.js?v=6"></script>
 <script src="./simurg-data-validation.js?v=9"></script>
@@ -6729,6 +6729,7 @@ function saveGymExercise(key){
   let rows=[...card.querySelectorAll('.gymSetInputRow')];
   const existingRows=DATA.workouts.filter(w=>gymRowMatches(item,w,meta.name));
   const sessionId=SimurgGymIdentity.sessionIdFor(DATA.workouts,selectedDate);
+  const sessionTiming=SimurgGymIdentity.sessionTimingFor(DATA.workouts,selectedDate,sessionId);
   const exerciseId=existingRows.find(w=>w.exerciseId)?.exerciseId||item.exerciseId||SimurgGymIdentity.id('exercise');
   DATA.workouts=DATA.workouts.filter(w=>!gymRowMatches(item,w,meta.name));
   rows.forEach((row,i)=>{
@@ -6753,6 +6754,7 @@ function saveGymExercise(key){
       },{sessionId,exerciseId,setId:SimurgGymIdentity.setIdFor(existingRows[i])}));
     }
   });
+  SimurgGymIdentity.applySessionTiming(DATA.workouts,selectedDate,sessionId,sessionTiming);
   const result=save();
   if(result.ok){
     gymSessionDrafts.delete(gymDraftId(selectedDate,key));
@@ -7890,7 +7892,7 @@ function deleteEditing(){let before=DATA.workouts.slice();editIndexes.sort((a,b)
 function closeModal(){editModal.classList.remove('active')}
 function addSetToExerciseAtIndex(idx){idx=safeDataIndex(idx);let matching=idx==null?[]:SimurgGymIdentity.indexesFor(DATA.workouts,idx),last=matching.length?DATA.workouts[matching[matching.length-1]]:null;if(!last)return;let row={...last,setId:SimurgGymIdentity.id('set'),notes:'Yeni set'};DATA.workouts.push(row);if(!save().ok)DATA.workouts.pop()}
 function addSetToExercise(ex){let idx=DATA.workouts.findIndex(w=>w.exercise===ex&&w.date===selectedDate);addSetToExerciseAtIndex(idx)}
-function addWorkout(){let row={date:selectedDate,day:dayName(selectedDate),exercise:exercise.value,sets:1,reps:Number(reps.value)||0,weight:Number(String(weight.value).replace(',','.'))||0,bodyPart:part(exercise.value),notes:''};SimurgGymIdentity.apply(row,{sessionId:SimurgGymIdentity.sessionIdFor(DATA.workouts,selectedDate),exerciseId:SimurgGymIdentity.id('exercise'),setId:SimurgGymIdentity.id('set')});DATA.workouts.push(row);save()}
+function addWorkout(){let row={date:selectedDate,day:dayName(selectedDate),exercise:exercise.value,sets:1,reps:Number(reps.value)||0,weight:Number(String(weight.value).replace(',','.'))||0,bodyPart:part(exercise.value),notes:''},sessionId=SimurgGymIdentity.sessionIdFor(DATA.workouts,selectedDate),sessionTiming=SimurgGymIdentity.sessionTimingFor(DATA.workouts,selectedDate,sessionId);SimurgGymIdentity.apply(row,{sessionId:sessionId,exerciseId:SimurgGymIdentity.id('exercise'),setId:SimurgGymIdentity.id('set')});DATA.workouts.push(row);SimurgGymIdentity.applySessionTiming(DATA.workouts,selectedDate,sessionId,sessionTiming);save()}
 
 function openProgramNameEdit(day){
   editingProgramDay=day;
@@ -7988,7 +7990,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=performance-dedup-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=performance-normalization-v2').catch(function(){});
   });
 }
 </script>
@@ -16296,7 +16298,7 @@ m Shell V4: Logger information architecture fix -->
 <script src="./simurg-mobile-weekly.js?v=2"></script>
 <script src="./mobile-ia-premium.js?v=11"></script>
 <script src="./simurg-training-lab-ui.js?v=19"></script>
-<script src="./simurg-performance-ui.js?v=2"></script>
+<script src="./simurg-performance-ui.js?v=3"></script>
 <script src="./simurg-journal-ui.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
 <script src="./simurg-cloud-auth.js?v=7" defer></script>

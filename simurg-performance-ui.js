@@ -21,6 +21,12 @@
   function dateLabel(value){return new Intl.DateTimeFormat('tr-TR',{weekday:'short',day:'numeric',month:'long'}).format(new Date(value+'T12:00:00'))}
   function confidence(value){return {low:'düşük',medium:'orta',high:'yüksek'}[value]||null}
   function modality(value){return {gym:'Gym',cardio:'Cardio',mixed:'Mixed'}[value]||null}
+  function ansStatusLabel(value){
+    if(value==null||value==='')return null;
+    if(typeof value==='number'||/^[+-]?\d+(?:\.\d+)?$/.test(String(value).trim()))return null;
+    var key=String(value).trim().toUpperCase().replace(/[\s-]+/g,'_');
+    return {GOOD:'İyi',VERY_GOOD:'Çok iyi',OK:'Normal',NORMAL:'Normal',POOR:'Zayıf',VERY_POOR:'Çok zayıf'}[key]||null;
+  }
   function analyze(source,date){return engine.analyze(source,date,{currentDate:today()})}
 
   function trend(source,endDate){
@@ -59,7 +65,8 @@
     var evidence=result.evidence||{},details=[];
     if(evidence.hrv!=null)details.push('<span><small>HRV · kanıt</small><b>'+esc(evidence.hrv)+' ms</b></span>');
     if(evidence.nightHr!=null)details.push('<span><small>Gece nabzı · kanıt</small><b>'+esc(evidence.nightHr)+' bpm</b></span>');
-    if(evidence.ansChargeStatus)details.push('<span><small>ANS durumu · bağlam</small><b>'+esc(evidence.ansChargeStatus)+'</b></span>');
+    var ansLabel=ansStatusLabel(evidence.ansChargeStatus);
+    if(ansLabel)details.push('<span><small>ANS durumu · bağlam</small><b>'+esc(ansLabel)+'</b></span>');
     return '<section class="spCard spScoreCard" data-performance-state="readiness-available">'+scoreHead('ANTRENMANA HAZIRLIK',result)+'<div class="spContributors"><div><small>Uyku</small><b>'+score(result.components.sleepCapacity)+'</b></div><div><small>Toparlanma</small><b>'+score(result.components.recovery)+'</b></div></div>'+(details.length?'<details class="spEvidence"><summary>Kanıt ayrıntıları</summary><div>'+details.join('')+'</div></details>':'')+'</section>';
   }
   function balanceCopy(result){
@@ -92,5 +99,5 @@
   }
   function open(){state.date=appDate();if(typeof root.simurgV8Go==='function')root.simurgV8Go('training-lab','training-lab');render()}
   function setDate(value){state.date=clampDate(value);return state.date}
-  return Object.freeze({render:render,open:open,setDate:setDate,trend:trend,summary:summary,balanceCopy:balanceCopy,_state:state});
+  return Object.freeze({render:render,open:open,setDate:setDate,trend:trend,summary:summary,balanceCopy:balanceCopy,ansStatusLabel:ansStatusLabel,_state:state});
 });

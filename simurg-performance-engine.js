@@ -64,6 +64,12 @@
   }
   function sharedSessionId(row){var raw=rawObject(row);return clean(row&&(row.sessionId||row.session_id)||raw.sessionId||raw.session_id);}
   function sessionKey(row,date){var id=sharedSessionId(row);return id?'session:'+id:'legacy:'+date;}
+  function consistentSessionValue(rows,resolver,tolerance){
+    var values=(rows||[]).map(resolver).filter(function(value){return value!=null;});
+    if(!values.length)return null;
+    var minimum=Math.min.apply(null,values),maximum=Math.max.apply(null,values);
+    return maximum-minimum<=(tolerance||0)?average(values):null;
+  }
   function gymFamily(rows){
     var values=[];
     rows.forEach(function(row){
@@ -82,15 +88,11 @@
       if(invalidRpe)return {status:'insufficient',sessionId:key,reason:'missing_or_invalid_rpe',rows:sessionRows};
       var totalSets=working.reduce(function(sum,row){return sum+number(row.sets);},0);
       var sessionRpe=working.reduce(function(sum,row){return sum+number(row.rpe)*number(row.sets);},0)/totalSets;
-      var durations=working.map(durationMinutes).filter(function(value){return value!=null;}),duration=null;
-      if(durations.length){
-        var minimum=Math.min.apply(null,durations),maximum=Math.max.apply(null,durations);
-        if(maximum-minimum<=2)duration=average(durations);
-      }
+      var duration=consistentSessionValue(sessionRows,durationMinutes,2),sessionStart=consistentSessionValue(sessionRows,startMinute,2);
       return {
         status:'available',sessionId:key,rows:sessionRows,workingSetCount:round(totalSets,2),sessionRpe:round(sessionRpe,2),
-        explicitSessionId:sharedSessionId(working[0])||null,
-        durationMinutes:duration==null?null:round(duration,2),family:gymFamily(working),startMinute:startMinute(working[0]),
+        explicitSessionId:sharedSessionId(sessionRows.find(function(row){return sharedSessionId(row);}))||null,
+        durationMinutes:duration==null?null:round(duration,2),family:gymFamily(working),startMinute:sessionStart==null?null:round(sessionStart,2),
         durationRaw:duration==null?null:round(duration*sessionRpe,2),fallbackRaw:round(totalSets*sessionRpe,2)
       };
     });
@@ -203,7 +205,7 @@
   function actualLoad(data,date){
     date=dateValue(date);if(!date)return resultInsufficient(null,'invalid_date');
     var exactGym=gymDay(data,date),exactCardio=cardioDay(data,date),gym=normalizedGym(data,date),cardio=normalizedCardio(data,date),hasGym=gym.status==='available',hasCardio=cardio.status==='available',dedup=deduplicationMetadata(data,date,exactGym);
-    if(exactGym&&dedup.identityResolution==='ambiguous')return resultInsufficient(date,'ambiguous_session_identity',{method:'shared_identity_then_compatible_strength_time_overlap',source:'Simurg Gym + Polar',components:{gym:gym,cardio:cardio},deduplication:dedup});
+    if(exactGym&&dedup.identityResolution==='ambiguous')return resultInsufficient(date,'ambiguous_session_identity',{identityResult:'ambiguous_session_identity',method:'shared_identity_then_compatible_strength_time_overlap',source:'Simurg Gym + Polar',components:{gym:gym,cardio:cardio},deduplication:dedup});
     if(exactGym&&dedup.identityResolution==='distinct')return resultInsufficient(date,'distinct_strength_session_load_unsupported',{method:'distinct_strength_sessions_preserved',source:'Simurg Gym + Polar',components:{gym:gym,cardio:cardio},deduplication:dedup});
     if(hasGym&&hasCardio)return {status:'available',date:date,value:mixedLoad(gym.value,cardio.value),coachEligible:false,modality:'mixed',method:'primary_plus_0.30_secondary_clamped',source:'Simurg Gym + Polar',confidence:lowerConfidence(gym.confidence,cardio.confidence),sampleCount:Math.min(gym.sampleCount,cardio.sampleCount),components:{gym:gym,cardio:cardio},deduplication:dedup};
     if(exactGym&&exactCardio)return resultInsufficient(date,'mixed_day_component_baseline_insufficient',{components:{gym:gym,cardio:cardio},deduplication:dedup});
@@ -253,7 +255,7 @@
   }
   function analyze(data,date,options){
     var ready=readiness(data,date,options),load=actualLoad(data,date),fit=loadFit(data,date,{readiness:ready,actualLoad:load}),balance=dailyBalance(data,date,{readiness:ready,actualLoad:load,loadFit:fit});
-    return {schemaVersion:VERSION,date:dateValue(date),status:ready.status==='available'?'available':'insufficient',coachEligible:false,readiness:ready,actualLoad:load,loadFit:fit,dailyBalance:balance};
+    return {schemaVersion:VERSION,date:dateValue(date),status:ready.status==='available'?'available':'insufficient',coachEligible:false,identityResult:load.identityResult||null,readiness:ready,actualLoad:load,loadFit:fit,dailyBalance:balance};
   }
   function resolve(date,options){options=options||{};var data=options.data;try{if(!data&&root)data=typeof root.simurgGetData==='function'?root.simurgGetData():root.DATA;}catch(error){}return analyze(data||{},date,options);}
 

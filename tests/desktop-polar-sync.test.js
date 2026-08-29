@@ -50,7 +50,7 @@ run('changed production assets use matching cache versions', () => {
     'simurg-coach.css?v=14',
     'simurg-coach-ui.js?v=15',
     'simurg-persistence.js?v=2',
-    'simurg-gym-identity.js?v=1',
+    'simurg-gym-identity.js?v=2',
     'simurg-exercise-canonicalization.js?v=2',
     'simurg-training-lab-analysis.js?v=6',
     'simurg-data-validation.js?v=9',
@@ -75,8 +75,14 @@ run('changed production assets use matching cache versions', () => {
     assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(index, /sw\.js\?v=performance-dedup-v1/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-performance-dedup-v1'/);
+  for (const asset of ['simurg-activity-classification.js?v=2','simurg-performance-engine.js?v=3','simurg-performance-ui.js?v=3']) {
+    assert.match(index, new RegExp(asset.replace(/[.?]/g, '\\$&')));
+    assert.match(worker, new RegExp(asset.replace(/[.?]/g, '\\$&')));
+  }
+  assert.doesNotMatch(index, /simurg-activity-classification\.js\?v=1/);
+  assert.doesNotMatch(worker, /simurg-activity-classification\.js\?v=1/);
+  assert.match(index, /sw\.js\?v=performance-normalization-v2/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-performance-normalization-v2'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

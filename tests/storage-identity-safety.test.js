@@ -115,6 +115,31 @@ run('stable IDs survive JSON restore and cloud-style round trip additively', () 
   assert.deepEqual(validation.prepareFull({schemaVersion:1}).data.gymDayState,{});
 });
 
+run('new Gym sessions capture one stable timing envelope across every row without extra workflow', () => {
+  const started = new Date(2026, 7, 29, 10, 0, 0), ended = new Date(2026, 7, 29, 10, 42, 0), date = '2026-08-29', sessionId = 'session_timed';
+  const rows = [];
+  const firstTiming = identity.sessionTimingFor(rows, date, sessionId, started);
+  rows.push({ date, sessionId, exercise:'Squat' }, { date, sessionId, exercise:'Row' });
+  identity.applySessionTiming(rows, date, sessionId, firstTiming);
+  assert.equal(rows[0].startedAt, started.toISOString()); assert.equal(rows[1].startedAt, rows[0].startedAt); assert.equal(rows[0].durationMinutes, undefined);
+  const finishedTiming = identity.sessionTimingFor(rows, date, sessionId, ended);
+  identity.applySessionTiming(rows, date, sessionId, finishedTiming);
+  assert.equal(rows[0].endedAt, ended.toISOString()); assert.equal(rows[1].endedAt, rows[0].endedAt); assert.equal(rows[0].durationMinutes, 42); assert.equal(rows[1].durationMinutes, 42);
+});
+
+run('historical Gym rows without timing are never backfilled when touched', () => {
+  const rows = [{ date:'2026-08-24', exercise:'Legacy', sessionId:'legacy-session' }];
+  const timing = identity.sessionTimingFor(rows, '2026-08-24', 'legacy-session', new Date(2026, 7, 24, 18, 0, 0));
+  identity.applySessionTiming(rows, '2026-08-24', 'legacy-session', timing);
+  assert.equal(timing.startedAt, undefined); assert.equal(rows[0].startedAt, undefined); assert.equal(rows[0].durationMinutes, undefined);
+});
+
+run('Gym UI applies timing only through the current successful save transaction', () => {
+  const body=index.match(/function saveGymExercise\(key\)\{([\s\S]*?)\n\}/)[1];
+  assert.match(body,/sessionTimingFor\(DATA\.workouts,selectedDate,sessionId\)/); assert.match(body,/applySessionTiming\(DATA\.workouts,selectedDate,sessionId,sessionTiming\)/);
+  assert.ok(body.indexOf('applySessionTiming') < body.indexOf('const result=save()')); assert.match(body,/else DATA=beforeData/);
+});
+
 run('all active production local writes use the centralized contract', () => {
   for(const file of ['index.html','simurg-data-validation.js','simurg-cloud-auth.js','polar-accesslink.js','polar-workout.js']){
     const source=fs.readFileSync(path.join(__dirname,'..',file),'utf8');

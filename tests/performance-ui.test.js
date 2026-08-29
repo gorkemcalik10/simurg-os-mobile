@@ -34,6 +34,11 @@ run('mobile Lab destination renders Performance with readiness score and five-ba
   assert.match(section.innerHTML,new RegExp(engine.readiness(data,'2026-08-21').band));assert.equal((section.innerHTML.match(/class="spZones"/g)||[]).length,1);
 });
 
+run('ANS evidence translates known text and hides unknown numeric status codes',()=>{
+  assert.equal(ui.ansStatusLabel('GOOD'),'İyi'); assert.equal(ui.ansStatusLabel('VERY_POOR'),'Çok zayıf'); assert.equal(ui.ansStatusLabel(1),null); assert.equal(ui.ansStatusLabel('1'),null); assert.equal(ui.ansStatusLabel('UNMAPPED_PROVIDER_CODE'),null);
+  const data=readinessData('2026-08-21');data.polarNightlyRecharge.daily['2026-08-21'].ansChargeStatus=1;global.DATA=data;ui.setDate('2026-08-21');ui.render();assert.doesNotMatch(section.innerHTML,/ANS durumu[^<]*<\/small><b>1<\/b>/);
+});
+
 run('missing readiness component is explicit and never reweighted',()=>{
   global.DATA={polarSleep:{daily:{}},polarNightlyRecharge:{daily:{}}};ui.setDate('2026-08-21');ui.render();
   assert.match(section.innerHTML,/data-performance-state="readiness-insufficient"/);assert.match(section.innerHTML,/Yetersiz veri/);assert.match(section.innerHTML,/Skor yeniden ağırlıklandırılmadı/);

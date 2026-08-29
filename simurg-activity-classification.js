@@ -7,7 +7,15 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
 
-  function text(value){return String(value==null?'':value).toLocaleLowerCase('tr-TR').replace(/[^a-z0-9çğıöşü]+/g,' ').trim();}
+  function text(value){
+    return String(value==null?'':value)
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g,'')
+      .replace(/ı/g,'i')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g,' ')
+      .trim();
+  }
   function key(value){
     var normalized=text(value)||'aktivite';
     if(/functional|fonksiyonel|strength|fitness|gym|weight|resistance|circuit|crossfit|other indoor|kuvvet|ağırlık|agirlik/.test(normalized))return 'strength';
