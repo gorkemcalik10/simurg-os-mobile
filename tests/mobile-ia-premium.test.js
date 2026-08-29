@@ -125,6 +125,8 @@ run('mobile Workout Journal uses premium single-open exercise summaries without 
   assert.match(css, /#workout\.miaJournalDashboard #workoutGroups \.mjExerciseToggle\{[\s\S]*?min-height:64px!important/);
   assert.match(css, /#workout\.miaJournalDashboard #workoutGroups \.mjExerciseBody\{[\s\S]*?display:none!important/);
   assert.match(css, /#workout\.miaJournalDashboard #workoutGroups \.exerciseCard\.isJournalOpen \.mjExerciseBody\{[\s\S]*?display:block!important/);
+  assert.match(html, /--muscle-share:\$\{pct\}%/);
+  assert.match(html, /--muscle-color:\$\{palette\[i%palette\.length\]\}/);
 });
 
 run('Polar AccessLink mounts in Data Center on mobile and defers status loading', () => {

@@ -6503,7 +6503,7 @@ legend.innerHTML=entries.map(([b,v],i)=>{
   let pct=Math.round(v/all*100);
   let kg=Math.round(v).toLocaleString('tr-TR');
   let setCount=(groups[b]||[]).length;
-  return `<div class="leg" data-tip="${escapeAttr(b)}: ${pct}% • ${kg} kg • ${setCount} set"><span><span class="dot" style="background:${palette[i%palette.length]}"></span>${escapeAttr(b)}</span><span>${pct}%</span></div>`
+  return `<div class="leg" style="--muscle-color:${palette[i%palette.length]};--muscle-share:${pct}%" data-tip="${escapeAttr(b)}: ${pct}% • ${kg} kg • ${setCount} set"><span><span class="dot" style="background:${palette[i%palette.length]}"></span>${escapeAttr(b)}</span><span>${pct}%</span></div>`
 }).join('')||'<span class="sub">Veri yok</span>';
 
 trendBars.innerHTML=weekDates().map(d=>{
@@ -7990,7 +7990,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=mobile-system-v1').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=mobile-system-v2').catch(function(){});
   });
 }
 </script>
@@ -16295,8 +16295,8 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./simurg-training-lab.css?v=13">
 <link rel="stylesheet" href="./simurg-performance-ui.css?v=1">
 <link rel="stylesheet" href="./simurg-journal.css?v=1">
-<link rel="stylesheet" href="./simurg-mobile-system.css?v=1">
-<script src="./simurg-mobile-weekly.js?v=2"></script>
+<link rel="stylesheet" href="./simurg-mobile-system.css?v=2">
+<script src="./simurg-mobile-weekly.js?v=3"></script>
 <script src="./mobile-ia-premium.js?v=12"></script>
 <script src="./simurg-training-lab-ui.js?v=19"></script>
 <script src="./simurg-performance-ui.js?v=3"></script>

@@ -479,23 +479,26 @@ run('primary cards lead with training days, duration, and compact Gym volume wit
   const data = stores();
   data.workouts.push({ date: '2026-08-24', sessionId: 'gym', sets: 1, reps: 1, weight: 17997, durationMinutes: 45 });
   const html = weekly.render(weekly.buildWeek('2026-08-24', options(data)), null, TODAY);
-  const primary = html.match(/<section class="mwPrimaryGrid">([\s\S]*?)<\/section>/)[1];
+  const primary = html.match(/<section class="mwPrimaryGrid"[^>]*>([\s\S]*?)<\/section>/)[1];
   assert.ok(primary.indexOf('Antrenman günü') < primary.indexOf('Toplam süre'));
   assert.ok(primary.indexOf('Toplam süre') < primary.indexOf('Gym hacmi'));
   assert.match(primary, /Antrenman günü[\s\S]*?1 seans/);
   assert.match(primary, /Gym hacmi[\s\S]*?18[\s\S]*?ton/);
   assert.doesNotMatch(primary, /mwPrimaryArc|mwPrimaryAccent/);
+  assert.match(html, /mwMetricGrid mwMetricGrid--strength/);
+  assert.match(html, /mwMetric mwMetric--inline[\s\S]*?<small>PR<\/small>/);
+  assert.match(html, /mwMetricGrid mwMetricGrid--polar/);
 });
 
 run('asset versions and service-worker cache generation invalidate stale Weekly bundles', () => {
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-  for (const asset of ['simurg-mobile-weekly.css?v=2', 'simurg-mobile-weekly.js?v=2']) {
+  for (const asset of ['simurg-mobile-weekly.css?v=2', 'simurg-mobile-weekly.js?v=3', 'simurg-mobile-system.css?v=2']) {
     assert.match(html, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(sw, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(html, /sw\.js\?v=mobile-system-v1/);
-  assert.match(sw, /simurg-mobile-system-v1/);
+  assert.match(html, /sw\.js\?v=mobile-system-v2/);
+  assert.match(sw, /simurg-mobile-system-v2/);
   assert.doesNotMatch(sw, /simurg-mobile-weekly\.(?:css|js)\?v=1/);
 });
 

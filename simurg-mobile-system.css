@@ -96,7 +96,7 @@
   #training-lab .spBalanceCard .spVerdict{border-left-color:var(--sms-blue)!important;background:rgba(72,169,255,.065)!important;}
 
   /* Weekly: compact status strip, cards, and metric groups. */
-  #weekly.mwMobileWeekly{background:transparent!important;padding-bottom:92px!important;}
+  #weekly.mwMobileWeekly{background:transparent!important;padding:0 var(--sms-page-x) 92px!important;}
   #weekly .mwShell{--mw-line:var(--sms-line);--mw-amber:var(--sms-amber);}
   #weekly .mwHeader{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(170px,205px)!important;align-items:end!important;gap:12px!important;}
   #weekly .mwHeader p:not(.mwComparisonScope){margin:6px 0 0!important;color:var(--sms-muted)!important;font-size:11px!important;line-height:1.35!important;}
@@ -148,6 +148,111 @@
   #home.gp-home .gp-evidence-item:before{content:"";position:absolute;left:7px;top:7px;width:4px;height:4px;border-radius:50%;background:var(--sms-amber);}
   #home.gp-home .gp-evidence-item.sleep:before{background:var(--sms-purple);}#home.gp-home .gp-evidence-item.hrv:before{background:var(--sms-green);}#home.gp-home .gp-evidence-item.heart:before{background:var(--sms-blue);}#home.gp-home .gp-evidence-item.load:before{background:var(--sms-amber);}
   #home.gp-home :is(.gp-energy-card,.gp-workout-summary){border-color:var(--sms-line)!important;border-radius:var(--sms-radius-card)!important;box-shadow:var(--sms-shadow)!important;}
+
+  /* Phase 2 — density and hierarchy polish. */
+  #weekly .mwHeader{gap:9px!important;margin-bottom:9px!important;}
+  #weekly .mwComparisonScope{display:flex!important;align-items:center!important;min-height:28px!important;padding:5px 9px!important;}
+  #weekly .mwComparisonScope:before{content:"";flex:0 0 auto;width:5px;height:5px;margin-right:7px;border-radius:50%;background:var(--sms-muted-2);}
+  #weekly .mwComparisonScope.active:before{background:var(--sms-amber);box-shadow:0 0 0 3px rgba(245,163,13,.09);}
+  #weekly .mwPrimaryGrid{
+    display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0!important;margin:0!important;
+    border:1px solid var(--sms-line)!important;border-radius:var(--sms-radius-card)!important;background:var(--sms-surface)!important;
+    box-shadow:var(--sms-shadow)!important;overflow:hidden!important;
+  }
+  #weekly .mwPrimary,#weekly .mwPrimary.current{
+    min-height:0!important;padding:11px 10px!important;border:0!important;border-right:1px solid var(--sms-line)!important;
+    border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;
+  }
+  #weekly .mwPrimary:last-child{border-right:0!important;}
+  #weekly .mwPrimary small{min-height:25px!important;font-size:9.5px!important;line-height:1.2!important;}
+  #weekly .mwPrimary strong{margin-top:6px!important;font-size:21px!important;white-space:nowrap!important;}
+  #weekly .mwPrimary span{margin-top:4px!important;font-size:9.5px!important;line-height:1.25!important;}
+  #weekly .mwPrimary em{margin-top:5px!important;padding:0!important;background:transparent!important;color:#c8a75f!important;font-size:9px!important;}
+  #weekly .mwSection{margin-top:8px!important;padding:12px!important;}
+  #weekly .mwSection>header{margin-bottom:8px!important;}
+  #weekly .mwMetricGrid{align-items:start!important;gap:6px!important;}
+  #weekly .mwMetric{min-height:0!important;padding:9px 10px!important;border-radius:11px!important;}
+  #weekly .mwMetric small{font-size:9.5px!important;}
+  #weekly .mwMetric b{margin-top:4px!important;font-size:18px!important;}
+  #weekly .mwMetric span{margin-top:4px!important;font-size:9.5px!important;}
+  #weekly .mwMetric em{margin-top:3px!important;font-size:9px!important;}
+  #weekly .mwMetricGrid--strength .mwMetric--inline{
+    grid-column:1/-1!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;
+    gap:8px!important;padding:7px 10px!important;border-color:rgba(245,163,13,.16)!important;background:var(--sms-amber-soft)!important;
+  }
+  #weekly .mwMetricGrid--strength .mwMetric--inline b{margin:0!important;color:var(--sms-amber-bright)!important;font-size:17px!important;}
+  #weekly .mwMetricGrid--polar .mwMetric:only-child{
+    grid-column:1/-1!important;display:grid!important;grid-template-columns:minmax(118px,.8fr) auto!important;align-items:center!important;column-gap:12px!important;
+  }
+  #weekly .mwMetricGrid--polar .mwMetric:only-child b{grid-column:2;grid-row:1/3;margin:0!important;text-align:right!important;}
+  #weekly .mwMetricGrid--polar .mwMetric:only-child :is(span,em){grid-column:1/-1!important;}
+
+  #workout.gp-logger-refined>.topbar{gap:7px!important;margin-bottom:8px!important;}
+  #workout.gp-logger-refined>.topbar .controls{
+    display:grid!important;grid-template-columns:34px minmax(92px,1fr) 34px auto auto!important;grid-template-rows:34px!important;
+    gap:5px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;overflow:visible!important;
+  }
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>*{height:34px!important;min-height:34px!important;max-height:34px!important;margin:0!important;padding:0 7px!important;}
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(1){border-radius:var(--sms-radius-control) 0 0 var(--sms-radius-control)!important;}
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(2){border-radius:0!important;}
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(3){border-radius:0 var(--sms-radius-control) var(--sms-radius-control) 0!important;}
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(4),
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(5){width:auto!important;min-width:0!important;padding:0 8px!important;font-size:9px!important;}
+  #workout.gp-logger-refined .weekStrip{
+    width:100%!important;margin:0 0 8px!important;padding:1px 2px 6px!important;overflow-x:auto!important;overflow-y:hidden!important;
+    scroll-padding-inline:2px!important;overscroll-behavior-inline:contain!important;scrollbar-width:none!important;
+  }
+  #workout.gp-logger-refined .weekStrip::-webkit-scrollbar{display:none!important;}
+  #workout.gp-logger-refined .weekStrip .dateBtn{flex:0 0 66px!important;min-width:66px!important;}
+  #workout.miaJournalDashboard #workoutGroups{gap:7px!important;}
+  #workout.miaJournalDashboard #workoutGroups>.group{
+    padding:9px 0 2px!important;border-width:1px 0 0!important;border-radius:0!important;background:transparent!important;
+  }
+  #workout.miaJournalDashboard #workoutGroups .groupHead{margin:0 2px 4px!important;padding:0 2px 7px!important;border-bottom:0!important;}
+  #workout.miaJournalDashboard #workoutGroups .exerciseGrid{gap:0!important;}
+  #workout.miaJournalDashboard #workoutGroups .exerciseCard{
+    padding:0!important;border-width:1px 0 0!important;border-radius:0!important;background:transparent!important;
+  }
+  #workout.miaJournalDashboard #workoutGroups .mjExerciseToggle{min-height:54px!important;padding:9px 4px!important;}
+  #workout.miaJournalDashboard #workoutGroups .mjExerciseBody{margin:0!important;padding:7px 4px 4px!important;border-top:1px solid rgba(166,180,194,.08)!important;background:rgba(166,180,194,.025)!important;}
+  #workout.miaJournalDashboard #workoutGroups .exerciseCard.isJournalOpen{border-color:rgba(245,163,13,.22)!important;box-shadow:none!important;}
+  #workout.miaJournalDashboard #workoutGroups>.simurg-activity-card{
+    margin-top:4px!important;padding:11px!important;border-color:var(--sms-line)!important;background:linear-gradient(145deg,rgba(72,169,255,.035),var(--sms-surface-inset))!important;
+  }
+  #workout.miaJournalDashboard #workoutGroups .activitySessionTitle small{color:#76bbf5!important;}
+  #workout.miaJournalDashboard #workoutGroups .activityIcon{border-color:rgba(245,163,13,.18)!important;background:var(--sms-amber-soft)!important;color:var(--sms-amber-bright)!important;}
+  #workout.miaJournalDashboard .right>.gp-logger-muscle{padding-bottom:12px!important;}
+  #workout.miaJournalDashboard .gp-logger-muscle .donut{display:none!important;}
+  #workout.miaJournalDashboard .gp-logger-muscle .legend{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;margin-top:0!important;}
+  #workout.miaJournalDashboard .gp-logger-muscle .leg{
+    position:relative!important;display:flex!important;justify-content:space-between!important;gap:10px!important;padding:0 1px 8px!important;
+    border:0!important;border-radius:0!important;background:transparent!important;color:#cbd3dc!important;font-size:10.5px!important;
+  }
+  #workout.miaJournalDashboard .gp-logger-muscle .leg:before,
+  #workout.miaJournalDashboard .gp-logger-muscle .leg:after{content:"";position:absolute;left:0;bottom:0;height:3px;border-radius:999px;}
+  #workout.miaJournalDashboard .gp-logger-muscle .leg:before{right:0;background:rgba(166,180,194,.10);}
+  #workout.miaJournalDashboard .gp-logger-muscle .leg:after{width:var(--muscle-share,0%);background:var(--muscle-color,var(--sms-amber));}
+  #workout.miaJournalDashboard .gp-logger-muscle .dot{width:7px!important;height:7px!important;margin-right:6px!important;border-radius:50%!important;}
+
+  #training-lab .spEmptyCard,#training-lab .spPostState{padding-top:13px!important;padding-bottom:13px!important;}
+  #training-lab .spEmptyCard h2,#training-lab .spPostState h2{margin:7px 0 5px!important;font-size:17px!important;line-height:1.2!important;}
+  #training-lab .spEmptyCard p,#training-lab .spPostState p{font-size:11px!important;line-height:1.4!important;}
+
+  #home.gp-home .gp-daily-guidance{padding:10px 11px!important;background:var(--sms-surface-inset)!important;border-color:rgba(166,180,194,.10)!important;}
+  #home.gp-home .gp-guidance-action h2{font-size:14px!important;}
+  #home.gp-home .gp-guidance-action p{color:var(--sms-muted-2)!important;}
+  #home.gp-home .gp-evidence-item :is(small,.label){font-size:9.5px!important;line-height:1.2!important;}
+
+  /* Beat the legacy high-specificity journal geometry without changing its renderer. */
+  html body main #workout.section.active.gp-logger-refined.miaJournalDashboard #workoutGroups>.group{
+    padding:9px 0 2px!important;border-width:1px 0 0!important;border-radius:0!important;background:transparent!important;
+  }
+  html body main #workout.section.active.gp-logger-refined.miaJournalDashboard #workoutGroups .exerciseCard{
+    padding:0!important;border-width:1px 0 0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;
+  }
+  html body main #workout.section.active.gp-logger-refined.miaJournalDashboard #workoutGroups .mjExerciseBody{
+    margin:0!important;padding:7px 4px 4px!important;border-top:1px solid rgba(166,180,194,.08)!important;background:rgba(166,180,194,.025)!important;
+  }
 }
 
 @media (max-width:390px){
