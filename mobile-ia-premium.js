@@ -302,6 +302,24 @@
       if(key===journalActiveKey)card.classList.add('isJournalOpen');
     });
     if(journalActiveKey&&!groups.querySelector('.exerciseCard[data-journal-key="'+CSS.escape(journalActiveKey)+'"]'))journalActiveKey='';
+
+    /* Presentation-only availability state: the canonical renderer has already
+       decided whether the selected day contains Gym/activity data and whether
+       the weekly trend has history. Keep valid history visible. */
+    var emptyDay=!cards.length&&!groups.querySelector('.simurg-activity-card');
+    section.classList.toggle('miaJournalEmpty',emptyDay);
+    var trendHasHistory=!!section.querySelector('.gp-logger-trend .bar:not(.empty)');
+    [
+      {selector:'.gp-logger-muscle',copy:'Seçili gün için kas grubu hacmi yok.'},
+      {selector:'.gp-logger-trend',copy:'Bu hafta için hacim geçmişi yok.',preserve:trendHasHistory},
+      {selector:'.gp-logger-raw',copy:'Seçili gün için performans özeti yok.'}
+    ].forEach(function(item){
+      var panel=section.querySelector(item.selector);if(!panel)return;
+      var compact=emptyDay&&!item.preserve,note=panel.querySelector('.miaJournalEmptyNote');
+      panel.classList.toggle('miaCompactEmpty',compact);
+      if(compact&&!note){note=document.createElement('p');note.className='miaJournalEmptyNote';note.textContent=item.copy;panel.appendChild(note);}
+      else if(!compact&&note)note.remove();
+    });
   }
   function patchJournalRenderer(){
     if(window.__miaJournalRendererPatched||typeof window.renderWorkout!=='function')return;

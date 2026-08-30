@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-indexeddb-v1';
+const SIMURG_CACHE = 'simurg-mobile-polish-v3';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -46,9 +46,9 @@ const CORE_ASSETS = [
   './desktop-alignment.js?v=37',
   './mobile-ia-premium.css?v=12',
   './simurg-mobile-weekly.css?v=2',
-  './simurg-mobile-system.css?v=2',
+  './simurg-mobile-system.css?v=3',
   './simurg-mobile-weekly.js?v=3',
-  './mobile-ia-premium.js?v=12',
+  './mobile-ia-premium.js?v=13',
   './simurg-training-lab.css?v=13',
   './simurg-training-lab-ui.js?v=19',
   './simurg-journal.css?v=1',

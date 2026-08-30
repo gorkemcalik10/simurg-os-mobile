@@ -8,6 +8,7 @@ const mobile = fs.readFileSync(path.join(root, 'mobile-ia-premium.js'), 'utf8');
 const trainingLabUi = fs.readFileSync(path.join(root, 'simurg-training-lab-ui.js'), 'utf8');
 const premium = fs.readFileSync(path.join(root, 'premium-standard.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'mobile-ia-premium.css'), 'utf8');
+const systemCss = fs.readFileSync(path.join(root, 'simurg-mobile-system.css'), 'utf8');
 const polar = fs.readFileSync(path.join(root, 'polar-accesslink.js'), 'utf8');
 
 function run(name, fn) {
@@ -127,6 +128,14 @@ run('mobile Workout Journal uses premium single-open exercise summaries without 
   assert.match(css, /#workout\.miaJournalDashboard #workoutGroups \.exerciseCard\.isJournalOpen \.mjExerciseBody\{[\s\S]*?display:block!important/);
   assert.match(html, /--muscle-share:\$\{pct\}%/);
   assert.match(html, /--muscle-color:\$\{palette\[i%palette\.length\]\}/);
+});
+
+run('Daily compacts only empty analytical panels and preserves real weekly trend history', () => {
+  assert.match(mobile, /var emptyDay=!cards\.length&&!groups\.querySelector\('\.simurg-activity-card'\)/);
+  assert.match(mobile, /var trendHasHistory=!!section\.querySelector\('\.gp-logger-trend \.bar:not\(\.empty\)'\)/);
+  assert.match(mobile, /panel\.classList\.toggle\('miaCompactEmpty',compact\)/);
+  assert.match(systemCss, /#workout\.miaJournalEmpty \.right>\.panel\.miaCompactEmpty\{[\s\S]*?min-height:0!important/);
+  assert.match(systemCss, /\.miaCompactEmpty>\*:not\(h3\):not\(\.miaJournalEmptyNote\)\{display:none!important/);
 });
 
 run('Polar AccessLink mounts in Data Center on mobile and defers status loading', () => {
