@@ -94,11 +94,11 @@
     });
     return data;
   }
-  function updateLocalConnection(connection,counts,statuses,errors){
+  async function updateLocalConnection(connection,counts,statuses,errors){
     var live=root();if(!live||typeof live!=='object'||!connection)return {ok:true,skipped:true};
     var candidate;
     try{candidate=cloneData(live);applyLocalConnection(candidate,connection,counts,statuses,errors);}catch(error){return {ok:false,code:'candidate_merge_failed',error:error,message:error.message||'Polar bağlantı durumu hazırlanamadı.'};}
-    var result=persistCandidate(candidate);
+    var result=await persistCandidate(candidate);
     if(!result.ok)return result;
     commitInPlace(live,candidate);syncStateFrom(live);return result;
   }
@@ -119,7 +119,7 @@
     store.lastSyncAt=lastSyncAt||store.lastSyncAt||null;
     store.lastError=error||(status==='forbidden'?'Bu Polar hesabında kullanılamıyor.':status==='error'?'Polar uç noktası hata döndürdü.':null);
   }
-  function mergeSync(payload){
+  async function mergeSync(payload){
     var live=root();if(!live||typeof live!=='object')return {ok:false,code:'missing_data',message:'Yerel DATA kullanılamıyor.'};
     var data;
     try{data=ensureStores(cloneData(live));}catch(error){return {ok:false,code:'candidate_clone_failed',error:error,message:'Polar verileri güvenli bir aday kopyaya hazırlanamadı.'};}
@@ -144,7 +144,7 @@
     mergeDailyStore(data.polarCardioLoad,payload.cardioLoad,lastSyncAt,statuses.cardioLoad,errors.cardioLoad);
     var connection=payload.connection||{connected:payload.connected!==false,status:payload.connected===false?'disconnected':'connected',lastSyncAt:payload.lastSyncAt||new Date().toISOString(),errorMessage:(payload.warnings||[]).join(' ')||null};
     applyLocalConnection(data,connection,counts,statuses,errors);
-    var result=persistCandidate(data);
+    var result=await persistCandidate(data);
     if(!result.ok)return result;
     commitInPlace(live,data);syncStateFrom(live);
     try{if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('polar-sync');}catch(error){console.warn('Simurg OS: Polar sync signal cache invalidation failed.',error);}
@@ -209,7 +209,7 @@
   async function refreshStatus(){
     statusLoaded=true;
     state.status='loading';state.errorMessage='';state.message='Polar bağlantı durumu kontrol ediliyor.';renderCard();
-    try{var payload=await request('polar-sync','GET');var localResult=updateLocalConnection(payload.connection,payload.counts,payload.statuses,payload.errors);if(!localResult.ok)throw polarPersistenceError(localResult);state.status=payload.connection&&payload.connection.connected?'connected':'disconnected';state.message=state.status==='connected'?(payload.connection.claimedLegacy?'Eski Polar bağlantısı bu Simurg hesabına güvenle taşındı.':'Polar AccessLink manuel senkronizasyonu hazır.'):'Bu Simurg hesabına bağlı Polar hesabı yok.';}
+    try{var payload=await request('polar-sync','GET');var localResult=await updateLocalConnection(payload.connection,payload.counts,payload.statuses,payload.errors);if(!localResult.ok)throw polarPersistenceError(localResult);state.status=payload.connection&&payload.connection.connected?'connected':'disconnected';state.message=state.status==='connected'?(payload.connection.claimedLegacy?'Eski Polar bağlantısı bu Simurg hesabına güvenle taşındı.':'Polar AccessLink manuel senkronizasyonu hazır.'):'Bu Simurg hesabına bağlı Polar hesabı yok.';}
     catch(error){state.status=error.code==='signed_out'||error.code==='missing_session'||error.code==='invalid_session'?'signed_out':'error';state.message=state.status==='signed_out'?'Polar bağlantısını kullanmak için Simurg Cloud oturumu açın.':'Polar bağlantı durumu doğrulanamadı.';state.errorMessage=state.status==='signed_out'?'':error.message;}
     renderCard();
   }
@@ -221,14 +221,14 @@
   window.simurgPolarSyncNow=async function(){
     if(state.busy)return;state.busy=true;state.errorMessage='';state.message='Polar Flow verileri senkronize ediliyor.';renderCard();
     var outcome;
-    try{var payload=await request('polar-sync','POST',{});var persistence=mergeSync(payload);if(!persistence.ok)throw polarPersistenceError(persistence);var counts=payload.counts||{};state.message='Senkron tamamlandı: '+Number(counts.workouts||0)+' antrenman, '+Number(counts.activity!=null?counts.activity:counts.activities||0)+' aktivite, '+Number(counts.sleep||0)+' uyku kaydı.';state.errorMessage=(payload.warnings||[]).join(' ');outcome={ok:true,persistence:persistence,payload:payload};}
+    try{var payload=await request('polar-sync','POST',{});var persistence=await mergeSync(payload);if(!persistence.ok)throw polarPersistenceError(persistence);var counts=payload.counts||{};state.message='Senkron tamamlandı: '+Number(counts.workouts||0)+' antrenman, '+Number(counts.activity!=null?counts.activity:counts.activities||0)+' aktivite, '+Number(counts.sleep||0)+' uyku kaydı.';state.errorMessage=(payload.warnings||[]).join(' ');outcome={ok:true,persistence:persistence,payload:payload};}
     catch(error){if(error.code==='signed_out'||error.code==='missing_session'||error.code==='invalid_session')state.status='signed_out';state.errorMessage=error.message;state.message='Polar senkronizasyonu tamamlanamadı.';outcome={ok:false,code:error.code||'polar_sync_failed',error:error,persistence:error.persistenceResult||null};}
     state.busy=false;renderCard();if(outcome.ok)refreshExistingViews();return outcome;
   };
   window.simurgPolarDisconnect=async function(){
     if(state.busy||!confirm('Polar Flow bağlantısı kesilecek. Daha önce senkronize edilen Simurg verileri korunacak. Devam edelim mi?'))return;
     state.busy=true;state.errorMessage='';state.message='Polar bağlantısı kesiliyor.';renderCard();
-    try{var payload=await request('polar-disconnect','POST',{});var localResult=updateLocalConnection(Object.assign({},payload.connection,{connected:false,status:'disconnected'}));if(!localResult.ok)throw polarPersistenceError(localResult);state.status='disconnected';state.message='Polar bağlantısı kesildi. Senkronize edilmiş veriler korundu.';}
+    try{var payload=await request('polar-disconnect','POST',{});var localResult=await updateLocalConnection(Object.assign({},payload.connection,{connected:false,status:'disconnected'}));if(!localResult.ok)throw polarPersistenceError(localResult);state.status='disconnected';state.message='Polar bağlantısı kesildi. Senkronize edilmiş veriler korundu.';}
     catch(error){state.errorMessage=error.message;state.message='Polar bağlantısı kesilemedi.';}
     state.busy=false;renderCard();
   };

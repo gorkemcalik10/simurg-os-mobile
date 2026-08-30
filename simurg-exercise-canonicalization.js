@@ -216,18 +216,17 @@
     return report;
   }
   function prepared(data){var next=clone(data),report=canonicalize(next);return {data:next,report:report}}
-  function persistWithBackup(storage,original,canonical,persistence,source){
+  async function persistWithBackup(storage,original,canonical,persistence,source){
     if(!storage||!persistence)throw new Error('Migration persistence dependencies are unavailable.');
-    var previousDataRaw=storage.getItem(persistence.DATA_KEY),previousBackupRaw=storage.getItem(BACKUP_KEY),createdBackup=false;
+    var previousBackupRaw=storage.getItem(BACKUP_KEY),createdBackup=false;
     try{
       if(previousBackupRaw===null){
         persistence.requireSuccess(persistence.writeJson(storage,BACKUP_KEY,{meta:{version:VERSION,source:source||'exercise-canonicalization',createdAt:new Date().toISOString()},data:clone(original)}));
         createdBackup=true;
       }
-      persistence.requireSuccess(persistence.persistData(storage,canonical));
+      await persistence.requireSuccess(persistence.persistData(storage,canonical,{source:source||'exercise-canonicalization'}));
       return {ok:true,backupKey:BACKUP_KEY,backupCreated:createdBackup};
     }catch(error){
-      if(previousDataRaw===null)persistence.remove(storage,persistence.DATA_KEY);else persistence.writeRaw(storage,persistence.DATA_KEY,previousDataRaw);
       if(previousBackupRaw===null)persistence.remove(storage,BACKUP_KEY);else persistence.writeRaw(storage,BACKUP_KEY,previousBackupRaw);
       return {ok:false,error:error,backupKey:BACKUP_KEY,backupCreated:false};
     }

@@ -2,8 +2,8 @@ const assert = require('node:assert/strict');
 const recovery = require('../simurg-workout-recovery.js');
 const persistence = require('../simurg-persistence.js');
 
-function run(name, fn) {
-  try { fn(); process.stdout.write(`✓ ${name}\n`); }
+async function run(name, fn) {
+  try { await fn(); process.stdout.write(`✓ ${name}\n`); }
   catch (error) { process.stderr.write(`✗ ${name}\n${error.stack}\n`); process.exitCode = 1; }
 }
 
@@ -34,7 +34,8 @@ function data(workouts = []) {
   };
 }
 
-run('empty current DATA plus backup recovers every workout', () => {
+(async () => {
+await run('empty current DATA plus backup recovers every workout', () => {
   const backup = { workouts: [row(), row({ exercise: 'Flat DB Press', exerciseId: 'flat-db', weight: 20 })] };
   const report = recovery.simulateWorkoutMerge(data(), backup);
   assert.equal(report.currentWorkoutCount, 0);
@@ -44,7 +45,7 @@ run('empty current DATA plus backup recovers every workout', () => {
   assert.equal(recovery.mergeMissingWorkouts(data(), backup).data.workouts.length, 2);
 });
 
-run('duplicate matching consumes only the corresponding current row count', () => {
+await run('duplicate matching consumes only the corresponding current row count', () => {
   const existing = row();
   const backup = { workouts: [row(), row(), row({ exercise: 'Cable Row', exerciseId: 'cable-row' })] };
   const result = recovery.mergeMissingWorkouts(data([existing]), backup);
@@ -53,7 +54,7 @@ run('duplicate matching consumes only the corresponding current row count', () =
   assert.equal(result.data.workouts.length, 3);
 });
 
-run('merge preserves every non-workout DATA domain', () => {
+await run('merge preserves every non-workout DATA domain', () => {
   const current = data();
   const before = JSON.parse(JSON.stringify(current));
   const merged = recovery.mergeMissingWorkouts(current, { workouts: [row()] }).data;
@@ -62,7 +63,7 @@ run('merge preserves every non-workout DATA domain', () => {
   assert.deepEqual(merged, before);
 });
 
-run('validation reports date range and rejects invalid backup rows before merge', () => {
+await run('validation reports date range and rejects invalid backup rows before merge', () => {
   const valid = recovery.validateWorkoutBackup({ workouts: [row({ date: '2026-06-22' }), row()] });
   assert.equal(valid.valid, true);
   assert.deepEqual(valid.dateRange, { from: '2026-06-22', to: '2026-08-20' });
@@ -72,13 +73,13 @@ run('validation reports date range and rejects invalid backup rows before merge'
   assert.throws(() => recovery.mergeMissingWorkouts(data(), { workouts: [{ date: 'not-a-date' }] }), /merge durduruldu/);
 });
 
-run('public workout identity is stable across harmless object key order changes', () => {
+await run('public workout identity is stable across harmless object key order changes', () => {
   const first = row();
   const second = Object.fromEntries(Object.entries(first).reverse());
   assert.equal(recovery.workoutIdentity(first), recovery.workoutIdentity(second));
 });
 
-run('runtime merge creates a rollback snapshot and restores it safely', () => {
+await run('runtime merge creates a rollback snapshot and restores it safely', async () => {
   const values = new Map();
   const storage = {
     getItem: key => values.has(key) ? values.get(key) : null,
@@ -101,10 +102,10 @@ run('runtime merge creates a rollback snapshot and restores it safely', () => {
     });
     const input = { files: [{ size: 100, content: JSON.stringify({ workouts: [row()] }) }], value: 'backup.json' };
     runtime.analyze({ target: input });
-    runtime.merge();
+    await runtime.merge();
     assert.equal(current.workouts.length, 1);
     assert.ok(storage.getItem(recovery.SNAPSHOT_KEY));
-    runtime.rollback();
+    await runtime.rollback();
     assert.equal(current.workouts.length, 0);
     assert.equal(storage.getItem(recovery.SNAPSHOT_KEY), null);
   } finally {
@@ -116,3 +117,4 @@ run('runtime merge creates a rollback snapshot and restores it safely', () => {
 });
 
 if (process.exitCode) process.exit(process.exitCode);
+})();

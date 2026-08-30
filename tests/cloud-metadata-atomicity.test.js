@@ -282,16 +282,17 @@ test('Pull DATA persistence quota failure rolls back the application', async () 
   assert.equal(app.storage.raw(META_KEY), null);
 });
 
-test('Pull render failure retains the existing rollback contract', async () => {
-  const incoming = { schemaVersion: 1, workouts: [{ date: '2026-08-14', exercise: 'Must Roll Back' }] };
+test('Pull render failure after committed persistence does not create false application failure', async () => {
+  const incoming = { schemaVersion: 1, workouts: [{ date: '2026-08-14', exercise: 'Committed Despite Render Failure' }] };
   const app = await runtime({ lookup: { data: { payload: incoming, revision: 11, updated_at: '2026-08-14T11:00:00.000Z' }, error: null }, renderError: new Error('render failed') });
   const previousData = app.context.DATA;
   const previousRaw = app.storage.raw(DATA_KEY);
   const result = await app.window.pullUserData();
-  assert.equal(result.status, 'data_application_failure');
+  assert.equal(result.status, 'success');
   assert.equal(app.context.DATA, previousData);
-  assert.equal(app.storage.raw(DATA_KEY), previousRaw);
-  assert.equal(app.storage.raw(META_KEY), null);
+  assert.notEqual(app.storage.raw(DATA_KEY), previousRaw);
+  assert.equal(JSON.parse(app.storage.raw(DATA_KEY)).workouts[0].exercise,'Committed Despite Render Failure');
+  assert.ok(app.storage.raw(META_KEY));
 });
 
 (async () => {

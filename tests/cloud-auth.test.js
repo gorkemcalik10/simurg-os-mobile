@@ -60,8 +60,8 @@ run('signed-out cloud controls start disabled', () => {
 
 run('official Supabase v2 and one local controller are loaded', () => {
   assert.match(index, /cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2\.95\.0/);
-  assert.match(index, /simurg-cloud-auth\.js\?v=7/);
-  assert.match(sw, /simurg-cloud-auth\.js\?v=7/);
+  assert.match(index, /simurg-cloud-auth\.js\?v=8/);
+  assert.match(sw, /simurg-cloud-auth\.js\?v=8/);
 });
 
 run('active runtime contains no legacy shared cloud model', () => {
@@ -156,9 +156,12 @@ run('cloud metadata is scoped and excludes payload, token, email and password', 
   assert.doesNotMatch(cloud, /DATA\.(?:token|accessToken|refreshToken|password|userId|email)\s*=/i);
 });
 
-run('localStorage-first DATA startup validates before assignment and preserves invalid raw data', () => {
+run('IndexedDB-first startup delegates validation and preserves legacy recovery input', () => {
   assert.match(index, /simurgStoredDataRaw=localStorage\.getItem\('atlas_summary_reports'\)/);
-  assert.match(index, /SimurgDataValidation\.prepareFullText\(simurgStoredDataRaw/);
+  assert.match(index, /SimurgPersistence\.initialize\(\{/);
+  assert.match(index, /prepare:function\(value,context\)/);
+  assert.match(index, /SimurgDataValidation\.prepareFull\(value/);
+  assert.match(index, /recoverWorkoutHistoryText\(simurgStoredDataRaw/);
   assert.doesNotMatch(index, /let DATA=JSON\.parse\(localStorage\.getItem\('atlas_summary_reports'\)/);
   assert.match(index, /__simurgStartupDataValidationError/);
 });

@@ -413,7 +413,7 @@
   function wrapUniversalImport(){
     var old=window.universalImport;
     if(typeof old!=='function'||old.__polarWorkout) return;
-    window.universalImport=function(){
+    window.universalImport=async function(){
       var box=document.getElementById('universalJsonBox');
       var raw=box&&box.value?box.value.trim():'';
       if(raw){
@@ -422,8 +422,8 @@
           var kind=String(parsed&&parsed.type||'').trim().toLowerCase();
           var source=String(parsed&&parsed.source||'').trim().toLowerCase();
           if(!Array.isArray(parsed)&&(kind==='polar_flow_workout'||source==='polar flow')){
-            var workout=importPolarWorkout(parsed);
-            var persistence=typeof window.save==='function'?window.save():window.SimurgPersistence.persistData(localStorage,root());
+            var workout=await importPolarWorkout(parsed);
+            var persistence=typeof window.save==='function'?await window.save():await window.SimurgPersistence.persistData(localStorage,root(),{source:'manual-polar-workout'});
             if(!persistence.ok){window.SimurgPersistence.notifyFailure(persistence,'Polar antrenmanı kaydedilemedi.');return null;}
             if(box) box.value='';
             render();
@@ -434,7 +434,7 @@
           if(String(raw).indexOf('polar_flow_workout')>-1||String(raw).indexOf('Polar Flow')>-1){alert('Polar antrenmanı içe aktarılamadı: '+error.message);return;}
         }
       }
-      return old.apply(this,arguments);
+      return await old.apply(this,arguments);
     };
     window.universalImport.__polarWorkout=true;
   }

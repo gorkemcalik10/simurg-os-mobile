@@ -6281,54 +6281,46 @@ body{background:#050607!important;}
 <div class="modal" id="editModal"><div class="modalbox"><div class="modalTop"><h2 id="modalTitle">Düzenle</h2><button class="btn sec" onclick="closeModal()">Kapat</button></div><div id="modalBody"></div><div class="actions"><button class="btn" onclick="saveEdit()">Kaydet</button><button class="btn danger" onclick="deleteEditing()">Sil</button></div></div></div>
 <div class="modal programNameModal" id="programNameModal"><div class="modalbox"><div class="modalTop"><h2>Program İsmini Düzenle</h2><button class="btn sec" onclick="closeProgramNameModal()">Kapat</button></div><div id="programNameBody"></div><div class="actions"><button class="btn" onclick="saveProgramNameEdit()">Kaydet</button><button class="btn sec" onclick="resetProgramNameEdit()">Varsayılana Dön</button></div></div></div>
 <div class="modal exerciseLibraryModal" id="exerciseLibraryModal" role="dialog" aria-modal="true" aria-labelledby="exerciseLibraryTitle"><div class="modalbox"><div class="modalTop"><h2 id="exerciseLibraryTitle">Hareket Kütüphanesi</h2><button class="btn sec" type="button" onclick="closeExerciseLibrary()">Kapat</button></div><p class="exerciseLibraryIntro">Makine, dambıl ve yaygın salon hareketlerinden seç. Türkçe veya İngilizce adla arayabilirsin; istersen özel hareket oluşturmaya devam edebilirsin.</p><div class="exerciseLibraryTools"><input id="exerciseLibrarySearch" type="search" placeholder="Ara: incline press, göğüs, tek kol…" autocomplete="off"><select id="exerciseLibraryCategory" aria-label="Hareket kategorisi"></select></div><div class="exerciseLibraryCount" id="exerciseLibraryCount"></div><div class="exerciseLibraryResults" id="exerciseLibraryResults"></div><div class="actions"><button class="btn sec" type="button" onclick="addCustomGymExerciseFromLibrary()">+ Özel Hareket Oluştur</button></div></div></div>
-<script src="./simurg-persistence.js?v=3"></script>
+<script src="./simurg-persistence.js?v=4"></script>
 <script src="./simurg-gym-identity.js?v=2"></script>
-<script src="./simurg-exercise-canonicalization.js?v=2"></script>
+<script src="./simurg-exercise-canonicalization.js?v=3"></script>
 <script src="./simurg-training-lab-analysis.js?v=6"></script>
-<script src="./simurg-data-validation.js?v=9"></script>
-<script src="./simurg-workout-recovery.js?v=1"></script>
+<script src="./simurg-data-validation.js?v=10"></script>
+<script src="./simurg-workout-recovery.js?v=2"></script>
 <script src="./simurg-gym-flex.js?v=1"></script>
 <script src="./simurg-exercise-catalog.js?v=1"></script>
 <script>
 const INITIAL={"schemaVersion":1,"workouts":[],"metrics":[],"nutrition":[],"recovery":[],"appleWatch":[],"dailyNotes":[],"weeklyNotes":[],"customGymPrograms":{},"programNames":{},"gymDayState":{},"exerciseLoadProfiles":{},"exerciseCatalog":{},"journal":{"schemaVersion":1,"daily":{}},"coachIntelligence":{"schemaVersion":1,"daily":{},"weekly":{},"patterns":{},"aiCache":{},"settings":{"movementCategories":{}}},"polarWorkouts":{"daily":{},"latest":null},"polarActivity":{"daily":{},"latest":null},"polarProfile":{"latest":null},"polarSleep":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarNightlyRecharge":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarContinuousHr":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarCardioLoad":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarConnection":{"connected":false,"status":"disconnected","lastSyncAt":null,"lastError":null,"source":"Polar AccessLink"}};
 window.SIMURG_INITIAL_DEFAULTS=INITIAL;
-let DATA;
+let DATA=SimurgDataValidation.prepareFull(INITIAL,{source:'startup-defaults'}).data;
 var simurgStoredDataRaw=localStorage.getItem('atlas_summary_reports');
-try{
-  if(simurgStoredDataRaw){
-    var simurgLegacyPrepared=SimurgDataValidation.prepareFullText(simurgStoredDataRaw,{source:'startup-local-storage',canonicalizeExercises:false});
-    var simurgCanonicalPrepared=SimurgDataValidation.prepareFull(simurgLegacyPrepared.data,{source:'startup-exercise-canonicalization'});
-    DATA=simurgCanonicalPrepared.data;
-    if(simurgCanonicalPrepared.canonicalizationReport&&simurgCanonicalPrepared.canonicalizationReport.changed){
-      var simurgMigrationPersist=SimurgExerciseCanonicalization.persistWithBackup(localStorage,simurgLegacyPrepared.data,DATA,SimurgPersistence,'startup-local-storage');
-      if(!simurgMigrationPersist.ok){
-        DATA=simurgLegacyPrepared.data;
-        window.__simurgExerciseCanonicalizationError=simurgMigrationPersist.error;
-        console.warn('Simurg OS: egzersiz migration yedeği veya atomik kaydı oluşturulamadı; eski DATA değiştirilmedi.');
-      }else window.__simurgExerciseCanonicalizationReport=simurgCanonicalPrepared.canonicalizationReport;
-    }
-  }else DATA=SimurgDataValidation.prepareFull(INITIAL,{source:'startup-defaults'}).data;
-}catch(simurgStartupDataError){
-  var simurgStartupRecovery=null;
-  try{
-    if(simurgStoredDataRaw)simurgStartupRecovery=SimurgDataValidation.recoverWorkoutHistoryText(simurgStoredDataRaw,{source:'startup-workout-recovery'});
-  }catch(simurgStartupRecoveryError){
-    window.__simurgStartupDataRecoveryError={
-      code:simurgStartupRecoveryError&&simurgStartupRecoveryError.code||'startup_recovery_failed',
-      message:simurgStartupRecoveryError&&simurgStartupRecoveryError.message||'Workout geçmişi güvenli biçimde kurtarılamadı.'
-    };
+window.__simurgDataReady=SimurgPersistence.initialize({
+  storage:localStorage,
+  indexedDB:window.indexedDB,
+  prepare:function(value,context){
+    return SimurgDataValidation.prepareFull(value,{source:context&&context.source||'persistence',legacyAppleWatchRpe:true}).data;
   }
-  DATA=simurgStartupRecovery&&simurgStartupRecovery.data||SimurgDataValidation.prepareFull(INITIAL,{source:'startup-fallback'}).data;
-  window.__simurgStartupDataRecoveryActive=!!(simurgStartupRecovery&&simurgStartupRecovery.recoveredWorkoutRows);
-  if(window.__simurgStartupDataRecoveryActive)window.__simurgStartupDataRecovery={recoveredWorkoutRows:simurgStartupRecovery.recoveredWorkoutRows,warnings:simurgStartupRecovery.warnings||[]};
-  window.__simurgStartupDataValidationError={
-    code:simurgStartupDataError&&simurgStartupDataError.code||'startup_validation_failed',
-    message:simurgStartupDataError&&simurgStartupDataError.message||'Yerel DATA doğrulanamadı.'
-  };
-  console.warn(window.__simurgStartupDataRecoveryActive
-    ?'Simurg OS: DATA doğrulaması başarısız; yerel veri değiştirilmeden workout geçmişi salt okunur kurtarma modunda yüklendi.'
-    :'Simurg OS: geçersiz yerel DATA değiştirilmeden güvenli başlangıç verisi kullanıldı.');
-}
+}).then(function(simurgStartupResult){
+  var resolved=simurgStartupResult&&simurgStartupResult.data;
+  if(!resolved&&simurgStartupResult&&simurgStartupResult.legacyError&&simurgStoredDataRaw){
+    try{
+      var recovery=SimurgDataValidation.recoverWorkoutHistoryText(simurgStoredDataRaw,{source:'startup-workout-recovery'});
+      if(recovery&&recovery.data){
+        resolved=recovery.data;
+        window.__simurgStartupDataRecoveryActive=!!recovery.recoveredWorkoutRows;
+        if(window.__simurgStartupDataRecoveryActive)window.__simurgStartupDataRecovery={recoveredWorkoutRows:recovery.recoveredWorkoutRows,warnings:recovery.warnings||[]};
+      }
+    }catch(recoveryError){window.__simurgStartupDataRecoveryError={code:recoveryError&&recoveryError.code||'startup_recovery_failed',message:recoveryError&&recoveryError.message||'Workout geçmişi güvenli biçimde kurtarılamadı.'};}
+    window.__simurgStartupDataValidationError={code:simurgStartupResult.legacyError.code||'startup_validation_failed',message:simurgStartupResult.legacyError.message||'Yerel DATA doğrulanamadı.'};
+  }
+  DATA=resolved||SimurgDataValidation.prepareFull(INITIAL,{source:'startup-fallback'}).data;
+  window.simurgData=DATA;
+  if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('persistence-startup');
+  if(typeof render==='function')render();
+  if(typeof window.renderDataLocalStatus==='function')window.renderDataLocalStatus();
+  try{document.dispatchEvent(new CustomEvent('simurg:data-ready',{detail:simurgStartupResult}));}catch(error){}
+  return simurgStartupResult;
+});
 if(!DATA.appleWatch) DATA.appleWatch=[];
 if(!DATA.dailyNotes) DATA.dailyNotes=[];
 if(!DATA.weeklyNotes) DATA.weeklyNotes=[];
@@ -6710,7 +6702,7 @@ function restoreGymDrafts(date){
     [...card.querySelectorAll('.gymSetInputRow')].forEach((row,index)=>{if(!draft.rows[index])return;row.querySelector('.gymWeight').value=draft.rows[index].weight;row.querySelector('.gymReps').value=draft.rows[index].reps});
   });
 }
-function saveGymExercise(key){
+async function saveGymExercise(key){
   const card=gymCardEl(key);
   if(!card) return;
   const beforeData=JSON.parse(JSON.stringify(DATA));
@@ -6755,7 +6747,7 @@ function saveGymExercise(key){
     }
   });
   SimurgGymIdentity.applySessionTiming(DATA.workouts,selectedDate,sessionId,sessionTiming);
-  const result=save();
+  const result=await save();
   if(result.ok){
     gymSessionDrafts.delete(gymDraftId(selectedDate,key));
     if(nextKey&&window.innerWidth<=900){window.SimurgMobileIA?.mountGym();window.SimurgMobileIA?.openGym(nextKey,{focus:true})}
@@ -6773,14 +6765,14 @@ function addGymSet(key){
     <label class="gymInputBox"><small>Tekrar</small><input class="gymReps" inputmode="numeric" enterkeyhint="done" placeholder="tekrar"></label>
   </div>`);
 }
-function clearGymExercise(key){
+async function clearGymExercise(key){
   const card=gymCardEl(key);
   if(!card) return;
   const meta=readGymMetaFromCard(card);
   if(!confirm(meta.name+' verilerini bu gün için temizleyeyim mi?')) return;
   const item=gymItemsForDate(selectedDate).find(value=>value.key===key);if(!item)return;
   const before=DATA.workouts;DATA.workouts=DATA.workouts.filter(w=>!gymRowMatches(item,w,meta.name));
-  if(!save().ok)DATA.workouts=before;
+  if(!(await save()).ok)DATA.workouts=before;
 }
 function gymExercisePickerSheet(){
   let shade=document.getElementById('gymExercisePicker');
@@ -6856,7 +6848,7 @@ function closeGymExercisePicker(){const shade=document.getElementById('gymExerci
 function focusGymItem(key){
   setTimeout(()=>{window.SimurgMobileIA?.mountGym();window.SimurgMobileIA?.openGym(key,{focus:true});const card=gymCardEl(key);card?.scrollIntoView({behavior:'smooth',block:'start'});card?.querySelector('.gymWeight')?.focus()},30);
 }
-function addGymExerciseFromChoice(choice){
+async function addGymExerciseFromChoice(choice){
   if(!choice)return;
   const before=JSON.parse(JSON.stringify(DATA)),exerciseId=choice.exerciseId||SimurgGymIdentity.id('exercise');
   const current=gymItemsForDate(selectedDate).find(item=>item.exerciseId===exerciseId);
@@ -6864,14 +6856,14 @@ function addGymExerciseFromChoice(choice){
   const entry=ensureGymProgramEntry(selectedDate),id=SimurgGymIdentity.id('custom'),state=SimurgGymFlex.stateFor(DATA,selectedDate);
   SimurgExerciseCatalog.register(DATA,{exerciseId,name:choice.name,bodyPart:choice.bodyPart,exerciseType:choice.exerciseType});
   entry.extras.push({id,exerciseId,name:choice.name,bodyPart:choice.bodyPart||'Other',exerciseType:choice.exerciseType||'',setCount:3,custom:true,sessionOnly:!!(state&&state.mode==='custom')});
-  const result=save();if(!result.ok){DATA=before;return result}
+  const result=await save();if(!result.ok){DATA=before;return result}
   closeGymExercisePicker();focusGymItem('custom::'+id);return result;
 }
-function createGymExerciseFromPicker(){
+async function createGymExerciseFromPicker(){
   const shade=gymExercisePickerSheet(),name=shade.querySelector('#gymExerciseNameInput').value.trim(),bodyPart=shade.querySelector('#gymExerciseBodyInput').value.trim();
   if(!name){shade.querySelector('#gymExerciseNameInput').focus();return}
   if(!bodyPart){shade.querySelector('#gymExerciseBodyInput').focus();return}
-  return addGymExerciseFromChoice({exerciseId:SimurgGymIdentity.id('exercise'),name,bodyPart,exerciseType:''});
+  return await addGymExerciseFromChoice({exerciseId:SimurgGymIdentity.id('exercise'),name,bodyPart,exerciseType:''});
 }
 function addGymExercise(){openGymExercisePicker()}
 function openExerciseLibrary(){
@@ -6923,7 +6915,7 @@ if(exerciseLibraryResults) exerciseLibraryResults.addEventListener('click',event
   const button=event.target.closest('[data-library-exercise-id]');
   if(button) selectLibraryExercise(button.dataset.libraryExerciseId);
 });
-function deleteGymExercise(key){
+async function deleteGymExercise(key){
   const card=gymCardEl(key);
   if(!card) return;
   const meta=readGymMetaFromCard(card);
@@ -6937,7 +6929,7 @@ function deleteGymExercise(key){
   const item=gymItemsForDate(selectedDate).find(value=>value.key===key);
   entry.extras=entry.extras.filter(x=>x.id!==id);
   if(item)DATA.workouts=DATA.workouts.filter(w=>!gymRowMatches(item,w,meta.name));
-  if(!save().ok)DATA=before;
+  if(!(await save()).ok)DATA=before;
 }
 
 function readGymCoachFromCard(card){
@@ -7039,12 +7031,12 @@ function openGymWorkoutSelector(){
 }
 function closeGymWorkoutSelector(){const shade=document.getElementById('gymWorkoutShade');if(shade)shade.hidden=true}
 function gymDisplayLabel(value){return window.SimurgLabels?window.SimurgLabels.sentence(value):value}
-function persistGymDaySelection(state,extras){
+async function persistGymDaySelection(state,extras){
   captureGymDrafts();const before=JSON.parse(JSON.stringify(DATA));DATA.gymDayState=DATA.gymDayState||{};DATA.gymDayState[selectedDate]=state;
   if(Array.isArray(extras))DATA.customGymPrograms[selectedDate]={overrides:{},extras:extras};
-  const result=save();if(result.ok)closeGymWorkoutSelector();else DATA=before;return result;
+  const result=await save();if(result.ok)closeGymWorkoutSelector();else DATA=before;return result;
 }
-function gymChoosePlanned(){persistGymDaySelection(SimurgGymFlex.makeState('planned',{sourceDay:dayName(selectedDate),sourceDate:selectedDate,label:gymBaseTemplateForDate(selectedDate).name}))}
+async function gymChoosePlanned(){return await persistGymDaySelection(SimurgGymFlex.makeState('planned',{sourceDay:dayName(selectedDate),sourceDate:selectedDate,label:gymBaseTemplateForDate(selectedDate).name}))}
 function gymShowMissedPrograms(){
   const body=document.getElementById('gymWorkoutSheetBody'),items=SimurgGymFlex.missedPrograms(DATA,selectedDate,gymBaseTemplateForDate);
   body.innerHTML=(items.length?items.map(item=>gymSelectorOption('↶',gymDisplayLabel(item.name),trDate(item.date)+' · '+(window.SimurgLabels?window.SimurgLabels.ui(item.day):item.day),`gymChooseAlternate('${item.date}')`)).join(''):'<div class="gymEmpty">Bu haftada seçili tarihten önce kaçırılmış planlı antrenman yok.</div>')+gymSelectorOption('‹','Geri','Ana seçeneklere dön','openGymWorkoutSelector()');
@@ -7053,29 +7045,29 @@ function gymShowProgramTemplates(){
   const body=document.getElementById('gymWorkoutSheetBody'),items=SimurgGymFlex.programTemplates(selectedDate,gymBaseTemplateForDate);
   body.innerHTML=items.map(item=>gymSelectorOption('≡',gymDisplayLabel(item.name),window.SimurgLabels?window.SimurgLabels.ui(item.day):item.day,`gymChooseAlternate('${item.date}')`)).join('')+gymSelectorOption('‹','Geri','Ana seçeneklere dön','openGymWorkoutSelector()');
 }
-function gymChooseAlternate(sourceDate){const base=gymBaseTemplateForDate(sourceDate);persistGymDaySelection(SimurgGymFlex.makeState('alternate',{sourceDay:dayName(sourceDate),sourceDate,label:base.name}))}
-function gymRepeatLastSession(){
+async function gymChooseAlternate(sourceDate){const base=gymBaseTemplateForDate(sourceDate);return await persistGymDaySelection(SimurgGymFlex.makeState('alternate',{sourceDay:dayName(sourceDate),sourceDate,label:base.name}))}
+async function gymRepeatLastSession(){
   const last=SimurgGymFlex.lastSession(DATA,selectedDate);if(!last){alert('Tekrarlanabilecek önceki Gym seansı bulunamadı.');return}
   const extras=last.items.map(item=>({...item,sessionOnly:true}));
-  persistGymDaySelection(SimurgGymFlex.makeState('custom',{sourceDay:dayName(last.date),sourceDate:last.date,label:'Son Seansı Tekrarla · '+trDate(last.date)}),extras);
+  return await persistGymDaySelection(SimurgGymFlex.makeState('custom',{sourceDay:dayName(last.date),sourceDate:last.date,label:'Son Seansı Tekrarla · '+trDate(last.date)}),extras);
 }
-function gymStartFreeWorkout(){
+async function gymStartFreeWorkout(){
   const id='free_'+Date.now(),extras=[{id,name:'Yeni Hareket',bodyPart:'Other',setCount:3,custom:true,sessionOnly:true}];
-  const result=persistGymDaySelection(SimurgGymFlex.makeState('custom',{sourceDay:null,sourceDate:null,label:'Serbest Antrenman'}),extras);
+  const result=await persistGymDaySelection(SimurgGymFlex.makeState('custom',{sourceDay:null,sourceDate:null,label:'Serbest Antrenman'}),extras);
   if(result.ok){window.SimurgMobileIA?.mountGym();window.SimurgMobileIA?.openGym('custom::'+id,{focus:true})}
 }
-function gymSkipSelectedDay(){
+async function gymSkipSelectedDay(){
   const rows=dayData(selectedDate);
   if(rows.length&&!confirm('Bu tarihte '+rows.length+' kayıtlı set var. Gün atlandı olarak işaretlenecek ancak setler silinmeyecek. Devam edilsin mi?'))return;
   const previous=DATA.gymDayState&&DATA.gymDayState[selectedDate]?JSON.parse(JSON.stringify(DATA.gymDayState[selectedDate])):null;
   const pendingUndo={date:selectedDate,previous};gymSkipUndo=pendingUndo;
-  const result=persistGymDaySelection(SimurgGymFlex.makeState('skipped',{sourceDay:null,sourceDate:null,label:'Bugün Atlandı'}));
+  const result=await persistGymDaySelection(SimurgGymFlex.makeState('skipped',{sourceDay:null,sourceDate:null,label:'Bugün Atlandı'}));
   if(!result.ok)gymSkipUndo=null;
 }
-function undoGymSkippedDay(){
+async function undoGymSkippedDay(){
   if(!gymSkipUndo)return;const before=JSON.parse(JSON.stringify(DATA)),pendingUndo=gymSkipUndo;DATA.gymDayState=DATA.gymDayState||{};
   if(pendingUndo.previous)DATA.gymDayState[pendingUndo.date]=pendingUndo.previous;else delete DATA.gymDayState[pendingUndo.date];
-  selectedDate=pendingUndo.date;gymSkipUndo=null;const result=save();if(!result.ok){DATA=before;gymSkipUndo=pendingUndo}
+  selectedDate=pendingUndo.date;gymSkipUndo=null;const result=await save();if(!result.ok){DATA=before;gymSkipUndo=pendingUndo}
 }
 function renderGymWorkoutSelector(template){
   const root=document.getElementById('gymWorkoutSelector');if(!root)return;
@@ -7323,18 +7315,20 @@ function renderActivitySessionCard(date){
   });
   return Object.entries(grouped).map(([type,typeRows])=>renderSingleActivityCard(date, activitySummaryFromRows(date,typeRows))).join('');
 }
-function deleteActivityCard(date,type){
+async function deleteActivityCard(date,type){
   let label=activityDisplayName(type||'Other');
   let niceDate=(typeof trDate==='function')?trDate(date):date;
   if(!confirm(`${label} aktivitesini ${niceDate} tarihinden silmek istediğine emin misin?\n\nBu işlem sadece bu aktivite türünün o güne ait Apple Watch kayıtlarını kaldırır.`)) return;
   if(!DATA.appleWatch) DATA.appleWatch=[];
-  let before=DATA.appleWatch.length;
+  let before=DATA.appleWatch.slice(),beforeCount=before.length;
   DATA.appleWatch=DATA.appleWatch.filter(r=>!(r.date===date && normalizeActivityType(r)===type));
-  let removed=before-DATA.appleWatch.length;
+  let removed=beforeCount-DATA.appleWatch.length;
+  const result=await save();
+  if(!result.ok){DATA.appleWatch=before;return result}
   if(typeof setImportSummary==='function'){
     try{ setImportSummary(`<b>Activity silindi.</b><br><span class="sumPill">${escapeAttr(activityDisplayName(type))}</span><span class="sumPill">${escapeAttr(trDate(date))}</span><span class="sumPill">${removed} kayıt</span>`); }catch(e){}
   }
-  save();
+  return result;
 }
 function dayCoachStats(date){
   let rows=dayData(date);
@@ -7581,7 +7575,7 @@ function renderWeeklyReport(){
   </div>`;
 }
 
-function importWorkoutJson(){
+async function importWorkoutJson(){
 try{
   let parsed=JSON.parse(workoutJsonBox.value);
   let arr=Array.isArray(parsed)?parsed:(parsed.workouts||[]);
@@ -7599,13 +7593,13 @@ try{
   selectedDate=arr[0].date;
   weekStart=mondayOf(selectedDate);
   workoutJsonBox.value='';
-  save();
+  await save();
 }catch(e){
   alert('Workout JSON okunamadı. date / exercise / reps / weight alanlarını kontrol et.');
 }
 }
 
-function importWatchJson(){
+async function importWatchJson(){
 try{
   let rec=JSON.parse(watchJsonBox.value);
   if(!rec.date){alert('Bu JSON içinde date alanı yok. Hangi güne ait olduğunu bilmem için date gerekli.');return;}
@@ -7614,7 +7608,7 @@ try{
   watchJsonBox.value='';
   selectedDate=rec.date;
   let d=parseDate(rec.date); let dow=d.getDay(); if(dow>=1 && dow<=7){ weekStart=addDays(rec.date, -(dow===0?6:dow-1)); }
-  save();
+  await save();
 }catch(e){
   alert('JSON okunamadı. Formatı kontrol et.');
 }
@@ -7784,7 +7778,7 @@ function importAppleWatch(rec){
   selectedDate=rec.date;
   weekStart=mondayOf(selectedDate);
 }
-function universalImport(){
+async function universalImport(){
 try{
   let raw=universalJsonBox.value.trim();
   if(!raw){alert('JSON kutusu boş.');return;}
@@ -7808,7 +7802,7 @@ try{
     return;
   }
   universalJsonBox.value='';
-  save();
+  await save();
 }catch(e){
   alert('Universal Import başarısız: '+e.message);
 }
@@ -7887,12 +7881,12 @@ function loadProfileEditor(ex){
 function openEditExerciseAtIndex(idx){idx=safeDataIndex(idx);editIndexes=idx==null?[]:SimurgGymIdentity.indexesFor(DATA.workouts,idx);let first=DATA.workouts[editIndexes[0]];if(!first)return;modalTitle.textContent=String(first.exercise||'')+' düzenle';modalBody.innerHTML=`<input id="editExerciseName" value="${escapeAttr(first.exercise)}"><select id="editBodyPart"><option>${escapeAttr(first.bodyPart)}</option><option>Chest</option><option>Back</option><option>Rear Delt</option><option>Biceps</option><option>Triceps</option><option>Side Delt</option><option>Scapula</option></select>`+loadProfileEditor(first.exercise)+editIndexes.map((rowIndex,i)=>{let s=DATA.workouts[rowIndex];return `<div class="form5"><input value="Set ${i+1}" disabled><input value="${escapeAttr(s.notes)}" id="note_${rowIndex}"><input value="1" disabled><input id="reps_${rowIndex}" value="${escapeAttr(s.reps)}"><input id="weight_${rowIndex}" value="${escapeAttr(s.weight)}"></div>`}).join('');editModal.classList.add('active')}
 function openEditExercise(ex){let idx=DATA.workouts.findIndex(w=>w.exercise===ex&&w.date===selectedDate);openEditExerciseAtIndex(idx)}
 function openEditSet(idx){idx=safeDataIndex(idx);let s=idx==null?null:DATA.workouts[idx];if(!s)return;editIndexes=[idx];modalTitle.textContent=String(s.exercise||'')+' set düzenle';modalBody.innerHTML=`<input id="editExerciseName" value="${escapeAttr(s.exercise)}"><select id="editBodyPart"><option>${escapeAttr(s.bodyPart)}</option><option>Chest</option><option>Back</option><option>Rear Delt</option><option>Biceps</option><option>Triceps</option><option>Side Delt</option><option>Scapula</option></select>${loadProfileEditor(s.exercise)}<input id="reps_${idx}" value="${escapeAttr(s.reps)}" placeholder="Tekrar"><input id="weight_${idx}" value="${escapeAttr(s.weight)}" placeholder="Kilo"><input id="note_${idx}" value="${escapeAttr(s.notes)}" placeholder="Not">`;editModal.classList.add('active')}
-function saveEdit(){let before=JSON.parse(JSON.stringify(DATA)),first=DATA.workouts[editIndexes[0]],oldName=String(first?.exercise||''),name=document.getElementById('editExerciseName').value,body=document.getElementById('editBodyPart').value,preset=document.getElementById('editLoadPreset')?.value||'UNASSIGNED',sessionId=first?.sessionId||SimurgGymIdentity.sessionIdFor(DATA.workouts,selectedDate),exerciseId=first?.exerciseId||SimurgGymIdentity.id('exercise');if(SimurgVolumeModel.profileKey(oldName)!==SimurgVolumeModel.profileKey(name))SimurgVolumeModel.moveProfile(oldName,name);SimurgVolumeModel.setProfile(name,preset);editIndexes.forEach(idx=>{let row=DATA.workouts[idx];row.exercise=name;row.bodyPart=body;row.reps=Number(document.getElementById('reps_'+idx).value)||0;row.weight=Number(String(document.getElementById('weight_'+idx).value).replace(',','.'))||0;row.notes=document.getElementById('note_'+idx)?.value||'';SimurgGymIdentity.apply(row,{sessionId,exerciseId,setId:SimurgGymIdentity.setIdFor(row)})});if(save().ok)closeModal();else DATA=before}
-function deleteEditing(){let before=DATA.workouts.slice();editIndexes.sort((a,b)=>b-a).forEach(i=>DATA.workouts.splice(i,1));if(save().ok)closeModal();else DATA.workouts=before}
+async function saveEdit(){let before=JSON.parse(JSON.stringify(DATA)),first=DATA.workouts[editIndexes[0]],oldName=String(first?.exercise||''),name=document.getElementById('editExerciseName').value,body=document.getElementById('editBodyPart').value,preset=document.getElementById('editLoadPreset')?.value||'UNASSIGNED',sessionId=first?.sessionId||SimurgGymIdentity.sessionIdFor(DATA.workouts,selectedDate),exerciseId=first?.exerciseId||SimurgGymIdentity.id('exercise');if(SimurgVolumeModel.profileKey(oldName)!==SimurgVolumeModel.profileKey(name))SimurgVolumeModel.moveProfile(oldName,name);SimurgVolumeModel.setProfile(name,preset);editIndexes.forEach(idx=>{let row=DATA.workouts[idx];row.exercise=name;row.bodyPart=body;row.reps=Number(document.getElementById('reps_'+idx).value)||0;row.weight=Number(String(document.getElementById('weight_'+idx).value).replace(',','.'))||0;row.notes=document.getElementById('note_'+idx)?.value||'';SimurgGymIdentity.apply(row,{sessionId,exerciseId,setId:SimurgGymIdentity.setIdFor(row)})});if((await save()).ok)closeModal();else DATA=before}
+async function deleteEditing(){let before=DATA.workouts.slice();editIndexes.sort((a,b)=>b-a).forEach(i=>DATA.workouts.splice(i,1));if((await save()).ok)closeModal();else DATA.workouts=before}
 function closeModal(){editModal.classList.remove('active')}
-function addSetToExerciseAtIndex(idx){idx=safeDataIndex(idx);let matching=idx==null?[]:SimurgGymIdentity.indexesFor(DATA.workouts,idx),last=matching.length?DATA.workouts[matching[matching.length-1]]:null;if(!last)return;let row={...last,setId:SimurgGymIdentity.id('set'),notes:'Yeni set'};DATA.workouts.push(row);if(!save().ok)DATA.workouts.pop()}
+async function addSetToExerciseAtIndex(idx){idx=safeDataIndex(idx);let matching=idx==null?[]:SimurgGymIdentity.indexesFor(DATA.workouts,idx),last=matching.length?DATA.workouts[matching[matching.length-1]]:null;if(!last)return;let row={...last,setId:SimurgGymIdentity.id('set'),notes:'Yeni set'};DATA.workouts.push(row);if(!(await save()).ok)DATA.workouts.pop()}
 function addSetToExercise(ex){let idx=DATA.workouts.findIndex(w=>w.exercise===ex&&w.date===selectedDate);addSetToExerciseAtIndex(idx)}
-function addWorkout(){let row={date:selectedDate,day:dayName(selectedDate),exercise:exercise.value,sets:1,reps:Number(reps.value)||0,weight:Number(String(weight.value).replace(',','.'))||0,bodyPart:part(exercise.value),notes:''},sessionId=SimurgGymIdentity.sessionIdFor(DATA.workouts,selectedDate),sessionTiming=SimurgGymIdentity.sessionTimingFor(DATA.workouts,selectedDate,sessionId);SimurgGymIdentity.apply(row,{sessionId:sessionId,exerciseId:SimurgGymIdentity.id('exercise'),setId:SimurgGymIdentity.id('set')});DATA.workouts.push(row);SimurgGymIdentity.applySessionTiming(DATA.workouts,selectedDate,sessionId,sessionTiming);save()}
+async function addWorkout(){let before=JSON.parse(JSON.stringify(DATA)),row={date:selectedDate,day:dayName(selectedDate),exercise:exercise.value,sets:1,reps:Number(reps.value)||0,weight:Number(String(weight.value).replace(',','.'))||0,bodyPart:part(exercise.value),notes:''},sessionId=SimurgGymIdentity.sessionIdFor(DATA.workouts,selectedDate),sessionTiming=SimurgGymIdentity.sessionTimingFor(DATA.workouts,selectedDate,sessionId);SimurgGymIdentity.apply(row,{sessionId:sessionId,exerciseId:SimurgGymIdentity.id('exercise'),setId:SimurgGymIdentity.id('set')});DATA.workouts.push(row);SimurgGymIdentity.applySessionTiming(DATA.workouts,selectedDate,sessionId,sessionTiming);let result=await save();if(!result.ok)DATA=before;return result}
 
 function openProgramNameEdit(day){
   editingProgramDay=day;
@@ -7903,37 +7897,41 @@ function openProgramNameEdit(day){
   setTimeout(()=>document.getElementById('programNameInput')?.focus(),50);
 }
 function closeProgramNameModal(){programNameModal.classList.remove('active');editingProgramDay=null}
-function saveProgramNameEdit(){
+async function saveProgramNameEdit(){
   if(!editingProgramDay) return;
+  const before=JSON.parse(JSON.stringify(DATA.programNames||{}));
   DATA.programNames=DATA.programNames||{};
   let val=(document.getElementById('programNameInput')?.value||'').trim();
   if(!val) val=defaultProgramNames[editingProgramDay]||'Off Day';
   DATA.programNames[editingProgramDay]=val;
-  closeProgramNameModal();
-  save();
+  const result=await save();
+  if(result.ok)closeProgramNameModal();else DATA.programNames=before;
+  return result;
 }
-function resetProgramNameEdit(){
+async function resetProgramNameEdit(){
   if(!editingProgramDay) return;
+  const before=JSON.parse(JSON.stringify(DATA.programNames||{}));
   DATA.programNames=DATA.programNames||{};
   delete DATA.programNames[editingProgramDay];
-  closeProgramNameModal();
-  save();
+  const result=await save();
+  if(result.ok)closeProgramNameModal();else DATA.programNames=before;
+  return result;
 }
 function startupRecoveryWriteBlocked(){return window.__simurgStartupDataRecoveryActive?{ok:false,key:SimurgPersistence.DATA_KEY,code:'startup_recovery_active',message:'Yerel DATA doğrulanamadığı için eski depolama verisi korunuyor. Geçerli bir JSON yedeği veya Cloud Pull uygulanmadan kayıt yapılmadı.'}:null}
-function save(){const blocked=startupRecoveryWriteBlocked();if(blocked)return blocked;const original=DATA,prepared=SimurgExerciseCanonicalization.prepared(DATA);let result;if(prepared.report.changed){result=SimurgExerciseCanonicalization.persistWithBackup(localStorage,original,prepared.data,SimurgPersistence,'local-save');if(result.ok){DATA=prepared.data;window.__simurgExerciseCanonicalizationReport=prepared.report}}else result=SimurgPersistence.persistData(localStorage,DATA);if(!result.ok){SimurgPersistence.notifyFailure(result,'Değişiklikler kaydedilemedi.');return result}if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('local-save');render();return result}
+async function save(){const blocked=startupRecoveryWriteBlocked();if(blocked)return blocked;const original=DATA,prepared=SimurgExerciseCanonicalization.prepared(DATA);let result;if(prepared.report.changed){result=await SimurgExerciseCanonicalization.persistWithBackup(localStorage,original,prepared.data,SimurgPersistence,'local-save');if(result.ok){DATA=prepared.data;window.__simurgExerciseCanonicalizationReport=prepared.report}}else result=await SimurgPersistence.persistData(localStorage,DATA,{source:'local-save'});if(!result.ok){SimurgPersistence.notifyFailure(result,'Değişiklikler kaydedilemedi.');return result}if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('local-save');render();return result}
 window.simurgGetData=function(){return DATA};
 window.simurgPersistData=function(){return save()};
 function clearManual(){['exercise','sets','reps','weight'].forEach(id=>document.getElementById(id).value='')}
-function addMetric(){DATA.metrics.push({date:selectedDate,weight:metricWeight.value,waist:metricWaist.value,notes:metricNotes.value});save()}
-function addNutrition(){DATA.nutrition.push({date:selectedDate,protein:protein.value,water:water.value,note:nutritionNote.value});save()}
-function addRecovery(){DATA.recovery.push({date:selectedDate,sleep:sleep.value,energy:energy.value,note:recoveryNote.value});save()}
+async function addMetric(){let before=DATA.metrics.slice();DATA.metrics.push({date:selectedDate,weight:metricWeight.value,waist:metricWaist.value,notes:metricNotes.value});let result=await save();if(!result.ok)DATA.metrics=before;return result}
+async function addNutrition(){let before=DATA.nutrition.slice();DATA.nutrition.push({date:selectedDate,protein:protein.value,water:water.value,note:nutritionNote.value});let result=await save();if(!result.ok)DATA.nutrition=before;return result}
+async function addRecovery(){let before=DATA.recovery.slice();DATA.recovery.push({date:selectedDate,sleep:sleep.value,energy:energy.value,note:recoveryNote.value});let result=await save();if(!result.ok)DATA.recovery=before;return result}
 function exportJSON(){download('atlas_summary_reports_backup.json',JSON.stringify(DATA,null,2))}
 function exportCSV(){let rows=[["date","day","exercise","reps","weight","bodyPart"],...DATA.workouts.map(w=>[w.date,w.day,w.exercise,w.reps,w.weight,w.bodyPart])];download('atlas_workouts.csv',rows.map(r=>r.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(',')).join('\n'))}
 function importJSON(e){
   let f=e.target.files[0];
   if(!f)return;
   let r=new FileReader();
-  r.onload=()=>{DATA=JSON.parse(r.result);save()};
+  r.onload=async()=>{DATA=JSON.parse(r.result);await save()};
   r.readAsText(f);
 }
 function download(name,text){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'}));a.download=name;a.click()}
@@ -8210,7 +8208,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     }
     weekStart=mondayOf(selectedDate);
   };
-  window.universalImport=function(){
+  window.universalImport=async function(){
     try{
       let raw=universalJsonBox.value.trim();
       if(!raw){alert('JSON kutusu boş.');return;}
@@ -8244,15 +8242,15 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
         }
       }
       universalJsonBox.value='';
-      save();
+      await save();
     }catch(e){ alert('Universal Import başarısız: '+e.message); }
   };
-  window.importWatchJson=function(){
+  window.importWatchJson=async function(){
     try{
       let rec=JSON.parse(watchJsonBox.value);
       importAppleWatch(rec);
       watchJsonBox.value='';
-      save();
+      await save();
     }catch(e){ alert('JSON okunamadı: '+e.message); }
   };
   window.activitySummaryForDate=function(date){
@@ -8636,9 +8634,9 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
   function canonicalType(rec){
     try{ return normalizeActivityType(rec)||'Other'; }catch(e){ return rec.activityType||rec.activity||rec.workoutType||'Other'; }
   }
-  function removeActivityNow(date,type){
+  async function removeActivityNow(date,type){
     if(!DATA.appleWatch) DATA.appleWatch=[];
-    const before=DATA.appleWatch.length;
+    const previous=DATA.appleWatch.slice(),before=previous.length;
     DATA.appleWatch=DATA.appleWatch.filter(r=>{
       if(r.date!==date) return true;
       const rt=canonicalType(r);
@@ -8648,7 +8646,8 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     if(typeof setImportSummary==='function'){
       try{ setImportSummary(`<b>Activity silindi.</b><br><span class="sumPill">${niceActivityLabel(type)}</span><span class="sumPill">${niceDateLabel(date)}</span><span class="sumPill">${removed} kayıt</span>`); }catch(e){}
     }
-    save();
+    const result=await save();
+    if(!result.ok){DATA.appleWatch=previous;return false}
     return false;
   }
   window.deleteActivityCard=function(date,type){
@@ -8704,15 +8703,15 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     const notes=DATA&&DATA.activityNotes?Object.keys(DATA.activityNotes).length:0;
     return {workoutDays, activities:polarCount+activityKeys, appleWatch:watch.length, notes};
   }
-  window.renderDataLocalStatus=function(){
+  window.renderDataLocalStatus=async function(){
     const el=document.getElementById('localDataStatus');
     if(!el||typeof DATA==='undefined'||!DATA) return;
     const c=dataCounts();
     const last=(DATA._meta&&DATA._meta.lastLocalUpdate)||DATA.lastSyncAt||(DATA.polarConnection&&DATA.polarConnection.lastSyncAt)||'';
     const lastLabel=last?fmtDateTime(last):(c.workoutDays||c.activities||c.appleWatch?'Kayıt mevcut':'Henüz kayıt yok');
-    const storageReport=window.SimurgPersistence&&SimurgPersistence.inspectStorage?SimurgPersistence.inspectStorage(localStorage):null;
+    const storageReport=window.SimurgPersistence&&SimurgPersistence.diagnostics?await SimurgPersistence.diagnostics(localStorage,navigator):null;
     const formatBytes=value=>value>=1048576?(value/1048576).toFixed(1)+' MB':value>=1024?Math.round(value/1024)+' KB':value+' B';
-    const storageLabel=storageReport?'DATA '+formatBytes(storageReport.canonicalBytes)+' · '+storageReport.backupCount+' yedek / '+formatBytes(storageReport.backupBytes)+(storageReport.warning?' · Dikkat':''):'';
+    const originLabel=storageReport&&storageReport.originEstimate&&storageReport.originEstimate.available?formatBytes(storageReport.originEstimate.usage)+' / '+formatBytes(storageReport.originEstimate.quota):'Kullanılamıyor';
     const rows=[
       ['Son Yerel Güncelleme',lastLabel],
       ['Toplam Antrenman Günü',c.workoutDays],
@@ -8720,7 +8719,13 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
       ['Apple Watch Kaydı',c.appleWatch],
       ['Hızlı Notlar',c.notes],
       ['Mevcut Sürüm',BUILD_NAME],
-      ['Depolama',storageLabel||'Ölçüm kullanılamıyor']
+      ['Persistence Backend',storageReport?storageReport.backend:'Ölçüm kullanılamıyor'],
+      ['Migration Durumu',storageReport?storageReport.migrationStatus:'Ölçüm kullanılamıyor'],
+      ['IndexedDB Canonical',storageReport?formatBytes(storageReport.indexedDbBytes):'Ölçüm kullanılamıyor'],
+      ['Legacy localStorage DATA',storageReport?formatBytes(storageReport.canonicalBytes):'Ölçüm kullanılamıyor'],
+      ['Tam-DATA Yedekleri',storageReport?storageReport.backupCount+' adet · '+formatBytes(storageReport.backupBytes):'Ölçüm kullanılamıyor'],
+      ['Origin Depolama Tahmini',originLabel],
+      ['Son Depolama Hatası',storageReport&&storageReport.lastError?storageReport.lastError.code+' · '+storageReport.lastError.message:'Yok']
     ];
     el.replaceChildren(...rows.map(([label,value])=>{
       const box=document.createElement('div');
@@ -8734,30 +8739,40 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     }));
   };
 
-  window.simurgPersistCandidateData=function(candidate){
+  window.simurgPersistCandidateData=async function(candidate){
     const blocked=startupRecoveryWriteBlocked();
     if(blocked)return blocked;
+    if(window.__simurgDataReady)await window.__simurgDataReady;
     if(candidate&&typeof candidate==='object'){
       candidate._meta=candidate._meta&&typeof candidate._meta==='object'?candidate._meta:{};
       candidate._meta.lastLocalUpdate=new Date().toISOString();
       candidate._meta.build=BUILD_NAME;
     }
-    return SimurgPersistence.persistData(localStorage,candidate);
+    return await SimurgPersistence.persistData(localStorage,candidate,{source:'candidate-save'});
   };
 
   const oldSave=window.save;
-  window.save=function(){
+  window.save=async function(){
     const blocked=startupRecoveryWriteBlocked();
     if(blocked)return blocked;
-    const hadMeta=!!(DATA&&Object.prototype.hasOwnProperty.call(DATA,'_meta'));
-    const previousMeta=hadMeta?JSON.parse(JSON.stringify(DATA._meta)):null;
-    markLocalUpdate();
-    const result=SimurgPersistence.persistData(localStorage,DATA);
+    if(window.__simurgDataReady)await window.__simurgDataReady;
+    const live=DATA;
+    const candidate=JSON.parse(JSON.stringify(live));
+    candidate._meta=candidate._meta&&typeof candidate._meta==='object'?candidate._meta:{};
+    candidate._meta.lastLocalUpdate=new Date().toISOString();
+    candidate._meta.build=BUILD_NAME;
+    const prepared=SimurgExerciseCanonicalization.prepared(candidate);
+    const result=prepared.report.changed
+      ?await SimurgExerciseCanonicalization.persistWithBackup(localStorage,live,prepared.data,SimurgPersistence,'local-save')
+      :await SimurgPersistence.persistData(localStorage,prepared.data,{source:'local-save'});
     if(!result.ok){
-      if(DATA){if(hadMeta)DATA._meta=previousMeta;else delete DATA._meta}
       SimurgPersistence.notifyFailure(result,'Değişiklikler kaydedilemedi.');
       return result;
     }
+    Object.keys(live).forEach(key=>delete live[key]);
+    Object.keys(prepared.data).forEach(key=>live[key]=prepared.data[key]);
+    DATA=live;
+    if(prepared.report.changed)window.__simurgExerciseCanonicalizationReport=prepared.report;
     if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('local-save');
     if(typeof render==='function') render();
     renderDataLocalStatus();
@@ -8773,7 +8788,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
   function getActivityNote(date,type){
     return (DATA&&DATA.activityNotes&&DATA.activityNotes[noteKey(date,type)])||'';
   }
-  window.setActivityQuickNote=function(date,type){
+  window.setActivityQuickNote=async function(date,type){
     const key=noteKey(date,type);
     DATA.activityNotes=DATA.activityNotes||{};
     const label=(typeof activityDisplayName==='function')?activityDisplayName(type||'Other'):(type||'Activity');
@@ -8781,8 +8796,10 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     const val=prompt(`${label} için kısa not yaz. Boş bırakırsan mevcut not silinir.`, old);
     if(val===null) return false;
     const clean=String(val).trim();
+    const had=Object.prototype.hasOwnProperty.call(DATA.activityNotes,key),previous=DATA.activityNotes[key];
     if(clean) DATA.activityNotes[key]=clean; else delete DATA.activityNotes[key];
-    save();
+    const result=await save();
+    if(!result.ok){if(had)DATA.activityNotes[key]=previous;else delete DATA.activityNotes[key]}
     return false;
   };
 
@@ -9345,7 +9362,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
       if(!result.ok)SimurgPersistence.notifyFailure(result,'Geri alma kopyası oluşturulamadı.');
     }catch(e){console.warn('undo snapshot failed',e)}
   }
-  window.undoLastImport=function(){
+  window.undoLastImport=async function(){
     try{
       const raw=localStorage.getItem(SNAP_KEY);
       if(!raw){alert('Geri alınacak son import kaydı yok.');return;}
@@ -9362,7 +9379,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
       if(!DATA.gymDayState) DATA.gymDayState={};
       if(!DATA.activityNotes) DATA.activityNotes={};
       if(snap.meta&&snap.meta.selectedDate) selectedDate=snap.meta.selectedDate;
-      SimurgPersistence.requireSuccess(SimurgPersistence.persistData(localStorage,DATA));
+      await SimurgPersistence.requireSuccess(SimurgPersistence.persistData(localStorage,DATA,{source:'undo-import'}));
       SimurgPersistence.requireSuccess(SimurgPersistence.remove(localStorage,SNAP_KEY));
       if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('undo-import');
       if(typeof render==='function') render();
@@ -10450,11 +10467,11 @@ textarea,input,select{
     if(window.SimurgSignalModel&&typeof window.SimurgSignalModel.safeTarget==='function') text=window.SimurgSignalModel.safeTarget(ex,rowsForExercise(ex),text);
     return {text, saved};
   }
-  function updateStoredTarget(ex,date){
+  async function updateStoredTarget(ex,date){
     if(!ex) return; DATA.autoNextTargets=DATA.autoNextTargets||{};
     const hadTarget=Object.prototype.hasOwnProperty.call(DATA.autoNextTargets,ex),previousTarget=hadTarget?DATA.autoNextTargets[ex]:null;
     const nt=nextTarget(ex,date); DATA.autoNextTargets[ex]={text:nt.text,date:new Date().toISOString(),sourceDate:date};
-    const result=SimurgPersistence.persistData(localStorage,DATA);
+    const result=await SimurgPersistence.persistData(localStorage,DATA,{source:'gym-auto-target'});
     if(!result.ok){if(hadTarget)DATA.autoNextTargets[ex]=previousTarget;else delete DATA.autoNextTargets[ex];SimurgPersistence.notifyFailure(result,'Otomatik hedef kaydedilemedi.');}
     return result;
   }
@@ -10472,11 +10489,11 @@ textarea,input,select{
     });
   }
   const oldSaveGym=window.saveGymExercise;
-  if(typeof oldSaveGym==='function') window.saveGymExercise=function(key){
+  if(typeof oldSaveGym==='function') window.saveGymExercise=async function(key){
     const date=getSelectedDate(); let ex='';
     try{const card=document.querySelector(`.gymCard[data-gym-key="${String(key).replace(/"/g,'\\"')}"]`); ex=(card?.querySelector('.gymExerciseName')?.value||card?.getAttribute('data-current-name')||'').trim();}catch(e){}
-    const ret=oldSaveGym.apply(this,arguments);
-    try{if(ret&&ret.ok){if(ex)updateStoredTarget(ex,date);addGymBadges()}}catch(e){}
+    const ret=await oldSaveGym.apply(this,arguments);
+    try{if(ret&&ret.ok){if(ex)await updateStoredTarget(ex,date);addGymBadges()}}catch(e){}
     return ret;
   };
   function weekStats(start){
@@ -10840,14 +10857,14 @@ button,.btn,.gymMiniBtn,input,select,textarea{
     box.scrollIntoView({behavior:'smooth',block:'center'});
   };
   const prevUniversal=window.universalImport;
-  window.universalImport=function(){
+  window.universalImport=async function(){
     try{
       const box=document.getElementById('universalJsonBox'); const raw=box?.value?.trim()||'';
       if(raw){ const parsed=JSON.parse(raw); const kind=String(parsed.importType||parsed.type||parsed.kind||'').toLowerCase();
-        if(kind==='polar_recovery' || kind==='recovery' || kind==='polar' || parsed.nightlyRecharge || parsed.hrvMs || parsed.restingHr){ importPolarRecovery(parsed); if(box) box.value=''; save(); alert('Polar Recovery içe aktarıldı.'); return; }
+        if(kind==='polar_recovery' || kind==='recovery' || kind==='polar' || parsed.nightlyRecharge || parsed.hrvMs || parsed.restingHr){ const before=JSON.parse(JSON.stringify(DATA));importPolarRecovery(parsed);const result=await save();if(!result.ok){DATA=before;return result}if(box) box.value='';alert('Polar Recovery içe aktarıldı.');return result; }
       }
     }catch(e){ alert('Polar Import başarısız: '+e.message); return; }
-    if(typeof prevUniversal==='function') return prevUniversal.apply(this,arguments);
+    if(typeof prevUniversal==='function') return await prevUniversal.apply(this,arguments);
   };
   window.SimurgLegacyPolarRecovery={read:recoveryFor,import:window.importPolarRecovery};
 })();
@@ -15706,9 +15723,9 @@ m Shell V4: Logger information architecture fix -->
     return root;
   }
   function bridge(){return store().polarBridge;}
-  function persist(){
+  async function persist(){
     var root=store();
-    var result=SimurgPersistence.persistData(localStorage,root);
+    var result=await SimurgPersistence.persistData(localStorage,root,{source:'polar-bridge'});
     if(!result.ok)SimurgPersistence.notifyFailure(result,'Polar Bridge verisi kaydedilemedi.');
     return result;
   }
@@ -16238,19 +16255,20 @@ m Shell V4: Logger information architecture fix -->
 	    try{store();renderDataCenterBridge();renderPolarBridgeTab();renderCoachingPolarCard();renderHomePolarNote();}catch(e){console.warn('polar bridge render',e);}
 	  }
 
-	  window.simurgReceivePolarBridge=function(payload){
+	  window.simurgReceivePolarBridge=async function(payload){
+	    var live=store(),previous=JSON.parse(JSON.stringify(live));
 	    var normalized=normalize(payload);
 	    var b=bridge();
 	    b.lastSync=normalized.receivedAt;
 	    b.daily[normalized.date]=normalized;
-    var persistence=persist();
-    if(!persistence.ok)return persistence;
+    var persistence=await persist();
+    if(!persistence.ok){Object.keys(live).forEach(function(key){delete live[key]});Object.keys(previous).forEach(function(key){live[key]=previous[key]});return persistence;}
     renderAll();
 	    try{if(typeof renderPolarDashboard==='function') renderPolarDashboard();}catch(e){}
 	    return {ok:true,storedAt:'simurgData.polarBridge.daily.'+normalized.date,polarBridge:b,normalizedPayload:normalized};
 	  };
 
-	  window.simurgSavePolarBridgeTestPayload=function(){
+	  window.simurgSavePolarBridgeTestPayload=async function(){
 	    var box=document.getElementById('polarBridgeTestPayload');
 	    var raw=box&&box.value?box.value.trim():'';
 	    var payload;
@@ -16260,7 +16278,7 @@ m Shell V4: Logger information architecture fix -->
 	      if(errorStatus) errorStatus.textContent='Test payload okunamadı: '+e.message;
 	      return null;
 	    }
-	    var result=window.simurgReceivePolarBridge(payload);
+	    var result=await window.simurgReceivePolarBridge(payload);
 	    try{renderPolarBridgeTab();}catch(e){}
 	    var status=document.getElementById('polarBridgeTestStatus');
 	    if(status && result && result.normalizedPayload) status.textContent='Test payload kaydedildi: '+result.normalizedPayload.date;
@@ -16294,14 +16312,14 @@ m Shell V4: Logger information architecture fix -->
 })();
 </script>
 <link rel="stylesheet" href="./polar-workout.css?v=12">
-<script src="./polar-workout.js?v=16"></script>
+<script src="./polar-workout.js?v=17"></script>
 <script src="./workout-source-policy.js?v=3"></script>
 <link rel="stylesheet" href="./simurg-coach.css?v=14">
 <script src="./simurg-coach-ui.js?v=15"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=41">
 <script src="./premium-standard.js?v=53"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
-<script src="./polar-accesslink.js?v=10"></script>
+<script src="./polar-accesslink.js?v=11"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=27">
 <script src="./desktop-alignment.js?v=37"></script>
 <link rel="stylesheet" href="./mobile-ia-premium.css?v=12">
@@ -16315,15 +16333,18 @@ m Shell V4: Logger information architecture fix -->
 <script src="./mobile-ia-premium.js?v=12"></script>
 <script src="./simurg-training-lab-ui.js?v=19"></script>
 <script src="./simurg-performance-ui.js?v=3"></script>
-<script src="./simurg-journal-ui.js?v=1"></script>
+<script src="./simurg-journal-ui.js?v=2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0" defer></script>
-<script src="./simurg-cloud-auth.js?v=7" defer></script>
+<script src="./simurg-cloud-auth.js?v=8" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
   if(!window.SimurgDataValidation)return;
   var atomic=window.SimurgDataValidation.installRuntime({
     getData:function(){return DATA;},
-    setData:function(value){DATA=value;},
+    setData:function(value){
+      if(DATA&&typeof DATA==='object'&&!Array.isArray(DATA)){Object.keys(DATA).forEach(function(key){delete DATA[key]});Object.keys(value).forEach(function(key){DATA[key]=value[key]});}
+      else DATA=value;
+    },
     getSelectedDate:function(){return selectedDate;},
     setSelectedDate:function(value){selectedDate=value;weekStart=mondayOf(value);},
     render:function(){render();},

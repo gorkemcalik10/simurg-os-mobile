@@ -13,6 +13,7 @@ function test(name, fn) {
   fn();
   process.stdout.write('✓ ' + name + '\n');
 }
+async function asyncTest(name, fn) { await fn(); process.stdout.write('✓ ' + name + '\n'); }
 
 test('mobile Program is a seven-day training plan with Turkish product copy', () => {
   assert.match(mobile, /<h1>Program<\/h1><p>Haftalık antrenman planın<\/p>/);
@@ -50,7 +51,7 @@ test('Program mobile layout is single-column and overflow bounded', () => {
   assert.match(css, /\.miaProgramDayToggle\{[\s\S]*?grid-template-columns:82px minmax\(0,1fr\) 20px!important/);
 });
 
-test('existing persistence round-trip keeps program names and canonical exercise IDs', () => {
+asyncTest('existing persistence round-trip keeps program names and canonical exercise IDs', async () => {
   const data = validation.prepareFull({
     schemaVersion: 1,
     programNames: { Monday: 'Push Test' },
@@ -59,8 +60,8 @@ test('existing persistence round-trip keeps program names and canonical exercise
     }
   }).data;
   const storage = { value: '', setItem(key, value) { assert.equal(key, persistence.DATA_KEY); this.value = value; } };
-  assert.equal(persistence.persistData(storage, data).ok, true);
+  assert.equal((await persistence.persistData(storage, data)).ok, true);
   const restored = validation.prepareFull(JSON.parse(storage.value)).data;
   assert.equal(restored.programNames.Monday, 'Push Test');
   assert.equal(restored.customGymPrograms['2026-08-10'].extras[0].exerciseId, 'canonical-row-1');
-});
+}).catch(error=>{process.stderr.write(error.stack+'\n');process.exitCode=1;});

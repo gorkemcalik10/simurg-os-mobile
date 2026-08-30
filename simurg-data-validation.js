@@ -686,7 +686,7 @@
   function installRuntime(adapter){
     if(typeof window==='undefined'||!adapter||typeof adapter.getData!=='function'||typeof adapter.setData!=='function')return null;
     if(window.__simurgPatchBInstalled)return window.SimurgDataAtomic;
-    var DATA_KEY='atlas_summary_reports',SNAP_KEY='simurg_last_import_snapshot_v1';
+    var SNAP_KEY='simurg_last_import_snapshot_v1';
     function selected(){return typeof adapter.getSelectedDate==='function'?adapter.getSelectedDate():''}
     function setSelected(value){if(value&&validDate(value)&&typeof adapter.setSelectedDate==='function')adapter.setSelectedDate(value)}
     function redraw(){
@@ -698,11 +698,10 @@
       var stamp=new Date().toISOString().replace(/[:.]/g,'-');
       adapter.download((label||'simurg-pre-import')+'-'+stamp+'.json',JSON.stringify(previous,null,2));
     }
-    function commit(candidate,options){
+    async function commit(candidate,options){
       options=options||{};
       var prepared=prepareFull(candidate,{source:options.source||'runtime-commit'}).data;
       var previous=adapter.getData();
-      var previousRaw=localStorage.getItem(DATA_KEY);
       var previousDate=selected();
       var previousSnapshot=localStorage.getItem(SNAP_KEY);
       var previousRecoveryActive=!!window.__simurgStartupDataRecoveryActive;
@@ -714,25 +713,24 @@
         if(options.snapshot){
           window.SimurgPersistence.requireSuccess(window.SimurgPersistence.writeJson(localStorage,SNAP_KEY,{meta:{at:new Date().toISOString(),source:options.source||'import',selectedDate:previousDate},data:clone(previous)}));
         }
+        await window.SimurgPersistence.requireSuccess(window.SimurgPersistence.persistData(localStorage,prepared,{source:options.source||'runtime-commit'}));
         adapter.setData(prepared);
         setSelected(options.selectedDate||'');
-        window.SimurgPersistence.requireSuccess(window.SimurgPersistence.persistData(localStorage,prepared));
-        redraw();
+        try{redraw()}catch(renderError){if(typeof console!=='undefined'&&console.warn)console.warn('Simurg OS: DATA kaydedildi ancak görünüm yenilenemedi.',renderError)}
         return prepared;
       }catch(error){
         adapter.setData(previous);
         window.__simurgStartupDataRecoveryActive=previousRecoveryActive;
         if(previousRecovery===undefined)delete window.__simurgStartupDataRecovery;else window.__simurgStartupDataRecovery=previousRecovery;
-        if(previousRaw===null)window.SimurgPersistence.remove(localStorage,DATA_KEY);else window.SimurgPersistence.writeRaw(localStorage,DATA_KEY,previousRaw);
         if(previousSnapshot===null)window.SimurgPersistence.remove(localStorage,SNAP_KEY);else window.SimurgPersistence.writeRaw(localStorage,SNAP_KEY,previousSnapshot);
         setSelected(previousDate);
         try{redraw()}catch(rollbackError){}
         throw error;
       }
     }
-    function staged(mutator,options){
+    async function staged(mutator,options){
       var stagedResult=stageAppend(adapter.getData(),mutator,{source:options&&options.source||'append'});
-      commit(stagedResult.data,Object.assign({},options,{selectedDate:stagedResult.result&&stagedResult.result.date}));
+      await commit(stagedResult.data,Object.assign({},options,{selectedDate:stagedResult.result&&stagedResult.result.date}));
       return stagedResult.result;
     }
     function message(error){return error&&error.message?String(error.message):'Doğrulama başarısız.'}
@@ -742,7 +740,7 @@
       if(!raw)fail('empty_import','JSON kutusu boş','$.import');
       return {box:box,value:parseJson(raw,{source:id})};
     }
-    function secureUniversalImport(){
+    async function secureUniversalImport(){
       try{
         var input=parseBox('universalJsonBox');
         var routedValue=input.value;
@@ -754,7 +752,7 @@
             routedValue=window.SimurgPolarWorkoutNormalize(routedValue);
           }
         }
-        var result=staged(function(candidate){return routeImport(candidate,routedValue,{
+        var result=await staged(function(candidate){return routeImport(candidate,routedValue,{
           workoutNormalizer:window.normalizeWorkoutRow,
           activityNormalizer:window.normalizeWatchRecord
         })},{source:'universal-import',snapshot:true});
@@ -763,44 +761,44 @@
         return result;
       }catch(error){alert('Universal Import başarısız: '+message(error));return null}
     }
-    function secureWorkoutJson(){
+    async function secureWorkoutJson(){
       try{
         var input=parseBox('workoutJsonBox');
         var rows=Array.isArray(input.value)?input.value:(input.value.workouts||[]);
-        var result=staged(function(candidate){return appendWorkoutRows(candidate,rows,window.normalizeWorkoutRow)},{source:'workout-json-import',snapshot:true});
+        var result=await staged(function(candidate){return appendWorkoutRows(candidate,rows,window.normalizeWorkoutRow)},{source:'workout-json-import',snapshot:true});
         if(input.box)input.box.value='';
         return result;
       }catch(error){alert('Workout JSON okunamadı: '+message(error));return null}
     }
-    function secureWatchJson(){
+    async function secureWatchJson(){
       try{
         var input=parseBox('watchJsonBox');
-        var result=staged(function(candidate){return appendActivityRows(candidate,[input.value],window.normalizeWatchRecord)},{source:'activity-json-import',snapshot:true});
+        var result=await staged(function(candidate){return appendActivityRows(candidate,[input.value],window.normalizeWatchRecord)},{source:'activity-json-import',snapshot:true});
         if(input.box)input.box.value='';
         return result;
       }catch(error){alert('Aktivite JSON okunamadı: '+message(error));return null}
     }
-    function secureWorkoutArray(rows){
-      return staged(function(candidate){return appendWorkoutRows(candidate,rows,window.normalizeWorkoutRow)},{source:'callable-workout-import',snapshot:true});
+    async function secureWorkoutArray(rows){
+      return await staged(function(candidate){return appendWorkoutRows(candidate,rows,window.normalizeWorkoutRow)},{source:'callable-workout-import',snapshot:true});
     }
-    function secureActivity(input){
-      return staged(function(candidate){return appendActivityRows(candidate,[input],window.normalizeWatchRecord)},{source:'callable-activity-import',snapshot:true});
+    async function secureActivity(input){
+      return await staged(function(candidate){return appendActivityRows(candidate,[input],window.normalizeWatchRecord)},{source:'callable-activity-import',snapshot:true});
     }
-    function securePolarWorkout(input){
+    async function securePolarWorkout(input){
       scan(input);
       var normalized=typeof window.SimurgPolarWorkoutNormalize==='function'?window.SimurgPolarWorkoutNormalize(input):input;
-      var result=staged(function(candidate){return appendPolarWorkout(candidate,normalized)},{source:'manual-polar-workout',snapshot:true});
+      var result=await staged(function(candidate){return appendPolarWorkout(candidate,normalized)},{source:'manual-polar-workout',snapshot:true});
       return result&&result.record?result.record:result;
     }
-    function securePolarRecovery(input){
-      return staged(function(candidate){return appendPolarRecovery(candidate,input)},{source:'manual-polar-recovery',snapshot:true});
+    async function securePolarRecovery(input){
+      return await staged(function(candidate){return appendPolarRecovery(candidate,input)},{source:'manual-polar-recovery',snapshot:true});
     }
-    function secureBridge(input){
+    async function secureBridge(input){
       scan(input);
       var normalized=window.SimurgPolarBridge&&typeof window.SimurgPolarBridge.normalize==='function'
         ?window.SimurgPolarBridge.normalize(input)
         :input;
-      var result=staged(function(candidate){
+      var result=await staged(function(candidate){
         var row=validatePolarRecoveryRecord(normalized,'$.import.polarBridge',{coerce:true});
         if(!candidate.polarBridge)candidate.polarBridge={daily:{},lastSync:null};
         if(!candidate.polarBridge.daily)candidate.polarBridge.daily={};
@@ -820,10 +818,10 @@
       if(!file)return;
       if(file.size>LIMITS.maxBytes){alert('JSON içe aktarılamadı: dosya boyutu sınırı aşıyor.');input.value='';return}
       var reader=new FileReader();
-      reader.onload=function(){
+      reader.onload=async function(){
         try{
           var prepared=prepareFullText(String(reader.result||''),{source:'backup-file-restore',legacyAppleWatchRpe:true});
-          commit(prepared.data,{source:'backup-file-restore',downloadBackup:true,backupLabel:'simurg-pre-restore'});
+          await commit(prepared.data,{source:'backup-file-restore',downloadBackup:true,backupLabel:'simurg-pre-restore'});
           alert('JSON yedeği doğrulandı ve geri yüklendi.');
         }catch(error){alert('JSON içe aktarılamadı: '+message(error))}
         finally{input.value=''}
@@ -831,14 +829,14 @@
       reader.onerror=function(){alert('JSON dosyası okunamadı.');input.value=''};
       reader.readAsText(file);
     }
-    function secureUndo(){
+    async function secureUndo(){
       var raw=localStorage.getItem(SNAP_KEY);
       if(!raw){alert('Geri alınabilir import bulunamadı.');return null}
       try{
         var snapshot=parseJson(raw,{source:'undo-snapshot'});
         plain(snapshot,'$.snapshot');
         var prepared=prepareFull(snapshot.data,{source:'undo-import'});
-        commit(prepared.data,{source:'undo-import',selectedDate:snapshot.meta&&snapshot.meta.selectedDate});
+        await commit(prepared.data,{source:'undo-import',selectedDate:snapshot.meta&&snapshot.meta.selectedDate});
         window.SimurgPersistence.requireSuccess(window.SimurgPersistence.remove(localStorage,SNAP_KEY));
         alert('Son import geri alındı.');
         return prepared.data;

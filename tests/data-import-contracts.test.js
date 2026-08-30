@@ -34,11 +34,12 @@ function body(source, name) {
   assert.fail(`${name} body not closed`);
 }
 
-run('startup validates stored DATA before the DATA assignment', () => {
+run('startup initializes IndexedDB-first persistence before applying resolved DATA', () => {
   const readAt = index.indexOf("simurgStoredDataRaw=localStorage.getItem('atlas_summary_reports')");
-  const validateAt = index.indexOf('SimurgDataValidation.prepareFullText(simurgStoredDataRaw');
+  const validateAt = index.indexOf('SimurgPersistence.initialize({');
+  const assignAt = index.indexOf('DATA=resolved||');
   const fallbackAt = index.indexOf('__simurgStartupDataValidationError');
-  assert.ok(readAt >= 0 && validateAt > readAt && fallbackAt > validateAt);
+  assert.ok(readAt >= 0 && validateAt > readAt && assignAt > validateAt && fallbackAt > validateAt);
   assert.doesNotMatch(index, /DATA=JSON\.parse\(simurgStoredDataRaw/);
   assert.match(index, /recoverWorkoutHistoryText\(simurgStoredDataRaw/);
   assert.match(index, /__simurgStartupDataRecoveryActive/);
@@ -67,14 +68,15 @@ run('active append and callable legacy entry points are replaced by the staged c
   assert.match(validator, /prepareFull\(candidate/);
 });
 
-run('atomic commit retains exact previous DATA, storage, date and snapshot for rollback', () => {
+run('atomic commit awaits persistence before changing live DATA and preserves snapshot/date rollback', () => {
   const source = body(validator, 'commit');
   assert.match(source, /var previous=adapter\.getData\(\)/);
-  assert.match(source, /var previousRaw=localStorage\.getItem\(DATA_KEY\)/);
   assert.match(source, /var previousDate=selected\(\)/);
   assert.match(source, /var previousSnapshot=localStorage\.getItem\(SNAP_KEY\)/);
+  assert.match(source, /await window\.SimurgPersistence\.requireSuccess/);
+  assert.ok(source.indexOf('await window.SimurgPersistence.requireSuccess')<source.indexOf('adapter.setData(prepared)'));
   assert.match(source, /adapter\.setData\(previous\)/);
-  assert.match(source, /SimurgPersistence\.writeRaw\(localStorage,DATA_KEY,previousRaw\)/);
+  assert.doesNotMatch(source, /writeRaw\(localStorage,DATA_KEY/);
 });
 
 run('Cloud Pull validates before revision display, confirmation, backup, persist and metadata attempt', () => {

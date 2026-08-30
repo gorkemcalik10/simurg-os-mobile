@@ -2,7 +2,6 @@
   'use strict';
 
   var TABLE='simurg_user_data';
-  var LOCAL_DATA_KEY='atlas_summary_reports';
   var META_PREFIX='simurg_cloud_meta:';
   var client=null;
   var authSubscription=null;
@@ -20,6 +19,7 @@
     var proto=Object.getPrototypeOf(value);
     return proto===Object.prototype||proto===null;
   }
+  function replaceInPlace(target,value){Object.keys(target).forEach(function(key){delete target[key]});Object.keys(value).forEach(function(key){target[key]=value[key]});return target}
   function safeMessage(error,fallback){
     var message=error&&typeof error.message==='string'?error.message.trim():'';
     if(!message)return fallback;
@@ -129,7 +129,7 @@
   }
   function clearMeta(userId){if(userId)window.SimurgPersistence.remove(localStorage,metaKey(userId))}
   function currentData(){return typeof DATA!=='undefined'?DATA:null}
-  function requireCurrentData(){
+  async function requireCurrentData(){
     var value=currentData();
     if(!isPlainObject(value))throw new Error('Yerel DATA geçerli bir nesne değil.');
     if(!window.SimurgDataValidation)throw new Error('DATA doğrulayıcı yüklenemedi.');
@@ -139,9 +139,9 @@
     var prepared=window.SimurgDataValidation.prepareFull(legacy,{source:'authenticated-cloud-push'});
     if(prepared.canonicalizationReport&&prepared.canonicalizationReport.changed){
       if(!window.SimurgExerciseCanonicalization)throw new Error('Egzersiz migration katmanı yüklenemedi.');
-      var persisted=window.SimurgExerciseCanonicalization.persistWithBackup(localStorage,legacy,prepared.data,window.SimurgPersistence,'authenticated-cloud-push');
+      var persisted=await window.SimurgExerciseCanonicalization.persistWithBackup(localStorage,legacy,prepared.data,window.SimurgPersistence,'authenticated-cloud-push');
       if(!persisted.ok)throw persisted.error||new Error('Egzersiz migration yedeği oluşturulamadı.');
-      DATA=prepared.data;
+      replaceInPlace(value,prepared.data);DATA=value;
       if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('exercise-canonicalization-cloud-push');
     }
     return prepared.data;
@@ -193,9 +193,8 @@
     link.remove();
     setTimeout(function(){URL.revokeObjectURL(url)},0);
   }
-  function persistPulledData(value,migrationOriginal,migrationReport){
+  async function persistPulledData(value,migrationOriginal,migrationReport){
     var previousData=DATA;
-    var previousRaw=localStorage.getItem(LOCAL_DATA_KEY);
     var previousRecoveryActive=!!window.__simurgStartupDataRecoveryActive;
     var previousRecovery=window.__simurgStartupDataRecovery;
     try{
@@ -203,19 +202,17 @@
       delete window.__simurgStartupDataRecovery;
       if(migrationReport&&migrationReport.changed){
         if(!window.SimurgExerciseCanonicalization)throw new Error('Egzersiz migration katmanı yüklenemedi.');
-        var migrated=window.SimurgExerciseCanonicalization.persistWithBackup(localStorage,migrationOriginal,value,window.SimurgPersistence,'authenticated-cloud-pull');
+        var migrated=await window.SimurgExerciseCanonicalization.persistWithBackup(localStorage,migrationOriginal,value,window.SimurgPersistence,'authenticated-cloud-pull');
         if(!migrated.ok)throw migrated.error||new Error('Egzersiz migration yedeği oluşturulamadı.');
-      }else window.SimurgPersistence.requireSuccess(window.SimurgPersistence.persistData(localStorage,value));
-      DATA=value;
-      if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('cloud-pull');
-      if(typeof render==='function')render();
-      if(typeof window.renderDataLocalStatus==='function')window.renderDataLocalStatus();
+      }else await window.SimurgPersistence.requireSuccess(window.SimurgPersistence.persistData(localStorage,value,{source:'authenticated-cloud-pull'}));
+      replaceInPlace(previousData,value);DATA=previousData;
+      try{if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('cloud-pull');}catch(renderError){}
+      try{if(typeof render==='function')render();}catch(renderError){}
+      try{if(typeof window.renderDataLocalStatus==='function')window.renderDataLocalStatus();}catch(renderError){}
     }catch(error){
       DATA=previousData;
       window.__simurgStartupDataRecoveryActive=previousRecoveryActive;
       if(previousRecovery===undefined)delete window.__simurgStartupDataRecovery;else window.__simurgStartupDataRecovery=previousRecovery;
-      if(previousRaw===null)window.SimurgPersistence.remove(localStorage,LOCAL_DATA_KEY);
-      else window.SimurgPersistence.writeRaw(localStorage,LOCAL_DATA_KEY,previousRaw);
       try{if(typeof render==='function')render();}catch(rollbackError){}
       throw error;
     }
@@ -301,7 +298,7 @@
     var stage='local_preparation';
     try{
       var context=await requireSession();
-      var localData=requireCurrentData();
+      var localData=await requireCurrentData();
       stage='remote';
       var lookup=await context.client.from(TABLE)
         .select('revision,updated_at')
@@ -374,7 +371,7 @@
       var pulledPrepared=preparePulledData(result.data.payload),pulled=pulledPrepared.data;
       setRevisionStatus(result.data.revision,result.data.updated_at);
       stage='local_preparation';
-      var oldData=requireCurrentData();
+      var oldData=await requireCurrentData();
       var safety=workoutSafety(oldData,pulled,result.data.updated_at);
       if(!window.confirm(pullConfirmation(safety))){
         return finishOperation('pull',safety.hasRisk?'local_workout_conflict':'cancelled',safety.hasRisk?'Alım durduruldu: bulut kopyası yerel workout verilerini azaltabilir. Yerel veri değiştirilmedi.':'Alım iptal edildi. Yerel veri değiştirilmedi.',safety.hasRisk?'conflict':'',{workoutSafety:safety,dataApplied:false});
@@ -383,7 +380,7 @@
       stage='backup';
       downloadLocalBackup(oldData);
       stage='data_application';
-      persistPulledData(pulled,pulledPrepared.legacyData,pulledPrepared.canonicalizationReport);
+      await persistPulledData(pulled,pulledPrepared.legacyData,pulledPrepared.canonicalizationReport);
       stage='metadata';
       var pulledMeta=tryWriteMeta(context.userId,{revision:result.data.revision,updatedAt:result.data.updated_at,lastPullAt:new Date().toISOString(),lastPushAt:''});
       if(!pulledMeta.ok)return finishOperation('pull','success_with_local_metadata_warning',metadataWarning('Buluttan alım',pulledMeta.error)+' Uygulanan DATA korunuyor; depolama sorununu giderdikten sonra gerekirse Pull işlemini açıkça yeniden başlatın.','warn',{revision:result.data.revision,updatedAt:result.data.updated_at,metadataPersisted:false,dataApplied:true});

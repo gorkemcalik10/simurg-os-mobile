@@ -147,7 +147,7 @@
       reader.onerror=function(){pending=null;setStatus('Backup dosyası okunamadı.','error');input.value=''};
       reader.readAsText(file);
     }
-    function merge(){
+    async function merge(){
       if(!pending){setStatus('Önce workout backup dosyasını analiz et.','error');return null}
       if(JSON.stringify(adapter.getData().workouts||[])!==pending.currentWorkouts){pending=null;setStatus('Workout verisi analizden sonra değişti. Backup dosyasını yeniden analiz et.','error');return null}
       if(!pending.report.missingCount){setStatus('Eklenecek eksik workout kaydı yok.','ready');return null}
@@ -157,7 +157,7 @@
         var merged=mergeMissingWorkouts(previous,pending.backup);
         var snapshot={meta:{at:new Date().toISOString(),source:'workout-recovery',nonWorkoutFingerprint:withoutWorkouts(previous)},data:previous};
         window.SimurgPersistence.requireSuccess(window.SimurgPersistence.writeJson(localStorage,SNAPSHOT_KEY,snapshot));
-        adapter.commit(merged.data,{source:'workout-recovery'});
+        await adapter.commit(merged.data,{source:'workout-recovery'});
         pending=null;
         setStatus('Recovery tamamlandı. Önce: '+merged.report.currentWorkoutCount+' · Eklendi: '+merged.report.missingCount+' · Sonra: '+merged.report.expectedWorkoutCount,'success');
         return merged;
@@ -167,7 +167,7 @@
         return null;
       }
     }
-    function rollback(){
+    async function rollback(){
       var raw=localStorage.getItem(SNAPSHOT_KEY);
       if(!raw){setStatus('Geri alınabilir workout recovery snapshot’ı yok.','error');return null}
       try{
@@ -175,7 +175,7 @@
         if(!snapshot.meta||snapshot.meta.nonWorkoutFingerprint!==withoutWorkouts(adapter.getData()))throw new Error('Recovery sonrasında workouts dışındaki DATA değişti; yeni verileri ezmemek için otomatik geri alma durduruldu.');
         var restored=prepareCurrent(snapshot.data);
         if(!window.confirm('Workout recovery öncesindeki snapshot geri yüklenecek. Devam edilsin mi?'))return null;
-        adapter.commit(restored,{source:'workout-recovery-rollback'});
+        await adapter.commit(restored,{source:'workout-recovery-rollback'});
         window.SimurgPersistence.requireSuccess(window.SimurgPersistence.remove(localStorage,SNAPSHOT_KEY));
         pending=null;setStatus('Workout recovery geri alındı.','success');return restored;
       }catch(error){setStatus('Geri alma başarısız: '+String(error&&error.message||error),'error');return null}

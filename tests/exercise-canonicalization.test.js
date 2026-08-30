@@ -6,6 +6,7 @@ const validation = require('../simurg-data-validation.js');
 
 let passed = 0;
 function run(name, fn) { fn(); passed += 1; process.stdout.write(`✓ ${name}\n`); }
+async function asyncRun(name, fn) { await fn(); passed += 1; process.stdout.write(`✓ ${name}\n`); }
 function row(date, exercise, exerciseId, bodyPart, marker) {
   return {
     date, exercise, exerciseId, bodyPart, sets: 1, reps: 8, weight: 20,
@@ -175,22 +176,24 @@ run('validation canonicalizes imports while retaining an explicit legacy inspect
   assert.equal(migrated.workouts[0].exerciseId, canonical.resolve('Incline DB Press').exerciseId);
 });
 
-run('one-time backup precedes persistence and failed persistence rolls back both keys', () => {
+(async () => {
+await asyncRun('one-time backup precedes persistence and failed persistence rolls back both keys', async () => {
   const original = { workouts: [row('2026-08-01', 'Face Pull', 'old', 'Rear Delt', 1)] };
   const migrated = canonical.prepared(original).data;
   const originalRaw = JSON.stringify(original);
   const storage = memoryStorage({ [persistence.DATA_KEY]: originalRaw });
-  const success = canonical.persistWithBackup(storage, original, migrated, persistence, 'test');
+  const success = await canonical.persistWithBackup(storage, original, migrated, persistence, 'test');
   assert.equal(success.ok, true);
   assert.deepEqual(JSON.parse(storage.raw(canonical.BACKUP_KEY)).data, original);
   assert.equal(JSON.parse(storage.raw(persistence.DATA_KEY)).workouts[0].exercise, 'Facepull');
 
   const failing = memoryStorage({ [persistence.DATA_KEY]: originalRaw });
   failing.failKey = persistence.DATA_KEY;
-  const failure = canonical.persistWithBackup(failing, original, migrated, persistence, 'test');
+  const failure = await canonical.persistWithBackup(failing, original, migrated, persistence, 'test');
   assert.equal(failure.ok, false);
   assert.equal(failing.raw(persistence.DATA_KEY), originalRaw);
   assert.equal(failing.raw(canonical.BACKUP_KEY), undefined);
 });
 
 process.stdout.write(`${passed} exercise canonicalization tests passed.\n`);
+})().catch(error=>{process.stderr.write(error.stack+'\n');process.exitCode=1;});

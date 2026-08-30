@@ -24,10 +24,10 @@
   }
   function setDirty(){dirty=true;var state=document.getElementById('journalSaveState');if(state)state.textContent='Kaydedilmemiş değişiklikler';}
   function changeDate(date){if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||date>today())return;load(date);render();}
-  function saveEntry(){
+  async function saveEntry(){
     var before=JSON.parse(JSON.stringify(DATA.journal||{schemaVersion:1,daily:{}}));
     window.SimurgJournal.upsert(DATA,activeDate,draft,new Date().toISOString());
-    var result=typeof save==='function'?save():{ok:false};
+    var result=typeof save==='function'?await save():{ok:false};
     if(!result||!result.ok){DATA.journal=before;setDirty();return;}
     draft=window.SimurgJournal.entryFor(DATA,activeDate);dirty=false;render();
   }

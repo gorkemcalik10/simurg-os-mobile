@@ -1,11 +1,11 @@
-const SIMURG_CACHE = 'simurg-data-safety-v1';
+const SIMURG_CACHE = 'simurg-indexeddb-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './simurg-persistence.js?v=3',
+  './simurg-persistence.js?v=4',
   './simurg-gym-identity.js?v=2',
-  './simurg-exercise-canonicalization.js?v=2',
+  './simurg-exercise-canonicalization.js?v=3',
   './simurg-training-lab-analysis.js?v=6',
   './simurg-volume-model.js?v=1',
   './simurg-exercise-library.js?v=1',
@@ -14,13 +14,13 @@ const CORE_ASSETS = [
   './simurg-training-lab-anatomy-renderer.js?v=5',
   './simurg-exercise-history.js?v=2',
   './simurg-next-session-target.js?v=2',
-  './simurg-data-validation.js?v=9',
-  './simurg-workout-recovery.js?v=1',
+  './simurg-data-validation.js?v=10',
+  './simurg-workout-recovery.js?v=2',
   './simurg-gym-flex.js?v=1',
   './simurg-exercise-catalog.js?v=1',
   './simurg-gym-flex.css?v=2',
   './polar-workout.css?v=12',
-  './polar-workout.js?v=16',
+  './polar-workout.js?v=17',
   './workout-source-policy.js?v=3',
   './premium-standard.css?v=41',
   './premium-standard.js?v=53',
@@ -40,8 +40,8 @@ const CORE_ASSETS = [
   './simurg-coach.css?v=14',
   './simurg-coach-ui.js?v=15',
   './polar-accesslink.css?v=4',
-  './polar-accesslink.js?v=10',
-  './simurg-cloud-auth.js?v=7',
+  './polar-accesslink.js?v=11',
+  './simurg-cloud-auth.js?v=8',
   './desktop-alignment.css?v=27',
   './desktop-alignment.js?v=37',
   './mobile-ia-premium.css?v=12',
@@ -52,7 +52,7 @@ const CORE_ASSETS = [
   './simurg-training-lab.css?v=13',
   './simurg-training-lab-ui.js?v=19',
   './simurg-journal.css?v=1',
-  './simurg-journal-ui.js?v=1',
+  './simurg-journal-ui.js?v=2',
   './assets/simurg-anatomy-base-v1.png',
   './assets/anatomy-masks/pectoralis_sternal.png',
   './assets/anatomy-masks/pectoralis_clavicular.png',
@@ -106,10 +106,9 @@ self.addEventListener('install', event => {
 });
 self.addEventListener('activate', event => {
   event.waitUntil(
-    Promise.all([
-      caches.keys().then(keys => Promise.all(keys.filter(k => k !== SIMURG_CACHE).map(k => caches.delete(k)))),
-      caches.open(SIMURG_CACHE).then(pruneStaleCoreAssetVersions)
-    ]).then(() => self.clients.claim())
+    caches.open(SIMURG_CACHE)
+      .then(pruneStaleCoreAssetVersions)
+      .then(() => self.clients.claim())
   );
 });
 self.addEventListener('fetch', event => {
