@@ -1,9 +1,9 @@
-const SIMURG_CACHE = 'simurg-mobile-system-v2';
+const SIMURG_CACHE = 'simurg-data-safety-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './simurg-persistence.js?v=2',
+  './simurg-persistence.js?v=3',
   './simurg-gym-identity.js?v=2',
   './simurg-exercise-canonicalization.js?v=2',
   './simurg-training-lab-analysis.js?v=6',
@@ -40,7 +40,7 @@ const CORE_ASSETS = [
   './simurg-coach.css?v=14',
   './simurg-coach-ui.js?v=15',
   './polar-accesslink.css?v=4',
-  './polar-accesslink.js?v=9',
+  './polar-accesslink.js?v=10',
   './simurg-cloud-auth.js?v=7',
   './desktop-alignment.css?v=27',
   './desktop-alignment.js?v=37',

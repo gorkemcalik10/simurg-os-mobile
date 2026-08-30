@@ -31,7 +31,7 @@ run('AccessLink publishes status and refreshes existing render system', () => {
   assert.equal((accessLink.match(/window\.simurgPolarSyncNow=async function/g) || []).length, 1);
   assert.match(accessLink, /window\.simurgPolarSyncState=snapshot/);
   assert.match(accessLink, /new CustomEvent\('simurg:polar-sync-state'/);
-  assert.match(accessLink, /state\.busy=false;renderCard\(\);refreshExistingViews\(\)/);
+  assert.match(accessLink, /state\.busy=false;renderCard\(\);if\(outcome\.ok\)refreshExistingViews\(\);return outcome/);
   assert.match(accessLink, /if\(typeof render==='function'\)\{render\(\);return;\}/);
 });
 
@@ -49,7 +49,7 @@ run('changed production assets use matching cache versions', () => {
     'simurg-daily-guidance.js?v=1',
     'simurg-coach.css?v=14',
     'simurg-coach-ui.js?v=15',
-    'simurg-persistence.js?v=2',
+    'simurg-persistence.js?v=3',
     'simurg-gym-identity.js?v=2',
     'simurg-exercise-canonicalization.js?v=2',
     'simurg-training-lab-analysis.js?v=6',
@@ -57,7 +57,7 @@ run('changed production assets use matching cache versions', () => {
     'simurg-journal.js?v=1',
     'simurg-journal.css?v=1',
     'simurg-journal-ui.js?v=1',
-    'polar-accesslink.js?v=9',
+    'polar-accesslink.js?v=10',
     'premium-standard.css?v=41',
     'premium-standard.js?v=53',
     'desktop-alignment.css?v=27',
@@ -65,8 +65,8 @@ run('changed production assets use matching cache versions', () => {
     'simurg-cloud-auth.js?v=7',
     'mobile-ia-premium.css?v=12',
     'simurg-mobile-weekly.css?v=2',
-    'simurg-mobile-system.css?v=1',
-    'simurg-mobile-weekly.js?v=2',
+    'simurg-mobile-system.css?v=2',
+    'simurg-mobile-weekly.js?v=3',
     'mobile-ia-premium.js?v=12',
     'simurg-gym-flex.js?v=1',
     'simurg-gym-flex.css?v=2',
@@ -82,8 +82,8 @@ run('changed production assets use matching cache versions', () => {
   }
   assert.doesNotMatch(index, /simurg-activity-classification\.js\?v=1/);
   assert.doesNotMatch(worker, /simurg-activity-classification\.js\?v=1/);
-  assert.match(index, /sw\.js\?v=mobile-system-v1/);
-  assert.match(worker, /SIMURG_CACHE = 'simurg-mobile-system-v1'/);
+  assert.match(index, /sw\.js\?v=data-safety-v1/);
+  assert.match(worker, /SIMURG_CACHE = 'simurg-data-safety-v1'/);
 });
 
 if (process.exitCode) process.exit(process.exitCode);

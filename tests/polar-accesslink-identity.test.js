@@ -16,7 +16,7 @@ function makeRuntime() {
   const document = { readyState: 'loading', addEventListener() {}, dispatchEvent() {}, getElementById() { return null; } };
   const window = {
     window: null, DATA: data, SimurgPolarWorkoutIdentity: global.SimurgPolarWorkoutIdentity,
-    simurgGetData() { return data; }, simurgPersistData() { return { ok: true }; },
+    simurgGetData() { return data; }, simurgPersistCandidateData() { return { ok: true }; },
   };
   window.window = window;
   const context = { window, DATA: data, document, localStorage, console, Date, Math, Number, String, Object, Array, RegExp, JSON, Map, Set, URL, Uint8Array };

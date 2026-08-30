@@ -9,12 +9,19 @@
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function endpoint(name){var base='';try{base=SIMURG_SUPABASE_URL;}catch(e){}return String(base||'').replace(/\/$/,'')+'/functions/v1/'+name;}
   function apiKey(){try{return SIMURG_SUPABASE_KEY||'';}catch(e){return '';}}
-  function persist(){
-    try{if(typeof window.simurgPersistData==='function')return !!window.simurgPersistData().ok;}catch(e){}
-    try{if(typeof save==='function')return !!save().ok;}catch(e){}
-    var result=window.SimurgPersistence.persistData(localStorage,root());
-    if(!result.ok)window.SimurgPersistence.notifyFailure(result,'Polar verisi yerel olarak kaydedilemedi.');
-    return result.ok;
+  function cloneData(value){return JSON.parse(JSON.stringify(value));}
+  function persistCandidate(candidate){
+    if(typeof window.simurgPersistCandidateData==='function')return window.simurgPersistCandidateData(candidate);
+    return window.SimurgPersistence.persistData(localStorage,candidate);
+  }
+  function commitInPlace(target,candidate){
+    Object.keys(target).forEach(function(key){delete target[key];});
+    Object.keys(candidate).forEach(function(key){target[key]=candidate[key];});
+    return target;
+  }
+  function syncStateFrom(data){
+    var connection=data&&data.polarConnection||{};
+    state.status=connection.status||state.status;state.lastSyncAt=connection.lastSyncAt||null;state.errorMessage=connection.lastError||'';state.counts=connection.lastCounts||state.counts;state.statuses=connection.lastStatuses||{};
   }
   function base64Url(bytes){var binary='';bytes.forEach(function(value){binary+=String.fromCharCode(value);});return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,'');}
   function uuid(){if(crypto.randomUUID)return crypto.randomUUID();var bytes=new Uint8Array(16);crypto.getRandomValues(bytes);bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;var hex=Array.from(bytes).map(function(v){return v.toString(16).padStart(2,'0');}).join('');return hex.slice(0,8)+'-'+hex.slice(8,12)+'-'+hex.slice(12,16)+'-'+hex.slice(16,20)+'-'+hex.slice(20);}
@@ -24,8 +31,8 @@
     var bytes=new Uint8Array(32);crypto.getRandomValues(bytes);var value={clientId:uuid(),clientKey:base64Url(bytes)};
     window.SimurgPersistence.requireSuccess(window.SimurgPersistence.writeJson(localStorage,CAPABILITY_KEY,value));return value;
   }
-  function ensureStores(){
-    var data=root();if(!data||typeof data!=='object')return data;
+  function ensureStores(value){
+    var data=value||root();if(!data||typeof data!=='object')return data;
     if(!data.polarWorkouts||Array.isArray(data.polarWorkouts))data.polarWorkouts={daily:{},latest:null};
     if(!data.polarWorkouts.daily||Array.isArray(data.polarWorkouts.daily))data.polarWorkouts.daily={};
     if(!data.polarActivity||Array.isArray(data.polarActivity))data.polarActivity={daily:{},latest:null};
@@ -66,8 +73,8 @@
   function normalizedCounts(counts){
     counts=counts||{};return {workouts:Number(counts.workouts||0),activity:Number(counts.activity!=null?counts.activity:counts.activities||0),profile:Number(counts.profile||0),sleep:Number(counts.sleep||0),nightlyRecharge:Number(counts.nightlyRecharge||0),continuousHr:Number(counts.continuousHr||0),cardioLoad:Number(counts.cardioLoad||0)};
   }
-  function updateLocalConnection(connection,counts,statuses,errors){
-    var data=ensureStores();if(!data||!connection)return;
+  function applyLocalConnection(data,connection,counts,statuses,errors){
+    data=ensureStores(data);if(!data||!connection)return data;
     var status=connection.status||(connection.connected===false?'disconnected':'connected'),connected=connection.connected!=null?!!connection.connected:status==='connected';
     var previous=data.polarConnection&&typeof data.polarConnection==='object'?data.polarConnection:{};
     var nextCounts=normalizedCounts(counts||connection.lastCounts||previous.lastCounts||state.counts);
@@ -85,8 +92,15 @@
       lastStatuses:Object.assign({},nextStatuses),
       lastCategoryErrors:Object.assign({},errors||connection.lastCategoryErrors||previous.lastCategoryErrors||{})
     });
-    state.status=data.polarConnection.status;state.lastSyncAt=data.polarConnection.lastSyncAt;state.errorMessage=data.polarConnection.lastError||'';state.counts=data.polarConnection.lastCounts;state.statuses=data.polarConnection.lastStatuses||{};
-    persist();
+    return data;
+  }
+  function updateLocalConnection(connection,counts,statuses,errors){
+    var live=root();if(!live||typeof live!=='object'||!connection)return {ok:true,skipped:true};
+    var candidate;
+    try{candidate=cloneData(live);applyLocalConnection(candidate,connection,counts,statuses,errors);}catch(error){return {ok:false,code:'candidate_merge_failed',error:error,message:error.message||'Polar bağlantı durumu hazırlanamadı.'};}
+    var result=persistCandidate(candidate);
+    if(!result.ok)return result;
+    commitInPlace(live,candidate);syncStateFrom(live);return result;
   }
   function newestWorkout(daily){
     var all=[];Object.keys(daily||{}).forEach(function(date){var value=daily[date];(Array.isArray(value)?value:[value]).filter(Boolean).forEach(function(item){all.push(item);});});
@@ -106,16 +120,18 @@
     store.lastError=error||(status==='forbidden'?'Bu Polar hesabında kullanılamıyor.':status==='error'?'Polar uç noktası hata döndürdü.':null);
   }
   function mergeSync(payload){
-    var data=ensureStores();if(!data)return;
+    var live=root();if(!live||typeof live!=='object')return {ok:false,code:'missing_data',message:'Yerel DATA kullanılamıyor.'};
+    var data;
+    try{data=ensureStores(cloneData(live));}catch(error){return {ok:false,code:'candidate_clone_failed',error:error,message:'Polar verileri güvenli bir aday kopyaya hazırlanamadı.'};}
     var workouts=Array.isArray(payload.workouts)?payload.workouts:[];
     var activities=Array.isArray(payload.activity)?payload.activity:(Array.isArray(payload.activities)?payload.activities:[]);
     var counts=payload.counts||{workouts:workouts.length,activity:activities.length,profile:payload.profile?1:0};
     var statuses=payload.statuses||{},errors=payload.errors||{},lastSyncAt=payload.lastSyncAt||new Date().toISOString();
     workouts.forEach(function(workout){
       if(!workout||!workout.date)return;var current=data.polarWorkouts.daily[workout.date];var list=Array.isArray(current)?current.slice():(current?[current]:[]);
-      workout.type='polar_flow_workout';workout.source='Polar Flow';
-      var index=list.findIndex(function(item){return samePolarWorkout(item,workout);});
-      if(index>=0)list[index]=Object.assign({},list[index],workout);else list.push(workout);
+      var normalizedWorkout=Object.assign({},workout,{type:'polar_flow_workout',source:'Polar Flow'});
+      var index=list.findIndex(function(item){return samePolarWorkout(item,normalizedWorkout);});
+      if(index>=0)list[index]=Object.assign({},list[index],normalizedWorkout);else list.push(normalizedWorkout);
       list.sort(function(a,b){return String(a.startTime||'').localeCompare(String(b.startTime||''));});data.polarWorkouts.daily[workout.date]=list;
     });
     data.polarWorkouts.latest=newestWorkout(data.polarWorkouts.daily)||data.polarWorkouts.latest||null;
@@ -127,8 +143,17 @@
     mergeDailyStore(data.polarContinuousHr,payload.continuousHr,lastSyncAt,statuses.continuousHr,errors.continuousHr);
     mergeDailyStore(data.polarCardioLoad,payload.cardioLoad,lastSyncAt,statuses.cardioLoad,errors.cardioLoad);
     var connection=payload.connection||{connected:payload.connected!==false,status:payload.connected===false?'disconnected':'connected',lastSyncAt:payload.lastSyncAt||new Date().toISOString(),errorMessage:(payload.warnings||[]).join(' ')||null};
-    updateLocalConnection(connection,counts,statuses,errors);
-    try{if(typeof window.renderPolarWorkout==='function')window.renderPolarWorkout();}catch(e){}
+    applyLocalConnection(data,connection,counts,statuses,errors);
+    var result=persistCandidate(data);
+    if(!result.ok)return result;
+    commitInPlace(live,data);syncStateFrom(live);
+    try{if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('polar-sync');}catch(error){console.warn('Simurg OS: Polar sync signal cache invalidation failed.',error);}
+    return result;
+  }
+  function polarPersistenceError(result){
+    var detail=result&&result.code==='quota_exceeded'?'Tarayıcı depolama alanı dolu; canlı yerel DATA değiştirilmedi.':result&&result.code==='storage_unavailable'?'Tarayıcı depolaması kullanılamıyor; canlı yerel DATA değiştirilmedi.':result&&result.message?String(result.message):'Yerel tarayıcı depolamasına yazılamadı.';
+    var error=new Error('Polar verileri yerel olarak güvenle kaydedilemedi; senkronizasyon sonlandırılmadı. '+detail);
+    error.code=result&&result.code||'polar_persistence_failed';error.persistenceResult=result;return error;
   }
   function categoryValue(key,counts,statuses){
     var status=statuses&&statuses[key];
@@ -184,7 +209,7 @@
   async function refreshStatus(){
     statusLoaded=true;
     state.status='loading';state.errorMessage='';state.message='Polar bağlantı durumu kontrol ediliyor.';renderCard();
-    try{var payload=await request('polar-sync','GET');updateLocalConnection(payload.connection,payload.counts,payload.statuses,payload.errors);state.status=payload.connection&&payload.connection.connected?'connected':'disconnected';state.message=state.status==='connected'?(payload.connection.claimedLegacy?'Eski Polar bağlantısı bu Simurg hesabına güvenle taşındı.':'Polar AccessLink manuel senkronizasyonu hazır.'):'Bu Simurg hesabına bağlı Polar hesabı yok.';}
+    try{var payload=await request('polar-sync','GET');var localResult=updateLocalConnection(payload.connection,payload.counts,payload.statuses,payload.errors);if(!localResult.ok)throw polarPersistenceError(localResult);state.status=payload.connection&&payload.connection.connected?'connected':'disconnected';state.message=state.status==='connected'?(payload.connection.claimedLegacy?'Eski Polar bağlantısı bu Simurg hesabına güvenle taşındı.':'Polar AccessLink manuel senkronizasyonu hazır.'):'Bu Simurg hesabına bağlı Polar hesabı yok.';}
     catch(error){state.status=error.code==='signed_out'||error.code==='missing_session'||error.code==='invalid_session'?'signed_out':'error';state.message=state.status==='signed_out'?'Polar bağlantısını kullanmak için Simurg Cloud oturumu açın.':'Polar bağlantı durumu doğrulanamadı.';state.errorMessage=state.status==='signed_out'?'':error.message;}
     renderCard();
   }
@@ -195,14 +220,15 @@
   };
   window.simurgPolarSyncNow=async function(){
     if(state.busy)return;state.busy=true;state.errorMessage='';state.message='Polar Flow verileri senkronize ediliyor.';renderCard();
-    try{var payload=await request('polar-sync','POST',{});mergeSync(payload);var counts=payload.counts||{};state.message='Senkron tamamlandı: '+Number(counts.workouts||0)+' antrenman, '+Number(counts.activity!=null?counts.activity:counts.activities||0)+' aktivite, '+Number(counts.sleep||0)+' uyku kaydı.';state.errorMessage=(payload.warnings||[]).join(' ');}
-    catch(error){if(error.code==='signed_out'||error.code==='missing_session'||error.code==='invalid_session')state.status='signed_out';state.errorMessage=error.message;state.message='Polar senkronizasyonu tamamlanamadı.';}
-    state.busy=false;renderCard();refreshExistingViews();
+    var outcome;
+    try{var payload=await request('polar-sync','POST',{});var persistence=mergeSync(payload);if(!persistence.ok)throw polarPersistenceError(persistence);var counts=payload.counts||{};state.message='Senkron tamamlandı: '+Number(counts.workouts||0)+' antrenman, '+Number(counts.activity!=null?counts.activity:counts.activities||0)+' aktivite, '+Number(counts.sleep||0)+' uyku kaydı.';state.errorMessage=(payload.warnings||[]).join(' ');outcome={ok:true,persistence:persistence,payload:payload};}
+    catch(error){if(error.code==='signed_out'||error.code==='missing_session'||error.code==='invalid_session')state.status='signed_out';state.errorMessage=error.message;state.message='Polar senkronizasyonu tamamlanamadı.';outcome={ok:false,code:error.code||'polar_sync_failed',error:error,persistence:error.persistenceResult||null};}
+    state.busy=false;renderCard();if(outcome.ok)refreshExistingViews();return outcome;
   };
   window.simurgPolarDisconnect=async function(){
     if(state.busy||!confirm('Polar Flow bağlantısı kesilecek. Daha önce senkronize edilen Simurg verileri korunacak. Devam edelim mi?'))return;
     state.busy=true;state.errorMessage='';state.message='Polar bağlantısı kesiliyor.';renderCard();
-    try{var payload=await request('polar-disconnect','POST',{});updateLocalConnection(Object.assign({},payload.connection,{connected:false,status:'disconnected'}));state.status='disconnected';state.message='Polar bağlantısı kesildi. Senkronize edilmiş veriler korundu.';}
+    try{var payload=await request('polar-disconnect','POST',{});var localResult=updateLocalConnection(Object.assign({},payload.connection,{connected:false,status:'disconnected'}));if(!localResult.ok)throw polarPersistenceError(localResult);state.status='disconnected';state.message='Polar bağlantısı kesildi. Senkronize edilmiş veriler korundu.';}
     catch(error){state.errorMessage=error.message;state.message='Polar bağlantısı kesilemedi.';}
     state.busy=false;renderCard();
   };

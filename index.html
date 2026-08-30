@@ -6281,7 +6281,7 @@ body{background:#050607!important;}
 <div class="modal" id="editModal"><div class="modalbox"><div class="modalTop"><h2 id="modalTitle">Düzenle</h2><button class="btn sec" onclick="closeModal()">Kapat</button></div><div id="modalBody"></div><div class="actions"><button class="btn" onclick="saveEdit()">Kaydet</button><button class="btn danger" onclick="deleteEditing()">Sil</button></div></div></div>
 <div class="modal programNameModal" id="programNameModal"><div class="modalbox"><div class="modalTop"><h2>Program İsmini Düzenle</h2><button class="btn sec" onclick="closeProgramNameModal()">Kapat</button></div><div id="programNameBody"></div><div class="actions"><button class="btn" onclick="saveProgramNameEdit()">Kaydet</button><button class="btn sec" onclick="resetProgramNameEdit()">Varsayılana Dön</button></div></div></div>
 <div class="modal exerciseLibraryModal" id="exerciseLibraryModal" role="dialog" aria-modal="true" aria-labelledby="exerciseLibraryTitle"><div class="modalbox"><div class="modalTop"><h2 id="exerciseLibraryTitle">Hareket Kütüphanesi</h2><button class="btn sec" type="button" onclick="closeExerciseLibrary()">Kapat</button></div><p class="exerciseLibraryIntro">Makine, dambıl ve yaygın salon hareketlerinden seç. Türkçe veya İngilizce adla arayabilirsin; istersen özel hareket oluşturmaya devam edebilirsin.</p><div class="exerciseLibraryTools"><input id="exerciseLibrarySearch" type="search" placeholder="Ara: incline press, göğüs, tek kol…" autocomplete="off"><select id="exerciseLibraryCategory" aria-label="Hareket kategorisi"></select></div><div class="exerciseLibraryCount" id="exerciseLibraryCount"></div><div class="exerciseLibraryResults" id="exerciseLibraryResults"></div><div class="actions"><button class="btn sec" type="button" onclick="addCustomGymExerciseFromLibrary()">+ Özel Hareket Oluştur</button></div></div></div>
-<script src="./simurg-persistence.js?v=2"></script>
+<script src="./simurg-persistence.js?v=3"></script>
 <script src="./simurg-gym-identity.js?v=2"></script>
 <script src="./simurg-exercise-canonicalization.js?v=2"></script>
 <script src="./simurg-training-lab-analysis.js?v=6"></script>
@@ -7990,7 +7990,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=mobile-system-v2').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=data-safety-v1').catch(function(){});
   });
 }
 </script>
@@ -8710,13 +8710,17 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     const c=dataCounts();
     const last=(DATA._meta&&DATA._meta.lastLocalUpdate)||DATA.lastSyncAt||(DATA.polarConnection&&DATA.polarConnection.lastSyncAt)||'';
     const lastLabel=last?fmtDateTime(last):(c.workoutDays||c.activities||c.appleWatch?'Kayıt mevcut':'Henüz kayıt yok');
+    const storageReport=window.SimurgPersistence&&SimurgPersistence.inspectStorage?SimurgPersistence.inspectStorage(localStorage):null;
+    const formatBytes=value=>value>=1048576?(value/1048576).toFixed(1)+' MB':value>=1024?Math.round(value/1024)+' KB':value+' B';
+    const storageLabel=storageReport?'DATA '+formatBytes(storageReport.canonicalBytes)+' · '+storageReport.backupCount+' yedek / '+formatBytes(storageReport.backupBytes)+(storageReport.warning?' · Dikkat':''):'';
     const rows=[
       ['Son Yerel Güncelleme',lastLabel],
       ['Toplam Antrenman Günü',c.workoutDays],
       ['Toplam Aktivite',c.activities],
       ['Apple Watch Kaydı',c.appleWatch],
       ['Hızlı Notlar',c.notes],
-      ['Mevcut Sürüm',BUILD_NAME]
+      ['Mevcut Sürüm',BUILD_NAME],
+      ['Depolama',storageLabel||'Ölçüm kullanılamıyor']
     ];
     el.replaceChildren(...rows.map(([label,value])=>{
       const box=document.createElement('div');
@@ -8728,6 +8732,17 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
       box.append(small,strong);
       return box;
     }));
+  };
+
+  window.simurgPersistCandidateData=function(candidate){
+    const blocked=startupRecoveryWriteBlocked();
+    if(blocked)return blocked;
+    if(candidate&&typeof candidate==='object'){
+      candidate._meta=candidate._meta&&typeof candidate._meta==='object'?candidate._meta:{};
+      candidate._meta.lastLocalUpdate=new Date().toISOString();
+      candidate._meta.build=BUILD_NAME;
+    }
+    return SimurgPersistence.persistData(localStorage,candidate);
   };
 
   const oldSave=window.save;
@@ -16286,7 +16301,7 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./premium-standard.css?v=41">
 <script src="./premium-standard.js?v=53"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
-<script src="./polar-accesslink.js?v=9"></script>
+<script src="./polar-accesslink.js?v=10"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=27">
 <script src="./desktop-alignment.js?v=37"></script>
 <link rel="stylesheet" href="./mobile-ia-premium.css?v=12">
