@@ -1,9 +1,9 @@
-const SIMURG_CACHE = 'simurg-mobile-polish-v3';
+const SIMURG_CACHE = 'simurg-mobile-polish-v4';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './simurg-persistence.js?v=4',
+  './simurg-persistence.js?v=5',
   './simurg-gym-identity.js?v=2',
   './simurg-exercise-canonicalization.js?v=3',
   './simurg-training-lab-analysis.js?v=6',

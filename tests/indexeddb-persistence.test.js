@@ -132,6 +132,128 @@ async function run(name, fn) {
     assert.equal(storage.getItem(persistence.DATA_KEY),raw);
   });
 
+  await run('verified migration with temporary IndexedDB outage starts from legacy fallback', async () => {
+    const legacy=canonical([{date:'2026-08-30',exercise:'Legacy Row',sets:1,reps:8,weight:20}]),raw=JSON.stringify(legacy),storage=storageFrom({[persistence.DATA_KEY]:raw}),idb=fakeIndexedDB();
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    persistence._resetForTests();idb.control.failOpen=true;
+    const result=await persistence.initialize({storage,indexedDB:idb,prepare});
+    assert.equal(result.ok,true);
+    assert.equal(result.source,'legacy_localstorage');
+    assert.deepEqual(result.data,legacy);
+    assert.equal(storage.getItem(persistence.DATA_KEY),raw);
+  });
+
+  await run('successful fallback save updates legacy DATA and creates a matching small pending marker', async () => {
+    const storage=storageFrom({[persistence.DATA_KEY]:JSON.stringify(canonical())}),idb=fakeIndexedDB();
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    persistence._resetForTests();idb.control.failOpen=true;
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    const next=canonical([{date:'2026-08-31',exercise:'Fallback Press',sets:2,reps:8,weight:25}]);
+    const result=await persistence.persistData(storage,next,{source:'test-fallback-save'}),marker=JSON.parse(storage.getItem(persistence.FALLBACK_PENDING_KEY));
+    assert.equal(result.ok,true);
+    assert.deepEqual(JSON.parse(storage.getItem(persistence.DATA_KEY)),next);
+    assert.equal(marker.status,'pending_reconciliation');
+    assert.equal(marker.mode,'legacy_localstorage_fallback');
+    assert.equal(marker.storageVersion,persistence.STORAGE_VERSION);
+    assert.equal(marker.checksum,persistence.checksum(next));
+    assert.ok(storage.getItem(persistence.FALLBACK_PENDING_KEY).length<512);
+    assert.equal(persistence.state().migrationStatus,'legacy_fallback_pending');
+  });
+
+  await run('fallback save cannot claim success unless the marker is durable before canonical DATA changes', async () => {
+    const original=canonical(),raw=JSON.stringify(original),storage=storageFrom({[persistence.DATA_KEY]:raw}),idb=fakeIndexedDB();
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    persistence._resetForTests();idb.control.failOpen=true;
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    const setItem=storage.setItem.bind(storage);
+    storage.setItem=(key,value)=>{if(key===persistence.FALLBACK_PENDING_KEY)throw new Error('synthetic marker failure');setItem(key,value);};
+    const result=await persistence.persistData(storage,canonical([{date:'2026-08-31',exercise:'Fallback Press',sets:2,reps:8,weight:25}]));
+    assert.equal(result.ok,false);
+    assert.equal(result.code,'fallback_marker_write_failed');
+    assert.equal(storage.getItem(persistence.DATA_KEY),raw);
+    assert.equal(storage.getItem(persistence.FALLBACK_PENDING_KEY),null);
+  });
+
+  await run('valid fallback marker reconciles through verified IndexedDB promotion before it clears', async () => {
+    const initial=canonical(),storage=storageFrom({[persistence.DATA_KEY]:JSON.stringify(initial)}),idb=fakeIndexedDB();
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    persistence._resetForTests();idb.control.failOpen=true;
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    const fallback=canonical([{date:'2026-08-31',exercise:'Fallback Press',sets:2,reps:8,weight:25}]);
+    await persistence.persistData(storage,fallback,{source:'test-fallback-save'});
+    assert.ok(storage.getItem(persistence.FALLBACK_PENDING_KEY));
+    persistence._resetForTests();idb.control.failOpen=false;
+    const result=await persistence.initialize({storage,indexedDB:idb,prepare});
+    const main=idb.stores.get(persistence.STORE_NAME).get(persistence.MAIN_KEY);
+    assert.equal(result.ok,true);
+    assert.equal(result.source,'fallback_reconciled');
+    assert.equal(result.state.migrationStatus,'fallback_reconciled');
+    assert.deepEqual(result.data,fallback);
+    assert.deepEqual(main.payload,fallback);
+    assert.equal(main.status,'verified');
+    assert.equal(main.checksum,persistence.checksum(fallback));
+    assert.equal(idb.stores.get(persistence.STORE_NAME).has(persistence.PENDING_KEY),false);
+    assert.equal(storage.getItem(persistence.FALLBACK_PENDING_KEY),null);
+  });
+
+  await run('fallback checksum mismatch fails closed and preserves marker, legacy DATA and old IndexedDB main', async () => {
+    const initial=canonical([{date:'2026-08-29',exercise:'Old Main',sets:1,reps:8,weight:20}]),storage=storageFrom({[persistence.DATA_KEY]:JSON.stringify(initial)}),idb=fakeIndexedDB();
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    const oldMain=structuredClone(idb.stores.get(persistence.STORE_NAME).get(persistence.MAIN_KEY));
+    persistence._resetForTests();idb.control.failOpen=true;
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    const fallback=canonical([{date:'2026-08-31',exercise:'Fallback Press',sets:2,reps:8,weight:25}]);
+    await persistence.persistData(storage,fallback);
+    const markerRaw=storage.getItem(persistence.FALLBACK_PENDING_KEY),tampered=canonical([{date:'2026-09-01',exercise:'Tampered',sets:3,reps:5,weight:30}]);
+    storage.setItem(persistence.DATA_KEY,JSON.stringify(tampered));
+    persistence._resetForTests();idb.control.failOpen=false;
+    const result=await persistence.initialize({storage,indexedDB:idb,prepare});
+    assert.equal(result.ok,false);
+    assert.equal(result.source,'fallback_reconciliation_error');
+    assert.equal(result.error.code,'fallback_checksum_mismatch');
+    assert.equal(result.state.migrationStatus,'fallback_reconciliation_error');
+    assert.deepEqual(result.data,tampered);
+    assert.equal(storage.getItem(persistence.FALLBACK_PENDING_KEY),markerRaw);
+    assert.deepEqual(idb.stores.get(persistence.STORE_NAME).get(persistence.MAIN_KEY),oldMain);
+    assert.equal((await persistence.persistData(storage,tampered)).code,'fallback_reconciliation_blocked');
+  });
+
+  await run('invalid pending fallback payload fails closed without discarding recovery evidence', async () => {
+    const initial=canonical(),storage=storageFrom({[persistence.DATA_KEY]:JSON.stringify(initial)}),idb=fakeIndexedDB();
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    persistence._resetForTests();idb.control.failOpen=true;
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    await persistence.persistData(storage,canonical([{date:'2026-08-31',exercise:'Fallback Press',sets:2,reps:8,weight:25}]));
+    const markerRaw=storage.getItem(persistence.FALLBACK_PENDING_KEY);
+    storage.setItem(persistence.DATA_KEY,'{broken-json');
+    persistence._resetForTests();idb.control.failOpen=false;
+    const result=await persistence.initialize({storage,indexedDB:idb,prepare});
+    assert.equal(result.ok,false);
+    assert.equal(result.error.code,'fallback_payload_invalid');
+    assert.equal(result.data,null);
+    assert.equal(storage.getItem(persistence.DATA_KEY),'{broken-json');
+    assert.equal(storage.getItem(persistence.FALLBACK_PENDING_KEY),markerRaw);
+  });
+
+  await run('fallback reconciliation IndexedDB write failure preserves pending evidence and never reports old main as success', async () => {
+    const initial=canonical([{date:'2026-08-29',exercise:'Old Main',sets:1,reps:8,weight:20}]),storage=storageFrom({[persistence.DATA_KEY]:JSON.stringify(initial)}),idb=fakeIndexedDB();
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    const oldMain=structuredClone(idb.stores.get(persistence.STORE_NAME).get(persistence.MAIN_KEY));
+    persistence._resetForTests();idb.control.failOpen=true;
+    await persistence.initialize({storage,indexedDB:idb,prepare});
+    const fallback=canonical([{date:'2026-08-31',exercise:'Fallback Press',sets:2,reps:8,weight:25}]);
+    await persistence.persistData(storage,fallback);
+    const markerRaw=storage.getItem(persistence.FALLBACK_PENDING_KEY),legacyRaw=storage.getItem(persistence.DATA_KEY);
+    persistence._resetForTests();idb.control.failOpen=false;idb.control.failWrites=true;
+    const result=await persistence.initialize({storage,indexedDB:idb,prepare});
+    assert.equal(result.ok,false);
+    assert.equal(result.source,'fallback_reconciliation_error');
+    assert.deepEqual(result.data,fallback);
+    assert.equal(storage.getItem(persistence.FALLBACK_PENDING_KEY),markerRaw);
+    assert.equal(storage.getItem(persistence.DATA_KEY),legacyRaw);
+    assert.deepEqual(idb.stores.get(persistence.STORE_NAME).get(persistence.MAIN_KEY),oldMain);
+  });
+
   await run('invalid legacy JSON with no verified IndexedDB record uses the default path without modifying storage', async () => {
     const storage=storageFrom({[persistence.DATA_KEY]:'{broken-json'}),idb=fakeIndexedDB();
     const result=await persistence.initialize({storage,indexedDB:idb,prepare});
@@ -204,6 +326,7 @@ async function run(name, fn) {
     await persistence.persistData(storage,canonical([{date:'2026-08-30',exercise:'Row',sets:1,reps:8,weight:20}]));
     await persistence.persistData(storage,canonical([{date:'2026-08-31',exercise:'Press',sets:1,reps:8,weight:20}]));
     assert.equal(storage.writes.filter(([key])=>key===persistence.DATA_KEY).length,0);
+    assert.equal(storage.writes.filter(([key])=>key===persistence.FALLBACK_PENDING_KEY).length,0);
     assert.equal(storage.getItem(persistence.DATA_KEY),raw);
   });
 
