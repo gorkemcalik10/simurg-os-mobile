@@ -492,6 +492,7 @@
       if(['planned','alternate','custom','skipped'].indexOf(entry.mode)<0)fail('invalid_gym_day_mode','Geçerli Gym gün modu bekleniyor',entryPath+'.mode');
       if(entry.sourceDay!==null&&entry.sourceDay!==undefined)text(entry.sourceDay,entryPath+'.sourceDay',128,true);
       if(entry.sourceDate!==null&&entry.sourceDate!==undefined)date(entry.sourceDate,entryPath+'.sourceDate');
+      if(entry.sessionId!==null&&entry.sessionId!==undefined)text(entry.sessionId,entryPath+'.sessionId',512,false);
       text(entry.label==null?'':entry.label,entryPath+'.label',512,true);optionalDateTime(entry.updatedAt,entryPath+'.updatedAt');scan(entry);
     });
     Object.keys(candidate.activityNotes||{}).forEach(function(key){text(candidate.activityNotes[key],pathFor('$.activityNotes',key),LIMITS.maxString,true)});

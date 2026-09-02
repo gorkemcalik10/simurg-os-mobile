@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const flex = require('../simurg-gym-flex.js');
 const validation = require('../simurg-data-validation.js');
+const identity = require('../simurg-gym-identity.js');
 
 const index = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 let passed = 0;
@@ -14,14 +15,21 @@ function base(date) {
 }
 function data() { return {workouts:[],gymDayState:{},customGymPrograms:{},programNames:{}}; }
 
-run('planned workout is the zero-state default', () => {
-  const value = flex.resolveTemplate(data(),'2026-08-10',base);
-  assert.equal(value.mode,'planned'); assert.equal(value.name,'Push'); assert.equal(value.state,null);
+run('an unselected workout is the zero-state default on every weekday', () => {
+  for (const date of ['2026-08-09','2026-08-10','2026-08-11','2026-08-12','2026-08-13','2026-08-14','2026-08-15']) {
+    const value = flex.resolveTemplate(data(),date,base);
+    assert.equal(value.mode,'unselected'); assert.equal(value.items.length,0); assert.equal(value.state,null);
+  }
+});
+run('legacy rows without selection state retain their existing planned view', () => {
+  const legacy=data(); legacy.workouts.push({date:'2026-08-10',exercise:'Existing'});
+  const value = flex.resolveTemplate(legacy,'2026-08-10',base);
+  assert.equal(value.mode,'planned'); assert.equal(value.name,'Push'); assert.equal(value.legacySession,true);
 });
 run('alternate workout affects only the selected calendar date', () => {
   const value=data(); value.gymDayState['2026-08-13']=flex.makeState('alternate',{sourceDay:'Tuesday',sourceDate:'2026-08-11',label:'Pull'});
   assert.equal(flex.resolveTemplate(value,'2026-08-13',base).items[0][0],'Tuesday Exercise');
-  assert.equal(flex.resolveTemplate(value,'2026-08-11',base).items[0][0],'Tuesday Exercise');
+  assert.equal(flex.resolveTemplate(value,'2026-08-11',base).mode,'unselected');
   assert.equal(value.gymDayState['2026-08-11'],undefined);
 });
 run('missed workout selection contains only empty earlier planned days in the week', () => {
@@ -30,6 +38,14 @@ run('missed workout selection contains only empty earlier planned days in the we
 });
 run('another existing program lists training templates without off days', () => {
   assert.deepEqual(flex.programTemplates('2026-08-13',base).map(x=>x.day),['Monday','Tuesday','Wednesday','Thursday','Friday']);
+});
+run('all five templates stay available independent of the weekday being opened', () => {
+  for (const date of ['2026-08-10','2026-08-14','2026-08-16']) assert.equal(flex.programTemplates(date,base).length,5);
+});
+run('a Friday template selected on Monday is not replaced by Monday', () => {
+  const value=data(); value.gymDayState['2026-08-10']=flex.makeState('alternate',{sourceDay:'Friday',sourceDate:'2026-08-14',label:'Friday Pull'});
+  const selected=flex.resolveTemplate(value,'2026-08-10',base);
+  assert.equal(selected.sourceDate,'2026-08-14'); assert.equal(selected.items[0][0],'Friday Exercise'); assert.equal(selected.name,'Friday Pull');
 });
 run('repeat last session creates prefills without creating workout records', () => {
   const value=data(); value.workouts=[{date:'2026-08-09',exercise:'Row',bodyPart:'Back',weight:30,reps:8},{date:'2026-08-09',exercise:'Row',bodyPart:'Back',weight:35,reps:8}];
@@ -62,6 +78,47 @@ run('opening or changing a Gym date uses a pure program resolver', () => {
   const body=index.match(/function gymProgramEntryForDate\(date\)\{([\s\S]*?)\n\}/)[1];
   assert.doesNotMatch(body,/DATA\.customGymPrograms\[date\]\s*=/);
   assert.match(index,/function gymTemplateForDate\(date\)\{return SimurgGymFlex\.resolveTemplate/);
+});
+run('neutral mobile start lists templates and free workout without a weekday default', () => {
+  const renderBody=index.match(/function renderGymMode\(\)\{([\s\S]*?)\n\}/)[1];
+  assert.match(renderBody,/template\.mode==='unselected'/); assert.match(index,/Bugünkü antrenmanı seç/);
+  const openBody=index.match(/function openGymWorkoutSelector\(\)\{([\s\S]*?)\n\}/)[1];
+  assert.match(openBody,/gymTemplateOptionsHtml\(\)/); assert.match(openBody,/Serbest Antrenman/); assert.doesNotMatch(openBody,/Planlananı Yap|gymChoosePlanned/);
+});
+run('selected template identity and canonical session identity are saved together', () => {
+  const body=index.match(/async function saveGymExercise\(key\)\{([\s\S]*?)\n\}/)[1];
+  assert.match(body,/sessionState\.sessionId=sessionState\.sessionId\|\|sessionId/);
+  assert.match(body,/program:selectedTemplate\.name/); assert.match(body,/sessionLabel:selectedTemplate\.name/);
+  assert.match(body,/SimurgGymIdentity\.apply\(/); assert.match(body,/setId:SimurgGymIdentity\.setIdFor\(existingRows\[i\]\)/);
+});
+run('session exercise and set identities stay stable and distinct', () => {
+  const rows=[],sessionId=identity.sessionIdFor(rows,'2026-08-10'),exerciseId=identity.id('exercise');
+  rows.push(identity.apply({date:'2026-08-10',exercise:'Row'},{sessionId,exerciseId,setId:identity.id('set')}));
+  rows.push(identity.apply({date:'2026-08-10',exercise:'Row'},{sessionId,exerciseId,setId:identity.id('set')}));
+  assert.equal(rows[0].sessionId,rows[1].sessionId); assert.equal(rows[0].exerciseId,rows[1].exerciseId); assert.notEqual(rows[0].setId,rows[1].setId);
+  assert.equal(identity.sessionIdFor(rows,'2026-08-10'),sessionId);
+});
+run('selected template session binding round-trips without changing its actual label', () => {
+  const value=validation.prepareFull({schemaVersion:1}).data;
+  value.gymDayState['2026-08-10']=flex.makeState('alternate',{sourceDay:'Friday',sourceDate:'2026-08-14',label:'Friday Pull'});
+  value.gymDayState['2026-08-10'].sessionId='session_actual_friday';
+  const restored=validation.prepareFull(JSON.parse(JSON.stringify(value))).data;
+  assert.equal(restored.gymDayState['2026-08-10'].sessionId,'session_actual_friday');
+  assert.equal(flex.resolveTemplate(restored,'2026-08-10',base).name,'Friday Pull');
+});
+run('Daily semantics prefer the selected actual template label', () => {
+  const signal=fs.readFileSync(path.join(__dirname,'..','simurg-signal-model.js'),'utf8');
+  assert.match(signal,/var label=state&&firstText\(state\.label\)/);
+  assert.match(signal,/firstText\(rows\[0\]&&rows\[0\]\.program,rows\[0\]&&rows\[0\]\.sessionLabel/);
+});
+run('active canonical session resumes as a locked selected template', () => {
+  const body=index.match(/function renderGymWorkoutSelector\(template\)\{([\s\S]*?)\n\}/)[1];
+  assert.match(body,/row\.sessionId/); assert.match(body,/state&&state\.sessionId/); assert.match(body,/isLocked/);
+});
+run('chooser CSS remains width-safe at phone sizes', () => {
+  const css=fs.readFileSync(path.join(__dirname,'..','simurg-gym-flex.css'),'utf8');
+  assert.match(css,/\.gymWorkoutStart\{[^}]*max-width:100%[^}]*overflow:hidden/);
+  assert.match(css,/\.gymWorkoutStartOptions \.gymWorkoutOption\{[^}]*min-width:0[^}]*max-width:100%[^}]*box-sizing:border-box/);
 });
 run('existing-row skip protection warns and never deletes rows', () => {
   const body=index.match(/function gymSkipSelectedDay\(\)\{([\s\S]*?)\n\}/)[1];

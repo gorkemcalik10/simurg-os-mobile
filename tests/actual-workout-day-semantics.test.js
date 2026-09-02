@@ -158,7 +158,7 @@ run('day resolution and touched render helpers do not mutate DATA', () => {
   assert.equal(JSON.stringify(data), before);
   const targetBody = indexSource.match(/function nextTarget\(ex,date\)\{([\s\S]*?)\n  \}/)[1];
   assert.doesNotMatch(targetBody, /DATA\.autoNextTargets\s*=/);
-  const localStatusBody = indexSource.match(/window\.renderDataLocalStatus=function\(\)\{([\s\S]*?)\n  \};/)[1];
+  const localStatusBody = indexSource.match(/window\.renderDataLocalStatus=async function\(\)\{([\s\S]*?)\n  \};/)[1];
   assert.doesNotMatch(localStatusBody, /ensureMeta\(|DATA\._meta\s*=/);
 });
 

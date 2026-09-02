@@ -6287,7 +6287,7 @@ body{background:#050607!important;}
 <script src="./simurg-training-lab-analysis.js?v=6"></script>
 <script src="./simurg-data-validation.js?v=10"></script>
 <script src="./simurg-workout-recovery.js?v=2"></script>
-<script src="./simurg-gym-flex.js?v=1"></script>
+<script src="./simurg-gym-flex.js?v=2"></script>
 <script src="./simurg-exercise-catalog.js?v=1"></script>
 <script>
 const INITIAL={"schemaVersion":1,"workouts":[],"metrics":[],"nutrition":[],"recovery":[],"appleWatch":[],"dailyNotes":[],"weeklyNotes":[],"customGymPrograms":{},"programNames":{},"gymDayState":{},"exerciseLoadProfiles":{},"exerciseCatalog":{},"journal":{"schemaVersion":1,"daily":{}},"coachIntelligence":{"schemaVersion":1,"daily":{},"weekly":{},"patterns":{},"aiCache":{},"settings":{"movementCategories":{}}},"polarWorkouts":{"daily":{},"latest":null},"polarActivity":{"daily":{},"latest":null},"polarProfile":{"latest":null},"polarSleep":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarNightlyRecharge":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarContinuousHr":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarCardioLoad":{"daily":{},"latest":null,"lastSyncAt":null,"lastError":null},"polarConnection":{"connected":false,"status":"disconnected","lastSyncAt":null,"lastError":null,"source":"Polar AccessLink"}};
@@ -6722,6 +6722,8 @@ async function saveGymExercise(key){
   const existingRows=DATA.workouts.filter(w=>gymRowMatches(item,w,meta.name));
   const sessionId=SimurgGymIdentity.sessionIdFor(DATA.workouts,selectedDate);
   const sessionTiming=SimurgGymIdentity.sessionTimingFor(DATA.workouts,selectedDate,sessionId);
+  const selectedTemplate=gymTemplateForDate(selectedDate),sessionState=SimurgGymFlex.stateFor(DATA,selectedDate);
+  if(sessionState)sessionState.sessionId=sessionState.sessionId||sessionId;
   const exerciseId=existingRows.find(w=>w.exerciseId)?.exerciseId||item.exerciseId||SimurgGymIdentity.id('exercise');
   DATA.workouts=DATA.workouts.filter(w=>!gymRowMatches(item,w,meta.name));
   rows.forEach((row,i)=>{
@@ -6741,6 +6743,8 @@ async function saveGymExercise(key){
         rpe:coach.rpe,
         form:coach.form,
         pain:coach.pain,
+        program:selectedTemplate.name,
+        sessionLabel:selectedTemplate.name,
         gymEntryKey:key,
         notes:'Gym Mode'
       },{sessionId,exerciseId,setId:SimurgGymIdentity.setIdFor(existingRows[i])}));
@@ -7026,7 +7030,7 @@ function gymSelectorSheet(){
 function gymSelectorOption(icon,label,detail,action,secondary){return `<button type="button" class="gymWorkoutOption ${secondary?'secondary':''}" onclick="${action}"><i>${icon}</i><span><b>${gymSafe(label)}</b><small>${gymSafe(detail)}</small></span></button>`}
 function openGymWorkoutSelector(){
   const shade=gymSelectorSheet(),body=document.getElementById('gymWorkoutSheetBody');
-  body.innerHTML=gymSelectorOption('✓','Planlananı Yap','Takvimdeki programı değiştirmeden uygula','gymChoosePlanned()')+gymSelectorOption('↶','Kaçırılan Program','Bu hafta gerçekten kaçırdığın bir günü seç','gymShowMissedPrograms()')+gymSelectorOption('≡','Başka Program Seç','Mevcut haftalık program şablonlarından seç','gymShowProgramTemplates()')+gymSelectorOption('⟳','Son Seansı Tekrarla','Son kaydı yalnızca forma doldur','gymRepeatLastSession()')+gymSelectorOption('+','Serbest Antrenman','Hızlıca hareket ekleyerek başla','gymStartFreeWorkout()')+gymSelectorOption('—','Bugünü Atla','Kayıtlı setleri silmez; geri alınabilir','gymSkipSelectedDay()',true);
+  body.innerHTML=gymTemplateOptionsHtml()+gymSelectorOption('+','Serbest Antrenman','Boş bir antrenmanla başla','gymStartFreeWorkout()')+gymSelectorOption('⟳','Son Seansı Tekrarla','Son kaydı yalnızca forma doldur','gymRepeatLastSession()')+gymSelectorOption('—','Bugünü Atla','Kayıtlı setleri silmez; geri alınabilir','gymSkipSelectedDay()',true);
   shade.hidden=false;setTimeout(()=>shade.querySelector('.gymWorkoutOption')?.focus(),20);
 }
 function closeGymWorkoutSelector(){const shade=document.getElementById('gymWorkoutShade');if(shade)shade.hidden=true}
@@ -7044,6 +7048,12 @@ function gymShowMissedPrograms(){
 function gymShowProgramTemplates(){
   const body=document.getElementById('gymWorkoutSheetBody'),items=SimurgGymFlex.programTemplates(selectedDate,gymBaseTemplateForDate);
   body.innerHTML=items.map(item=>gymSelectorOption('≡',gymDisplayLabel(item.name),window.SimurgLabels?window.SimurgLabels.ui(item.day):item.day,`gymChooseAlternate('${item.date}')`)).join('')+gymSelectorOption('‹','Geri','Ana seçeneklere dön','openGymWorkoutSelector()');
+}
+function gymTemplateOptionsHtml(){
+  return SimurgGymFlex.programTemplates(selectedDate,gymBaseTemplateForDate).map(item=>gymSelectorOption('≡',gymDisplayLabel(item.name),(window.SimurgLabels?window.SimurgLabels.ui(item.day):item.day)+' şablonu',`gymChooseAlternate('${item.date}')`)).join('');
+}
+function renderGymTemplateChooser(){
+  return `<section class="gymWorkoutStart" aria-labelledby="gymWorkoutStartTitle"><div class="gymWorkoutStartHead"><small>YENİ OTURUM</small><h2 id="gymWorkoutStartTitle">Bugünkü antrenmanı seç</h2><p>Haftanın günü bir programı otomatik seçmez.</p></div><div class="gymWorkoutOptions gymWorkoutStartOptions">${gymTemplateOptionsHtml()}${gymSelectorOption('+','Serbest Antrenman','Boş bir antrenmanla başla','gymStartFreeWorkout()')}</div></section>`;
 }
 async function gymChooseAlternate(sourceDate){const base=gymBaseTemplateForDate(sourceDate);return await persistGymDaySelection(SimurgGymFlex.makeState('alternate',{sourceDay:dayName(sourceDate),sourceDate,label:base.name}))}
 async function gymRepeatLastSession(){
@@ -7071,9 +7081,10 @@ async function undoGymSkippedDay(){
 }
 function renderGymWorkoutSelector(template){
   const root=document.getElementById('gymWorkoutSelector');if(!root)return;
-  const state=SimurgGymFlex.stateFor(DATA,selectedDate),prefix=selectedDate===todayStr()?'Bugünün antrenmanı':'Seçili gün',label=gymDisplayLabel(template.name||'Program seç');
+  if(template.mode==='unselected'){root.innerHTML='';return}
+  const state=SimurgGymFlex.stateFor(DATA,selectedDate),prefix=selectedDate===todayStr()?'Bugünün antrenmanı':'Seçili gün',label=gymDisplayLabel(template.name||'Program seç'),activeSession=dayData(selectedDate).some(row=>row.sessionId&&(state&&state.sessionId?row.sessionId===state.sessionId:true));
   const undo=gymSkipUndo&&gymSkipUndo.date===selectedDate?'<div class="gymSkipUndo"><span>Gün atlandı olarak kaydedildi.</span><button type="button" onclick="undoGymSkippedDay()">Geri Al</button></div>':'';
-  root.innerHTML=undo+`<button type="button" class="gymWorkoutSelectorButton" onclick="openGymWorkoutSelector()" aria-haspopup="dialog"><span><small>${gymSafe(prefix)}</small> · ${gymSafe(label)}</span><i>⌄</i></button>`;
+  root.innerHTML=undo+(activeSession?`<div class="gymWorkoutSelectorButton isLocked"><span><small>${gymSafe(prefix)}</small> · ${gymSafe(label)}</span><i aria-label="Aktif oturum">●</i></div>`:`<button type="button" class="gymWorkoutSelectorButton" onclick="openGymWorkoutSelector()" aria-haspopup="dialog"><span><small>${gymSafe(prefix)}</small> · ${gymSafe(label)}</span><i>⌄</i></button>`);
 }
 document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeGymWorkoutSelector();closeGymExercisePicker()}});
 function renderGymMode(){
@@ -7089,11 +7100,15 @@ function renderGymMode(){
   renderGymWorkoutSelector(template);
   if(label) label.textContent=trDate(selectedDate);
   if(title) title.textContent=window.SimurgLabels?window.SimurgLabels.sentence(template.name):template.name;
-  if(meta) meta.textContent=`${trDate(selectedDate)} • ${c.sets} kayıtlı set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg hacim`;
+  if(meta) meta.textContent=template.mode==='unselected'?`${trDate(selectedDate)} • Henüz bir antrenman seçilmedi`:`${trDate(selectedDate)} • ${c.sets} kayıtlı set • ${Math.round(c.vol).toLocaleString('tr-TR')} kg hacim`;
   const addCard=`<div class="gymAddCard">
     <div><b>Programı düzenle</b><span>Hareket adını değiştir, vücut bölgesi/set planını düzenle veya bu güne ekstra hareket ekle.</span></div>
     <button class="btn" onclick="openExerciseLibrary()">+ Hareket Ekle</button>
   </div>`;
+  if(template.mode==='unselected'){
+    list.innerHTML=renderGymTemplateChooser();
+    return;
+  }
   if(template.mode==='skipped'){
     list.innerHTML=`<div class="gymEmpty">${trDate(selectedDate)} günü açıkça atlandı olarak işaretlendi. Bu tarihteki mevcut set kayıtları korunur.</div>`;
     return;
@@ -16324,7 +16339,7 @@ m Shell V4: Logger information architecture fix -->
 <script src="./desktop-alignment.js?v=37"></script>
 <link rel="stylesheet" href="./mobile-ia-premium.css?v=12">
 <link rel="stylesheet" href="./simurg-mobile-weekly.css?v=2">
-<link rel="stylesheet" href="./simurg-gym-flex.css?v=2">
+<link rel="stylesheet" href="./simurg-gym-flex.css?v=3">
 <link rel="stylesheet" href="./simurg-training-lab.css?v=13">
 <link rel="stylesheet" href="./simurg-performance-ui.css?v=1">
 <link rel="stylesheet" href="./simurg-journal.css?v=1">

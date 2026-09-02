@@ -18,7 +18,12 @@
   function stateFor(data,date){var state=data&&data.gymDayState&&data.gymDayState[date];return state&&MODES.indexOf(state.mode)>=0?state:null;}
   function resolveTemplate(data,date,baseResolver){
     var planned=clone(baseResolver(date)),state=stateFor(data,date);
-    if(!state||state.mode==='planned')return Object.assign({},planned,{mode:'planned',sourceDate:date,state:state});
+    if(!state){
+      var existing=(data&&data.workouts||[]).some(function(row){return row&&row.date===date;});
+      if(existing)return Object.assign({},planned,{mode:'planned',sourceDate:date,state:null,legacySession:true});
+      return {name:'Bugünkü antrenmanı seç',items:[],mode:'unselected',sourceDate:null,state:null};
+    }
+    if(state.mode==='planned')return Object.assign({},planned,{mode:'planned',sourceDate:date,state:state});
     if(state.mode==='alternate'&&validDate(state.sourceDate)){
       var alternate=clone(baseResolver(state.sourceDate));alternate.name=state.label||alternate.name;
       return Object.assign({},alternate,{mode:'alternate',sourceDate:state.sourceDate,state:state});
