@@ -60,7 +60,7 @@ run('Home v2 keeps one compact Daily Guidance summary and four evidence links', 
   assert.match(overview, /GÜNLÜK YÖNLENDİRME/);
   assert.match(overview, /UYKU DESTEĞİ/);
   assert.match(overview, /SimurgDailyGuidance\.resolve/);
-  for (const label of ['Sleep', 'HRV', 'Gece Nabzı', 'Dinlenik Nabız', 'Cardio Load']) assert.ok(overview.includes(label));
+  for (const label of ['Uyku', 'HRV', 'Gece Nabzı', 'Dinlenik Nabız', 'Cardio Load']) assert.ok(overview.includes(label));
   assert.equal((overview.match(/evidenceItem\('/g) || []).length, 4);
   assert.match(css, /\.gp-evidence-strip\{[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
   assert.doesNotMatch(overview, /gp-horizon/);

@@ -50,7 +50,7 @@ test('Data Center exposes read-only migration diagnostics and cache versions are
   for(const label of ['Persistence Backend','Migration Durumu','IndexedDB Canonical','Legacy localStorage DATA','Tam-DATA Yedekleri','Origin Depolama Tahmini','Son Depolama Hatası'])assert.match(index,new RegExp(label));
   assert.match(index,/simurg-persistence\.js\?v=5/);
   assert.match(sw,/simurg-persistence\.js\?v=5/);
-  assert.match(sw,/simurg-mobile-polish-v4/);
+  assert.match(sw,/simurg-unified-premium-mobile-v1/);
   assert.doesNotMatch(sw,/caches\.keys\(\)[\s\S]*caches\.delete/);
 });
 

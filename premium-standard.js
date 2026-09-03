@@ -227,13 +227,13 @@
     var sleepValue=model.sleepScore==null?(model.sleepMinutes==null?null:formatSleep(model.sleepMinutes)):Math.round(model.sleepScore),sleepUnit=model.sleepScore==null?'':'/100',sleepCaption=model.sleepScore==null?'Uyku süresi':'Uyku skoru';
     var hrLabel=model.heartRateSource==='night_hr'?'Gece Nabzı':'Dinlenik Nabız';
     return '<section class="gp-card gp-daily-evidence"><div class="gp-card-head"><h2>Günlük Kanıtlar</h2><span>'+esc(model.selectedDate===today()?'Bugün':'Seçili gün')+'</span></div><div class="gp-evidence-strip">'
-      +evidenceItem('sleep','Sleep',sleepValue,sleepUnit,sleepCaption,'sleep')
+      +evidenceItem('sleep','Uyku',sleepValue,sleepUnit,sleepCaption,'sleep')
       +evidenceItem('recovery','HRV',model.hrv==null?null:formatLoad(model.hrv),'ms','Gece ortalaması','hrv')
       +evidenceItem('recovery',hrLabel,model.rhr==null?null:formatLoad(model.rhr),'bpm',model.heartRateSource==='night_hr'?'Polar gece verisi':'Mevcut kayıt','heart')
       +evidenceItem('load','Cardio Load',loadValueLabel(model.loadResult),'',model.loadResult&&model.loadResult.available?text(model.loadResult.statusLabel,'Mevcut'):'Veri bekleniyor','load')
       +'</div>'+polarContextLine(model)+'</section>';
   }
-  function polarContextLine(model){var rows=model.polarIntelligence&&model.polarIntelligence.compact||[];return rows.length?'<p class="gp-polar-context"><b>Polar bağlamı:</b> '+esc(rows.slice(0,2).join(' '))+'</p>':'';}
+  function polarContextLine(model){var rows=model.polarIntelligence&&model.polarIntelligence.compact||[];return rows.length?'<p class="gp-polar-context"><b>Polar</b><span>'+esc(rows[0])+'</span></p>':'';}
   function overviewPane(model){
     if(window.innerWidth>900){var desktopActivity=model.activity,desktopActivityLabel=desktopActivity&&desktopActivity.polar?'Seçili Gün Polar Aktivitesi':'Seçili Gün Aktivitesi',activityHtmlDesktop=desktopActivity?activityCard(desktopActivity,desktopActivityLabel,false):'<div class="gp-card gp-activity"><small class="gp-kicker">SEÇİLİ GÜN AKTİVİTESİ</small><h3>Aktivite bulunmuyor</h3><p>Bu tarih için gerçek Polar veya eski kaynak aktivitesi kaydı yok.</p></div>';
       return '<div class="gp-home-pane active gp-desktop-overview" data-home-pane="overview">'

@@ -6415,7 +6415,9 @@ function renderWeekStrip(){
     let activity=watchRowsForDate(d).length?activitySummaryForDate(d):null;
     let dot=activity?`<div class="activityDot" title="${escapeAttr(activity.fullLabel)}">${activity.emoji}</div>`:'';
     let displayDay=window.SimurgLabels?window.SimurgLabels.ui(dayName(d)):dayName(d);
-    return `<button class="dateBtn ${d===selectedDate?'active':''}" onclick="selectedDate='${d}';render()"><div class="d">${trDate(d)}</div><div class="day">${displayDay}</div>${dot}</button>`
+    let parts=d.split('-');
+    let compactDate=`${parts[2]}.${parts[1]}.${parts[0].slice(-2)}`;
+    return `<button class="dateBtn ${d===selectedDate?'active':''}" onclick="selectedDate='${d}';render()"><div class="d">${compactDate}</div><div class="day">${displayDay}</div>${dot}</button>`
   }).join('')
 }
 function renderWorkout(){
@@ -6430,7 +6432,7 @@ function renderWorkout(){
     const workoutHtml=Object.entries(groups).map(([body,items])=>{
       let exs={};items.forEach(w=>{let key=SimurgGymIdentity.rowIdentity(w);if(!exs[key])exs[key]={name:w.exercise,sets:[]};exs[key].sets.push(w)});
       let cc=calc(items);
-      return `<div class="group"><div class="groupHead"><div><span class="groupTitle">${escapeAttr(String(body).toUpperCase())}</span><span class="groupMeta">• ${cc.sets} SET • ${Math.round(cc.vol).toLocaleString('tr-TR')} KG</span></div><div class="groupPill">${cc.sets} SET</div></div><div class="exerciseGrid">${Object.values(exs).map(group=>exCard(group.name,group.sets)).join('')}</div></div>`
+      return `<div class="group"><div class="groupHead"><div><span class="groupTitle">${escapeAttr(String(body).toUpperCase())}</span><span class="groupMeta">${Math.round(cc.vol).toLocaleString('tr-TR')} kg hacim</span></div><div class="groupPill">${cc.sets} set</div></div><div class="exerciseGrid">${Object.values(exs).map(group=>exCard(group.name,group.sets)).join('')}</div></div>`
     }).join('');
     workoutGroups.innerHTML=workoutHtml + activityHtml;
   }
@@ -8003,7 +8005,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=mobile-polish-v3').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=unified-premium-mobile-v1').catch(function(){});
   });
 }
 </script>
@@ -11465,27 +11467,9 @@ button,.btn,.gymMiniBtn,input,select,textarea{
 </style>
 <script id="simurgWhoopMobileV9Script">
 (function(){
-  function shortDate(s){const a=s.split('-'); return `${a[2]}.${a[1]}`;}
   function ready(fn){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();}
   ready(function(){
-    // Mobile date chips should not show the full year; keep full week label untouched.
-    if(typeof window.renderWeekStrip==='function' && !window.renderWeekStrip.__v9){
-      const old=window.renderWeekStrip;
-      window.renderWeekStrip=function(){
-        const weekStrip=document.getElementById('weekStrip');
-        const weekLabel=document.getElementById('weekLabel');
-        if(!weekStrip || typeof weekDates!=='function'){ return old(); }
-        let end=addDays(weekStart,6);
-        if(weekLabel) weekLabel.textContent=`${trDate(weekStart)} - ${trDate(end)}`;
-        weekStrip.innerHTML=weekDates().map(d=>{
-          let activity=watchRowsForDate(d).length?activitySummaryForDate(d):null;
-          let dot=activity?`<div class="activityDot" title="${escapeAttr(activity.fullLabel)}">${activity.emoji}</div>`:'';
-          return `<button class="dateBtn ${d===selectedDate?'active':''}" onclick="selectedDate='${d}';render()"><div class="d">${shortDate(d)}</div><div class="day">${dayName(d)}</div>${dot}</button>`;
-        }).join('');
-      };
-      window.renderWeekStrip.__v9=true;
-      try{ window.renderWeekStrip(); }catch(e){}
-    }
+    // Date formatting is owned by the primary renderWeekStrip renderer.
     // Remove leftover Safari-local preview hint text if present; it is not product UI.
     document.querySelectorAll('.simurgMobileHint').forEach(el=>el.style.display='none');
   });
@@ -16332,20 +16316,20 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./simurg-coach.css?v=14">
 <script src="./simurg-coach-ui.js?v=15"></script>
 <link rel="stylesheet" href="./premium-standard.css?v=41">
-<script src="./premium-standard.js?v=53"></script>
+<script src="./premium-standard.js?v=54"></script>
 <link rel="stylesheet" href="./polar-accesslink.css?v=4">
 <script src="./polar-accesslink.js?v=11"></script>
 <link rel="stylesheet" href="./desktop-alignment.css?v=27">
 <script src="./desktop-alignment.js?v=37"></script>
 <link rel="stylesheet" href="./mobile-ia-premium.css?v=12">
-<link rel="stylesheet" href="./simurg-mobile-weekly.css?v=2">
+<link rel="stylesheet" href="./simurg-mobile-weekly.css?v=3">
 <link rel="stylesheet" href="./simurg-gym-flex.css?v=3">
 <link rel="stylesheet" href="./simurg-training-lab.css?v=13">
 <link rel="stylesheet" href="./simurg-performance-ui.css?v=1">
 <link rel="stylesheet" href="./simurg-journal.css?v=1">
-<link rel="stylesheet" href="./simurg-mobile-system.css?v=3">
-<script src="./simurg-mobile-weekly.js?v=3"></script>
-<script src="./mobile-ia-premium.js?v=13"></script>
+<link rel="stylesheet" href="./simurg-mobile-system.css?v=4">
+<script src="./simurg-mobile-weekly.js?v=4"></script>
+<script src="./mobile-ia-premium.js?v=14"></script>
 <script src="./simurg-training-lab-ui.js?v=19"></script>
 <script src="./simurg-performance-ui.js?v=3"></script>
 <script src="./simurg-journal-ui.js?v=2"></script>

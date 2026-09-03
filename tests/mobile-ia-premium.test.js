@@ -130,6 +130,16 @@ run('mobile Workout Journal uses premium single-open exercise summaries without 
   assert.match(html, /--muscle-color:\$\{palette\[i%palette\.length\]\}/);
 });
 
+run('Unified Premium Mobile owns deterministic dates and connected Daily rows', () => {
+  assert.match(html, /let compactDate=`\$\{parts\[2\]\}\.\$\{parts\[1\]\}\.\$\{parts\[0\]\.slice\(-2\)\}`/);
+  assert.doesNotMatch(html, /function shortDate\(s\)/);
+  assert.match(mobile, /class="mjExerciseChevron"/);
+  assert.match(systemCss, /Option 2 — Unified Premium Mobile/);
+  assert.match(systemCss, /dateBtn\{[\s\S]*?flex:0 0 76px!important/);
+  assert.match(systemCss, /mjExerciseToggle\{[\s\S]*?min-height:72px!important/);
+  assert.match(systemCss, /mjExerciseIdentity b\{font-size:15\.5px!important/);
+});
+
 run('Daily compacts only empty analytical panels and preserves real weekly trend history', () => {
   assert.match(mobile, /var emptyDay=!cards\.length&&!groups\.querySelector\('\.simurg-activity-card'\)/);
   assert.match(mobile, /var trendHasHistory=!!section\.querySelector\('\.gp-logger-trend \.bar:not\(\.empty\)'\)/);
@@ -146,4 +156,4 @@ run('Polar AccessLink mounts in Data Center on mobile and defers status loading'
   assert.match(mobile, /simurgMobileOpenPolarDetails/);
 });
 
-process.stdout.write('10 mobile IA premium tests passed.\n');
+process.stdout.write('12 mobile IA premium tests passed.\n');

@@ -289,7 +289,7 @@
       toggle.className='mjExerciseToggle';
       toggle.setAttribute('aria-expanded',key===journalActiveKey?'true':'false');
       toggle.innerHTML='<span class="mjExerciseIdentity"><b>'+esc(name&&name.textContent||'Egzersiz')+'</b><small>'+esc(profile&&profile.textContent||'Kayıtlı egzersiz')+'</small></span>'
-        +'<span class="mjExerciseNumbers"><strong>'+stats.sets+' set</strong><em>'+stats.reps+' tekrar</em></span><i>⌄</i>';
+        +'<span class="mjExerciseNumbers"><strong>'+stats.sets+' set</strong><em>'+stats.reps+' tekrar</em></span><i class="mjExerciseChevron" aria-hidden="true">›</i>';
       toggle.addEventListener('click',function(){openJournalExercise(card,key);});
       var body=document.createElement('div');
       body.className='mjExerciseBody';

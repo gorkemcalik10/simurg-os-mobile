@@ -472,7 +472,21 @@ run('Weekly mobile labels stay readable without changing unrelated typography', 
   assert.match(css, /#weekly\.mwMobileWeekly \.mwVisual>div small[\s\S]*?font-size:10\.5px!important/);
   assert.match(css, /\.mwWeekNav button\{width:44px;height:44px/);
   assert.doesNotMatch(css, /\.mwPrimaryArc|\.mwPrimaryAccent|border-left-color|transform:rotate/);
-  assert.doesNotMatch(css, /font-size:(?:8\.5|9|9\.5)px/);
+  assert.match(css, /\.mwRhythmDay b\{[^}]*font-size:9px/);
+});
+
+run('weekly story orders one hero, three supports, seven-day rhythm, Strength and Polar', () => {
+  const data = stores();
+  data.workouts.push({ date: '2026-08-24', sessionId: 'gym', sets: 2, reps: 8, weight: 40 });
+  data.loads['2026-08-24'] = { available: true, value: 42, sourceType: 'official', statusLabel: 'Dengeli' };
+  const html = weekly.render(weekly.buildWeek('2026-08-24', options(data)), null, TODAY);
+  assert.equal((html.match(/class="mwHero"/g) || []).length, 1);
+  assert.equal((html.match(/class="mwPrimary /g) || []).length, 3);
+  assert.equal((html.match(/class="mwRhythmDay /g) || []).length, 7);
+  for (const label of ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']) assert.match(html, new RegExp(`>${label}<`));
+  assert.ok(html.indexOf('mwHero') < html.indexOf('mwPrimaryGrid'));
+  assert.ok(html.indexOf('mwPrimaryGrid') < html.indexOf('mwRhythm'));
+  assert.ok(html.indexOf('Kuvvet özeti') < html.indexOf('Haftalık vücut sinyalleri'));
 });
 
 run('primary cards lead with training days, duration, and compact Gym volume without decorative rings', () => {
@@ -493,12 +507,12 @@ run('primary cards lead with training days, duration, and compact Gym volume wit
 run('asset versions and service-worker cache generation invalidate stale Weekly bundles', () => {
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-  for (const asset of ['simurg-mobile-weekly.css?v=2', 'simurg-mobile-weekly.js?v=3', 'simurg-mobile-system.css?v=3', 'mobile-ia-premium.js?v=13']) {
+  for (const asset of ['simurg-mobile-weekly.css?v=3', 'simurg-mobile-weekly.js?v=4', 'simurg-mobile-system.css?v=4', 'mobile-ia-premium.js?v=14']) {
     assert.match(html, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(sw, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(html, /sw\.js\?v=mobile-polish-v3/);
-  assert.match(sw, /simurg-mobile-polish-v3/);
+  assert.match(html, /sw\.js\?v=unified-premium-mobile-v1/);
+  assert.match(sw, /simurg-unified-premium-mobile-v1/);
   assert.doesNotMatch(sw, /simurg-mobile-weekly\.(?:css|js)\?v=1/);
 });
 
