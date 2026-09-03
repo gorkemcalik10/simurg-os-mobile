@@ -148,6 +148,21 @@ run('Daily compacts only empty analytical panels and preserves real weekly trend
   assert.match(systemCss, /\.miaCompactEmpty>\*:not\(h3\):not\(\.miaJournalEmptyNote\)\{display:none!important/);
 });
 
+run('Shared Date Navigator v2 gives Daily, Weekly, and Performance one 44px dark control contract', () => {
+  assert.match(systemCss, /Shared Date Navigator v2/);
+  assert.match(systemCss, /#training-lab \.spDateNav,#weekly \.mwWeekNav\{[\s\S]*?grid-template-columns:44px minmax\(0,1fr\) 44px!important/);
+  assert.match(systemCss, /#training-lab \.spDateNav button,#weekly \.mwWeekNav button\{[\s\S]*?height:44px!important/);
+  assert.match(systemCss, /#workout\.section\.active\.gp-logger-refined>\.topbar \.controls\{[\s\S]*?grid-template-rows:44px 28px!important/);
+  assert.match(systemCss, /controls>:nth-child\(1\),[\s\S]*?controls>:nth-child\(3\)\{width:44px!important;min-width:44px!important/);
+});
+
+run('Home micro-polish keeps Coach dominant while guidance, evidence, and Polar context stay compact', () => {
+  assert.match(systemCss, /Home micro-polish: Coach stays dominant/);
+  assert.match(systemCss, /#home\.gp-home \.gp-daily-guidance\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)!important;[\s\S]*?padding:9px 11px!important/);
+  assert.match(systemCss, /#home\.gp-home \.gp-daily-evidence\{padding:8px 10px!important/);
+  assert.match(systemCss, /#home\.gp-home \.gp-polar-context\{margin-top:5px!important;[\s\S]*?opacity:\.78!important/);
+});
+
 run('Polar AccessLink mounts in Data Center on mobile and defers status loading', () => {
   assert.match(polar, /if\(window\.innerWidth<=900\)return document\.getElementById\('mobilePolarSyncHub'\)/);
   assert.match(polar, /if\(window\.innerWidth>900\)\{installObserver\(\);setTimeout\(installObserver,400\);setTimeout\(installObserver,1200\);refreshStatus\(\);\}/);
@@ -156,4 +171,4 @@ run('Polar AccessLink mounts in Data Center on mobile and defers status loading'
   assert.match(mobile, /simurgMobileOpenPolarDetails/);
 });
 
-process.stdout.write('12 mobile IA premium tests passed.\n');
+process.stdout.write('14 mobile IA premium tests passed.\n');

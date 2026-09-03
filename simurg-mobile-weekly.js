@@ -20,10 +20,15 @@
   function localToday(){return dateString(new Date());}
   function list(value){return value==null?[]:(Array.isArray(value)?value:[value]);}
   function escapeHtml(value){return String(value==null?'':value).replace(/[&<>"']/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char];});}
+  function liveData(options){
+    if(options&&Object.prototype.hasOwnProperty.call(options,'data'))return options.data||{};
+    try{if(root&&typeof root.simurgGetData==='function')return root.simurgGetData()||{};}catch(error){}
+    return root&&root.DATA||{};
+  }
   function dependencies(options){
     options=options||{};
     return {
-      data:options.data||(root&&root.DATA)||{},
+      data:liveData(options),
       signal:options.signalModel||(root&&root.SimurgSignalModel),
       sleep:options.sleepIntelligence||(root&&root.SimurgSleepIntelligence),
       polar:options.polarIntelligence||(root&&root.SimurgPolarIntelligence)
@@ -196,16 +201,25 @@
     var polar=metricCard('Gerçek uyku',current.polar.actualSleepMinutes==null?null:durationLabel(current.polar.actualSleepMinutes),null,deltaLabel(comparison,'actualSleepMinutes',' dk'),current.polar.actualSleepSampleSize+' gece')+metricCard('HRV',current.polar.hrv.value==null?null:decimalLabel(current.polar.hrv.value),'ms',deltaLabel(comparison,'hrv',' ms'),current.polar.hrv.sampleSize+' gece')+metricCard('Night HR',current.polar.nightHr.value==null?null:decimalLabel(current.polar.nightHr.value),'bpm',deltaLabel(comparison,'nightHr',' bpm'),current.polar.nightHr.sampleSize+' gece')+metricCard('Adım',current.polar.steps.value==null?null:numberLabel(current.polar.steps.value),null,deltaLabel(comparison,'stepsPercent','%'),current.polar.steps.sampleSize+'/7 gün')+metricCard('Aktif süre',current.polar.activeMinutes.value==null?null:durationLabel(current.polar.activeMinutes.value),null,deltaLabel(comparison,'activeMinutes',' dk'),current.polar.activeMinutes.sampleSize+'/7 gün')+metricCard('Cardio Load · haftalık ort.',cardioValue,null,cardioDelta,current.polar.cardioLoad.sampleSize+' resmi gün',cardioContext);
     var visuals=(comparison.volumePercent!=null?visual('Gym hacmi',current.strength.volume,previous&&previous.strength.volume,volumeLabel):'')+(comparison.durationMinutes!=null?visual('Antrenman süresi',current.training.durationMinutes,previous&&previous.training.durationMinutes,durationLabel):'')+(comparison.actualSleepMinutes!=null?visual('Gerçek uyku',current.polar.actualSleepMinutes,previous&&previous.polar.actualSleepMinutes,durationLabel):'')+(comparison.cardioLoadPercent!=null?visual('Cardio Load',current.polar.cardioLoad.value,previous&&previous.polar.cardioLoad.value,decimalLabel):'');
     var hero='<section class="mwHero"><small>BU HAFTANIN ÖZETİ</small><h2>'+escapeHtml(isCurrent?'Hafta ilerliyor':'Hafta tamamlandı')+'</h2><p>'+escapeHtml(summaryText(current,comparison))+'</p><span class="mwHeroStatus '+(isCurrent?'active':'')+'">'+escapeHtml(scopeLabel)+'</span></section>';
-    return '<div class="mwShell"><header class="mwHeader"><div><small>'+escapeHtml(isCurrent?'BU HAFTA':'GEÇMİŞ HAFTA')+'</small><h1>Haftalık Özet</h1></div><div class="mwWeekNav"><button type="button" onclick="SimurgMobileWeekly.shift(-1)" aria-label="Önceki hafta" '+(current.hasEarlierData?'':'disabled')+'>‹</button><strong>'+escapeHtml(rangeLabel(current.startDate,current.endDate))+'</strong><button type="button" onclick="SimurgMobileWeekly.shift(1)" aria-label="Sonraki hafta" '+(nextDisabled?'disabled':'')+'>›</button></div></header>'+hero+'<section class="mwPrimaryGrid" aria-label="Haftalık destek metrikleri">'+primary.join('')+'</section>'+rhythm(current)+'<section class="mwSection"><header><small>KUVVET</small><h2>Kuvvet özeti</h2></header><div class="mwMetricGrid mwMetricGrid--strength">'+(strength||'<p class="mwUnavailable">Bu hafta Gym kaydı yok.</p>')+'</div></section><section class="mwSection"><header><small>POLAR</small><h2>Haftalık vücut sinyalleri</h2></header><div class="mwMetricGrid mwMetricGrid--polar">'+(polar||'<p class="mwUnavailable">Bu hafta güvenilir Polar özeti için yeterli veri yok.</p>')+'</div></section>'+(visuals?'<section class="mwSection mwComparison"><header><small>KARŞILAŞTIRMA</small><h2>Bu hafta / Geçen hafta</h2><p>'+escapeHtml(scopeLabel)+'</p></header><div class="mwVisualGrid">'+visuals+'</div></section>':'')+'</div>';
+    return '<div class="mwShell"><header class="mwHeader"><div><small>'+escapeHtml(isCurrent?'BU HAFTA':'GEÇMİŞ HAFTA')+'</small><h1>Haftalık Özet</h1></div><div class="mwWeekNav"><button type="button" data-week-shift="-1" aria-label="Önceki hafta" '+(current.hasEarlierData?'':'disabled')+'>‹</button><strong>'+escapeHtml(rangeLabel(current.startDate,current.endDate))+'</strong><button type="button" data-week-shift="1" aria-label="Sonraki hafta" '+(nextDisabled?'disabled':'')+'>›</button></div></header>'+hero+'<section class="mwPrimaryGrid" aria-label="Haftalık destek metrikleri">'+primary.join('')+'</section>'+rhythm(current)+'<section class="mwSection"><header><small>KUVVET</small><h2>Kuvvet özeti</h2></header><div class="mwMetricGrid mwMetricGrid--strength">'+(strength||'<p class="mwUnavailable">Bu hafta Gym kaydı yok.</p>')+'</div></section><section class="mwSection"><header><small>POLAR</small><h2>Haftalık vücut sinyalleri</h2></header><div class="mwMetricGrid mwMetricGrid--polar">'+(polar||'<p class="mwUnavailable">Bu hafta güvenilir Polar özeti için yeterli veri yok.</p>')+'</div></section>'+(visuals?'<section class="mwSection mwComparison"><header><small>KARŞILAŞTIRMA</small><h2>Bu hafta / Geçen hafta</h2><p>'+escapeHtml(scopeLabel)+'</p></header><div class="mwVisualGrid">'+visuals+'</div></section>':'')+'</div>';
+  }
+  function bindNavigator(report,options){
+    if(!report||typeof report.querySelectorAll!=='function')return;
+    Array.prototype.forEach.call(report.querySelectorAll('[data-week-shift]'),function(button){
+      button.addEventListener('click',function(){if(!button.disabled)shift(Number(button.getAttribute('data-week-shift'))||0,options);});
+    });
   }
   function mount(options){
     options=options||{};if(root&&root.innerWidth>900)return false;
     var report=root&&root.document&&root.document.getElementById('weeklyReport');if(!report)return false;
     var today=dateValue(options.today)||localToday();state.start=mondayOf(state.start||today);if(state.start>mondayOf(today))state.start=mondayOf(today);
     var current=buildWeek(state.start,Object.assign({},options,{today:today})),previous=current.isActive?null:buildWeek(addDays(state.start,-7),Object.assign({},options,{today:today}));
-    var section=root.document.getElementById('weekly');if(section)section.classList.add('mwMobileWeekly');report.innerHTML=render(current,previous,today);return true;
+    var section=root.document.getElementById('weekly');if(section)section.classList.add('mwMobileWeekly');report.innerHTML=render(current,previous,today);bindNavigator(report,options);return true;
   }
-  function shift(amount){state.start=addDays(state.start||mondayOf(localToday()),Number(amount||0)*7);mount();}
+  function shift(amount,options){
+    options=options||{};var today=dateValue(options.today)||localToday(),current=mondayOf(state.start||today),target=addDays(current,Number(amount||0)*7),latest=mondayOf(today);
+    state.start=target>latest?latest:target;return mount(options);
+  }
   function install(){
     if(!root||root.__simurgMobileWeeklyInstalled)return;root.__simurgMobileWeeklyInstalled=true;
     var base=root.renderWeeklyReport;root.renderWeeklyReport=function(){if(root.innerWidth<=900)return mount();return typeof base==='function'?base.apply(this,arguments):undefined;};

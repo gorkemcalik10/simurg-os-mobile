@@ -418,6 +418,59 @@
   #weekly .mwRhythmDay.training i{background:linear-gradient(#ffd06b,var(--sms-amber))!important;}#weekly .mwRhythmDay.load i{background:#85919d!important;}#weekly .mwRhythmDay.missing i{height:3px!important;background:#1b242d!important;}
   #weekly .mwRhythmDay b{margin-top:5px!important;color:#aeb7c0!important;font-size:8px!important;line-height:1!important;}#weekly .mwRhythmDay span{margin-top:3px!important;color:var(--sms-muted-2)!important;font-size:7.5px!important;line-height:1!important;}
   #weekly .mwSection{margin-top:8px!important;}
+
+  /* Shared Date Navigator v2 — Daily, Weekly and Performance share one shell. */
+  #training-lab .spDateNav,#weekly .mwWeekNav{
+    grid-template-columns:44px minmax(0,1fr) 44px!important;min-height:44px!important;
+    border:1px solid var(--sms-line)!important;border-radius:14px!important;background:#080f16!important;
+  }
+  #training-lab .spDateNav button,#weekly .mwWeekNav button{
+    width:44px!important;height:44px!important;min-height:44px!important;color:#dce2e8!important;font-size:24px!important;
+  }
+  #training-lab .spDateNav button:disabled,#weekly .mwWeekNav button:disabled{color:#4e5965!important;opacity:.55!important;}
+  #training-lab .spDateNav>div,#weekly .mwWeekNav strong{min-width:0!important;padding:0 8px!important;text-align:center!important;}
+  #training-lab .spDateNav b,#weekly .mwWeekNav strong{color:#e5e9ed!important;font-size:11px!important;line-height:1.25!important;font-weight:780!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+  #training-lab .spDateNav small{color:var(--sms-muted-2)!important;font-size:7.5px!important;letter-spacing:.12em!important;}
+
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls{
+    grid-template-columns:44px minmax(0,1fr) 44px auto auto!important;grid-template-rows:44px 28px!important;
+    row-gap:7px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;overflow:visible!important;
+  }
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(-n+3){
+    height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;background:#080f16!important;border-color:var(--sms-line)!important;color:#dce2e8!important;
+  }
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(1),
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(3){width:44px!important;min-width:44px!important;padding:0!important;}
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(1){grid-column:1!important;grid-row:1!important;border-radius:14px 0 0 14px!important;}
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(2),
+  html body main #workout.section.active.gp-logger-refined #weekLabel{
+    grid-column:2/5!important;grid-row:1!important;padding:0 9px!important;border-width:1px 0!important;border-radius:0!important;background:#080f16!important;
+    color:#e5e9ed!important;font-size:11px!important;line-height:44px!important;font-weight:780!important;text-align:center!important;
+  }
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(3){grid-column:5!important;grid-row:1!important;border-radius:0 14px 14px 0!important;}
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(4),
+  html body main #workout.section.active.gp-logger-refined>.topbar .controls>:nth-child(5){
+    grid-row:2!important;height:28px!important;min-height:28px!important;max-height:28px!important;min-width:72px!important;padding:0 9px!important;
+    border:1px solid rgba(166,180,194,.10)!important;border-radius:10px!important;background:transparent!important;color:var(--sms-muted)!important;font-size:9px!important;
+  }
+
+  /* Home micro-polish: Coach stays dominant; guidance and evidence recede. */
+  #home.gp-home .gp-daily-guidance{
+    grid-template-columns:minmax(0,1fr)!important;gap:7px!important;padding:9px 11px!important;
+    border-color:rgba(166,180,194,.09)!important;background:var(--sms-surface-inset)!important;
+  }
+  #home.gp-home .gp-guidance-action .gp-kicker{color:var(--sms-muted)!important;font-size:8px!important;}
+  #home.gp-home .gp-guidance-action h2{margin:3px 0!important;font-size:13.5px!important;line-height:1.2!important;}
+  #home.gp-home .gp-guidance-action p{font-size:9.5px!important;line-height:1.35!important;}
+  #home.gp-home .gp-guidance-sleep{padding:7px 0 0!important;border-top:1px solid rgba(166,180,194,.08)!important;border-left:0!important;opacity:.68!important;}
+  #home.gp-home .gp-guidance-sleep b{margin-top:3px!important;font-size:9.5px!important;line-height:1.25!important;}
+  #home.gp-home .gp-guidance-sleep span{margin-top:2px!important;font-size:7.5px!important;}
+  #home.gp-home .gp-daily-evidence{padding:8px 10px!important;}
+  #home.gp-home .gp-daily-evidence .gp-card-head{margin-bottom:6px!important;}
+  #home.gp-home .gp-evidence-strip{margin-top:6px!important;}
+  #home.gp-home .gp-evidence-item{padding:8px 7px!important;}
+  #home.gp-home .gp-evidence-item b{margin:4px 0 2px!important;font-size:15px!important;}
+  #home.gp-home .gp-polar-context{margin-top:5px!important;font-size:8px!important;line-height:1.25!important;opacity:.78!important;}
 }
 
 @media (max-width:340px){

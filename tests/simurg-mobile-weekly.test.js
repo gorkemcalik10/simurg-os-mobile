@@ -322,6 +322,59 @@ run('week navigation stops when no older trusted history exists', () => {
   assert.match(html, /aria-label="Önceki hafta" disabled/);
 });
 
+run('historical availability uses the live app data getter instead of a missing window.DATA property', () => {
+  const data = stores();
+  data.workouts.push({ date: '2026-08-10', sets: 2, reps: 8, weight: 40 });
+  const previousGetter = global.simurgGetData;
+  global.simurgGetData = () => data;
+  try {
+    const result = weekly.buildWeek('2026-08-24', {
+      today: TODAY,
+      signalModel: makeSignal(data, []),
+      sleepIntelligence: sleep,
+      polarIntelligence: polarProvider(data),
+    });
+    assert.equal(result.hasEarlierData, true);
+    assert.match(weekly.render(result, null, TODAY), /data-week-shift="-1" aria-label="Önceki hafta" >/);
+  } finally {
+    if (previousGetter === undefined) delete global.simurgGetData;
+    else global.simurgGetData = previousGetter;
+  }
+});
+
+run('week navigation moves backward repeatedly, forward from history, blocks future, and survives rerender', () => {
+  const data = stores();
+  for (const date of ['2026-08-03', '2026-08-10', '2026-08-17']) data.workouts.push({ date, sets: 1, reps: 8, weight: 40 });
+  const opts = options(data), previousDocument = global.document, previousWidth = global.innerWidth;
+  const navButtons = [-1, 1].map(value => ({ disabled: false, getAttribute() { return String(value); }, addEventListener(type, handler) { if (type === 'click') this.click = handler; } }));
+  const report = { innerHTML: '', querySelectorAll() { return navButtons; } };
+  global.innerWidth = 390;
+  global.document = {
+    getElementById(id) {
+      if (id === 'weeklyReport') return report;
+      if (id === 'weekly') return { classList: { add() {} } };
+      return null;
+    },
+  };
+  weekly.state.start = null;
+  try {
+    assert.equal(weekly.mount(opts), true);
+    assert.equal(weekly.state.start, '2026-08-24');
+    assert.equal(typeof navButtons[0].click, 'function');
+    navButtons[0].click(); assert.equal(weekly.state.start, '2026-08-17');
+    weekly.shift(-1, opts); assert.equal(weekly.state.start, '2026-08-10');
+    weekly.shift(1, opts); assert.equal(weekly.state.start, '2026-08-17');
+    weekly.mount(opts); assert.equal(weekly.state.start, '2026-08-17');
+    weekly.state.start = '2026-08-24';
+    weekly.shift(1, opts); assert.equal(weekly.state.start, '2026-08-24');
+    assert.match(report.innerHTML, /data-week-shift="1" aria-label="Sonraki hafta" disabled/);
+  } finally {
+    weekly.state.start = null;
+    if (previousDocument === undefined) delete global.document; else global.document = previousDocument;
+    if (previousWidth === undefined) delete global.innerWidth; else global.innerWidth = previousWidth;
+  }
+});
+
 run('actual sleep is stage-derived and never substituted with time in bed or duration', () => {
   const data = stores();
   data.polarSleep.daily['2026-08-24'] = {
@@ -507,12 +560,12 @@ run('primary cards lead with training days, duration, and compact Gym volume wit
 run('asset versions and service-worker cache generation invalidate stale Weekly bundles', () => {
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-  for (const asset of ['simurg-mobile-weekly.css?v=3', 'simurg-mobile-weekly.js?v=4', 'simurg-mobile-system.css?v=4', 'mobile-ia-premium.js?v=14']) {
+  for (const asset of ['simurg-mobile-weekly.css?v=3', 'simurg-mobile-weekly.js?v=5', 'simurg-mobile-system.css?v=5', 'mobile-ia-premium.js?v=14']) {
     assert.match(html, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(sw, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(html, /sw\.js\?v=unified-premium-mobile-v1/);
-  assert.match(sw, /simurg-unified-premium-mobile-v1/);
+  assert.match(html, /sw\.js\?v=mobile-polish-nav-v2/);
+  assert.match(sw, /simurg-mobile-polish-nav-v2/);
   assert.doesNotMatch(sw, /simurg-mobile-weekly\.(?:css|js)\?v=1/);
 });
 
@@ -548,4 +601,4 @@ run('mobile menu hides Journal while its data contract and stable adjacent surfa
   assert.doesNotMatch(source, /Pzt.{0,20}bugün|aynı günleri|maxDays|partial_equivalent/);
 });
 
-process.stdout.write('34 Simurg mobile Weekly tests passed.\n');
+process.stdout.write('36 Simurg mobile Weekly tests passed.\n');
