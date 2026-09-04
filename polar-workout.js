@@ -453,7 +453,7 @@
   window.simurgOpenPolarWorkout=function(button){
     activatePolarWorkout();
   };
-  window.simurgClosePolarWorkout=function(){window.simurgV8Go('polar','polar');};
+  window.simurgClosePolarWorkout=function(){window.simurgV8Go('polar','menu');};
   window.simurgOpenPolarWorkoutFor=function(date,startTime){selectedDate=String(date||todayDate());selectedWorkoutKey=String(startTime||'');activatePolarWorkout();};
   window.polarWorkoutExport=function(){
     var workout=latest();if(!workout){return;}

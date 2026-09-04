@@ -1,4 +1,4 @@
-const SIMURG_CACHE = 'simurg-mobile-polish-nav-v2';
+const SIMURG_CACHE = 'simurg-ui-package1-v1';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -15,12 +15,12 @@ const CORE_ASSETS = [
   './simurg-exercise-history.js?v=2',
   './simurg-next-session-target.js?v=2',
   './simurg-data-validation.js?v=10',
-  './simurg-workout-recovery.js?v=2',
+  './simurg-workout-recovery.js?v=3',
   './simurg-gym-flex.js?v=2',
   './simurg-exercise-catalog.js?v=1',
   './simurg-gym-flex.css?v=3',
   './polar-workout.css?v=12',
-  './polar-workout.js?v=17',
+  './polar-workout.js?v=18',
   './workout-source-policy.js?v=3',
   './premium-standard.css?v=41',
   './premium-standard.js?v=54',
@@ -46,9 +46,9 @@ const CORE_ASSETS = [
   './desktop-alignment.js?v=37',
   './mobile-ia-premium.css?v=12',
   './simurg-mobile-weekly.css?v=3',
-  './simurg-mobile-system.css?v=5',
+  './simurg-mobile-system.css?v=6',
   './simurg-mobile-weekly.js?v=5',
-  './mobile-ia-premium.js?v=14',
+  './mobile-ia-premium.js?v=15',
   './simurg-training-lab.css?v=13',
   './simurg-training-lab-ui.js?v=19',
   './simurg-journal.css?v=1',

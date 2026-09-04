@@ -87,9 +87,12 @@ await run('runtime merge creates a rollback snapshot and restores it safely', as
     removeItem: key => values.delete(key)
   };
   const status = { textContent: '', dataset: {} };
+  const controls = Object.fromEntries(['workoutRecoveryMergeBtn', 'workoutRecoveryExportBtn', 'workoutRecoveryRollbackBtn'].map(id => [id, {
+    disabled: false, title: '', attributes: {}, setAttribute(name, value) { this.attributes[name] = String(value); }
+  }]));
   let current = data();
   global.localStorage = storage;
-  global.document = { getElementById: id => id === 'workoutRecoveryStatus' ? status : null };
+  global.document = { getElementById: id => id === 'workoutRecoveryStatus' ? status : (controls[id] || null) };
   global.FileReader = class {
     readAsText(file) { this.result = file.content; this.onload(); }
   };
@@ -100,14 +103,23 @@ await run('runtime merge creates a rollback snapshot and restores it safely', as
       commit: candidate => { current = candidate; },
       download: () => {}
     });
+    assert.equal(controls.workoutRecoveryMergeBtn.disabled, true);
+    assert.equal(controls.workoutRecoveryExportBtn.disabled, true);
+    assert.equal(controls.workoutRecoveryRollbackBtn.disabled, true);
     const input = { files: [{ size: 100, content: JSON.stringify({ workouts: [row()] }) }], value: 'backup.json' };
     runtime.analyze({ target: input });
+    assert.equal(controls.workoutRecoveryMergeBtn.disabled, false);
     await runtime.merge();
     assert.equal(current.workouts.length, 1);
     assert.ok(storage.getItem(recovery.SNAPSHOT_KEY));
+    assert.equal(controls.workoutRecoveryMergeBtn.disabled, true);
+    assert.equal(controls.workoutRecoveryExportBtn.disabled, false);
+    assert.equal(controls.workoutRecoveryRollbackBtn.disabled, false);
     await runtime.rollback();
     assert.equal(current.workouts.length, 0);
     assert.equal(storage.getItem(recovery.SNAPSHOT_KEY), null);
+    assert.equal(controls.workoutRecoveryExportBtn.disabled, true);
+    assert.equal(controls.workoutRecoveryRollbackBtn.disabled, true);
   } finally {
     delete global.window;
     delete global.document;

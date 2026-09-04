@@ -126,13 +126,26 @@
     if(typeof window==='undefined'||!adapter||typeof adapter.getData!=='function'||typeof adapter.commit!=='function')return null;
     var pending=null;
     function el(id){return document.getElementById(id)}
-    function setStatus(text,state){var node=el('workoutRecoveryStatus');if(node){node.textContent=text;node.dataset.state=state||'idle'}}
+    function snapshotAvailable(){try{return !!localStorage.getItem(SNAPSHOT_KEY)}catch(error){return false}}
+    function setControl(buttonId,enabled,reason){
+      var button=el(buttonId);if(!button)return;
+      button.disabled=!enabled;
+      button.setAttribute('aria-disabled',String(!enabled));
+      button.title=enabled?'':reason;
+    }
+    function updateControls(){
+      var canMerge=!!(pending&&pending.report&&pending.report.missingCount>0),hasSnapshot=snapshotAvailable();
+      setControl('workoutRecoveryMergeBtn',canMerge,pending?'Analizde eklenecek eksik workout yok.':'Önce bir backup analiz et.');
+      setControl('workoutRecoveryExportBtn',hasSnapshot,'Önce workout recovery uygula.');
+      setControl('workoutRecoveryRollbackBtn',hasSnapshot,'Geri alınabilir recovery snapshot’ı yok.');
+    }
+    function setStatus(text,state){var node=el('workoutRecoveryStatus');if(node){node.textContent=text;node.dataset.state=state||'idle'}updateControls()}
     function format(report){
       return 'Mevcut: '+report.currentWorkoutCount+' · Backup: '+report.backupWorkoutCount+' · Eklenecek: '+report.missingCount+' · Tekrar: '+report.duplicateCount+' · Sonuç: '+report.expectedWorkoutCount+'\nTarih: '+(report.dateRange.from||'-')+' → '+(report.dateRange.to||'-')+' · 20 Ağustos: '+(report.containsAugust20?'var':'yok');
     }
     function readFile(event){
       var input=event&&event.target,file=input&&input.files&&input.files[0];
-      if(!file)return;
+      if(!file){updateControls();return}
       if(file.size>validation.LIMITS.maxBytes){setStatus('Backup dosyası izin verilen boyutu aşıyor.','error');input.value='';return}
       var reader=new FileReader();
       reader.onload=function(){
@@ -181,6 +194,7 @@
       }catch(error){setStatus('Geri alma başarısız: '+String(error&&error.message||error),'error');return null}
     }
     function exportRecovered(){
+      if(!snapshotAvailable()){setStatus('Önce workout recovery uygula.','idle');return null}
       var data=prepareCurrent(adapter.getData());
       adapter.download('simurg-recovered-data.json',JSON.stringify(data,null,2));
       setStatus('Mevcut doğrulanmış DATA dışa aktarıldı.','success');
@@ -189,6 +203,7 @@
     window.mergeWorkoutRecovery=merge;
     window.rollbackWorkoutRecovery=rollback;
     window.exportRecoveredData=exportRecovered;
+    updateControls();
     return {analyze:readFile,merge:merge,rollback:rollback,exportData:exportRecovered};
   }
 

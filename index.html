@@ -6269,9 +6269,9 @@ body{background:#050607!important;}
   <div class="actions">
     <button class="btn" type="button" onclick="document.getElementById('workoutRecoveryFile').click()">Backup Analiz Et</button>
     <input type="file" id="workoutRecoveryFile" accept="application/json,.json,.txt" style="display:none" onchange="analyzeWorkoutRecovery(event)">
-    <button class="btn" type="button" onclick="mergeWorkoutRecovery()">Eksik Workout'ları Birleştir</button>
-    <button class="btn sec" type="button" onclick="exportRecoveredData()">Kurtarılan DATA'yı Dışa Aktar</button>
-    <button class="btn sec" type="button" onclick="rollbackWorkoutRecovery()">Recovery Öncesine Dön</button>
+    <button id="workoutRecoveryMergeBtn" class="btn" type="button" onclick="mergeWorkoutRecovery()" aria-describedby="workoutRecoveryStatus" disabled title="Önce bir backup analiz et.">Eksik Workout'ları Birleştir</button>
+    <button id="workoutRecoveryExportBtn" class="btn sec" type="button" onclick="exportRecoveredData()" aria-describedby="workoutRecoveryStatus" disabled title="Önce workout recovery uygula.">Kurtarılan DATA'yı Dışa Aktar</button>
+    <button id="workoutRecoveryRollbackBtn" class="btn sec" type="button" onclick="rollbackWorkoutRecovery()" aria-describedby="workoutRecoveryStatus" disabled title="Geri alınabilir recovery snapshot’ı yok.">Recovery Öncesine Dön</button>
   </div>
   <div id="workoutRecoveryStatus" class="syncStatus" data-state="idle">Workout backup seçilmedi. Önce yazmasız analiz çalıştır.</div>
 </div>
@@ -6286,7 +6286,7 @@ body{background:#050607!important;}
 <script src="./simurg-exercise-canonicalization.js?v=3"></script>
 <script src="./simurg-training-lab-analysis.js?v=6"></script>
 <script src="./simurg-data-validation.js?v=10"></script>
-<script src="./simurg-workout-recovery.js?v=2"></script>
+<script src="./simurg-workout-recovery.js?v=3"></script>
 <script src="./simurg-gym-flex.js?v=2"></script>
 <script src="./simurg-exercise-catalog.js?v=1"></script>
 <script>
@@ -6445,7 +6445,7 @@ function exCard(ex,sets){
   let firstIndex=sets.length?DATA.workouts.indexOf(sets[0]):-1;
   let profile=SimurgVolumeModel.profileFor(ex);
   let profileText=profile.weightLabel+(profile.factor===2?' · Hacim ×2':'');
-  return `<div class="exerciseCard"><div class="exTop"><div class="exerciseIdentity"><div class="exName" role="button" tabindex="0" data-workout-action="edit-exercise" data-workout-index="${firstIndex}">${escapeAttr(ex)}</div><span class="loadProfileTag ${profile.factor===2?'factor2':''}">${escapeAttr(profileText)}</span></div><button class="menuBtn" type="button" data-workout-action="edit-exercise" data-workout-index="${firstIndex}">⋮</button></div><table class="setTable"><thead><tr><th>SET</th><th>TEKRAR</th><th>KİLO</th></tr></thead><tbody>${sets.map((s,i)=>{let idx=DATA.workouts.indexOf(s);return `<tr tabindex="0" data-workout-action="edit-set" data-workout-index="${idx}"><td>${i+1}</td><td>${escapeAttr(s.reps)}</td><td>${escapeAttr(s.weight)}</td></tr>`}).join('')}</tbody></table><button class="addSet" type="button" data-workout-action="add-set" data-workout-index="${firstIndex}">+ Set Ekle</button><div class="blueLine"></div></div>`
+  return `<div class="exerciseCard"><div class="exTop"><div class="exerciseIdentity"><div class="exName" role="button" tabindex="0" data-workout-action="edit-exercise" data-workout-index="${firstIndex}">${escapeAttr(ex)}</div><span class="loadProfileTag ${profile.factor===2?'factor2':''}">${escapeAttr(profileText)}</span></div><button class="menuBtn" type="button" data-workout-action="edit-exercise" data-workout-index="${firstIndex}">⋮</button></div><table class="setTable"><thead><tr><th>SET</th><th>TEKRAR</th><th>KİLO</th></tr></thead><tbody>${sets.map((s,i)=>{let idx=DATA.workouts.indexOf(s),setCount=Math.max(1,Number(s.sets)||1),aggregate=setCount>1;return `<tr tabindex="0" data-workout-action="edit-set" data-workout-index="${idx}" data-set-count="${setCount}" data-reps-per-set="${escapeAttr(s.reps)}" class="${aggregate?'aggregateSetRow':''}"><td>${aggregate?`<b>${setCount} set</b><small>Toplu kayıt</small>`:i+1}</td><td>${escapeAttr(s.reps)}${aggregate?'<small> / set</small>':''}</td><td>${escapeAttr(s.weight)}</td></tr>`}).join('')}</tbody></table><button class="addSet" type="button" data-workout-action="add-set" data-workout-index="${firstIndex}">+ Set Ekle</button><div class="blueLine"></div></div>`
 }
 function handleWorkoutAction(target){
   let actionNode=target&&target.closest?target.closest('[data-workout-action]'):null;
@@ -6885,10 +6885,12 @@ function openExerciseLibrary(){
   category.value='All';
   renderExerciseLibrary();
   modal.classList.add('active');
+  document.body.classList.add('gymExerciseLibraryOpen');
   setTimeout(()=>search.focus(),0);
 }
 function closeExerciseLibrary(){
   document.getElementById('exerciseLibraryModal')?.classList.remove('active');
+  document.body.classList.remove('gymExerciseLibraryOpen');
 }
 function renderExerciseLibrary(){
   const library=window.SimurgExerciseLibrary;
@@ -8005,7 +8007,7 @@ render()
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js?v=mobile-polish-nav-v2').catch(function(){});
+    navigator.serviceWorker.register('./sw.js?v=ui-package1-v1').catch(function(){});
   });
 }
 </script>
@@ -9372,6 +9374,14 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     const el=document.getElementById('undoImportMiniStatus');
     if(el) el.textContent=msg||'';
   }
+  function setUndoAvailability(raw){
+    const button=document.getElementById('undoLastImportBtn');
+    if(!button)return;
+    const available=!!raw;
+    button.disabled=!available;
+    button.setAttribute('aria-disabled',String(!available));
+    button.title=available?'Son Universal Import snapshot’ını geri al.':'Henüz geri alınabilir bir import yok.';
+  }
   function snapshotBeforeImport(before){
     try{
       const meta={at:new Date().toISOString(),counts:countData(before),selectedDate:window.selectedDate||''};
@@ -9401,6 +9411,7 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
       if(window.SimurgSignalModel)window.SimurgSignalModel.invalidate('undo-import');
       if(typeof render==='function') render();
       setUndoStatus('Son import geri alındı.');
+      setUndoAvailability(null);
       alert('Son import geri alındı.');
     }catch(e){alert('Undo başarısız: '+e.message);}
   };
@@ -9408,28 +9419,28 @@ const SIMURG_SUPABASE_KEY = "sb_publishable_4pCcxpRqlaYeTY3D2CwgGA_Il3LfwLj";
     const card=document.querySelector('.universalImportCard'); if(!card) return;
     const actions=card.querySelector('.actions'); if(!actions) return;
     if(!document.getElementById('undoLastImportBtn')){
-      actions.insertAdjacentHTML('beforeend',`<button id="undoLastImportBtn" class="btn sec undoImportBtn" onclick="undoLastImport()">Son İçe Aktarımı Geri Al</button><div id="undoImportMiniStatus" class="undoImportMiniStatus"></div>`);
+      actions.insertAdjacentHTML('beforeend',`<button id="undoLastImportBtn" class="btn sec undoImportBtn" onclick="undoLastImport()" aria-describedby="undoImportMiniStatus" disabled title="Henüz geri alınabilir bir import yok.">Son İçe Aktarımı Geri Al</button><div id="undoImportMiniStatus" class="undoImportMiniStatus" aria-live="polite"></div>`);
     }
     const raw=localStorage.getItem(SNAP_KEY);
+    setUndoAvailability(raw);
     if(raw){
       try{const s=JSON.parse(raw); const t=s.meta&&s.meta.at?new Date(s.meta.at).toLocaleString('tr-TR'):''; setUndoStatus(t?`Geri alınabilir son import: ${t}`:'Son import geri alınabilir.');}catch(e){}
-    }else setUndoStatus('');
+    }else setUndoStatus('Henüz geri alınabilir bir import yok.');
   }
   const originalUniversal=window.universalImport;
   if(typeof originalUniversal==='function' && !window.__simurgUndoUniversalWrapped){
-    window.universalImport=function(){
+    window.universalImport=async function(){
       const before=clone(window.DATA||DATA);
       const beforeCounts=JSON.stringify(countData(before));
-      originalUniversal.apply(this,arguments);
-      setTimeout(()=>{
-        try{
-          const after=window.DATA||DATA;
-          if(beforeCounts!==JSON.stringify(countData(after))){
-            snapshotBeforeImport(before);
-            enhanceUniversalImportUI();
-          }
-        }catch(e){}
-      },30);
+      const result=await originalUniversal.apply(this,arguments);
+      try{
+        const after=window.DATA||DATA;
+        if(beforeCounts!==JSON.stringify(countData(after))){
+          snapshotBeforeImport(before);
+          enhanceUniversalImportUI();
+        }
+      }catch(e){}
+      return result;
     };
     window.__simurgUndoUniversalWrapped=true;
   }
@@ -16175,9 +16186,8 @@ m Shell V4: Logger information architecture fix -->
 		    if(!section) return;
 		    var entry=latestEntry(), b=bridge();
 		    if(!entry){
-		      section.innerHTML='<div class="polarDashboardV1">'
-		        +recoveryCardHtml(null,b)
-		        +'<div class="polarBridgeEmpty"><b>Waiting for Polar Bridge</b><p>Run the iOS Shortcut from Apple Health. This dashboard will fill with recovery score, sleep, HRV, activity load, and workout context.</p></div>'
+		      section.innerHTML='<div class="polarDashboardV1 polarDashboardEmptyV1">'
+		        +'<div class="polarBridgeEmpty" role="status"><b>Polar verisi bekleniyor</b><p>Apple Health kısayolunu çalıştırdığında recovery, uyku, HRV, aktivite yükü ve antrenman bağlamı burada görünecek.</p></div>'
 		        +polarWorkoutAccessHtml()
 		        +'</div>';
 		      return;
@@ -16311,7 +16321,7 @@ m Shell V4: Logger information architecture fix -->
 })();
 </script>
 <link rel="stylesheet" href="./polar-workout.css?v=12">
-<script src="./polar-workout.js?v=17"></script>
+<script src="./polar-workout.js?v=18"></script>
 <script src="./workout-source-policy.js?v=3"></script>
 <link rel="stylesheet" href="./simurg-coach.css?v=14">
 <script src="./simurg-coach-ui.js?v=15"></script>
@@ -16327,9 +16337,9 @@ m Shell V4: Logger information architecture fix -->
 <link rel="stylesheet" href="./simurg-training-lab.css?v=13">
 <link rel="stylesheet" href="./simurg-performance-ui.css?v=1">
 <link rel="stylesheet" href="./simurg-journal.css?v=1">
-<link rel="stylesheet" href="./simurg-mobile-system.css?v=5">
+<link rel="stylesheet" href="./simurg-mobile-system.css?v=6">
 <script src="./simurg-mobile-weekly.js?v=5"></script>
-<script src="./mobile-ia-premium.js?v=14"></script>
+<script src="./mobile-ia-premium.js?v=15"></script>
 <script src="./simurg-training-lab-ui.js?v=19"></script>
 <script src="./simurg-performance-ui.js?v=3"></script>
 <script src="./simurg-journal-ui.js?v=2"></script>

@@ -78,6 +78,7 @@ run('date history, Latest and multi-session interaction contracts remain wired',
   assert.match(source, /polarWorkoutSelectSession/);
   assert.match(source, /simurgOpenPolarWorkoutFor/);
   assert.match(source, /selectedWorkoutKey/);
+  assert.match(source, /simurgClosePolarWorkout=function\(\)\{window\.simurgV8Go\('polar','menu'\);\}/);
 });
 
 run('responsive layout and bottom navigation spacing cover requested breakpoints', () => {

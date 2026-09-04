@@ -560,12 +560,12 @@ run('primary cards lead with training days, duration, and compact Gym volume wit
 run('asset versions and service-worker cache generation invalidate stale Weekly bundles', () => {
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-  for (const asset of ['simurg-mobile-weekly.css?v=3', 'simurg-mobile-weekly.js?v=5', 'simurg-mobile-system.css?v=5', 'mobile-ia-premium.js?v=14']) {
+  for (const asset of ['simurg-mobile-weekly.css?v=3', 'simurg-mobile-weekly.js?v=5', 'simurg-mobile-system.css?v=6', 'mobile-ia-premium.js?v=15']) {
     assert.match(html, new RegExp(asset.replace(/[.?]/g, '\\$&')));
     assert.match(sw, new RegExp(asset.replace(/[.?]/g, '\\$&')));
   }
-  assert.match(html, /sw\.js\?v=mobile-polish-nav-v2/);
-  assert.match(sw, /simurg-mobile-polish-nav-v2/);
+  assert.match(html, /sw\.js\?v=ui-package1-v1/);
+  assert.match(sw, /simurg-ui-package1-v1/);
   assert.doesNotMatch(sw, /simurg-mobile-weekly\.(?:css|js)\?v=1/);
 });
 

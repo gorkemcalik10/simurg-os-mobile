@@ -241,14 +241,15 @@
   }
   function journalExerciseStats(card){
     var rows=Array.from(card.querySelectorAll('.setTable tbody tr'));
-    var reps=0,volume=0;
+    var sets=0,reps=0,volume=0;
     rows.forEach(function(row){
       var cells=row.querySelectorAll('td');
-      var rowReps=journalNumber(cells[1]&&cells[1].textContent);
+      var rowSets=Math.max(1,journalNumber(row.dataset&&row.dataset.setCount)||1);
+      var rowReps=journalNumber(row.dataset&&row.dataset.repsPerSet)||journalNumber(cells[1]&&cells[1].textContent);
       var weight=journalNumber(cells[2]&&cells[2].textContent);
-      reps+=rowReps;volume+=rowReps*weight;
+      sets+=rowSets;reps+=rowSets*rowReps;volume+=rowSets*rowReps*weight;
     });
-    return {sets:rows.length,reps:reps,volume:Math.round(volume)};
+    return {sets:sets,reps:reps,volume:Math.round(volume)};
   }
   function closeJournalExercise(card){
     if(!card)return;
@@ -473,5 +474,5 @@
     if(document.body.getAttribute('data-simurg-active-screen')==='weekly'&&window.SimurgMobileWeekly)window.SimurgMobileWeekly.mount();
     window.addEventListener('resize',handleResize,{passive:true});
   });
-  window.SimurgMobileIA={renderDaily:renderMobileDaily,mountGym:mountGymAccordion,mountJournal:mountJournalDashboard,mountProgram:renderMobileProgram,mountData:mountDataCenter,openGym:openGymAndFocus};
+  window.SimurgMobileIA={renderDaily:renderMobileDaily,mountGym:mountGymAccordion,mountJournal:mountJournalDashboard,journalExerciseStats:journalExerciseStats,mountProgram:renderMobileProgram,mountData:mountDataCenter,openGym:openGymAndFocus};
 })();

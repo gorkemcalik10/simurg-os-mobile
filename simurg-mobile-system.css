@@ -471,6 +471,43 @@
   #home.gp-home .gp-evidence-item{padding:8px 7px!important;}
   #home.gp-home .gp-evidence-item b{margin:4px 0 2px!important;font-size:15px!important;}
   #home.gp-home .gp-polar-context{margin-top:5px!important;font-size:8px!important;line-height:1.25!important;opacity:.78!important;}
+
+  /* Package 1: the exercise library owns the viewport while it is open. */
+  body.gymExerciseLibraryOpen #simurgV8Nav{display:none!important;}
+  body.gymExerciseLibraryOpen #exerciseLibraryModal{
+    z-index:2147483001!important;align-items:stretch!important;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px))!important;
+  }
+  body.gymExerciseLibraryOpen #exerciseLibraryModal .modalbox{
+    width:100%!important;max-width:520px!important;height:100%!important;max-height:100%!important;min-height:0!important;margin:auto!important;padding:14px!important;overflow:hidden!important;
+  }
+  body.gymExerciseLibraryOpen #exerciseLibraryModal .modalTop{flex:0 0 auto!important;margin-bottom:10px!important;gap:10px!important;}
+  body.gymExerciseLibraryOpen #exerciseLibraryModal .modalTop .btn,
+  body.gymExerciseLibraryOpen #exerciseLibraryModal .exerciseLibraryTools :is(input,select),
+  body.gymExerciseLibraryOpen #exerciseLibraryModal .exerciseLibraryItem,
+  body.gymExerciseLibraryOpen #exerciseLibraryModal>.modalbox>.actions .btn{min-height:44px!important;}
+  body.gymExerciseLibraryOpen #exerciseLibraryModal .exerciseLibraryIntro,
+  body.gymExerciseLibraryOpen #exerciseLibraryModal .exerciseLibraryTools,
+  body.gymExerciseLibraryOpen #exerciseLibraryModal .exerciseLibraryCount{flex:0 0 auto!important;}
+  body.gymExerciseLibraryOpen #exerciseLibraryModal .exerciseLibraryResults{
+    flex:1 1 auto!important;min-height:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+  }
+  body.gymExerciseLibraryOpen #exerciseLibraryModal>.modalbox>.actions{
+    flex:0 0 auto!important;margin:8px -2px -2px!important;padding:8px 2px 0!important;border-top:1px solid var(--sms-line)!important;background:var(--sms-surface-raised)!important;
+  }
+
+  /* Current Polar empty renderer: keep one status card visible, not legacy recovery duplicates. */
+  #polar .polarDashboardV1.polarDashboardEmptyV1 .polarBridgeEmpty{
+    display:block!important;height:auto!important;min-height:0!important;margin:0!important;padding:18px!important;
+  }
+
+  /* Aggregate imports remain one honest row while exposing their real totals. */
+  #workout .setTable tr.aggregateSetRow td:first-child b,
+  #workout .setTable tr.aggregateSetRow td small{display:block!important;}
+  #workout .setTable tr.aggregateSetRow td:first-child b{color:var(--sms-text)!important;font-size:11px!important;}
+  #workout .setTable tr.aggregateSetRow td small{margin-top:2px!important;color:var(--sms-muted)!important;font-size:8px!important;line-height:1.15!important;}
+
+  #data.section button:disabled{pointer-events:none!important;opacity:.46!important;filter:saturate(.35)!important;cursor:not-allowed!important;}
+  #data.section :is(#undoLastImportBtn,#workoutRecoveryMergeBtn,#workoutRecoveryExportBtn,#workoutRecoveryRollbackBtn){min-height:44px!important;}
 }
 
 @media (max-width:340px){
